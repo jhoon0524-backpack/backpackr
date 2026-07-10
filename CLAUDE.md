@@ -81,6 +81,14 @@ creation uses a preview-first workflow:
 - **Check permissions if you get errors** — the AI can only see and do what
   your Superset user account is allowed to.
 
+## Local installation
+
+Run `scripts/setup-superset.sh` to install Superset (with the MCP server)
+into a virtualenv, initialize the metadata DB and admin user, and start:
+
+- Web UI: http://localhost:8088 (admin / admin by default)
+- MCP endpoint: http://localhost:5008/mcp
+
 ## Related documentation
 
 - MCP Server Deployment & Authentication (admin docs):
