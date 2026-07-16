@@ -121,10 +121,13 @@ private fun MainScreen() {
                     style = MaterialTheme.typography.bodyMedium,
                 )
             } else {
+                val pipelineBusy =
+                    phase is RecorderPhase.Recording || phase is RecorderPhase.Processing
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(meetings, key = { it.baseName }) { record ->
                         MeetingItem(
                             record = record,
+                            retryEnabled = !pipelineBusy,
                             onOpen = { openedRecord = record },
                             onDelete = {
                                 store.delete(record)
@@ -249,9 +252,11 @@ private fun SetupGuideCard() {
 @Composable
 private fun MeetingItem(
     record: MeetingRecord,
+    retryEnabled: Boolean,
     onOpen: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val context = LocalContext.current
     val dateText = remember(record.createdAtMillis) {
         SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA).format(Date(record.createdAtMillis))
     }
@@ -270,6 +275,20 @@ private fun MeetingItem(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (record.minutesFile != null || record.transcriptFile != null) {
                     TextButton(onClick = onOpen) { Text("열기") }
+                }
+                if (!record.hasMinutes) {
+                    // 실패했거나 키가 없어 중간에 멈춘 기록: 남은 단계부터 이어서 처리
+                    TextButton(
+                        enabled = retryEnabled,
+                        onClick = { RecordingService.processExisting(context, record.baseName) },
+                    ) { Text("재시도") }
+                } else if (record.transcriptFile != null) {
+                    // 이미 완료된 기록도 전사문이 있으면 회의록만 다시 만들 수 있다
+                    // (예: 간이 회의록 상태에서 Claude 키 등록 후 업그레이드)
+                    TextButton(
+                        enabled = retryEnabled,
+                        onClick = { RecordingService.processExisting(context, record.baseName) },
+                    ) { Text("재생성") }
                 }
                 TextButton(onClick = onDelete) { Text("삭제") }
             }

@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.IBinder
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,8 @@ import java.util.Locale
  *
  * ACTION_TOGGLE: 녹음 중이면 정지 후 회의록 생성 파이프라인 실행, 아니면 녹음 시작.
  * ACTION_STOP: 녹음 정지 (알림의 정지 버튼).
+ * ACTION_PROCESS: 기존 기록에 대해 파이프라인 재실행 (재시도/재생성).
+ *   이미 전사문이 있으면 전사를 건너뛰고 회의록 생성부터 이어서 한다.
  */
 class RecordingService : Service() {
 
@@ -35,13 +38,34 @@ class RecordingService : Service() {
     private var recorder: MediaRecorder? = null
     private var currentFile: File? = null
 
+    @Volatile
+    private var isProcessing = false
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_TOGGLE -> if (recorder == null) startRecording() else stopAndProcess()
-            ACTION_START -> if (recorder == null) startRecording()
+            ACTION_TOGGLE -> when {
+                recorder != null -> stopAndProcess()
+                isProcessing -> Toast.makeText(
+                    this, R.string.toast_busy_processing, Toast.LENGTH_SHORT,
+                ).show()
+                else -> startRecording()
+            }
+            ACTION_START -> if (recorder == null && !isProcessing) startRecording()
             ACTION_STOP -> if (recorder != null) stopAndProcess()
+            ACTION_PROCESS -> {
+                val baseName = intent.getStringExtra(EXTRA_BASE_NAME)
+                if (baseName != null && recorder == null && !isProcessing) {
+                    isProcessing = true
+                    startAsForeground(
+                        getString(R.string.notification_processing),
+                        foregroundServiceType(recording = false),
+                        showStopAction = false,
+                    )
+                    scope.launch { process(baseName) }
+                }
+            }
         }
         return START_NOT_STICKY
     }
@@ -79,7 +103,11 @@ class RecordingService : Service() {
         recorder = mediaRecorder
         currentFile = file
         RecorderState.update(RecorderPhase.Recording(System.currentTimeMillis()))
-        startAsForeground(getString(R.string.notification_recording))
+        startAsForeground(
+            getString(R.string.notification_recording),
+            foregroundServiceType(recording = true),
+            showStopAction = true,
+        )
     }
 
     private fun stopAndProcess() {
@@ -108,42 +136,52 @@ class RecordingService : Service() {
             return
         }
 
-        updateForeground(getString(R.string.notification_processing))
-        scope.launch { process(file) }
+        isProcessing = true
+        updateForeground(getString(R.string.notification_processing), showStopAction = false)
+        val baseName = MeetingStore(this).baseNameOf(file)
+        scope.launch { process(baseName) }
     }
 
-    /** 전사 → 회의록 생성 → 파일 저장. API 키가 없으면 가능한 단계까지만 수행한다. */
-    private fun process(audioFile: File) {
+    /**
+     * 전사 → 회의록 생성 → 파일 저장.
+     * 이미 저장된 전사문이 있으면 그 단계는 건너뛰므로, 실패한 기록의 재시도와
+     * (전사문만 있는 기록의) 회의록 재생성에도 그대로 쓰인다.
+     * API 키가 없으면 가능한 단계까지만 수행한다.
+     */
+    private fun process(baseName: String) {
         val settings = AppSettings(this)
         val store = MeetingStore(this)
-        val baseName = store.baseNameOf(audioFile)
-        val dateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA)
-            .format(Date(audioFile.lastModified()))
+        val audioFile = File(store.recordingsDir, "$baseName.m4a").takeIf { it.exists() }
+        val dateTime = meetingDateTime(baseName, audioFile)
 
         try {
-            if (settings.sttApiKey.isBlank()) {
-                RecorderState.update(RecorderPhase.Done(audioFile.name))
-                notifyDone(
-                    getString(R.string.notification_saved_audio_only),
-                    getString(R.string.notification_need_stt_key),
-                )
-                return
-            }
-
-            RecorderState.update(RecorderPhase.Processing(getString(R.string.step_transcribing)))
-            val transcript = TranscriptionClient(
-                baseUrl = settings.sttBaseUrl,
-                apiKey = settings.sttApiKey,
-                model = settings.sttModel,
-            ).transcribe(audioFile)
-
             val transcriptFile = store.transcriptFileFor(baseName)
-            transcriptFile.writeText(transcript)
+            var transcript =
+                transcriptFile.takeIf { it.exists() }?.readText()?.trim().orEmpty()
 
             if (transcript.isBlank()) {
-                RecorderState.update(RecorderPhase.Error("전사 결과가 비어 있습니다."))
-                notifyDone(getString(R.string.notification_saved_audio_only), "전사 결과가 비어 있습니다.")
-                return
+                if (audioFile == null) {
+                    RecorderState.update(RecorderPhase.Error("녹음 파일이 없어 처리할 수 없습니다."))
+                    notifyDone(getString(R.string.notification_failed), "녹음 파일이 없어 처리할 수 없습니다.")
+                    return
+                }
+                if (settings.sttApiKey.isBlank()) {
+                    RecorderState.update(RecorderPhase.Done(audioFile.name))
+                    notifyDone(
+                        getString(R.string.notification_saved_audio_only),
+                        getString(R.string.notification_need_stt_key),
+                    )
+                    return
+                }
+
+                transcript = transcribe(audioFile, settings)
+                transcriptFile.writeText(transcript)
+
+                if (transcript.isBlank()) {
+                    RecorderState.update(RecorderPhase.Error("전사 결과가 비어 있습니다."))
+                    notifyDone(getString(R.string.notification_saved_audio_only), "전사 결과가 비어 있습니다.")
+                    return
+                }
             }
 
             val minutesFile = store.minutesFileFor(baseName)
@@ -159,6 +197,7 @@ class RecordingService : Service() {
             }
 
             RecorderState.update(RecorderPhase.Processing(getString(R.string.step_generating_minutes)))
+            updateForeground(getString(R.string.step_generating_minutes), showStopAction = false)
             val minutes = MinutesClient(
                 apiKey = settings.anthropicApiKey,
                 model = settings.anthropicModel,
@@ -182,9 +221,57 @@ class RecordingService : Service() {
             RecorderState.update(RecorderPhase.Error(e.message ?: "알 수 없는 오류"))
             notifyDone(getString(R.string.notification_failed), e.message ?: "")
         } finally {
-            stopForegroundCompat()
-            stopSelf()
+            isProcessing = false
+            // 처리 중에 새 녹음이 시작되지 않았을 때만 서비스를 내린다.
+            if (recorder == null) {
+                stopForegroundCompat()
+                stopSelf()
+            }
         }
+    }
+
+    /**
+     * 업로드 한도를 넘는 긴 녹음은 10분 단위 청크로 분할해 순서대로 전사하고
+     * 결과를 이어붙인다.
+     */
+    private fun transcribe(audioFile: File, settings: AppSettings): String {
+        RecorderState.update(RecorderPhase.Processing(getString(R.string.step_transcribing)))
+        updateForeground(getString(R.string.step_transcribing), showStopAction = false)
+
+        val client = TranscriptionClient(
+            baseUrl = settings.sttBaseUrl,
+            apiKey = settings.sttApiKey,
+            model = settings.sttModel,
+        )
+
+        RecorderState.update(RecorderPhase.Processing(getString(R.string.step_splitting)))
+        val chunks = AudioChunker.splitIfNeeded(audioFile, File(cacheDir, "chunks"))
+        try {
+            if (chunks.size == 1) {
+                RecorderState.update(RecorderPhase.Processing(getString(R.string.step_transcribing)))
+                return client.transcribe(chunks[0]).trim()
+            }
+            val parts = mutableListOf<String>()
+            chunks.forEachIndexed { index, chunk ->
+                val step = getString(
+                    R.string.step_transcribing_progress, index + 1, chunks.size,
+                )
+                RecorderState.update(RecorderPhase.Processing(step))
+                updateForeground(step, showStopAction = false)
+                parts += client.transcribe(chunk).trim()
+            }
+            return parts.filter { it.isNotBlank() }.joinToString("\n\n").trim()
+        } finally {
+            AudioChunker.cleanup(audioFile, chunks)
+        }
+    }
+
+    private fun meetingDateTime(baseName: String, audioFile: File?): String {
+        val output = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA)
+        runCatching {
+            SimpleDateFormat("'MTG_'yyyyMMdd_HHmmss", Locale.US).parse(baseName)
+        }.getOrNull()?.let { return output.format(it) }
+        return output.format(Date(audioFile?.lastModified() ?: System.currentTimeMillis()))
     }
 
     private fun fallbackMinutes(dateTime: String, transcript: String): String = buildString {
@@ -199,45 +286,56 @@ class RecordingService : Service() {
 
     // ---------- 알림 ----------
 
-    private fun startAsForeground(text: String) {
+    private fun foregroundServiceType(recording: Boolean): Int =
+        if (recording) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+        } else {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        }
+
+    private fun startAsForeground(text: String, serviceType: Int, showStopAction: Boolean) {
         createChannel()
-        val notification = buildOngoingNotification(text)
+        val notification = buildOngoingNotification(text, showStopAction)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            startForeground(
-                NOTIFICATION_ID,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
-            )
+            startForeground(NOTIFICATION_ID, notification, serviceType)
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
     }
 
-    private fun updateForeground(text: String) {
-        notificationManager().notify(NOTIFICATION_ID, buildOngoingNotification(text))
+    private fun updateForeground(text: String, showStopAction: Boolean) {
+        notificationManager().notify(
+            NOTIFICATION_ID,
+            buildOngoingNotification(text, showStopAction),
+        )
     }
 
-    private fun buildOngoingNotification(text: String): android.app.Notification {
-        val stopIntent = PendingIntent.getService(
-            this,
-            1,
-            Intent(this, RecordingService::class.java).setAction(ACTION_STOP),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+    private fun buildOngoingNotification(
+        text: String,
+        showStopAction: Boolean,
+    ): android.app.Notification {
         val openIntent = PendingIntent.getActivity(
             this,
             2,
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_mic)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(text)
             .setOngoing(true)
             .setContentIntent(openIntent)
-            .addAction(0, getString(R.string.action_stop), stopIntent)
-            .build()
+        if (showStopAction) {
+            val stopIntent = PendingIntent.getService(
+                this,
+                1,
+                Intent(this, RecordingService::class.java).setAction(ACTION_STOP),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            builder.addAction(0, getString(R.string.action_stop), stopIntent)
+        }
+        return builder.build()
     }
 
     private fun notifyDone(title: String, text: String) {
@@ -294,13 +392,28 @@ class RecordingService : Service() {
         const val ACTION_TOGGLE = "kr.backpac.meetingrecorder.action.TOGGLE"
         const val ACTION_START = "kr.backpac.meetingrecorder.action.START"
         const val ACTION_STOP = "kr.backpac.meetingrecorder.action.STOP"
+        const val ACTION_PROCESS = "kr.backpac.meetingrecorder.action.PROCESS"
+        const val EXTRA_BASE_NAME = "base_name"
 
         private const val CHANNEL_ID = "recording"
         private const val NOTIFICATION_ID = 1
         private const val DONE_NOTIFICATION_ID = 2
 
         fun toggle(context: Context) {
-            val intent = Intent(context, RecordingService::class.java).setAction(ACTION_TOGGLE)
+            start(context, Intent(context, RecordingService::class.java).setAction(ACTION_TOGGLE))
+        }
+
+        /** 기존 기록에 대해 전사/회의록 파이프라인을 다시 실행한다. */
+        fun processExisting(context: Context, baseName: String) {
+            start(
+                context,
+                Intent(context, RecordingService::class.java)
+                    .setAction(ACTION_PROCESS)
+                    .putExtra(EXTRA_BASE_NAME, baseName),
+            )
+        }
+
+        private fun start(context: Context, intent: Intent) {
             try {
                 context.startForegroundService(intent)
             } catch (e: Exception) {

@@ -16,7 +16,11 @@
     <string name="notification_failed">회의록 생성에 실패했습니다</string>
 
     <string name="step_transcribing">음성을 텍스트로 변환하는 중…</string>
+    <string name="step_splitting">긴 녹음을 나누는 중…</string>
+    <string name="step_transcribing_progress">음성을 텍스트로 변환하는 중… (%1$d/%2$d)</string>
     <string name="step_generating_minutes">회의록을 작성하는 중…</string>
+
+    <string name="toast_busy_processing">회의록 생성 중입니다. 완료 후 다시 시도해 주세요.</string>
 
     <string name="action_stop">정지</string>
     <string name="toast_recording_started">녹음을 시작했습니다 🎙</string>
