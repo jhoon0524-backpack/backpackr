@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">회의록 레코더</string>
+    <string name="quick_record_label">빠른 녹음 (회의록)</string>
+    <string name="accessibility_service_label">회의록 레코더 (볼륨 키 2번 녹음)</string>
+    <string name="accessibility_service_description">볼륨 상(上) 키를 빠르게 두 번 누르면 회의 녹음을 시작하거나 정지합니다. 키 입력 감지 용도로만 사용되며 화면 내용을 읽지 않습니다.</string>
+
+    <string name="notification_channel_name">녹음 및 회의록 생성</string>
+    <string name="notification_recording">녹음 중… 정지하면 회의록이 자동 생성됩니다.</string>
+    <string name="notification_processing">회의록 생성 중…</string>
+    <string name="notification_minutes_done">회의록이 완성되었습니다 ✅</string>
+    <string name="notification_transcript_done">전사가 완료되었습니다</string>
+    <string name="notification_saved_audio_only">녹음이 저장되었습니다</string>
+    <string name="notification_need_stt_key">설정에서 전사 API 키를 등록하면 자동으로 텍스트/회의록이 생성됩니다.</string>
+    <string name="notification_need_anthropic_key">Anthropic API 키를 등록하면 요약 회의록이 생성됩니다. (전사문은 저장됨)</string>
+    <string name="notification_failed">회의록 생성에 실패했습니다</string>
+
+    <string name="step_transcribing">음성을 텍스트로 변환하는 중…</string>
+    <string name="step_generating_minutes">회의록을 작성하는 중…</string>
+
+    <string name="action_stop">정지</string>
+    <string name="toast_recording_started">녹음을 시작했습니다 🎙</string>
+    <string name="toast_recording_stopped">녹음 정지 — 회의록을 생성합니다</string>
+    <string name="toast_need_mic_permission">마이크 권한이 필요합니다. 앱에서 권한을 허용해 주세요.</string>
+</resources>
