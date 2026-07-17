@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,3 +33,14 @@ jobs:
         with:
           name: app-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      # 릴리스 페이지에 최신 APK를 올려 폰 브라우저에서 바로 내려받을 수 있게 한다
+      # (Actions Artifacts는 모바일 웹에서 다운로드 버튼이 없음)
+      - name: Publish APK to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: debug-latest
+          name: "최신 테스트 빌드 (자동 갱신)"
+          body: "가장 최근 push에서 자동 빌드된 디버그 APK입니다. 아래 app-debug.apk를 탭해서 설치하세요."
+          prerelease: true
+          files: app/build/outputs/apk/debug/app-debug.apk
