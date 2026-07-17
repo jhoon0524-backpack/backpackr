@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- MeetingStore: getExternalFilesDir(null) 우선, 없으면 filesDir 폴백 -->
+    <external-files-path name="minutes" path="minutes/" />
+    <files-path name="minutes_internal" path="minutes/" />
+</paths>
