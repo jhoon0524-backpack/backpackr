@@ -1,12 +1,9 @@
 package kr.backpac.meetingrecorder
 
-import android.Manifest
 import android.accessibilityservice.AccessibilityService
-import android.content.pm.PackageManager
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 
 /**
  * 볼륨 상(上) 키를 빠르게 두 번 누르면 녹음을 토글하는 접근성 서비스.
@@ -17,6 +14,7 @@ import androidx.core.content.ContextCompat
  *
  * 볼륨 이벤트는 소비하지 않는다(return false). 볼륨이 살짝 바뀌는 대신
  * 단일 누름의 원래 동작을 깨뜨리지 않는다.
+ * 시작/정지/거부 안내는 실제 결과를 아는 RecordingService가 표시한다.
  */
 class SideKeyAccessibilityService : AccessibilityService() {
 
@@ -30,6 +28,11 @@ class SideKeyAccessibilityService : AccessibilityService() {
         if (event.keyCode != KeyEvent.KEYCODE_VOLUME_UP || event.action != KeyEvent.ACTION_DOWN) {
             return false
         }
+        // 길게 누르기의 auto-repeat 이벤트를 두 번 누르기로 오인하지 않는다.
+        if (event.repeatCount > 0) {
+            lastVolumeUpAtMillis = 0L
+            return false
+        }
         if (!AppSettings(this).volumeDoublePressEnabled) {
             return false
         }
@@ -40,20 +43,7 @@ class SideKeyAccessibilityService : AccessibilityService() {
 
         if (isDoublePress) {
             lastVolumeUpAtMillis = 0L
-            val hasMicPermission = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO,
-            ) == PackageManager.PERMISSION_GRANTED
-            if (hasMicPermission) {
-                val wasRecording = RecorderState.isRecording
-                RecordingService.toggle(this)
-                Toast.makeText(
-                    this,
-                    if (wasRecording) R.string.toast_recording_stopped
-                    else R.string.toast_recording_started,
-                    Toast.LENGTH_SHORT,
-                ).show()
-            } else {
+            if (!RecordingService.requestToggle(this)) {
                 Toast.makeText(this, R.string.toast_need_mic_permission, Toast.LENGTH_LONG).show()
             }
         }

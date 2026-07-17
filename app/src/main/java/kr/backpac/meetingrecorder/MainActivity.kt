@@ -1,6 +1,7 @@
 package kr.backpac.meetingrecorder
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -38,17 +39,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -79,26 +84,28 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainScreen() {
-    val context = LocalContext.current
     val phase by RecorderState.phase.collectAsState()
+    val context = LocalContext.current
     val store = remember { MeetingStore(context) }
-    var meetings by remember { mutableStateOf(store.listMeetings()) }
+    val scope = rememberCoroutineScope()
+    var meetings by remember { mutableStateOf<List<MeetingRecord>>(emptyList()) }
+    var refreshKey by remember { mutableStateOf(0) }
     var showSettings by remember { mutableStateOf(false) }
     var openedRecord by remember { mutableStateOf<MeetingRecord?>(null) }
 
-    // 파이프라인이 끝날 때마다 목록 갱신
-    LaunchedEffect(phase) {
-        if (phase is RecorderPhase.Done || phase is RecorderPhase.Error) {
-            meetings = store.listMeetings()
-        }
+    // 최초 진입, 파이프라인 단계 변화, 삭제 후에 목록을 백그라운드 스레드에서 갱신
+    LaunchedEffect(phase, refreshKey) {
+        meetings = withContext(Dispatchers.IO) { store.listMeetings() }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("회의록 레코더") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                    TextButton(onClick = { showSettings = true }) { Text("설정") }
+                    TextButton(onClick = { showSettings = true }) {
+                        Text(stringResource(R.string.action_settings))
+                    }
                 },
             )
         },
@@ -113,11 +120,14 @@ private fun MainScreen() {
             Spacer(Modifier.height(12.dp))
             SetupGuideCard()
             Spacer(Modifier.height(12.dp))
-            Text("회의 기록", style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.section_meetings),
+                style = MaterialTheme.typography.titleMedium,
+            )
             Spacer(Modifier.height(8.dp))
             if (meetings.isEmpty()) {
                 Text(
-                    "아직 기록이 없습니다. 우측 버튼을 두 번 누르거나 위 버튼으로 녹음을 시작하세요.",
+                    stringResource(R.string.empty_meetings),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             } else {
@@ -127,11 +137,13 @@ private fun MainScreen() {
                     items(meetings, key = { it.baseName }) { record ->
                         MeetingItem(
                             record = record,
-                            retryEnabled = !pipelineBusy,
+                            actionsEnabled = !pipelineBusy,
                             onOpen = { openedRecord = record },
                             onDelete = {
-                                store.delete(record)
-                                meetings = store.listMeetings()
+                                scope.launch {
+                                    withContext(Dispatchers.IO) { store.delete(record) }
+                                    refreshKey++
+                                }
                             },
                         )
                     }
@@ -169,21 +181,27 @@ private fun RecordControlCard(phase: RecorderPhase) {
                         }
                     }
                     Text(
-                        "🔴 녹음 중  ${"%02d:%02d".format(elapsed / 60, elapsed % 60)}",
+                        stringResource(
+                            R.string.recording_elapsed,
+                            "%02d:%02d".format(elapsed / 60, elapsed % 60),
+                        ),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                     )
                     Spacer(Modifier.height(12.dp))
                     Button(onClick = { RecordingService.toggle(context) }) {
-                        Text("정지하고 회의록 만들기")
+                        Text(stringResource(R.string.action_stop_and_generate))
                     }
                 }
 
                 is RecorderPhase.Processing -> {
-                    Text("⏳ ${phase.step}", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.processing_prefix, phase.step),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "완료되면 알림으로 알려드립니다.",
+                        stringResource(R.string.processing_notice),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -191,18 +209,18 @@ private fun RecordControlCard(phase: RecorderPhase) {
                 else -> {
                     if (phase is RecorderPhase.Error) {
                         Text(
-                            "⚠️ ${phase.message}",
+                            stringResource(R.string.error_prefix, phase.message),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.error,
                         )
                         Spacer(Modifier.height(8.dp))
                     }
                     Button(onClick = { RecordingService.toggle(context) }) {
-                        Text("🎙 녹음 시작")
+                        Text(stringResource(R.string.action_start_recording))
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "정지하면 전사와 회의록 생성이 자동으로 진행됩니다.",
+                        stringResource(R.string.start_hint),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -222,27 +240,28 @@ private fun SetupGuideCard() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("우측 버튼 두 번으로 녹음하기", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.guide_title),
+                    style = MaterialTheme.typography.titleSmall,
+                )
                 TextButton(onClick = { expanded = !expanded }) {
-                    Text(if (expanded) "접기" else "설정 방법")
+                    Text(
+                        stringResource(
+                            if (expanded) R.string.action_collapse else R.string.action_show_guide,
+                        ),
+                    )
                 }
             }
             if (expanded) {
                 Text(
-                    """
-                    갤럭시: 설정 → 유용한 기능 → 사이드 키 → "두 번 누르기"를 "앱 열기"로 바꾸고 "빠른 녹음 (회의록)"을 선택하세요.
-
-                    픽셀: 설정 → 시스템 → 동작 및 제스처 → 빠른 탭에서 "빠른 녹음 (회의록)"을 지정하세요.
-
-                    보조 방법: 아래 버튼으로 접근성 서비스를 켜면, 화면이 켜진 상태에서 볼륨 상(上) 키를 빠르게 두 번 눌러 녹음을 시작/정지할 수 있습니다.
-                    """.trimIndent(),
+                    stringResource(R.string.guide_body),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Spacer(Modifier.height(8.dp))
                 FilledTonalButton(onClick = {
                     context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 }) {
-                    Text("접근성 설정 열기")
+                    Text(stringResource(R.string.action_open_accessibility))
                 }
             }
         }
@@ -252,45 +271,48 @@ private fun SetupGuideCard() {
 @Composable
 private fun MeetingItem(
     record: MeetingRecord,
-    retryEnabled: Boolean,
+    actionsEnabled: Boolean,
     onOpen: () -> Unit,
     onDelete: () -> Unit,
 ) {
     val context = LocalContext.current
     val dateText = remember(record.createdAtMillis) {
-        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA).format(Date(record.createdAtMillis))
+        MeetingStore.formatDateTime(record.createdAtMillis)
     }
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(dateText, style = MaterialTheme.typography.titleSmall)
             Text(
-                when {
-                    record.hasMinutes -> "회의록 완료"
-                    record.transcriptFile != null -> "전사만 완료"
-                    else -> "녹음만 저장됨"
-                },
+                stringResource(
+                    when {
+                        record.hasMinutes -> R.string.status_minutes_done
+                        record.transcriptFile != null -> R.string.status_transcript_only
+                        else -> R.string.status_audio_only
+                    },
+                ),
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (record.minutesFile != null || record.transcriptFile != null) {
-                    TextButton(onClick = onOpen) { Text("열기") }
+                    TextButton(onClick = onOpen) { Text(stringResource(R.string.action_open)) }
                 }
-                if (!record.hasMinutes) {
-                    // 실패했거나 키가 없어 중간에 멈춘 기록: 남은 단계부터 이어서 처리
-                    TextButton(
-                        enabled = retryEnabled,
-                        onClick = { RecordingService.processExisting(context, record.baseName) },
-                    ) { Text("재시도") }
-                } else if (record.transcriptFile != null) {
-                    // 이미 완료된 기록도 전사문이 있으면 회의록만 다시 만들 수 있다
-                    // (예: 간이 회의록 상태에서 Claude 키 등록 후 업그레이드)
-                    TextButton(
-                        enabled = retryEnabled,
-                        onClick = { RecordingService.processExisting(context, record.baseName) },
-                    ) { Text("재생성") }
+                // 재시도(중간에 멈춘 기록)와 재생성(전사문 재활용)은 동작이 같고 라벨만 다르다.
+                val actionLabel = when {
+                    !record.hasMinutes -> R.string.action_retry
+                    record.transcriptFile != null -> R.string.action_regenerate
+                    else -> null
                 }
-                TextButton(onClick = onDelete) { Text("삭제") }
+                actionLabel?.let { label ->
+                    TextButton(
+                        enabled = actionsEnabled,
+                        onClick = { RecordingService.processExisting(context, record.baseName) },
+                    ) { Text(stringResource(label)) }
+                }
+                // 처리 중 삭제하면 파이프라인이 파일을 되살리는 유령 레코드가 생기므로 함께 잠근다.
+                TextButton(enabled = actionsEnabled, onClick = onDelete) {
+                    Text(stringResource(R.string.action_delete))
+                }
             }
         }
     }
@@ -299,34 +321,73 @@ private fun MeetingItem(
 @Composable
 private fun MinutesDialog(record: MeetingRecord, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val content = remember(record.baseName) {
-        record.minutesFile?.readText()
-            ?: record.transcriptFile?.readText()
-            ?: "내용이 없습니다."
+    // 긴 전사문이 포함될 수 있어 파일은 백그라운드에서 읽는다.
+    val content by produceState<String?>(initialValue = null, record.baseName) {
+        value = withContext(Dispatchers.IO) {
+            record.minutesFile?.readText()
+                ?: record.transcriptFile?.readText()
+                ?: ""
+        }
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("회의록") },
+        title = { Text(stringResource(R.string.dialog_minutes_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(content, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    when {
+                        content == null -> stringResource(R.string.loading)
+                        content.isNullOrBlank() -> stringResource(R.string.empty_content)
+                        else -> content.orEmpty()
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                val share = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, "회의록 ${record.baseName}")
-                    putExtra(Intent.EXTRA_TEXT, content)
-                }
-                context.startActivity(Intent.createChooser(share, "회의록 공유"))
-            }) { Text("공유") }
+            TextButton(
+                enabled = !content.isNullOrBlank(),
+                onClick = { shareRecord(context, record, content.orEmpty()) },
+            ) { Text(stringResource(R.string.action_share)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("닫기") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
         },
     )
 }
+
+/**
+ * 짧은 회의록은 텍스트로 바로 공유하고, 아주 긴 회의록은 인텐트 크기 한도
+ * (binder ~1MB)를 넘지 않도록 파일로 공유한다.
+ */
+private fun shareRecord(context: Context, record: MeetingRecord, content: String) {
+    val subject = context.getString(R.string.share_subject, record.baseName)
+    val share = if (content.length <= MAX_SHARE_TEXT_CHARS) {
+        Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, content)
+        }
+    } else {
+        val file = record.minutesFile ?: record.transcriptFile ?: return
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file,
+        )
+        Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+    context.startActivity(
+        Intent.createChooser(share, context.getString(R.string.share_chooser)),
+    )
+}
+
+private const val MAX_SHARE_TEXT_CHARS = 100_000
 
 @Composable
 private fun SettingsDialog(onDismiss: () -> Unit) {
@@ -341,43 +402,49 @@ private fun SettingsDialog(onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("설정") },
+        title = { Text(stringResource(R.string.settings_title)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text("음성 전사 (OpenAI Whisper 호환)", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.settings_stt_section),
+                    style = MaterialTheme.typography.titleSmall,
+                )
                 OutlinedTextField(
                     value = sttBaseUrl,
                     onValueChange = { sttBaseUrl = it },
-                    label = { Text("베이스 URL") },
+                    label = { Text(stringResource(R.string.settings_base_url)) },
                     singleLine = true,
                 )
                 OutlinedTextField(
                     value = sttApiKey,
                     onValueChange = { sttApiKey = it },
-                    label = { Text("API 키") },
+                    label = { Text(stringResource(R.string.settings_api_key)) },
                     singleLine = true,
                 )
                 OutlinedTextField(
                     value = sttModel,
                     onValueChange = { sttModel = it },
-                    label = { Text("모델") },
+                    label = { Text(stringResource(R.string.settings_model)) },
                     singleLine = true,
                 )
                 HorizontalDivider()
-                Text("회의록 요약 (Claude)", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(R.string.settings_minutes_section),
+                    style = MaterialTheme.typography.titleSmall,
+                )
                 OutlinedTextField(
                     value = anthropicApiKey,
                     onValueChange = { anthropicApiKey = it },
-                    label = { Text("Anthropic API 키") },
+                    label = { Text(stringResource(R.string.settings_anthropic_key)) },
                     singleLine = true,
                 )
                 OutlinedTextField(
                     value = anthropicModel,
                     onValueChange = { anthropicModel = it },
-                    label = { Text("모델") },
+                    label = { Text(stringResource(R.string.settings_model)) },
                     singleLine = true,
                 )
                 HorizontalDivider()
@@ -386,7 +453,10 @@ private fun SettingsDialog(onDismiss: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("볼륨 상 키 2번 → 녹음 토글", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(R.string.settings_volume_toggle),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     Switch(checked = volumeToggle, onCheckedChange = { volumeToggle = it })
                 }
             }
@@ -400,10 +470,10 @@ private fun SettingsDialog(onDismiss: () -> Unit) {
                 settings.anthropicModel = anthropicModel
                 settings.volumeDoublePressEnabled = volumeToggle
                 onDismiss()
-            }) { Text("저장") }
+            }) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("취소") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
 }

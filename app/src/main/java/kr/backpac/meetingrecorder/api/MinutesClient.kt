@@ -15,14 +15,14 @@ class MinutesClient(
     private val model: String,
 ) {
 
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
+    private val client: OkHttpClient = Http.shared.newBuilder()
         .readTimeout(5, TimeUnit.MINUTES)
         .build()
 
     @Throws(IOException::class)
     fun generateMinutes(transcript: String, meetingDateTime: String): String {
-        val prompt = """
+        // trimIndent는 transcript(들여쓰기 0)를 붙이기 전에 템플릿에만 적용해야 한다.
+        val instructions = """
             다음은 회의 녹음을 음성 인식으로 전사한 텍스트입니다. 이를 바탕으로 한국어 회의록을 마크다운으로 작성해 주세요.
 
             형식:
@@ -44,10 +44,9 @@ class MinutesClient(
             (없으면 "없음")
 
             규칙: 전사 오류로 보이는 부분은 문맥에 맞게 자연스럽게 보정하되, 내용을 지어내지 마세요. 회의록 본문만 출력하세요.
-
-            --- 전사 텍스트 ---
-            $transcript
         """.trimIndent()
+
+        val prompt = instructions + "\n\n--- 전사 텍스트 ---\n" + transcript
 
         val requestJson = JSONObject()
             .put("model", model)

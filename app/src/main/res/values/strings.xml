@@ -5,6 +5,7 @@
     <string name="accessibility_service_label">회의록 레코더 (볼륨 키 2번 녹음)</string>
     <string name="accessibility_service_description">볼륨 상(上) 키를 빠르게 두 번 누르면 회의 녹음을 시작하거나 정지합니다. 키 입력 감지 용도로만 사용되며 화면 내용을 읽지 않습니다.</string>
 
+    <!-- 알림 -->
     <string name="notification_channel_name">녹음 및 회의록 생성</string>
     <string name="notification_recording">녹음 중… 정지하면 회의록이 자동 생성됩니다.</string>
     <string name="notification_processing">회의록 생성 중…</string>
@@ -14,16 +15,78 @@
     <string name="notification_need_stt_key">설정에서 전사 API 키를 등록하면 자동으로 텍스트/회의록이 생성됩니다.</string>
     <string name="notification_need_anthropic_key">Anthropic API 키를 등록하면 요약 회의록이 생성됩니다. (전사문은 저장됨)</string>
     <string name="notification_failed">회의록 생성에 실패했습니다</string>
+    <string name="notification_start_failed">녹음을 시작하지 못했습니다</string>
 
+    <!-- 진행 단계 -->
+    <string name="step_finalizing">녹음 파일 저장 중…</string>
     <string name="step_transcribing">음성을 텍스트로 변환하는 중…</string>
     <string name="step_splitting">긴 녹음을 나누는 중…</string>
     <string name="step_transcribing_progress">음성을 텍스트로 변환하는 중… (%1$d/%2$d)</string>
     <string name="step_generating_minutes">회의록을 작성하는 중…</string>
 
+    <!-- 토스트 -->
     <string name="toast_busy_processing">회의록 생성 중입니다. 완료 후 다시 시도해 주세요.</string>
-
-    <string name="action_stop">정지</string>
+    <string name="toast_busy_recording">녹음 중에는 처리할 수 없습니다. 녹음을 먼저 정지해 주세요.</string>
     <string name="toast_recording_started">녹음을 시작했습니다 🎙</string>
-    <string name="toast_recording_stopped">녹음 정지 — 회의록을 생성합니다</string>
+    <string name="toast_recording_stopped">녹음을 정지했습니다</string>
     <string name="toast_need_mic_permission">마이크 권한이 필요합니다. 앱에서 권한을 허용해 주세요.</string>
+
+    <!-- 오류 -->
+    <string name="error_start_recording">녹음을 시작할 수 없습니다: %1$s</string>
+    <string name="error_too_short">녹음이 너무 짧아 저장하지 못했습니다.</string>
+    <string name="error_file_missing">녹음 파일을 찾을 수 없습니다.</string>
+    <string name="error_no_audio_for_retry">녹음 파일이 없어 처리할 수 없습니다.</string>
+    <string name="error_empty_transcript">전사 결과가 비어 있습니다.</string>
+    <string name="error_unknown">알 수 없는 오류</string>
+    <string name="error_service_start">녹음 서비스를 시작하지 못했습니다: %1$s</string>
+
+    <!-- 메인 화면 -->
+    <string name="action_settings">설정</string>
+    <string name="action_stop">정지</string>
+    <string name="section_meetings">회의 기록</string>
+    <string name="empty_meetings">아직 기록이 없습니다. 우측 버튼을 두 번 누르거나 위 버튼으로 녹음을 시작하세요.</string>
+    <string name="recording_elapsed">🔴 녹음 중  %1$s</string>
+    <string name="action_stop_and_generate">정지하고 회의록 만들기</string>
+    <string name="processing_prefix">⏳ %1$s</string>
+    <string name="processing_notice">완료되면 알림으로 알려드립니다.</string>
+    <string name="error_prefix">⚠️ %1$s</string>
+    <string name="action_start_recording">🎙 녹음 시작</string>
+    <string name="start_hint">정지하면 전사와 회의록 생성이 자동으로 진행됩니다.</string>
+
+    <!-- 사이드 키 안내 -->
+    <string name="guide_title">우측 버튼 두 번으로 녹음하기</string>
+    <string name="action_collapse">접기</string>
+    <string name="action_show_guide">설정 방법</string>
+    <string name="guide_body">갤럭시: 설정 → 유용한 기능 → 사이드 키 → \"두 번 누르기\"를 \"앱 열기\"로 바꾸고 \"빠른 녹음 (회의록)\"을 선택하세요.\n\n픽셀: 설정 → 시스템 → 동작 및 제스처 → 빠른 탭에서 \"빠른 녹음 (회의록)\"을 지정하세요.\n\n보조 방법: 아래 버튼으로 접근성 서비스를 켜면, 화면이 켜진 상태에서 볼륨 상(上) 키를 빠르게 두 번 눌러 녹음을 시작/정지할 수 있습니다. 화면이 꺼진 상태에서는 기기에 따라 무음으로 녹음될 수 있으니 사이드 키 연동을 권장합니다.</string>
+    <string name="action_open_accessibility">접근성 설정 열기</string>
+
+    <!-- 기록 목록 -->
+    <string name="status_minutes_done">회의록 완료</string>
+    <string name="status_transcript_only">전사만 완료</string>
+    <string name="status_audio_only">녹음만 저장됨</string>
+    <string name="action_open">열기</string>
+    <string name="action_delete">삭제</string>
+    <string name="action_retry">재시도</string>
+    <string name="action_regenerate">재생성</string>
+
+    <!-- 회의록 열람/공유 -->
+    <string name="dialog_minutes_title">회의록</string>
+    <string name="loading">불러오는 중…</string>
+    <string name="empty_content">내용이 없습니다.</string>
+    <string name="action_share">공유</string>
+    <string name="action_close">닫기</string>
+    <string name="share_subject">회의록 %1$s</string>
+    <string name="share_chooser">회의록 공유</string>
+
+    <!-- 설정 -->
+    <string name="settings_title">설정</string>
+    <string name="settings_stt_section">음성 전사 (OpenAI Whisper 호환)</string>
+    <string name="settings_base_url">베이스 URL</string>
+    <string name="settings_api_key">API 키</string>
+    <string name="settings_model">모델</string>
+    <string name="settings_minutes_section">회의록 요약 (Claude)</string>
+    <string name="settings_anthropic_key">Anthropic API 키</string>
+    <string name="settings_volume_toggle">볼륨 상 키 2번 → 녹음 토글</string>
+    <string name="action_save">저장</string>
+    <string name="action_cancel">취소</string>
 </resources>

@@ -20,8 +20,8 @@ class TranscriptionClient(
     private val model: String,
 ) {
 
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
+    // 공유 풀을 재사용하면서 업로드에 맞는 타임아웃만 조정한다.
+    private val client: OkHttpClient = Http.shared.newBuilder()
         .readTimeout(10, TimeUnit.MINUTES)
         .writeTimeout(10, TimeUnit.MINUTES)
         .build()
