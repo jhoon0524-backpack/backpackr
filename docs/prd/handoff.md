@@ -5,6 +5,52 @@
 
 ---
 
+## 코드 사다리
+
+무언가를 짜기 전에 위에서부터 내려온다. 걸리는 첫 단에서 멈춘다.
+
+```
+1. 이게 존재해야 하는가?      → 아니면 안 만든다
+2. 이 코드베이스에 있는가?     → 재사용한다, 다시 쓰지 않는다
+3. 표준 라이브러리가 하는가?    → 쓴다
+4. 플랫폼 기본 기능인가?       → 쓴다
+5. 이미 깔린 의존성이 하는가?   → 쓴다
+6. 한 줄인가?                → 한 줄로 쓴다
+7. 그제서야: 동작하는 최소한
+```
+
+이 사다리를 스펙에 적용해 내린 결정들. 아래 장들은 그 결과다.
+
+| 단 | 항목 | 결정 |
+|---|---|---|
+| 1 | `lead_time_hours` · `window_days` 컬럼 | **상수로 둔다.** 담당자마다 다르게 쓸 근거가 없다. 컬럼 2개 + 폼 필드 2개 + 검증이 사라진다. 요청이 나오면 그때 컬럼으로 올린다 |
+| 1 | 예약 변경 기능 | 만들지 않는다. 취소 후 재예약이 같은 결과다 |
+| 2 | 메일 발송 | 기존 알림 모듈 재사용. 발송기를 새로 만들지 않는다 |
+| 2 | refresh token 암호화 | **기존 암호화 유틸을 찾아 쓴다.** 새 암복호 클래스를 만들지 않는다 |
+| 2 | 담당자 인증 | 기존 `admin` 세션 인증 |
+| 3 | 슬러그 8자 | `UUID.randomUUID().toString().substring(0, 8)` — 생성기 클래스를 만들지 않는다 |
+| 3 | 시간 겹침 판정 | `LocalDateTime` 비교. Interval·Range 클래스를 만들지 않는다 |
+| 3 | JSON 컬럼 매핑 | `AttributeConverter` 2개 + 이미 있는 Jackson. **JSON 매핑 라이브러리를 새로 넣지 않는다** |
+| 4 | 동시 예약 방지 | DB unique 제약. 애플리케이션 락을 만들지 않는다 |
+| 4 | 파기 중복 실행 방지 | 필요 없다. UPDATE가 멱등하다 |
+| 5 | 구글 캘린더 SDK | **넣지 않는다.** 필요한 호출이 5개뿐이라 이미 있는 HTTP 클라이언트로 직접 부른다 (아래) |
+| 6 | 연동 여부 판별 | `calendarTokenRepository.existsById(memberId)` |
+| 6 | 취소 가능 판별 | `booking.startAt.minusHours(2).isAfter(now)` |
+| 6 | 파기 | UPDATE 쿼리 1개 |
+
+**구글 캘린더를 SDK 없이 부르는 이유** — `google-api-services-calendar`는 트랜지티브 의존성이 크고, 이 기능이 실제로 쓰는 건 5개 호출뿐이다.
+
+```
+POST https://oauth2.googleapis.com/token                          # 코드 교환 · 토큰 갱신
+POST https://www.googleapis.com/calendar/v3/freeBusy              # busy 조회
+POST .../calendar/v3/calendars/{calendarId}/events?sendUpdates=all # 이벤트 생성 + 초대
+DEL  .../calendar/v3/calendars/{calendarId}/events/{eventId}?sendUpdates=all
+```
+
+동의 화면 URL은 쿼리 파라미터를 붙인 문자열이라 호출이 아니다. 다섯 개 다 평범한 JSON 요청이고, 응답에서 꺼내 쓰는 필드는 `access_token`·`calendars[].busy[]`·`id`뿐이다.
+
+---
+
 ## 0. 시작 전 준비물
 
 착수 전에 받아둬야 하는 것. 셋 다 개발 외 작업이고, 없으면 T3부터 막힌다.
@@ -33,12 +79,12 @@ MAIL_FROM
 | 모듈 | 넣는 것 |
 |---|---|
 | `core` | `booking` 도메인 — 엔티티, 리포지토리, 슬롯 계산, 예약 확정/취소 서비스 |
-| `core` | `booking.calendar` — 구글 캘린더 클라이언트, 토큰 저장·갱신 |
+| `core` | `booking.calendar` — 구글 캘린더 클라이언트(HTTP 5개 호출), 토큰 저장·갱신 |
 | `api` | 공개 엔드포인트 (`/api/booking/**`, `/api/bookings/**`) — 인증 없음 |
 | `admin` | 담당자 엔드포인트 (`/admin/api/**`) — 기존 admin 인증 재사용 |
 | `api` 또는 `admin` | `@Scheduled` 파기 작업 1개. **`batch` 모듈을 새로 붙이지 않는다** |
 
-RabbitMQ·Quartz·Redisson·Algolia 의존성을 추가하지 않는다. 이 기능은 그 어느 것도 쓰지 않는다.
+**새로 추가하는 의존성은 0개다.** RabbitMQ·Quartz·Redisson·Algolia는 물론 구글 API SDK와 JSON 매핑 라이브러리도 넣지 않는다.
 
 ---
 
@@ -54,8 +100,6 @@ CREATE TABLE booking_page (
     duration_min    INT          NOT NULL,           -- 15 | 30 | 60
     weekly_hours    JSON         NOT NULL,           -- 아래 형식 참고
     blocked_dates   JSON         NOT NULL,           -- ["2026-08-11", ...]
-    lead_time_hours INT          NOT NULL DEFAULT 4,
-    window_days     INT          NOT NULL DEFAULT 14,
     meeting_url     VARCHAR(500)     NULL,
     active          TINYINT(1)   NOT NULL DEFAULT 1,
     created_at      DATETIME(6)  NOT NULL,
@@ -101,6 +145,7 @@ CREATE TABLE calendar_token (
 | `calendar_token.connected_at`·`revoked_at` | 연동 해제는 row DELETE다. **행의 존재 여부가 곧 연동 상태**다 |
 | `booking` 상태 enum 컬럼 | `canceled_ref = 0` 여부가 상태다 |
 | 취소 사유 컬럼 | 컬럼 + 폼 필드 + 메일 템플릿 한 줄이 붙는다. 취소 알림을 받은 담당자가 물어보면 된다 |
+| `lead_time_hours` · `window_days` 컬럼 | 상수 `LEAD_TIME_HOURS = 4`, `WINDOW_DAYS = 14`. 담당자별로 다르게 쓸 근거가 나오면 그때 컬럼으로 올린다 |
 
 **`uk_slot`이 이 스키마의 핵심이다.** 활성 예약은 `canceled_ref = 0`으로 고정이라 `(page_id, start_at, 0)`이 중복되어 슬롯당 1건에서 막힌다. 취소 시 `canceled_ref = seq`로 갱신하면 슬롯 점유가 풀리고, 같은 슬롯의 취소 이력은 `seq`가 달라 계속 쌓인다. 이 인덱스가 `(page_id, start_at, ...)` 순서라 슬롯 조회 쿼리도 그대로 탄다 — 조회용 인덱스를 따로 만들지 않는다.
 
@@ -130,7 +175,7 @@ CREATE TABLE calendar_token (
 | 7 | GET | `/admin/api/calendar/callback` | 필요 | OAuth 콜백. refresh token 저장 |
 | 8 | DELETE | `/admin/api/calendar` | 필요 | 연동 해제. row DELETE |
 | 9 | GET | `/api/booking/{slug}` | 없음 | 페이지 메타 — 제목·설명·담당자·소요시간·`bookable` |
-| 10 | GET | `/api/booking/{slug}/slots?from=&to=` | 없음 | 슬롯 목록. 최대 `window_days` 범위 |
+| 10 | GET | `/api/booking/{slug}/slots?from=&to=` | 없음 | 슬롯 목록. 최대 `WINDOW_DAYS` 범위 |
 | 11 | POST | `/api/booking/{slug}` | 없음 | 예약 확정 |
 | 12 | GET | `/api/bookings/{uuid}` | 없음 | 취소 화면용 예약 조회 |
 | 13 | DELETE | `/api/bookings/{uuid}` | 없음 | 예약자 취소. 2시간 전 이후면 **409** |
@@ -164,7 +209,7 @@ class BookingException extends RuntimeException {
 10번 엔드포인트의 전부다. 여기서 어긋나면 이중 부킹이 난다.
 
 ```
-입력: page, from, to   (to − from ≤ window_days)
+입력: page, from, to   (to − from ≤ WINDOW_DAYS)
 
 1. 후보 생성
    for 각 날짜 d in [from, to]:
@@ -176,7 +221,7 @@ class BookingException extends RuntimeException {
                t += duration_min          ← 구간 시작점 기준 정렬
 
 2. 리드타임 제외
-   후보에서 (now + lead_time_hours) 이전 시각 제거
+   후보에서 (now + LEAD_TIME_HOURS) 이전 시각 제거
 
 3. 활성 예약 제외
    SELECT start_at FROM booking

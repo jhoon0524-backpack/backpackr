@@ -35,7 +35,7 @@
 **범위**
 
 *v1 — 1:1 예약 링크*
-- 예약 유형 CRUD (제목·설명, 소요시간 15/30/60분, 요일별 운영시간, 휴가일 제외, 최소 리드타임, 예약 가능 기간)
+- 예약 유형 CRUD (제목·설명, 소요시간 15/30/60분, 요일별 운영시간, 휴가일 제외)
 - 구글 캘린더 연동 (Internal OAuth, freebusy 읽기 + events 쓰기)
 - 공개 예약 페이지 (비로그인, 회사 로고·담당자 이름 노출) + 슬롯 계산
 - 예약 확정 → 캘린더 이벤트 생성 + 예약자 초대 + 양측 메일
@@ -56,14 +56,13 @@
 
 ```
 booking_page     id, member_id, title, description, duration_min,
-                 weekly_hours(JSON), blocked_dates(JSON),
-                 lead_time_hours, window_days, meeting_url,
+                 weekly_hours(JSON), blocked_dates(JSON), meeting_url,
                  slug(UNIQUE), active
 booking          id(UUID), seq(AUTO_INCREMENT), page_id, start_at,
                  guest_name, guest_company, guest_email, guest_phone, memo,
                  gcal_event_id, created_at, canceled_at, canceled_ref
                  UNIQUE (page_id, start_at, canceled_ref)
-calendar_token   member_id(PK), refresh_token, calendar_id, revoked_at
+calendar_token   member_id(PK), refresh_token, calendar_id   # 행 존재 = 연동됨
 poll             id, member_id, title, candidate_slots(JSON), confirmed_slot
 poll_response    id, poll_id, guest_name, guest_email, ox(JSON)
 ```
@@ -86,12 +85,12 @@ poll_response    id, poll_id, guest_name, guest_email, ox(JSON)
 - 확정 시점의 캘린더 API 호출이 실패하면 예약을 저장하지 않고 재시도를 요청한다.
 
 *예약 유형 (v1)*
-- 담당자가 예약 유형을 저장하면 `/booking/{slug}` URL을 발급한다. 슬러그는 랜덤 8자, 충돌 시 재생성한다.
+- 담당자가 예약 유형을 저장하면 `/booking/{slug}` URL을 발급한다. 슬러그는 랜덤 8자, 충돌 시 재생성한다. 최소 리드타임 4시간·예약 가능 기간 14일은 상수이고 설정 화면에 두지 않는다.
 - 담당자가 비활성화하면 이후 열람자에게 "예약 마감"을 노출하고 기존 예약은 유지한다.
 - 미래 확정 예약이 있는 예약 유형은 삭제를 차단한다.
 
 *슬롯 조회·예약 (v1)*
-- 예약 페이지 진입 시 `운영시간 − blocked_dates − 캘린더 busy − 활성 예약 − (현재 + 리드타임) 이전` 구간을 슬롯으로 계산해 KST로 표시한다. 취소된 예약의 시간은 다시 슬롯으로 노출한다.
+- 예약 페이지 진입 시 `운영시간 − blocked_dates − 캘린더 busy − 활성 예약 − (현재 + 4시간) 이전` 구간을 슬롯으로 계산해 KST로 표시한다. 취소된 예약의 시간은 다시 슬롯으로 노출한다.
 - 슬롯은 각 요일 운영시간의 시작 시각을 기준으로 `duration_min` 간격으로 정렬한다. 운영시간 10:00–12:00 / 30분 미팅이면 10:00·10:30·11:00·11:30이고, 이 정렬을 벗어난 시각으로는 예약할 수 없다.
 - 방문자가 슬롯을 선택하고 이름·회사명·이메일·연락처·메모를 입력하면 개인정보 수집 동의 후 예약을 확정한다.
 - 확정 INSERT가 unique 제약에 걸리면 409를 반환하고 "방금 마감된 시간입니다" 안내 후 슬롯을 다시 불러온다.
@@ -138,7 +137,7 @@ poll_response    id, poll_id, guest_name, guest_email, ox(JSON)
 ```
 ①예약 유형 목록 → "구글 캘린더 연동" → 구글 OAuth 동의(Internal 앱)
    → refresh token 저장 → ②예약 유형 편집
-   → 제목·설명·소요시간·요일별 운영시간·휴가일·리드타임·예약 가능 기간·회의실 URL 입력
+   → 제목·설명·소요시간·요일별 운영시간·휴가일·회의실 URL 입력
    → 저장 → /booking/{slug} 발급 → 링크 복사
 ```
 캘린더 연동이 예약 유형 생성보다 먼저다. 미연동 상태에서 만든 링크는 어차피 열리지 않는다.
