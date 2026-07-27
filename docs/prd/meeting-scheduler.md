@@ -15,7 +15,7 @@
 
 | 원안 | 최소안 | 근거 |
 |---|---|---|
-| Redisson 분산 락으로 동시 예약 방지 | `UNIQUE (page_id, start_at)` + `DuplicateKeyException` → 409 | 동시 요청이 하루 1건 미만. 락 획득/해제/타임아웃 처리 전부 불필요 |
+| Redisson 분산 락으로 동시 예약 방지 | `UNIQUE (page_id, start_at, canceled_at)` + `DuplicateKeyException` → 409 | 동시 요청이 하루 1건 미만. 락 획득/해제/타임아웃 처리 전부 불필요 |
 | RabbitMQ 알림 이벤트 + DLQ 재처리 | 트랜잭션 커밋 후 동기 메일 발송, 실패 시 에러 로그 | 메일 하루 몇 통. 큐를 태우면 발송 실패 관측·재처리 화면까지 딸려온다 |
 | Quartz 리마인더 배치(24h/1h 전) | **삭제.** `.ics` 첨부로 캘린더에 등록되면 캘린더가 알림을 준다 | 배치 + 발송 이력 테이블 + 중복 방지 로직이 통째로 사라짐 |
 | Google Calendar OAuth (freebusy 읽기 + 이벤트 쓰기) | **삭제.** 확정 메일에 `.ics` 첨부 | OAuth flow·refresh token·앱 검증·개인정보 처리방침 갱신이 전부 사라짐. 원안의 개발 블로커 1번이 소멸 |
@@ -54,15 +54,19 @@
 
 ```
 booking_page   id, member_id, title, duration_min, weekly_hours(JSON),
-               lead_time_hours, window_days, slug(UNIQUE), active
+               blocked_dates(JSON), lead_time_hours, window_days,
+               slug(UNIQUE), active
 booking        id(UUID), page_id, start_at, guest_email, memo,
-               status, created_at, canceled_at
-               UNIQUE (page_id, start_at)
+               ics_uid, ics_sequence, created_at, canceled_at
+               UNIQUE (page_id, start_at, canceled_at)
 poll           id, member_id, title, candidate_slots(JSON), confirmed_slot
 poll_response  id, poll_id, member_id, ox(JSON)
                UNIQUE (poll_id, member_id)
 ```
-슬롯은 저장하지 않고 요청 시 계산한다 — `weekly_hours`를 JSON 컬럼에 두면 availability 테이블이 필요 없다.
+- 슬롯은 저장하지 않고 요청 시 계산한다 — `weekly_hours`를 JSON 컬럼에 두면 availability 테이블이 필요 없다.
+- `canceled_at`을 unique key에 포함시킨다. MySQL은 NULL 중복을 허용하므로 **활성 예약(`canceled_at IS NULL`)은 슬롯당 1건으로 막히고, 취소된 예약은 같은 슬롯에 여러 건 공존한다.** 이 컬럼이 빠지면 한 번 취소한 시간을 영구히 재예약할 수 없다.
+- 상태 컬럼은 두지 않는다. `canceled_at`의 NULL 여부가 곧 상태다.
+- `blocked_dates`는 담당자 휴가·외근 등 특정일 제외용. 이게 없으면 하루를 빼기 위해 예약 유형 전체를 비활성화해야 한다.
 
 ---
 
@@ -74,12 +78,13 @@ poll_response  id, poll_id, member_id, ox(JSON)
 - 미래 확정 예약이 있는 예약 유형은 삭제를 차단한다.
 
 *슬롯 조회·예약 (v1)*
-- 예약 페이지 진입 시 `운영시간 − 확정 예약 − (현재 + 리드타임) 이전` 구간을 슬롯으로 계산해 KST로 표시한다.
+- 예약 페이지 진입 시 `운영시간 − blocked_dates − 활성 예약(canceled_at IS NULL) − (현재 + 리드타임) 이전` 구간을 슬롯으로 계산해 KST로 표시한다. 취소된 예약의 시간은 다시 예약 가능 슬롯으로 노출한다.
+- 슬롯은 각 요일 운영시간의 시작 시각을 기준으로 `duration_min` 간격으로 정렬한다. 운영시간 10:00–12:00 / 30분 미팅이면 10:00·10:30·11:00·11:30이고, 이 정렬을 벗어난 시각으로는 예약할 수 없다.
 - 방문자가 슬롯을 선택하고 이메일·메모를 입력하면 개인정보 수집 동의 후 예약을 확정한다.
 - 확정 INSERT가 unique 제약에 걸리면 409를 반환하고 "방금 마감된 시간입니다" 안내 후 슬롯을 다시 불러온다.
-- 확정 시 주최자·예약자에게 메일을 보내고 `.ics`를 첨부한다.
-- 예약자가 확정 메일의 `/bookings/{uuid}/cancel` 링크로 접근하면 미팅 2시간 전까지 취소할 수 있다. 취소 시 양측에 메일을 보낸다.
-- 메일 발송이 실패하면 예약은 확정 상태로 두고 에러 로그만 남긴다. 재시도하지 않는다.
+- 확정 시 주최자·예약자에게 `METHOD:REQUEST` `.ics`를 첨부한 메일을 보낸다. `ics_uid`는 예약 생성 시 발급해 저장하고 `ics_sequence`는 0에서 시작한다.
+- 예약자가 확정 메일의 `/bookings/{uuid}/cancel` 링크로 접근하면 미팅 2시간 전까지 취소할 수 있다. 취소 시 **같은 `ics_uid`에 `ics_sequence`를 1 올린 `METHOD:CANCEL` `.ics`**를 양측에 보낸다. 이 규격을 지키지 않으면 취소해도 상대 캘린더에 일정이 남는다.
+- 메일 발송이 실패하면 예약은 유효한 상태로 두고, 주최자에게 슬랙 DM으로 실패를 알린다. 자동 재시도는 하지 않는다.
 
 *후보 시간 조율 (v2)*
 - 주최자가 후보 시간 3~8개를 선택하면 조율 링크를 발급한다.
@@ -97,7 +102,8 @@ poll_response  id, poll_id, member_id, ox(JSON)
 | 미팅 2시간 이내 취소 시도 | 차단, 주최자에게 직접 연락 안내 |
 | 운영시간 변경으로 기존 예약이 범위 밖으로 이탈 | 기존 예약 유지, 저장 시 경고 문구 노출 |
 | 예약 링크 외부 유출 | 예약 유형별 비활성 토글로 대응. 링크 인증은 하지 않는다 |
-| 메일 발송 실패 | 예약은 유효. 에러 로그 후 주최자가 관리 화면에서 확인 |
+| 메일 발송 실패 | 예약은 유효. 에러 로그 + 주최자 슬랙 DM. 재발송은 주최자가 예약 상세에서 수동 실행 |
+| 취소한 시간에 다시 예약 | 가능해야 한다. `canceled_at`이 unique key에 포함되므로 취소 row가 슬롯을 점유하지 않는다 |
 | 주최자 퇴사 | 예약 유형 비활성화 + 미래 예약은 DB에서 수동 정리 |
 
 ---
@@ -105,7 +111,9 @@ poll_response  id, poll_id, member_id, ox(JSON)
 **인수 조건**
 - [ ] 예약 유형 설정대로 슬롯이 계산되고, 확정된 슬롯과 리드타임 미달 구간이 제외된다.
 - [ ] 동일 슬롯 동시 요청 시 확정 예약이 정확히 1건이고 나머지는 409를 받는다.
-- [ ] 확정·취소 시 양측에 메일이 1회 발송되고 `.ics` 첨부로 캘린더에 등록된다.
+- [ ] 확정 시 `.ics`(REQUEST)로 양측 캘린더에 등록되고, 취소 시 `.ics`(CANCEL, SEQUENCE+1)로 해당 일정이 캘린더에서 제거된다.
+- [ ] 예약을 취소한 뒤 같은 시간이 다시 예약 가능 슬롯으로 노출되고 재예약이 성공한다.
+- [ ] `blocked_dates`에 등록한 날짜의 슬롯이 노출되지 않는다.
 - [ ] 미래 확정 예약이 있는 예약 유형은 삭제가 차단된다.
 - [ ] 동의 없이 예약 확정이 불가하다.
 - [ ] (v2) 후보별 O/X 응답이 저장되고, 확정 시 응답자 전원에게 메일이 발송된다.
