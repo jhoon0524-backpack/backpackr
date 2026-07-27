@@ -61,8 +61,7 @@ CREATE TABLE booking_page (
     created_at      DATETIME(6)  NOT NULL,
     updated_at      DATETIME(6)  NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_slug (slug),
-    KEY idx_member (member_id)
+    UNIQUE KEY uk_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE booking (
@@ -79,24 +78,31 @@ CREATE TABLE booking (
     created_at      DATETIME(6)  NOT NULL,
     canceled_at     DATETIME(6)      NULL,
     canceled_ref    BIGINT       NOT NULL DEFAULT 0, -- 0 = 활성, 취소 시 seq 값
-    purged_at       DATETIME(6)      NULL,
     PRIMARY KEY (seq),
     UNIQUE KEY uk_public_id (id),
-    UNIQUE KEY uk_slot (page_id, start_at, canceled_ref),
-    KEY idx_purge (start_at, purged_at)
+    UNIQUE KEY uk_slot (page_id, start_at, canceled_ref)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE calendar_token (
     member_id     BIGINT       NOT NULL,
     refresh_token VARBINARY(512) NOT NULL,           -- 암호화 저장
     calendar_id   VARCHAR(255) NOT NULL,
-    connected_at  DATETIME(6)  NOT NULL,
-    revoked_at    DATETIME(6)      NULL,
     PRIMARY KEY (member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
-**`uk_slot`이 이 스키마의 핵심이다.** 활성 예약은 `canceled_ref = 0`으로 고정이라 `(page_id, start_at, 0)`이 중복되어 슬롯당 1건에서 막힌다. 취소 시 `canceled_ref = seq`로 갱신하면 슬롯 점유가 풀리고, 같은 슬롯의 취소 이력은 `seq`가 달라 계속 쌓인다.
+**넣지 않은 것들** — 있으면 좋아 보이지만 코드를 늘리기만 한다.
+
+| 안 넣음 | 대신 | 
+|---|---|
+| `purged_at` 컬럼 + 인덱스 | 파기 대상 판별은 `guest_email IS NOT NULL`로 충분하다. 이미 비운 행은 자동으로 걸러진다 |
+| `booking` 파기용 인덱스 | 담당자 5명 × 몇 년치라 수천 행이다. 하루 한 번 풀스캔이 인덱스 유지비보다 싸다 |
+| `booking_page.idx_member` | 담당자당 예약 유형 몇 개다. 인덱스 탈 일이 없다 |
+| `calendar_token.connected_at`·`revoked_at` | 연동 해제는 row DELETE다. **행의 존재 여부가 곧 연동 상태**다 |
+| `booking` 상태 enum 컬럼 | `canceled_ref = 0` 여부가 상태다 |
+| 취소 사유 컬럼 | 컬럼 + 폼 필드 + 메일 템플릿 한 줄이 붙는다. 취소 알림을 받은 담당자가 물어보면 된다 |
+
+**`uk_slot`이 이 스키마의 핵심이다.** 활성 예약은 `canceled_ref = 0`으로 고정이라 `(page_id, start_at, 0)`이 중복되어 슬롯당 1건에서 막힌다. 취소 시 `canceled_ref = seq`로 갱신하면 슬롯 점유가 풀리고, 같은 슬롯의 취소 이력은 `seq`가 달라 계속 쌓인다. 이 인덱스가 `(page_id, start_at, ...)` 순서라 슬롯 조회 쿼리도 그대로 탄다 — 조회용 인덱스를 따로 만들지 않는다.
 
 > `canceled_at`(nullable)을 대신 키에 넣으면 안 된다. MySQL은 unique 인덱스에서 NULL을 서로 다른 값으로 취급해 활성 예약끼리 중복이 차단되지 않는다. **판별 컬럼은 NOT NULL이어야 한다.**
 
@@ -115,38 +121,47 @@ CREATE TABLE calendar_token (
 
 | # | 메서드 | 경로 | 인증 | 설명 |
 |---|---|---|---|---|
-| 1 | GET | `/admin/api/booking-pages` | 필요 | 내 예약 유형 목록 + 캘린더 연동 상태 |
+| 1 | GET | `/admin/api/booking-pages` | 필요 | **화면 ① 전체** — 예약 유형 목록 + 캘린더 연동 상태 + 다가오는 예약 |
 | 2 | POST | `/admin/api/booking-pages` | 필요 | 생성. slug 랜덤 8자, 충돌 시 재생성 |
-| 3 | PUT | `/admin/api/booking-pages/{id}` | 필요 | 수정 |
+| 3 | PUT | `/admin/api/booking-pages/{id}` | 필요 | 수정. 비활성 토글도 여기서 처리 |
 | 4 | DELETE | `/admin/api/booking-pages/{id}` | 필요 | 삭제. 미래 활성 예약 있으면 **409** |
-| 5 | GET | `/admin/api/bookings?from=&to=` | 필요 | 다가오는 예약 목록 (리드 정보 포함) |
-| 6 | DELETE | `/admin/api/bookings/{uuid}` | 필요 | 담당자 취소. 시간 제한 없음 |
-| 7 | GET | `/admin/api/calendar/auth-url` | 필요 | 구글 동의 화면 URL 발급 |
-| 8 | GET | `/admin/api/calendar/callback` | 필요 | OAuth 콜백. refresh token 저장 |
-| 9 | DELETE | `/admin/api/calendar` | 필요 | 연동 해제 |
-| 10 | GET | `/api/booking/{slug}` | 없음 | 페이지 메타 — 제목·설명·담당자·소요시간·**예약 가능 여부** |
-| 11 | GET | `/api/booking/{slug}/slots?from=&to=` | 없음 | 슬롯 목록. 최대 `window_days` 범위 |
-| 12 | POST | `/api/booking/{slug}` | 없음 | 예약 확정 |
-| 13 | GET | `/api/bookings/{uuid}` | 없음 | 취소 화면용 예약 조회 |
-| 14 | DELETE | `/api/bookings/{uuid}` | 없음 | 예약자 취소. 2시간 전 이후면 **409** |
+| 5 | DELETE | `/admin/api/bookings/{uuid}` | 필요 | 담당자 취소. 시간 제한 없음 |
+| 6 | GET | `/admin/api/calendar/connect` | 필요 | 구글 동의 화면으로 302 |
+| 7 | GET | `/admin/api/calendar/callback` | 필요 | OAuth 콜백. refresh token 저장 |
+| 8 | DELETE | `/admin/api/calendar` | 필요 | 연동 해제. row DELETE |
+| 9 | GET | `/api/booking/{slug}` | 없음 | 페이지 메타 — 제목·설명·담당자·소요시간·`bookable` |
+| 10 | GET | `/api/booking/{slug}/slots?from=&to=` | 없음 | 슬롯 목록. 최대 `window_days` 범위 |
+| 11 | POST | `/api/booking/{slug}` | 없음 | 예약 확정 |
+| 12 | GET | `/api/bookings/{uuid}` | 없음 | 취소 화면용 예약 조회 |
+| 13 | DELETE | `/api/bookings/{uuid}` | 없음 | 예약자 취소. 2시간 전 이후면 **409** |
+
+1번이 화면 ①에 필요한 것을 한 번에 반환한다. 예약 목록을 별도 엔드포인트로 나누면 소비자가 하나뿐인데 호출만 두 번이 된다.
 
 **응답 코드 규약**
 
 | 코드 | 상황 | 프런트 처리 |
 |---|---|---|
-| 409 `SLOT_TAKEN` | 12번에서 `uk_slot` 충돌 | 입력값 유지한 채 시간 선택 단계로 복귀 |
-| 409 `CANCEL_WINDOW_CLOSED` | 14번, 미팅 2시간 이내 | 담당자 연락처 안내 |
+| 409 `SLOT_TAKEN` | 11번에서 `uk_slot` 충돌 | 입력값 유지한 채 시간 선택 단계로 복귀 |
+| 409 `CANCEL_WINDOW_CLOSED` | 13번, 미팅 2시간 이내 | 담당자 연락처 안내 |
 | 409 `HAS_FUTURE_BOOKINGS` | 4번, 미래 예약 존재 | 삭제 버튼 비활성 + 사유 표기 |
-| 503 `CALENDAR_UNAVAILABLE` | 10·11번, 미연동·토큰 철회 | 예약 일시 중단 화면 |
-| 503 `CALENDAR_FAILED` | 12번, 이벤트 생성 실패 | 재시도 안내. **예약은 저장되지 않음** |
+| 503 `CALENDAR_FAILED` | 11번, 이벤트 생성 실패 | 재시도 안내. **예약은 저장되지 않음** |
 
-10번이 `bookable: false`를 반환하면 프런트는 11번을 호출하지 않는다.
+캘린더 미연동·토큰 철회는 **에러가 아니라 상태**다. 9번이 `bookable: false`를 반환하고 프런트는 10번을 호출하지 않는다. 별도 503 코드를 두지 않는다 — 안내 문구를 렌더하려면 어차피 페이지 메타가 필요해서, 에러로 만들면 본문을 못 싣는다.
+
+**예외 클래스는 1개다.** 코드별로 클래스를 만들지 않는다.
+
+```java
+class BookingException extends RuntimeException {
+    enum Code { SLOT_TAKEN, CANCEL_WINDOW_CLOSED, HAS_FUTURE_BOOKINGS, CALENDAR_FAILED }
+    final Code code;   // → @ExceptionHandler 하나가 code 별 HTTP status 매핑
+}
+```
 
 ---
 
 ## 4. 슬롯 계산
 
-11번 엔드포인트의 전부다. 여기서 어긋나면 이중 부킹이 난다.
+10번 엔드포인트의 전부다. 여기서 어긋나면 이중 부킹이 난다.
 
 ```
 입력: page, from, to   (to − from ≤ window_days)
@@ -183,7 +198,7 @@ CREATE TABLE calendar_token (
 
 ## 5. 예약 확정 트랜잭션
 
-12번. **순서가 중요하다.**
+11번. **순서가 중요하다.**
 
 ```
 1. 슬롯 유효성 재검증 (4장 1~4단계를 다시 계산)
@@ -200,7 +215,7 @@ CREATE TABLE calendar_token (
 3번이 트랜잭션 안에 있어야 한다. 캘린더에 없는 예약을 만들지 않는 것이 이 기능의 실패 정책이다.
 6번은 트랜잭션 밖이다 (`@TransactionalEventListener(AFTER_COMMIT)`). 메일 실패로 예약을 되돌리지 않는다.
 
-**취소(6·14번)**
+**취소(5·13번)**
 
 ```
 1. canceled_at = now, canceled_ref = seq  UPDATE
@@ -219,15 +234,15 @@ CREATE TABLE calendar_token (
 ```sql
 UPDATE booking
    SET guest_name = NULL, guest_company = NULL, guest_email = NULL,
-       guest_phone = NULL, memo = NULL, purged_at = NOW(6)
+       guest_phone = NULL, memo = NULL
  WHERE start_at < DATE_SUB(NOW(), INTERVAL 3 MONTH)
-   AND purged_at IS NULL
- LIMIT 1000;
+   AND guest_email IS NOT NULL;
 ```
 
-- 멱등하다. 여러 파드에서 동시에 돌아도, 몇 번을 재실행해도 결과가 같다. **실행 이력 테이블이나 락을 두지 않는다.**
-- `LIMIT`은 첫 실행 시 대량 UPDATE를 막기 위한 것이다. 남은 건이 있으면 다음 날 이어서 처리된다.
-- `purged_at`으로 재처리 대상을 걸러 매일 전체 스캔을 피한다.
+- 이 메서드가 파기 기능의 전부다. 쿼리 한 개, 클래스 한 개.
+- 멱등하다. 여러 파드에서 동시에 돌아도, 몇 번을 재실행해도 결과가 같다. **실행 이력 테이블도 락도 두지 않는다.**
+- `guest_email IS NOT NULL`이 재처리 대상을 거른다. 별도 `purged_at` 컬럼이 필요 없다.
+- 인덱스도 두지 않는다. 담당자 5명 규모라 몇 년이 지나도 수천 행이고, 하루 한 번 풀스캔이 인덱스 유지비보다 싸다.
 
 ---
 
@@ -236,12 +251,12 @@ UPDATE booking
 | # | 작업 | 선행 | 산출물 |
 |---|---|---|---|
 | T1 | DDL + 엔티티·리포지토리 | — | 3장 스키마, JPA 매핑 |
-| T2 | 예약 유형 CRUD API + 화면 ①② | T1 | API 1~6 |
-| T3 | 구글 OAuth 연동 + 토큰 저장·갱신 | T1 | API 7~9. **0장 준비물 필요** |
-| T4 | 슬롯 계산 + 공개 조회 API | T1, T3 | API 10~11 |
-| T5 | 예약 확정 트랜잭션 + 메일 + 슬랙 알림 | T4 | API 12 |
+| T2 | 예약 유형 CRUD API + 화면 ① ② | T1 | API 1~5 |
+| T3 | 구글 OAuth 연동 + 토큰 저장·갱신 | T1 | API 6~8. **0장 준비물 필요** |
+| T4 | 슬롯 계산 + 공개 조회 API | T1, T3 | API 9~10 |
+| T5 | 예약 확정 트랜잭션 + 메일 + 슬랙 알림 | T4 | API 11 |
 | T6 | 공개 예약 페이지 ③ + 완료 ④ | T4, T5 | 2단계 폼, 동의 UI |
-| T7 | 취소 ⑤ + 담당자 취소 | T5 | API 13~14 |
+| T7 | 취소 ⑤ + 담당자 취소 | T5 | API 12~13 |
 | T8 | 실패 상태 3종 UI + 슬랙 웹훅 | T5 | 와이어프레임 "실패 상태" |
 | T9 | 파기 스케줄러 | T1 | 6장 |
 
@@ -264,9 +279,9 @@ T2와 T3은 병렬 가능. T9는 T1 직후 아무 때나.
 - [ ] 메일 발송이 실패해도 booking row와 캘린더 이벤트는 남는다
 - [ ] 미팅 2시간 이내 취소 요청 → 409, 예약 유지
 - [ ] 미래 활성 예약이 있는 예약 유형 삭제 → 409
-- [ ] 토큰 철회 상태에서 10번이 `bookable: false`를 반환한다
+- [ ] 토큰 철회 상태에서 9번이 `bookable: false`를 반환한다
 - [ ] 파기 대상 예약의 게스트 5개 컬럼이 NULL이 되고 `page_id`·`start_at`은 남는다. 두 번 실행해도 결과가 같다
-- [ ] 동의 체크 없이 12번 호출 → 400
+- [ ] 동의 체크 없이 11번 호출 → 400
 
 ---
 
