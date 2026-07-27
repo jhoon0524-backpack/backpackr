@@ -15,7 +15,7 @@
 
 | 흔한 설계 | 이 PRD | 근거 |
 |---|---|---|
-| Redisson 분산 락으로 동시 예약 방지 | `UNIQUE (page_id, start_at, canceled_at)` + `DuplicateKeyException` → 409 | 동시 요청이 하루 1건 미만. 락 획득/해제/타임아웃 처리 불필요 |
+| Redisson 분산 락으로 동시 예약 방지 | `UNIQUE (page_id, start_at, canceled_ref)` + `DuplicateKeyException` → 409 | 동시 요청이 하루 1건 미만. 락 획득/해제/타임아웃 처리 불필요 |
 | RabbitMQ 알림 이벤트 + DLQ 재처리 | 트랜잭션 커밋 후 동기 메일 발송, 실패 시 주최자 슬랙 DM | 메일 하루 몇 통. 큐를 태우면 발송 실패 관측·재처리 화면이 딸려온다 |
 | Quartz 리마인더 배치 | **없음.** 캘린더 초대로 등록되면 구글이 알림을 준다 | 배치 + 발송 이력 테이블 + 중복 방지 로직이 통째로 불필요 |
 | Quartz 개인정보 파기 배치 | Spring `@Scheduled` 일 1회, 쿼리 1개 | **파기는 멱등하다.** 여러 파드에서 중복 실행돼도 결과가 같아 Quartz의 클러스터 중복 방지가 필요 없다 |
@@ -28,7 +28,7 @@
 | 라운드로빈 팀 배정 | 담당자 개인 링크 (확정) | 영업팀이 담당자별로 리드를 맡는 방식. 배정 규칙·부하 분산·가용성 합산이 전부 불필요 |
 | 타임존 감지·변경 | KST 고정 (확정) | 해외 리드 없음 |
 
-**규모**: 테이블 5개, 엔드포인트 12개, 화면 7개.
+**규모**: 테이블 3개(v1) / 5개(v2), 엔드포인트 14개, 화면 7개.
 
 ---
 
@@ -59,17 +59,18 @@ booking_page     id, member_id, title, description, duration_min,
                  weekly_hours(JSON), blocked_dates(JSON),
                  lead_time_hours, window_days, meeting_url,
                  slug(UNIQUE), active
-booking          id(UUID), page_id, start_at,
+booking          id(UUID), seq(AUTO_INCREMENT), page_id, start_at,
                  guest_name, guest_company, guest_email, guest_phone, memo,
-                 gcal_event_id, created_at, canceled_at
-                 UNIQUE (page_id, start_at, canceled_at)
+                 gcal_event_id, created_at, canceled_at, canceled_ref
+                 UNIQUE (page_id, start_at, canceled_ref)
 calendar_token   member_id(PK), refresh_token, calendar_id, revoked_at
 poll             id, member_id, title, candidate_slots(JSON), confirmed_slot
 poll_response    id, poll_id, guest_name, guest_email, ox(JSON)
 ```
 - 슬롯은 저장하지 않고 요청 시 계산한다 — `weekly_hours`를 JSON 컬럼에 두면 availability 테이블이 필요 없다.
-- `canceled_at`을 unique key에 포함시킨다. MySQL은 NULL 중복을 허용하므로 **활성 예약은 슬롯당 1건으로 막히고, 취소된 예약은 같은 슬롯에 여러 건 공존한다.** 이 컬럼이 빠지면 한 번 취소한 시간을 영구히 재예약할 수 없다.
-- 상태 컬럼은 두지 않는다. `canceled_at`의 NULL 여부가 곧 상태다.
+- 슬롯 점유는 `canceled_ref`로 판별한다. 활성 예약은 `0`, 취소 시 자기 `seq` 값으로 갱신한다. **활성 예약은 `(page_id, start_at, 0)`이 중복되어 슬롯당 1건에서 막히고, 취소된 예약은 `canceled_ref`가 서로 달라 같은 슬롯에 얼마든지 쌓인다.**
+- `canceled_at`(nullable)을 unique key에 넣으면 안 된다. **MySQL은 unique 인덱스에서 NULL을 서로 다른 값으로 취급하므로 활성 예약끼리 중복이 차단되지 않는다.** 판별 컬럼은 NOT NULL이어야 한다.
+- 상태 컬럼은 따로 두지 않는다. `canceled_ref = 0` 여부가 곧 상태이고, `canceled_at`은 취소 시각 기록용이다.
 - `guest_company`·`guest_phone`은 영업 리드 정보라 수집한다. 게스트 컬럼 5종(`guest_name`·`guest_company`·`guest_email`·`guest_phone`·`memo`)은 **전부 nullable**이어야 한다. 미팅 후 3개월이 지나면 이 컬럼들만 NULL로 비우고 row는 남긴다.
 
 ---
@@ -172,7 +173,7 @@ flowchart TD
 
 | 주체 | 경로 | 조건 | 결과 |
 |---|---|---|---|
-| 외부 리드 | 확정 메일의 `/bookings/{uuid}/cancel` → ⑤취소 확인 | 미팅 2시간 전까지 | `canceled_at` 기록 → 캘린더 이벤트 삭제 → 양측 메일 → **슬롯 재개방** |
+| 외부 리드 | 확정 메일의 `/bookings/{uuid}/cancel` → ⑤취소 확인 | 미팅 2시간 전까지 | `canceled_at`·`canceled_ref` 기록 → 캘린더 이벤트 삭제 → 양측 메일 → **슬롯 재개방** |
 | 외부 리드 | 동일 | 2시간 이내 | 차단, 담당자 직접 연락 안내 |
 | 담당자 | ①예약 유형 목록 → 예약 상세 | 제한 없음 | 동일 |
 
@@ -200,7 +201,7 @@ v2: 확정 → Salesmap 리드 조회·생성 + 미팅 노트 자동 기록 → 
 | 케이스 | 동작 |
 |---|---|
 | 동일 슬롯 동시 확정 | unique 제약 위반 → 409, 슬롯 목록 갱신 |
-| 취소한 시간에 다시 예약 | 가능해야 한다. 취소 row가 슬롯을 점유하지 않는다 |
+| 취소한 시간에 다시 예약 | 가능해야 한다. 취소 시 `canceled_ref`가 0에서 벗어나 슬롯 점유가 풀린다 |
 | 미팅 2시간 이내 취소 시도 | 차단, 담당자에게 직접 연락 안내 |
 | 캘린더 토큰 만료·권한 철회 | 예약 페이지 중단 + 담당자 슬랙 DM. busy를 모르는 채로 예약받지 않는다 |
 | 캘린더 API 장애로 확정 실패 | 예약 저장하지 않고 재시도 요청. 유령 예약을 만들지 않는다 |
@@ -214,7 +215,7 @@ v2: 확정 → Salesmap 리드 조회·생성 + 미팅 노트 자동 기록 → 
 **인수 조건**
 - [ ] 예약 유형 설정대로 슬롯이 계산되고, 캘린더 busy 구간·휴가일·리드타임 미달 구간이 제외된다.
 - [ ] 동일 슬롯 동시 요청 시 확정 예약이 정확히 1건이고 나머지는 409를 받는다.
-- [ ] 예약을 취소한 뒤 같은 시간이 다시 예약 가능 슬롯으로 노출되고 재예약이 성공한다.
+- [ ] 예약을 취소한 뒤 같은 시간이 다시 예약 가능 슬롯으로 노출되고 재예약이 성공한다. 같은 슬롯을 여러 번 예약·취소해도 계속 성공한다.
 - [ ] 확정 시 담당자 캘린더에 이벤트가 생기고 예약자에게 구글 초대가 발송된다. 취소 시 해당 이벤트가 삭제된다.
 - [ ] 캘린더 미연동·토큰 철회 상태에서 예약 페이지가 예약을 받지 않는다.
 - [ ] 캘린더 API 실패 시 예약이 저장되지 않는다.
@@ -239,5 +240,6 @@ v2: 확정 → Salesmap 리드 조회·생성 + 미팅 노트 자동 기록 → 
 - 예약 페이지 도메인·브랜딩 수준(로고만 vs 랜딩) — 외부 노출 화면이라 디자인 확인 필요.
 - 개인정보 보관 기간은 미팅 후 3개월로 확정. 동의 문구 최종 문안은 법무 검토를 받는다(기간 자체는 재논의하지 않는다).
 
-**와이어프레임**
-화면별 저충실도 와이어프레임은 `docs/prd/wireframes.html` 참조.
+**관련 문서**
+- 화면 와이어프레임 — `docs/prd/wireframes.html`
+- 개발 핸드오프 (DDL·API·작업 분해) — `docs/prd/handoff.md`
