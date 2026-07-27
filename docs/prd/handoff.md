@@ -72,6 +72,70 @@ BOOKING_BASE_URL         # 공개 예약 링크 도메인. 확정 메일·취소
 MAIL_FROM
 ```
 
+### GCP OAuth 클라이언트 발급 절차
+
+콘솔 메뉴 이름은 개편이 잦다. 최근에는 "OAuth 동의 화면"이 **Google Auth Platform** 아래로 옮겨졌다. 이름이 다르면 같은 성격의 메뉴를 찾는다.
+
+**1) 프로젝트와 API**
+
+- [console.cloud.google.com](https://console.cloud.google.com)에서 프로젝트를 만든다. **회사 Workspace 조직(backpac.kr) 아래여야 한다.** 개인 계정 아래에 만들면 2)의 Internal 옵션이 나오지 않는다.
+- API 및 서비스 → 라이브러리 → `Google Calendar API` 사용 설정.
+
+**2) OAuth 동의 화면**
+
+| 항목 | 값 |
+|---|---|
+| User Type | **Internal** |
+| 앱 이름 | 미팅 예약 링크 (담당자 동의 화면에 표시) |
+| 사용자 지원 이메일 | 담당자 주소 |
+| 승인된 도메인 | `backpac.kr` |
+
+Internal이면 구글 앱 검증 심사가 없다. 조직 내 계정만 연동할 수 있는데, 연동 주체가 영업 담당자 본인뿐이라 이걸로 충분하다.
+
+**3) 스코프 — 두 개만**
+
+```
+https://www.googleapis.com/auth/calendar.freebusy   # busy 구간 조회
+https://www.googleapis.com/auth/calendar.events     # 이벤트 생성·삭제
+```
+
+전체 권한 스코프(`.../auth/calendar`)는 넣지 않는다. 이 두 개로 필요한 5개 호출이 전부 커버된다.
+
+**4) 클라이언트 ID**
+
+사용자 인증 정보 → OAuth 클라이언트 ID → **웹 애플리케이션**.
+승인된 리디렉션 URI에 `https://{admin-host}/admin/api/calendar/callback`을 등록한다. 스테이징·운영 두 개를 함께 등록해 둔다.
+
+리디렉션 URI는 `GOOGLE_REDIRECT_URI`와 **프로토콜·후행 슬래시까지 정확히** 같아야 한다. 다르면 `redirect_uri_mismatch`가 난다.
+
+**동의 화면 URL** — 6번 엔드포인트가 302로 보낼 주소
+
+```
+https://accounts.google.com/o/oauth2/v2/auth
+  ?client_id={GOOGLE_CLIENT_ID}
+  &redirect_uri={GOOGLE_REDIRECT_URI}
+  &response_type=code
+  &scope=<위 두 스코프를 공백으로 연결>
+  &access_type=offline
+  &prompt=consent
+  &state=<CSRF 토큰>
+```
+
+`access_type=offline`이 없으면 refresh token이 오지 않는다. **연동 직후에는 정상 동작하다가 한 시간 뒤 슬롯 조회가 통째로 죽는다.** `prompt=consent`는 재연동 때도 refresh token을 다시 받기 위해 필요하다.
+
+**콜백** — 7번 엔드포인트
+
+```
+POST https://oauth2.googleapis.com/token
+  code, client_id, client_secret, redirect_uri, grant_type=authorization_code
+→ 응답의 refresh_token을 암호화해 calendar_token 에 저장
+```
+
+`calendar_id`는 `primary`를 넣는다. 담당자 기본 캘린더를 가리키는 예약어라 실제 ID를 조회할 필요가 없다.
+
+> **발급 전 마지막 확인 — User Type이 Internal인가.**
+> External + 게시 상태 "테스트"로 두면 **refresh token이 7일마다 만료된다.** 개발 중에는 멀쩡하다가 배포 후 매주 재연동을 요구하는 형태로 나타나 원인을 찾기 번거롭다. Internal 앱에는 이 제한이 없다.
+
 ---
 
 ## 1. 모듈 배치
