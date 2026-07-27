@@ -1,0 +1,1153 @@
+<title>미팅 예약 링크 — 동작 목업</title>
+
+<style>
+  :root {
+    --ink: #16191c;
+    --ink-2: #414a4c;
+    --muted: #6d7879;
+    --paper: #eef1f1;
+    --surface: #ffffff;
+    --line: #c5cdcd;
+    --line-soft: #dde3e3;
+    --fill: #dfe5e5;
+    --accent: #0b6e5f;
+    --accent-ink: #ffffff;
+    --accent-soft: #dcebe7;
+    --warn: #a8481a;
+    --warn-soft: #f6e5da;
+    --tool: #3c3f52;
+    --tool-ink: #e8e9f0;
+
+    --serif: ui-serif, Georgia, "Nimbus Roman", "Times New Roman", serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, "DejaVu Sans Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e6eaea;
+      --ink-2: #b3bcbd;
+      --muted: #8a9495;
+      --paper: #121516;
+      --surface: #1a1e1f;
+      --line: #394142;
+      --line-soft: #2a3132;
+      --fill: #262d2e;
+      --accent: #5cb8a5;
+      --accent-ink: #0d1a18;
+      --accent-soft: #16302c;
+      --warn: #d4855c;
+      --warn-soft: #33221a;
+      --tool: #23252f;
+      --tool-ink: #c9ccd8;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #e6eaea;
+    --ink-2: #b3bcbd;
+    --muted: #8a9495;
+    --paper: #121516;
+    --surface: #1a1e1f;
+    --line: #394142;
+    --line-soft: #2a3132;
+    --fill: #262d2e;
+    --accent: #5cb8a5;
+    --accent-ink: #0d1a18;
+    --accent-soft: #16302c;
+    --warn: #d4855c;
+    --warn-soft: #33221a;
+    --tool: #23252f;
+    --tool-ink: #c9ccd8;
+  }
+
+  :root[data-theme="light"] {
+    --ink: #16191c;
+    --ink-2: #414a4c;
+    --muted: #6d7879;
+    --paper: #eef1f1;
+    --surface: #ffffff;
+    --line: #c5cdcd;
+    --line-soft: #dde3e3;
+    --fill: #dfe5e5;
+    --accent: #0b6e5f;
+    --accent-ink: #ffffff;
+    --accent-soft: #dcebe7;
+    --warn: #a8481a;
+    --warn-soft: #f6e5da;
+    --tool: #3c3f52;
+    --tool-ink: #e8e9f0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font: inherit; color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ── 테스트 도구 바 (제품 화면 아님) ─────────────────── */
+
+  .tool {
+    background: var(--tool);
+    color: var(--tool-ink);
+    padding: 10px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    font-size: 12.5px;
+  }
+
+  .tool-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity: .62;
+    padding-right: 4px;
+  }
+
+  .tool-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tool-group > span { opacity: .62; }
+
+  .tool button {
+    background: transparent;
+    color: inherit;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 2px;
+    padding: 3px 9px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .tool button:hover { border-color: rgba(255,255,255,.5); }
+
+  .tool button[aria-pressed="true"] {
+    background: var(--tool-ink);
+    color: var(--tool);
+    border-color: var(--tool-ink);
+  }
+
+  .tool .spacer { flex: 1 1 auto; }
+
+  /* ── 페이지 골격 ────────────────────────────────────── */
+
+  .stage {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 40px 20px 72px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+
+  .pane {
+    display: grid;
+    grid-template-columns: 264px 1fr;
+    min-height: 462px;
+  }
+
+  @media (max-width: 760px) {
+    .pane { grid-template-columns: 1fr; min-height: 0; }
+    .rail { border-right: none !important; border-bottom: 1px solid var(--line-soft); }
+  }
+
+  /* ── 좌측 레일 — 미팅 정보 ──────────────────────────── */
+
+  .rail {
+    border-right: 1px solid var(--line-soft);
+    padding: 30px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-size: 14px;
+    letter-spacing: -.02em;
+  }
+
+  .host {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .rail h1 {
+    font-family: var(--serif);
+    font-size: 27px;
+    line-height: 1.25;
+    font-weight: 500;
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    color: var(--ink-2);
+    font-size: 13.5px;
+  }
+
+  .meta div {
+    display: flex;
+    gap: 9px;
+    align-items: baseline;
+  }
+
+  .meta .k {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    flex: 0 0 52px;
+  }
+
+  .desc {
+    color: var(--ink-2);
+    font-size: 13.5px;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 14px;
+    margin-top: auto;
+  }
+
+  /* ── 우측 — 달력과 슬롯 ─────────────────────────────── */
+
+  .picker {
+    display: grid;
+    grid-template-columns: 1fr 148px;
+    gap: 26px;
+    padding: 30px 26px;
+  }
+
+  @media (max-width: 560px) {
+    .picker { grid-template-columns: 1fr; gap: 20px; }
+  }
+
+  .step {
+    font-size: 11.5px;
+    letter-spacing: .04em;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .month {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .month strong {
+    font-weight: 500;
+    font-size: 14.5px;
+  }
+
+  .nav { display: flex; gap: 3px; }
+
+  .nav button {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    color: var(--ink-2);
+    line-height: 1;
+  }
+
+  .nav button:hover:not(:disabled) { border-color: var(--line); }
+  .nav button:disabled { opacity: .25; cursor: default; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .grid .dow {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding-bottom: 6px;
+  }
+
+  .day {
+    aspect-ratio: 1;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .day.blank { cursor: default; }
+
+  .day.off {
+    color: var(--muted);
+    opacity: .38;
+    cursor: default;
+  }
+
+  .day.open {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .day.open:hover { border-color: var(--accent); }
+
+  .day.on {
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+
+  .tz {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .slot-head {
+    font-size: 13.5px;
+    margin-bottom: 10px;
+  }
+
+  .slots {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 310px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    /* 잘린 행이 "더 있음"으로 읽히도록 아래쪽을 흐린다 */
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+  }
+
+  @media (max-width: 560px) {
+    .slots { max-height: none; mask-image: none; }
+  }
+
+  .slot {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 2px;
+    padding: 8px 0;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .slot:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+  .slot.taken {
+    color: var(--muted);
+    border-color: var(--line-soft);
+    background: none;
+    text-decoration: line-through;
+    cursor: default;
+    opacity: .6;
+  }
+
+  .empty {
+    font-size: 12.5px;
+    color: var(--muted);
+    padding: 6px 0;
+  }
+
+  /* ── 2단계 폼 ───────────────────────────────────────── */
+
+  .form { padding: 30px 26px; display: flex; flex-direction: column; gap: 16px; }
+
+  .picked {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 11px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .picked span {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--accent);
+  }
+
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  @media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.wide { grid-column: 1 / -1; }
+
+  .field label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .field .hint { color: var(--muted); opacity: .8; }
+
+  .field .err { font-size: 11.5px; color: var(--warn); }
+
+  .field input[aria-invalid="true"] { border-color: var(--warn); }
+
+  .linkish {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .linkish:hover { color: var(--ink-2); }
+
+  .result a[href] { color: var(--accent); }
+
+  .field input,
+  .field textarea {
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 8px 10px;
+    width: 100%;
+  }
+
+  .field textarea { resize: vertical; min-height: 62px; }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
+
+  .consent {
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .consent input { margin-top: 4px; accent-color: var(--accent); }
+  .consent b { font-weight: 500; font-size: 13.5px; }
+  .consent p { margin: 3px 0 0; font-size: 12px; color: var(--muted); }
+
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 16px;
+  }
+
+  .foot p { margin: 0; font-size: 12px; color: var(--muted); }
+
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 2px;
+    padding: 8px 16px;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+
+  .btn:hover:not(:disabled) { border-color: var(--ink-2); }
+
+  .btn.pri {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .btn.pri:hover:not(:disabled) { filter: brightness(1.08); }
+
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn.sm { padding: 5px 11px; font-size: 12.5px; }
+
+  /* ── 결과 화면 ──────────────────────────────────────── */
+
+  .result {
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-start;
+    max-width: 560px;
+  }
+
+  .result h2 {
+    font-family: var(--serif);
+    font-size: 25px;
+    font-weight: 500;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .receipt {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    padding: 15px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+
+  .receipt .when {
+    font-family: var(--mono);
+    font-size: 14.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .receipt .who { font-size: 13px; color: var(--ink-2); }
+
+  .receipt a {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    word-break: break-all;
+  }
+
+  .result p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+
+  .alert {
+    background: var(--warn-soft);
+    border: 1px solid var(--warn);
+    border-radius: 2px;
+    padding: 15px 18px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .alert b { font-weight: 500; color: var(--warn); }
+  .alert p { font-size: 13px; color: var(--ink-2); }
+
+  .row { display: flex; flex-wrap: wrap; gap: 9px; }
+
+  .note {
+    max-width: 940px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .note code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    background: var(--fill);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+</style>
+
+<div class="tool">
+  <span class="tool-tag">테스트 도구</span>
+
+  <div class="tool-group">
+    <span>캘린더</span>
+    <button type="button" id="t-connected" aria-pressed="true">연동됨</button>
+    <button type="button" id="t-revoked" aria-pressed="false">철회됨</button>
+  </div>
+
+  <div class="tool-group">
+    <span>다음 확정 시</span>
+    <button type="button" id="t-ok" aria-pressed="true">정상</button>
+    <button type="button" id="t-409" aria-pressed="false">슬롯 선점 409</button>
+    <button type="button" id="t-503" aria-pressed="false">캘린더 실패 503</button>
+  </div>
+
+  <div class="spacer"></div>
+  <button type="button" id="t-reset">처음부터</button>
+</div>
+
+<div class="stage">
+  <div class="card" id="card"></div>
+</div>
+
+<p class="note" id="note"></p>
+
+<script>
+  "use strict";
+
+  /* 예약 유형 설정 — booking_page 한 행에 해당한다 */
+  const PAGE = {
+    host: "김영업",
+    org: "백팩커",
+    email: "sales@backpac.kr",
+    phone: "010-0000-0000",
+    title: "서비스 소개 미팅",
+    description: "제품 데모와 도입 사례를 중심으로 진행합니다. 미리 알려주실 내용이 있으면 아래에 적어 주세요.",
+    durationMin: 30,
+    meetingUrl: "meet.google.com/abc-defg-hij",
+    weeklyHours: {
+      MON: [["10:00", "12:00"], ["14:00", "18:00"]],
+      TUE: [["10:00", "18:00"]],
+      WED: [["10:00", "12:00"], ["14:00", "18:00"]],
+      THU: [["10:00", "18:00"]],
+      FRI: [["10:00", "12:00"], ["14:00", "17:00"]]
+    }
+  };
+
+  const LEAD_TIME_HOURS = 4;
+  const WINDOW_DAYS = 14;
+  const CANCEL_WINDOW_HOURS = 2;
+  const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const DOW_KR = ["일", "월", "화", "수", "목", "금", "토"];
+
+  /* ── 상태 ────────────────────────────────────────────── */
+
+  /* 브라우저가 어느 타임존이든 KST 벽시계로 계산한다 — 화면 표기가 KST이기 때문 */
+  function nowKst() {
+    const d = new Date();
+    return new Date(d.getTime() + (d.getTimezoneOffset() + 9 * 60) * 60000);
+  }
+
+  const today = startOfDay(nowKst());
+  const windowEnd = addDays(today, WINDOW_DAYS);
+
+  const state = {
+    view: "pick",          // pick | form | done | cancel | canceled | error
+    calendar: "connected", // connected | revoked
+    nextResult: "ok",      // ok | 409 | 503
+    month: new Date(today.getFullYear(), today.getMonth(), 1),
+    date: null,
+    time: null,
+    error: null,
+    booking: null,
+    draft: { name: "", company: "", email: "", phone: "", memo: "", agreed: false },
+    bookings: [],          // 활성 예약 — canceled_ref = 0
+    blocked: [iso(addDays(today, 9))]
+  };
+
+  /* 다른 사람이 먼저 잡아둔 예약 두 건을 심어 둔다 */
+  seedBookings();
+
+  /* ── 날짜 유틸 ───────────────────────────────────────── */
+
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function iso(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function minutes(hhmm) { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; }
+  function hhmm(mins) { return pad(Math.floor(mins / 60)) + ":" + pad(mins % 60); }
+  function at(dateIso, mins) {
+    const [y, m, d] = dateIso.split("-").map(Number);
+    return new Date(y, m - 1, d, Math.floor(mins / 60), mins % 60);
+  }
+  function longDate(dateIso) {
+    const [y, m, d] = dateIso.split("-").map(Number);
+    const wd = DOW_KR[new Date(y, m - 1, d).getDay()];
+    return y + "년 " + m + "월 " + d + "일 (" + wd + ")";
+  }
+  function range(dateIso, mins) {
+    return longDate(dateIso) + " " + hhmm(mins) + " – " + hhmm(mins + PAGE.durationMin) + " · KST";
+  }
+
+  /* ── 가짜 캘린더 busy — 날짜별로 항상 같은 값이 나온다 ── */
+
+  function busyFor(dateIso) {
+    let h = 0;
+    for (const ch of dateIso) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    const out = [];
+    if (h % 3 !== 0) { const s = 600 + (h % 5) * 30; out.push([s, s + 60]); }
+    if (h % 4 !== 1) { const s = 840 + (h % 7) * 30; out.push([s, s + 90]); }
+    return out;
+  }
+
+  function seedBookings() {
+    for (let i = 1; i <= WINDOW_DAYS && state.bookings.length < 2; i++) {
+      const d = addDays(today, i);
+      const hours = PAGE.weeklyHours[DOW[d.getDay()]];
+      if (!hours) continue;
+      state.bookings.push({ date: iso(d), start: minutes(hours[0][1]) - PAGE.durationMin });
+    }
+  }
+
+  /* ── 슬롯 계산 — handoff.md 4장 그대로 ───────────────── */
+
+  function slotsFor(dateIso) {
+    if (state.blocked.includes(dateIso)) return [];
+
+    const [y, m, d] = dateIso.split("-").map(Number);
+    const hours = PAGE.weeklyHours[DOW[new Date(y, m - 1, d).getDay()]];
+    if (!hours) return [];
+
+    /* 1. 후보 생성 — 구간 시작점 기준 */
+    const candidates = [];
+    for (const [s, e] of hours) {
+      const end = minutes(e);
+      for (let t = minutes(s); t + PAGE.durationMin <= end; t += PAGE.durationMin) candidates.push(t);
+    }
+
+    /* 2. 리드타임 제외 */
+    const earliest = new Date(nowKst().getTime() + LEAD_TIME_HOURS * 3600 * 1000);
+
+    /* 3. 활성 예약 제외 */
+    const taken = new Set(
+      state.bookings.filter(b => b.date === dateIso).map(b => b.start)
+    );
+
+    /* 4. 캘린더 busy 제외 — 경계 접촉은 겹침이 아니다 */
+    const busy = busyFor(dateIso);
+
+    return candidates.map(t => {
+      const end = t + PAGE.durationMin;
+      const blockedByCal = busy.some(([bs, be]) => t < be && bs < end);
+      const open = at(dateIso, t) >= earliest && !taken.has(t) && !blockedByCal;
+      return { start: t, open };
+    });
+  }
+
+  function earliestOpenDate() {
+    for (let i = 0; i < WINDOW_DAYS; i++) {
+      const d = addDays(today, i);
+      if (dayHasOpen(d)) return d;
+    }
+    return null;
+  }
+
+  /* 진입 시 가장 빠른 날을 미리 골라 둔다 — 빈 패널로 시작하지 않는다 */
+  function selectEarliest() {
+    const d = earliestOpenDate();
+    state.date = d ? iso(d) : null;
+    state.month = d ? new Date(d.getFullYear(), d.getMonth(), 1)
+                    : new Date(today.getFullYear(), today.getMonth(), 1);
+  }
+
+  function dayHasOpen(d) {
+    if (d < today || d >= windowEnd) return false;
+    return slotsFor(iso(d)).some(s => s.open);
+  }
+
+  /* ── 렌더 ────────────────────────────────────────────── */
+
+  const card = document.getElementById("card");
+  const note = document.getElementById("note");
+
+  function render() {
+    if (state.calendar === "revoked" && (state.view === "pick" || state.view === "form")) {
+      card.innerHTML = viewSuspended();
+    } else if (state.view === "pick") {
+      card.innerHTML = '<div class="pane">' + viewRail() + viewPicker() + "</div>";
+    } else if (state.view === "form") {
+      card.innerHTML = '<div class="pane">' + viewRail() + viewForm() + "</div>";
+    } else if (state.view === "done") {
+      card.innerHTML = viewDone();
+    } else if (state.view === "cancel") {
+      card.innerHTML = viewCancel();
+    } else if (state.view === "canceled") {
+      card.innerHTML = viewCanceled();
+    } else if (state.view === "error") {
+      card.innerHTML = viewError();
+    }
+    note.textContent = noteText();
+    bind();
+  }
+
+  function noteText() {
+    const open = state.bookings.length;
+    return "가짜 캘린더로 도는 목업입니다 — 구글 연동 없이 슬롯 계산(운영시간 − 휴가일 − 캘린더 busy − 활성 예약 − 리드타임 " +
+      LEAD_TIME_HOURS + "시간)만 실제 규칙대로 돌립니다. 예약 창 " + WINDOW_DAYS + "일, 활성 예약 " + open + "건.";
+  }
+
+  function viewRail() {
+    return '<div class="rail">' +
+      '<div class="mark">' + PAGE.org.slice(0, 1) + "</div>" +
+      '<div class="host">' + PAGE.host + " · " + PAGE.org + "</div>" +
+      "<h1>" + PAGE.title + "</h1>" +
+      '<div class="meta">' +
+        '<div><span class="k">소요</span>' + PAGE.durationMin + "분</div>" +
+        '<div><span class="k">방식</span>구글 미트</div>' +
+      "</div>" +
+      '<div class="desc">' + PAGE.description + "</div>" +
+    "</div>";
+  }
+
+  function viewPicker() {
+    const first = new Date(state.month.getFullYear(), state.month.getMonth(), 1);
+    const label = state.month.getFullYear() + "년 " + (state.month.getMonth() + 1) + "월";
+
+    let cells = "";
+    for (let i = 0; i < first.getDay(); i++) cells += '<div class="day blank"></div>';
+
+    const daysInMonth = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 0).getDate();
+    for (let n = 1; n <= daysInMonth; n++) {
+      const d = new Date(state.month.getFullYear(), state.month.getMonth(), n);
+      const key = iso(d);
+      if (!dayHasOpen(d)) {
+        cells += '<div class="day off">' + n + "</div>";
+      } else {
+        const cls = key === state.date ? "day on" : "day open";
+        const aria = (state.month.getMonth() + 1) + "월 " + n + "일 " + DOW_KR[d.getDay()] + "요일, 예약 가능";
+        cells += '<button type="button" class="' + cls + '" data-day="' + key + '"' +
+          ' aria-label="' + aria + '"' + (key === state.date ? ' aria-current="date"' : "") + ">" + n + "</button>";
+      }
+    }
+
+    const prevOk = new Date(state.month.getFullYear(), state.month.getMonth(), 0) >= today;
+    const nextOk = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 1) < windowEnd;
+
+    let panel;
+    if (!state.date) {
+      panel = '<p class="empty">날짜를 먼저 선택해 주세요.</p>';
+    } else {
+      const list = slotsFor(state.date);
+      const open = list.filter(s => s.open).length;
+      panel = '<div class="slot-head">' + longDate(state.date) + "</div>" +
+        (list.length === 0
+          ? '<p class="empty">이 날은 예약을 받지 않습니다.</p>'
+          : (open === 0 ? '<p class="empty">남은 시간이 없습니다.</p>' : "") +
+            '<div class="slots">' + list.map(s =>
+              s.open
+                ? '<button type="button" class="slot" data-time="' + s.start + '"' +
+                    ' aria-label="' + hhmm(s.start) + " 시작, " + PAGE.durationMin + '분">' + hhmm(s.start) + "</button>"
+                : '<div class="slot taken">' + hhmm(s.start) + "</div>"
+            ).join("") + "</div>");
+    }
+
+    return '<div class="picker">' +
+      "<div>" +
+        '<div class="step">1단계 — 시간 선택</div>' +
+        '<div class="month"><strong>' + label + "</strong>" +
+          '<div class="nav">' +
+            '<button type="button" id="prev"' + (prevOk ? "" : " disabled") + ' aria-label="이전 달">‹</button>' +
+            '<button type="button" id="next"' + (nextOk ? "" : " disabled") + ' aria-label="다음 달">›</button>' +
+          "</div>" +
+        "</div>" +
+        '<div class="grid">' + DOW_KR.map(w => '<div class="dow">' + w + "</div>").join("") + cells + "</div>" +
+        '<p class="tz">모든 시간은 한국 표준시(KST) 기준입니다.</p>' +
+      "</div>" +
+      "<div>" + panel + "</div>" +
+    "</div>";
+  }
+
+  function viewForm() {
+    const d = state.draft;
+    return '<div class="form">' +
+      '<div class="step">2단계 — 정보 입력</div>' +
+      '<div class="picked"><span>' + range(state.date, state.time) + "</span>" +
+        '<button type="button" class="btn sm" id="back">시간 다시 고르기</button></div>' +
+      '<div class="fields">' +
+        field("name", "이름", d.name, "text") +
+        field("company", "회사명", d.company, "text") +
+        field("email", "이메일", d.email, "email", "캘린더 초대를 보냅니다") +
+        field("phone", "연락처", d.phone, "tel") +
+        '<div class="field wide"><label for="f-memo">미리 알려주실 내용 (선택)</label>' +
+          '<textarea id="f-memo">' + escapeHtml(d.memo) + "</textarea></div>" +
+      "</div>" +
+      '<div class="consent">' +
+        '<input type="checkbox" id="agree"' + (d.agreed ? " checked" : "") + ">" +
+        "<div><b>개인정보 수집·이용에 동의합니다 (필수)</b>" +
+        "<p>수집 항목 이름·회사명·이메일·연락처 · 목적 미팅 일정 확정 및 안내 · 보유 기간 미팅 종료 후 3개월</p></div>" +
+      "</div>" +
+      '<div class="foot"><p>확정 즉시 캘린더 초대와 안내 메일이 발송됩니다.</p>' +
+        '<button type="button" class="btn pri" id="confirm">예약 확정</button></div>' +
+    "</div>";
+  }
+
+  function field(id, label, value, type, hint) {
+    return '<div class="field"><label for="f-' + id + '">' + label + " *" +
+      (hint ? ' <span class="hint">— ' + hint + "</span>" : "") + "</label>" +
+      '<input id="f-' + id + '" type="' + type + '" value="' + escapeHtml(value) + '">' +
+      (id === "email"
+        ? '<span class="err" id="email-err" hidden>이메일 주소를 다시 확인해 주세요.</span>'
+        : "") +
+      "</div>";
+  }
+
+  function markEmail() {
+    const input = document.getElementById("f-email");
+    const err = document.getElementById("email-err");
+    if (!input || !err) return;
+    const bad = Boolean(input.value.trim()) && !EMAIL_RE.test(input.value.trim());
+    err.hidden = !bad;
+    if (bad) input.setAttribute("aria-invalid", "true");
+    else input.removeAttribute("aria-invalid");
+  }
+
+  function icsText(b) {
+    const stamp = (mins) => b.date.replace(/-/g, "") + "T" + hhmm(mins).replace(":", "") + "00";
+    const body = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//backpackr//booking//KO",
+      "BEGIN:VEVENT",
+      "UID:" + b.date + "-" + b.start + "@backpac.kr",
+      "DTSTART;TZID=Asia/Seoul:" + stamp(b.start),
+      "DTEND;TZID=Asia/Seoul:" + stamp(b.start + PAGE.durationMin),
+      "SUMMARY:" + PAGE.title + " — " + PAGE.org,
+      "LOCATION:" + PAGE.meetingUrl,
+      "DESCRIPTION:" + PAGE.host + " (" + PAGE.email + ")",
+      "END:VEVENT", "END:VCALENDAR"
+    ].join("\r\n");
+    return body;
+  }
+
+  function downloadIcs(b) {
+    const url = URL.createObjectURL(new Blob([icsText(b)], { type: "text/calendar;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "meeting.ics";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function viewDone() {
+    const b = state.booking;
+    return '<div class="result">' +
+      "<h2>예약이 확정되었습니다</h2>" +
+      '<div class="receipt">' +
+        '<div class="when">' + range(b.date, b.start) + "</div>" +
+        '<div class="who">' + PAGE.host + " · " + PAGE.org + " · " + PAGE.title + " " + PAGE.durationMin + "분</div>" +
+        "<a>" + PAGE.meetingUrl + "</a>" +
+      "</div>" +
+      "<p>" + escapeHtml(b.email) + " 으로 캘린더 초대와 안내 메일을 보냈습니다.</p>" +
+      '<div class="row"><button type="button" class="btn pri" id="add-ics">캘린더에 추가</button></div>' +
+      '<button type="button" class="linkish" id="to-cancel">일정을 변경하거나 취소해야 하나요?</button>' +
+    "</div>";
+  }
+
+  function viewCancel() {
+    const b = state.booking;
+    const closed = at(b.date, b.start) - nowKst() < CANCEL_WINDOW_HOURS * 3600 * 1000;
+
+    if (closed) {
+      return '<div class="result">' +
+        "<h2>온라인 취소가 어렵습니다</h2>" +
+        '<div class="alert"><b>미팅 시작 ' + CANCEL_WINDOW_HOURS + "시간 전이 지났습니다.</b>" +
+          "<p>" + PAGE.host + ' · <a href="mailto:' + PAGE.email + '">' + PAGE.email + "</a>" +
+          ' · <a href="tel:' + PAGE.phone.replace(/-/g, "") + '">' + PAGE.phone + "</a>" +
+          " 으로 연락 주시면 바로 처리해 드립니다.</p></div>" +
+        '<div class="row"><button type="button" class="btn" id="to-done">돌아가기</button></div>' +
+      "</div>";
+    }
+
+    return '<div class="result">' +
+      "<h2>예약을 취소하시겠습니까?</h2>" +
+      '<div class="receipt">' +
+        '<div class="when">' + range(b.date, b.start) + "</div>" +
+        '<div class="who">' + PAGE.host + " · " + PAGE.title + "</div>" +
+      "</div>" +
+      '<div class="row"><button type="button" class="btn pri" id="do-cancel">예약 취소</button>' +
+        '<button type="button" class="btn" id="to-done">돌아가기</button></div>' +
+    "</div>";
+  }
+
+  function viewCanceled() {
+    return '<div class="result">' +
+      "<h2>예약이 취소되었습니다</h2>" +
+      "<p>취소 안내 메일을 보냈습니다. 해당 시간은 다시 예약 가능한 슬롯으로 열렸습니다.</p>" +
+      '<div class="row"><button type="button" class="btn pri" id="restart">다시 예약하기</button></div>' +
+    "</div>";
+  }
+
+  function viewSuspended() {
+    return '<div class="result">' +
+      "<h2>지금은 예약을 받을 수 없습니다</h2>" +
+      '<div class="alert"><b>일시적인 문제로 예약이 중단되었습니다.</b>' +
+        "<p>" + PAGE.host + ' <a href="mailto:' + PAGE.email + '">' + PAGE.email + "</a>" +
+        ' · <a href="tel:' + PAGE.phone.replace(/-/g, "") + '">' + PAGE.phone + "</a>" +
+        " 으로 연락 주시면 직접 일정을 잡아드립니다.</p></div>" +
+      "<p>담당자에게 알림 메일이 발송되었습니다.</p>" +
+    "</div>";
+  }
+
+  function viewError() {
+    if (state.error === "409") {
+      return '<div class="result">' +
+        "<h2>방금 마감된 시간입니다</h2>" +
+        '<div class="alert"><b>다른 분이 먼저 예약했습니다.</b>' +
+          "<p>입력하신 내용은 그대로 두었습니다. 다른 시간을 선택해 주세요.</p></div>" +
+        '<div class="row"><button type="button" class="btn pri" id="back">시간 다시 고르기</button></div>' +
+      "</div>";
+    }
+    return '<div class="result">' +
+      "<h2>예약을 완료하지 못했습니다</h2>" +
+      '<div class="alert"><b>일시적인 오류가 발생해 예약이 저장되지 않았습니다.</b>' +
+        "<p>잠시 후 다시 시도해 주세요. 같은 시간이 아직 열려 있습니다.</p></div>" +
+      '<div class="row"><button type="button" class="btn pri" id="retry">다시 시도</button></div>' +
+    "</div>";
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+
+  /* ── 이벤트 ──────────────────────────────────────────── */
+
+  function bind() {
+    const on = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("click", fn); };
+
+    card.querySelectorAll("[data-day]").forEach(el =>
+      el.addEventListener("click", () => { state.date = el.dataset.day; render(); }));
+
+    card.querySelectorAll("[data-time]").forEach(el =>
+      el.addEventListener("click", () => {
+        state.time = Number(el.dataset.time);
+        state.view = "form";
+        render();
+      }));
+
+    on("prev", () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() - 1, 1); render(); });
+    on("next", () => { state.month = new Date(state.month.getFullYear(), state.month.getMonth() + 1, 1); render(); });
+
+    on("back", () => { readDraft(); state.view = "pick"; render(); });
+    on("retry", () => { state.view = "form"; render(); });
+    on("confirm", confirmBooking);
+
+    on("add-ics", () => downloadIcs(state.booking));
+    on("to-cancel", () => { state.view = "cancel"; render(); });
+    on("to-done", () => { state.view = "done"; render(); });
+    on("do-cancel", () => {
+      state.bookings = state.bookings.filter(b => b !== state.booking);
+      state.view = "canceled";
+      render();
+    });
+    on("restart", reset);
+
+    const form = card.querySelector(".form");
+    if (form) {
+      form.addEventListener("input", () => {
+        readDraft();
+        markEmail();
+        document.getElementById("confirm").disabled = !canConfirm();
+      });
+      markEmail();
+      document.getElementById("confirm").disabled = !canConfirm();
+    }
+  }
+
+  function readDraft() {
+    /* 폼이 화면에 없으면 읽지 않는다 — 409·503 화면에서 호출되면 입력값이 지워진다 */
+    if (!document.getElementById("f-name")) return;
+    const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    const agree = document.getElementById("agree");
+    state.draft = {
+      name: v("f-name"), company: v("f-company"), email: v("f-email"),
+      phone: v("f-phone"), memo: v("f-memo"), agreed: agree ? agree.checked : false
+    };
+  }
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function canConfirm() {
+    const d = state.draft;
+    return Boolean(d.name && d.company && EMAIL_RE.test(d.email) && d.phone && d.agreed);
+  }
+
+  function confirmBooking() {
+    readDraft();
+    if (!canConfirm()) return;
+
+    if (state.nextResult === "409") {
+      state.error = "409";
+      state.view = "error";
+      /* 선점된 시간을 실제로 채워 둔다 — 돌아가면 취소선으로 보인다 */
+      state.bookings.push({ date: state.date, start: state.time, email: "other@example.com" });
+      state.time = null;
+      return render();
+    }
+
+    if (state.nextResult === "503") {
+      state.error = "503";
+      state.view = "error";
+      return render();
+    }
+
+    state.booking = {
+      date: state.date, start: state.time,
+      email: state.draft.email, name: state.draft.name
+    };
+    state.bookings.push(state.booking);
+    state.view = "done";
+    render();
+  }
+
+  function reset() {
+    state.view = "pick";
+    state.time = null;
+    state.error = null;
+    state.booking = null;
+    state.draft = { name: "", company: "", email: "", phone: "", memo: "", agreed: false };
+    state.bookings = [];
+    seedBookings();
+    selectEarliest();
+    render();
+  }
+
+  /* ── 테스트 도구 ─────────────────────────────────────── */
+
+  function toggle(ids, activeId, apply) {
+    ids.forEach(id => document.getElementById(id).setAttribute("aria-pressed", String(id === activeId)));
+    apply();
+    render();
+  }
+
+  const CAL = ["t-connected", "t-revoked"];
+  const RES = ["t-ok", "t-409", "t-503"];
+
+  document.getElementById("t-connected").addEventListener("click", () =>
+    toggle(CAL, "t-connected", () => { state.calendar = "connected"; }));
+  document.getElementById("t-revoked").addEventListener("click", () =>
+    toggle(CAL, "t-revoked", () => { state.calendar = "revoked"; }));
+
+  document.getElementById("t-ok").addEventListener("click", () =>
+    toggle(RES, "t-ok", () => { state.nextResult = "ok"; }));
+  document.getElementById("t-409").addEventListener("click", () =>
+    toggle(RES, "t-409", () => { state.nextResult = "409"; }));
+  document.getElementById("t-503").addEventListener("click", () =>
+    toggle(RES, "t-503", () => { state.nextResult = "503"; }));
+
+  document.getElementById("t-reset").addEventListener("click", reset);
+
+  selectEarliest();
+  render();
+</script>
