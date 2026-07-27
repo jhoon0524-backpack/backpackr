@@ -58,7 +58,6 @@ DEL  .../calendar/v3/calendars/{calendarId}/events/{eventId}?sendUpdates=all
 | 항목 | 받는 곳 | 비고 |
 |---|---|---|
 | GCP 프로젝트 + OAuth 클라이언트 | 인프라 담당 | **User Type을 Internal로 게시.** External로 만들면 앱 검증 심사가 붙는다 |
-| 슬랙 인커밍 웹훅 URL | 워크스페이스 관리자 | 담당자 알림용 채널 하나 |
 | 메일 발신 주소 | 기존 알림 모듈 설정 확인 | 신규 발신 도메인이면 SPF/DKIM 확인 필요 |
 
 **환경 변수**
@@ -67,10 +66,14 @@ DEL  .../calendar/v3/calendars/{calendarId}/events/{eventId}?sendUpdates=all
 GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
 GOOGLE_REDIRECT_URI      # {admin-host}/admin/api/calendar/callback
-SLACK_WEBHOOK_URL
 BOOKING_BASE_URL         # 공개 예약 링크 도메인. 확정 메일·취소 링크에 사용
 MAIL_FROM
+MAIL_ADMIN_TO            # 부수 작업 실패 알림 수신 주소. 담당자 또는 팀 별칭
 ```
+
+**담당자 알림은 메일 한 갈래로 간다.** 슬랙 웹훅을 따로 두지 않는다 — v1의 알림 대상이 실패 3종(토큰 철회·확정 메일 실패·취소 시 캘린더 삭제 실패)뿐이고 하루 몇 건 규모라, 채널을 둘로 나누면 발송 코드와 준비물만 늘어난다.
+
+메일 발송 자체가 실패하는 경우는 알림 메일도 같이 죽는다. 이 구멍은 어드민 예약 목록의 실패 뱃지(`booking.sync_error`)가 메운다. 알림이 유일한 통로가 아니라 목록을 열면 보이는 구조라 알림을 놓쳐도 복구가 된다.
 
 ### GCP OAuth 클라이언트 발급 절차
 
@@ -183,6 +186,7 @@ CREATE TABLE booking (
     guest_phone     VARCHAR(30)      NULL,
     memo            VARCHAR(1000)    NULL,
     gcal_event_id   VARCHAR(255)     NULL,
+    sync_error      VARCHAR(30)      NULL,           -- MAIL / CAL_DELETE 콤마 결합. NULL = 정상
     created_at      DATETIME(6)  NOT NULL,
     canceled_at     DATETIME(6)      NULL,
     canceled_ref    BIGINT       NOT NULL DEFAULT 0, -- 0 = 활성, 취소 시 seq 값
@@ -211,6 +215,8 @@ CREATE TABLE calendar_token (
 | 취소 사유 컬럼 | 컬럼 + 폼 필드 + 메일 템플릿 한 줄이 붙는다. 취소 알림을 받은 담당자가 물어보면 된다 |
 | `lead_time_hours` · `window_days` 컬럼 | 상수 `LEAD_TIME_HOURS = 4`, `WINDOW_DAYS = 14`. 담당자별로 다르게 쓸 근거가 나오면 그때 컬럼으로 올린다 |
 
+**`sync_error`는 파생할 수 없는 유일한 상태라 컬럼으로 뒀다.** 예약은 성공했는데 확정 메일이나 취소 시 캘린더 삭제가 깨진 경우, 다른 컬럼 어디에도 흔적이 남지 않는다. 어드민 목록에 뱃지로 띄우려면 저장할 곳이 필요하다. 값이 둘뿐이고 조회 조건으로 쓰지 않아서 콤마 결합 문자열로 둔다 — 목록에 이미 실려 오는 값을 프런트가 읽기만 한다. v2에서 Salesmap 연동이 붙으면 `CRM`이 세 번째 값으로 들어간다.
+
 **`uk_slot`이 이 스키마의 핵심이다.** 활성 예약은 `canceled_ref = 0`으로 고정이라 `(page_id, start_at, 0)`이 중복되어 슬롯당 1건에서 막힌다. 취소 시 `canceled_ref = seq`로 갱신하면 슬롯 점유가 풀리고, 같은 슬롯의 취소 이력은 `seq`가 달라 계속 쌓인다. 이 인덱스가 `(page_id, start_at, ...)` 순서라 슬롯 조회 쿼리도 그대로 탄다 — 조회용 인덱스를 따로 만들지 않는다.
 
 > `canceled_at`(nullable)을 대신 키에 넣으면 안 된다. MySQL은 unique 인덱스에서 NULL을 서로 다른 값으로 취급해 활성 예약끼리 중복이 차단되지 않는다. **판별 컬럼은 NOT NULL이어야 한다.**
@@ -230,7 +236,7 @@ CREATE TABLE calendar_token (
 
 | # | 메서드 | 경로 | 인증 | 설명 |
 |---|---|---|---|---|
-| 1 | GET | `/admin/api/booking-pages` | 필요 | **화면 ① 전체** — 예약 유형 목록 + 캘린더 연동 상태 + 다가오는 예약 |
+| 1 | GET | `/admin/api/booking-pages` | 필요 | **화면 ① 전체** — 예약 유형 목록 + 캘린더 연동 상태 + 다가오는 예약(`sync_error` 포함) |
 | 2 | POST | `/admin/api/booking-pages` | 필요 | 생성. slug 랜덤 8자, 충돌 시 재생성 |
 | 3 | PUT | `/admin/api/booking-pages/{id}` | 필요 | 수정. 비활성 토글도 여기서 처리 |
 | 4 | DELETE | `/admin/api/booking-pages/{id}` | 필요 | 삭제. 미래 활성 예약 있으면 **409** |
@@ -318,17 +324,20 @@ class BookingException extends RuntimeException {
 4. gcal_event_id UPDATE
 5. 커밋
 6. 커밋 후: 양측 확정 메일 발송
-   └ 실패 → 예약은 유효. 슬랙 웹훅으로 담당자에게 알림. 재시도 안 함
+   └ 실패 → 예약은 유효. sync_error='MAIL' 기록 + 담당자 알림 메일. 재시도 안 함
 ```
 
 3번이 트랜잭션 안에 있어야 한다. 캘린더에 없는 예약을 만들지 않는 것이 이 기능의 실패 정책이다.
 6번은 트랜잭션 밖이다 (`@TransactionalEventListener(AFTER_COMMIT)`). 메일 실패로 예약을 되돌리지 않는다.
 
+**`sync_error` 기록이 알림 발송보다 먼저다.** 메일 서비스가 통째로 죽은 상황이면 담당자 알림 메일도 같이 실패한다. 컬럼을 먼저 찍어야 어드민 목록에 남는다.
+
 **취소(5·13번)**
 
 ```
 1. canceled_at = now, canceled_ref = seq  UPDATE
-2. gcal_event_id 로 캘린더 이벤트 삭제 (실패해도 취소는 유효, 슬랙 알림)
+2. gcal_event_id 로 캘린더 이벤트 삭제
+   └ 실패해도 취소는 유효. sync_error='CAL_DELETE' 기록 + 담당자 알림 메일
 3. 커밋 후 양측 취소 메일
 ```
 
@@ -363,10 +372,10 @@ UPDATE booking
 | T2 | 예약 유형 CRUD API + 화면 ① ② | T1 | API 1~5 |
 | T3 | 구글 OAuth 연동 + 토큰 저장·갱신 | T1 | API 6~8. **0장 준비물 필요** |
 | T4 | 슬롯 계산 + 공개 조회 API | T1, T3 | API 9~10 |
-| T5 | 예약 확정 트랜잭션 + 메일 + 슬랙 알림 | T4 | API 11 |
+| T5 | 예약 확정 트랜잭션 + 메일 + 담당자 알림 | T4 | API 11 |
 | T6 | 공개 예약 페이지 ③ + 완료 ④ | T4, T5 | 2단계 폼, 동의 UI |
 | T7 | 취소 ⑤ + 담당자 취소 | T5 | API 12~13 |
-| T8 | 실패 상태 3종 UI + 슬랙 웹훅 | T5 | 와이어프레임 "실패 상태" |
+| T8 | 실패 상태 3종 UI + 어드민 실패 뱃지 | T5 | 와이어프레임 "실패 상태", `sync_error` |
 | T9 | 파기 스케줄러 | T1 | 6장 |
 
 T2와 T3은 병렬 가능. T9는 T1 직후 아무 때나.
