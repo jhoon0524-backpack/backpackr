@@ -58,7 +58,7 @@ DEL  .../calendar/v3/calendars/{calendarId}/events/{eventId}?sendUpdates=all
 | 항목 | 받는 곳 | 비고 |
 |---|---|---|
 | GCP 프로젝트 + OAuth 클라이언트 | 인프라 담당 | **User Type을 Internal로 게시.** External로 만들면 앱 검증 심사가 붙는다 |
-| 메일 발신 주소 | 기존 알림 모듈 설정 확인 | 신규 발신 도메인이면 SPF/DKIM 확인 필요 |
+| 메일 발신 주소 **1개** | 기존 알림 모듈 설정 확인 | 담당자별로 받지 않는다. 신규 발신 도메인이면 SPF/DKIM 확인 필요 |
 
 **환경 변수**
 
@@ -67,7 +67,7 @@ GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
 GOOGLE_REDIRECT_URI      # {admin-host}/admin/api/calendar/callback
 BOOKING_BASE_URL         # 공개 예약 링크 도메인. 확정 메일·취소 링크에 사용
-MAIL_FROM
+MAIL_FROM                # 시스템 고정 발신 주소. 담당자 주소를 넣지 않는다 — 5장 헤더 규약
 MAIL_ADMIN_TO            # 부수 작업 실패 알림 수신 주소. 담당자 또는 팀 별칭
 ```
 
@@ -340,6 +340,21 @@ class BookingException extends RuntimeException {
    └ 실패해도 취소는 유효. sync_error='CAL_DELETE' 기록 + 담당자 알림 메일
 3. 커밋 후 양측 취소 메일
 ```
+
+**메일 헤더 규약** — 확정·취소 메일 모두 동일
+
+```
+From:      "{담당자 이름} (백패커)" <MAIL_FROM>
+Reply-To:  {담당자 이메일}
+```
+
+**발신 주소는 담당자별로 바꾸지 않는다.** 담당자 명의로 보이게 하는 목적은 표시 이름만으로 달성된다. From을 실제 담당자 주소로 바꾸면 두 가지를 잃는다 — 신청자 주소 오타로 인한 **반송 메일이 담당자 개인 받은편지함으로 흩어져** 시스템이 실패를 관측하지 못하고(SMTP 단계는 성공이라 `sync_error`도 안 찍힌다), 담당자 퇴사·주소 변경 시 과거 예약자의 회신 경로가 끊긴다. 기존 알림 모듈에 발신 주소 주입 경로를 새로 뚫어야 하는 비용은 별개다.
+
+담당자 이름·이메일은 `booking_page.member_id`로 기존 member에서 읽는다. `booking_page`에 연락처 컬럼을 두지 않는다.
+
+> member에 이메일 컬럼이 없으면 그때 추가한다. 착수를 막을 사안이 아니다.
+
+캘린더 이벤트 초대는 이 규약과 무관하다. 구글이 **담당자 계정에서 직접** 발송하므로 이미 개인 명의다.
 
 ---
 
