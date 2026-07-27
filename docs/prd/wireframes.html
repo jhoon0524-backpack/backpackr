@@ -1,0 +1,810 @@
+<title>미팅 예약 링크 — 화면 와이어프레임</title>
+
+<style>
+  :root {
+    --ink: #16191c;
+    --ink-2: #414a4c;
+    --muted: #6d7879;
+    --paper: #eef1f1;
+    --surface: #ffffff;
+    --line: #c5cdcd;
+    --line-soft: #dde3e3;
+    --fill: #dfe5e5;
+    --accent: #0b6e5f;
+    --accent-soft: #dcebe7;
+    --warn: #a8481a;
+    --warn-soft: #f6e5da;
+
+    --serif: ui-serif, Georgia, "Nimbus Roman", "Times New Roman", serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, "DejaVu Sans Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #e6eaea;
+      --ink-2: #b3bcbd;
+      --muted: #8a9495;
+      --paper: #121516;
+      --surface: #1a1e1f;
+      --line: #394142;
+      --line-soft: #2a3132;
+      --fill: #262d2e;
+      --accent: #5cb8a5;
+      --accent-soft: #16302c;
+      --warn: #d4855c;
+      --warn-soft: #33221a;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #e6eaea;
+    --ink-2: #b3bcbd;
+    --muted: #8a9495;
+    --paper: #121516;
+    --surface: #1a1e1f;
+    --line: #394142;
+    --line-soft: #2a3132;
+    --fill: #262d2e;
+    --accent: #5cb8a5;
+    --accent-soft: #16302c;
+    --warn: #d4855c;
+    --warn-soft: #33221a;
+  }
+
+  :root[data-theme="light"] {
+    --ink: #16191c;
+    --ink-2: #414a4c;
+    --muted: #6d7879;
+    --paper: #eef1f1;
+    --surface: #ffffff;
+    --line: #c5cdcd;
+    --line-soft: #dde3e3;
+    --fill: #dfe5e5;
+    --accent: #0b6e5f;
+    --accent-soft: #dcebe7;
+    --warn: #a8481a;
+    --warn-soft: #f6e5da;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { display: flex; flex-direction: column; gap: 14px; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .masthead h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(28px, 4.4vw, 40px);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .masthead p {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-2);
+  }
+
+  .rule { height: 1px; background: var(--line); }
+
+  /* ---------- legend ---------- */
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .legend span { display: flex; align-items: center; gap: 7px; }
+
+  .swatch { width: 22px; height: 11px; border: 1px solid var(--line); }
+  .swatch.solid { background: var(--fill); }
+  .swatch.text { background: repeating-linear-gradient(var(--fill) 0 3px, transparent 3px 6px); }
+  .swatch.act { background: var(--accent-soft); border-color: var(--accent); }
+  .swatch.err { background: var(--warn-soft); border-color: var(--warn); }
+
+  /* ---------- screen section ---------- */
+
+  .screen { display: flex; flex-direction: column; gap: 18px; }
+
+  .screen-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  .screen-head h2 {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .chips { display: flex; gap: 6px; margin-left: auto; }
+
+  .chip {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .chip.v1 { border-color: var(--accent); color: var(--accent); }
+
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 22px; align-items: start; }
+
+  @media (max-width: 760px) { .split { grid-template-columns: minmax(0, 1fr); } }
+
+  .notes { display: flex; flex-direction: column; gap: 9px; margin: 0; padding: 0; list-style: none; }
+
+  .notes li {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    padding-left: 13px;
+    border-left: 2px solid var(--line-soft);
+  }
+
+  .notes li b { color: var(--ink); font-weight: 600; }
+
+  .notes code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    background: var(--fill);
+    padding: 1px 4px;
+  }
+
+  /* ---------- wireframe frame ---------- */
+
+  .wf {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    overflow-x: auto;
+  }
+
+  .wf-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px;
+    border-bottom: 1px solid var(--line-soft);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--paper);
+  }
+
+  .dot { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--line); flex: none; }
+
+  .wf-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 480px; }
+
+  .wf-cap {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    padding: 6px 11px;
+    border-top: 1px dashed var(--line);
+    background: var(--paper);
+  }
+
+  /* ---------- wireframe primitives ---------- */
+
+  .ph { height: 8px; background: var(--fill); }
+  .ph.w80 { width: 80%; } .ph.w60 { width: 60%; } .ph.w40 { width: 40%; }
+
+  .lbl {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+
+  .lbl.dim { color: var(--muted); }
+
+  .strong { font-family: var(--sans); font-size: 14px; font-weight: 600; }
+
+  .box {
+    border: 1px solid var(--line);
+    padding: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .box.dash { border-style: dashed; }
+  .box.act { border-color: var(--accent); background: var(--accent-soft); }
+  .box.err { border-color: var(--warn); background: var(--warn-soft); }
+
+  .row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .row.between { justify-content: space-between; }
+  .col { display: flex; flex-direction: column; gap: 8px; }
+  .grow { flex: 1; min-width: 0; }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  .btn.pri { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+  .btn.dis { border-style: dashed; color: var(--muted); }
+
+  .field { border: 1px solid var(--line); padding: 6px 9px; display: flex; flex-direction: column; gap: 5px; }
+  .field .ph { height: 7px; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 11px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .logo { width: 20px; height: 20px; border: 1px solid var(--line); background: var(--fill); flex: none; }
+
+  /* calendar */
+
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+
+  .cal i {
+    font-style: normal;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-align: center;
+    padding: 6px 0;
+    border: 1px solid var(--line-soft);
+    color: var(--muted);
+  }
+
+  .cal i.head { border: 0; color: var(--muted); padding: 2px 0; }
+  .cal i.on { border-color: var(--accent); color: var(--accent); }
+  .cal i.sel { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+  .cal i.off { color: var(--line); }
+
+  .slots { display: flex; flex-direction: column; gap: 5px; }
+
+  .slot {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-align: center;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 6px 0;
+  }
+
+  .slot.taken { border-color: var(--line-soft); color: var(--line); text-decoration: line-through; }
+
+  /* matrix */
+
+  .mx { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 11px; }
+  .mx th, .mx td { border: 1px solid var(--line-soft); padding: 5px 7px; text-align: center; color: var(--ink-2); }
+  .mx th:first-child, .mx td:first-child { text-align: left; white-space: nowrap; }
+  .mx thead th { color: var(--muted); font-weight: 400; }
+  .mx .best { background: var(--accent-soft); color: var(--accent); }
+
+  /* states row */
+
+  .states { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+
+  footer {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    line-height: 1.8;
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="eyebrow">PRD 부록 · docs/prd/meeting-scheduler.md</div>
+    <h1>미팅 예약 링크 — 화면 와이어프레임</h1>
+    <p>영업 담당자가 외부 리드와 미팅을 잡는 도구입니다. 화면 5개가 v1, 2개가 v2입니다. 배치와 정보 구조만 확정하기 위한 저충실도 스케치이고, 시각 디자인은 포함하지 않습니다.</p>
+  </header>
+
+  <div class="legend">
+    <span><i class="swatch text"></i> 본문·설명 자리</span>
+    <span><i class="swatch solid"></i> 입력값 자리</span>
+    <span><i class="swatch act"></i> 선택 가능·주요 동작</span>
+    <span><i class="swatch err"></i> 실패·차단 상태</span>
+  </div>
+
+  <!-- 1 -->
+  <section class="screen">
+    <div class="screen-head">
+      <span class="num">01</span>
+      <h2>예약 유형 목록</h2>
+      <div class="chips"><span class="chip">영업 담당자</span><span class="chip v1">v1</span></div>
+    </div>
+    <div class="split">
+      <div class="wf">
+        <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/admin/booking</span></div>
+        <div class="wf-body">
+          <div class="topbar">
+            <div class="logo"></div>
+            <span class="strong">예약 링크</span>
+            <div class="grow"></div>
+            <span class="lbl dim">김영업</span>
+          </div>
+
+          <div class="box act row between">
+            <div class="row">
+              <span class="lbl">구글 캘린더 연결됨</span>
+              <span class="lbl dim">sales@backpac.kr</span>
+            </div>
+            <span class="btn">연결 해제</span>
+          </div>
+
+          <div class="row between">
+            <span class="lbl dim">내 예약 유형 2개</span>
+            <span class="btn pri">+ 새 예약 유형</span>
+          </div>
+
+          <div class="box col">
+            <div class="row between">
+              <span class="strong">서비스 소개 미팅</span>
+              <span class="lbl dim">30분</span>
+            </div>
+            <div class="row">
+              <span class="lbl">backpac.kr/booking/a7f3k2m9</span>
+              <span class="btn">링크 복사</span>
+              <span class="btn">수정</span>
+              <span class="btn">비활성</span>
+            </div>
+          </div>
+
+          <div class="box col">
+            <div class="row between">
+              <span class="strong">데모 상세 미팅</span>
+              <span class="lbl dim">60분</span>
+            </div>
+            <div class="row">
+              <span class="lbl">backpac.kr/booking/q1w2e3r4</span>
+              <span class="btn">링크 복사</span>
+              <span class="btn">수정</span>
+              <span class="btn">비활성</span>
+            </div>
+          </div>
+
+          <div class="rule"></div>
+
+          <span class="lbl dim">다가오는 예약</span>
+          <div class="box col">
+            <div class="row between">
+              <span class="lbl">8/4 (화) 14:00 · 서비스 소개 미팅</span>
+              <span class="btn">취소</span>
+            </div>
+            <div class="row"><span class="lbl dim">박담당 · 하나기획 · park@example.com</span></div>
+          </div>
+          <div class="box col">
+            <div class="row between">
+              <span class="lbl">8/6 (목) 11:00 · 데모 상세 미팅</span>
+              <span class="btn">취소</span>
+            </div>
+            <div class="row"><span class="lbl dim">이대표 · 스튜디오둘 · lee@example.com</span></div>
+          </div>
+        </div>
+        <div class="wf-cap">담당자가 하루에 한 번 여는 화면. 링크 복사와 다가오는 예약 확인이 전부다.</div>
+      </div>
+      <ul class="notes">
+        <li>캘린더 연동 상태를 <b>최상단</b>에 둔다. 미연동이면 이 배너가 붉은 경고로 바뀌고, 아래 링크들은 전부 열리지 않는 상태다.</li>
+        <li>담당자 취소는 여기 "다가오는 예약"에서만 진입한다. 별도 예약 관리 화면을 만들지 않는다.</li>
+        <li>리드 정보(이름·회사·이메일)를 목록에 노출해 담당자가 Salesmap에 옮겨 적을 수 있게 한다. v2에서 자동화되면 이 줄은 참고용으로 남는다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="screen">
+    <div class="screen-head">
+      <span class="num">02</span>
+      <h2>예약 유형 편집</h2>
+      <div class="chips"><span class="chip">영업 담당자</span><span class="chip v1">v1</span></div>
+    </div>
+    <div class="split">
+      <div class="wf">
+        <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/admin/booking/a7f3k2m9/edit</span></div>
+        <div class="wf-body">
+          <div class="row between">
+            <span class="strong">서비스 소개 미팅</span>
+            <span class="lbl dim">backpac.kr/booking/a7f3k2m9</span>
+          </div>
+
+          <div class="field"><span class="lbl dim">미팅 제목</span><div class="ph w60"></div></div>
+          <div class="field"><span class="lbl dim">설명 — 예약 페이지에 노출</span><div class="ph"></div><div class="ph w80"></div></div>
+
+          <div class="row">
+            <span class="lbl dim">소요 시간</span>
+            <span class="btn">15분</span><span class="btn pri">30분</span><span class="btn">60분</span>
+          </div>
+
+          <div class="field"><span class="lbl dim">회의실 URL — 확정 메일에 포함</span><div class="ph w60"></div></div>
+
+          <div class="box col">
+            <span class="lbl">요일별 운영 시간</span>
+            <div class="row between"><span class="lbl dim">월</span><span class="lbl">10:00 – 12:00, 14:00 – 18:00</span><span class="btn">구간 추가</span></div>
+            <div class="row between"><span class="lbl dim">화</span><span class="lbl">10:00 – 18:00</span><span class="btn">구간 추가</span></div>
+            <div class="row between"><span class="lbl dim">수</span><span class="lbl">10:00 – 18:00</span><span class="btn">구간 추가</span></div>
+            <div class="row between"><span class="lbl dim">목·금</span><span class="lbl">10:00 – 18:00</span><span class="btn">구간 추가</span></div>
+            <div class="row between"><span class="lbl dim">토·일</span><span class="lbl dim">예약 받지 않음</span><span class="btn dis">구간 추가</span></div>
+          </div>
+
+          <div class="box col">
+            <span class="lbl">제외할 날짜 — 휴가·외근</span>
+            <div class="row"><span class="btn">8/11 ×</span><span class="btn">8/12 ×</span><span class="btn dis">+ 날짜 추가</span></div>
+          </div>
+
+          <div class="row">
+            <div class="field grow"><span class="lbl dim">최소 리드타임</span><span class="lbl">4시간 전까지</span></div>
+            <div class="field grow"><span class="lbl dim">예약 가능 기간</span><span class="lbl">앞으로 14일</span></div>
+          </div>
+
+          <div class="rule"></div>
+          <div class="row between">
+            <span class="btn dis">삭제 — 예정된 예약 2건이 있어 삭제할 수 없습니다</span>
+            <div class="row"><span class="btn">미리보기</span><span class="btn pri">저장</span></div>
+          </div>
+        </div>
+        <div class="wf-cap">운영 시간을 바꾸면 저장 시 "기존 예약 2건은 그대로 유지됩니다" 문구를 띄운다.</div>
+      </div>
+      <ul class="notes">
+        <li>슬롯은 운영 시간 <b>시작 시각부터 소요 시간 간격</b>으로 정렬된다. 10:00–12:00 / 30분이면 10:00·10:30·11:00·11:30이다.</li>
+        <li>제외 날짜가 없으면 휴가 하루를 빼기 위해 예약 유형 전체를 비활성화해야 한다. 그래서 <code>blocked_dates</code>가 v1에 있다.</li>
+        <li>삭제 버튼은 미래 예약이 있으면 <b>비활성 + 사유 표기</b>다. 눌러서 에러를 보게 하지 않는다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="screen">
+    <div class="screen-head">
+      <span class="num">03</span>
+      <h2>공개 예약 페이지</h2>
+      <div class="chips"><span class="chip">외부 리드</span><span class="chip v1">v1</span></div>
+    </div>
+    <div class="split">
+      <div class="col" style="gap:16px">
+        <div class="wf">
+          <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/booking/a7f3k2m9 — 1단계 시간 선택</span></div>
+          <div class="wf-body">
+            <div class="row" style="gap:18px; align-items:flex-start">
+              <div class="col grow" style="max-width:210px">
+                <div class="logo"></div>
+                <span class="lbl dim">김영업 · 백팩커</span>
+                <span class="strong">서비스 소개 미팅</span>
+                <span class="lbl">30분</span>
+                <span class="lbl dim">구글 미트</span>
+                <div class="ph w80"></div>
+                <div class="ph"></div>
+                <div class="ph w60"></div>
+              </div>
+
+              <div class="col grow">
+                <div class="row between"><span class="lbl">2026년 8월</span><span class="lbl dim">‹ ›</span></div>
+                <div class="cal">
+                  <i class="head">일</i><i class="head">월</i><i class="head">화</i><i class="head">수</i><i class="head">목</i><i class="head">금</i><i class="head">토</i>
+                  <i class="off">2</i><i class="on">3</i><i class="sel">4</i><i class="on">5</i><i class="on">6</i><i class="on">7</i><i class="off">8</i>
+                  <i class="off">9</i><i class="on">10</i><i class="off">11</i><i class="off">12</i><i class="on">13</i><i class="on">14</i><i class="off">15</i>
+                  <i class="off">16</i><i class="on">17</i><i class="on">18</i><i class="on">19</i><i class="on">20</i><i class="on">21</i><i class="off">22</i>
+                </div>
+                <span class="lbl dim">시간대 · 한국 표준시 (KST)</span>
+              </div>
+
+              <div class="col" style="width:110px">
+                <span class="lbl">8월 4일 (화)</span>
+                <div class="slots">
+                  <span class="slot taken">10:00</span>
+                  <span class="slot">10:30</span>
+                  <span class="slot taken">11:00</span>
+                  <span class="slot">14:00</span>
+                  <span class="slot">14:30</span>
+                  <span class="slot">15:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-cap">회색 취소선 = 캘린더가 이미 차 있거나 다른 예약이 잡힌 시간. 계산 결과만 보이고 사유는 노출하지 않는다.</div>
+        </div>
+
+        <div class="wf">
+          <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/booking/a7f3k2m9 — 2단계 정보 입력</span></div>
+          <div class="wf-body">
+            <div class="box act row between">
+              <span class="lbl">2026년 8월 4일 (화) 14:00 – 14:30 · KST</span>
+              <span class="btn">시간 다시 고르기</span>
+            </div>
+            <div class="row">
+              <div class="field grow"><span class="lbl dim">이름 *</span><div class="ph w60"></div></div>
+              <div class="field grow"><span class="lbl dim">회사명 *</span><div class="ph w60"></div></div>
+            </div>
+            <div class="row">
+              <div class="field grow"><span class="lbl dim">이메일 * — 캘린더 초대를 보냅니다</span><div class="ph w80"></div></div>
+              <div class="field grow"><span class="lbl dim">연락처 *</span><div class="ph w60"></div></div>
+            </div>
+            <div class="field"><span class="lbl dim">미리 알려주실 내용 (선택)</span><div class="ph"></div><div class="ph w80"></div></div>
+            <div class="box dash col">
+              <span class="lbl">☐ 개인정보 수집·이용에 동의합니다 (필수)</span>
+              <span class="lbl dim">수집 항목 이름·회사명·이메일·연락처 · 목적 미팅 일정 확정 및 안내 · 보유 기간 미팅 종료 후 3개월</span>
+            </div>
+            <div class="row between">
+              <span class="lbl dim">확정 즉시 캘린더 초대와 안내 메일이 발송됩니다.</span>
+              <span class="btn pri">예약 확정</span>
+            </div>
+          </div>
+          <div class="wf-cap">동의 체크 전에는 확정 버튼이 비활성이다.</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li>외부 리드가 보는 <b>유일한 대외 화면</b>이다. 브랜딩 수준은 아직 미정 — 지금은 로고와 담당자 이름만 두었다.</li>
+        <li>수집 항목 4개가 모두 필수다. 회사명·연락처는 영업 리드 정보로 쓰인다.</li>
+        <li>동의 문구에 <b>수집 항목·목적·3개월 보유</b>를 그대로 노출한다. 별도 약관 페이지를 만들지 않는다.</li>
+        <li>슬롯 계산은 <code>운영시간 − 휴가일 − 캘린더 busy − 활성 예약 − 리드타임</code>이다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4 & 5 -->
+  <section class="screen">
+    <div class="screen-head">
+      <span class="num">04 · 05</span>
+      <h2>예약 완료 · 취소 확인</h2>
+      <div class="chips"><span class="chip">외부 리드</span><span class="chip v1">v1</span></div>
+    </div>
+    <div class="split">
+      <div class="col" style="gap:16px">
+        <div class="wf">
+          <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/booking/complete</span></div>
+          <div class="wf-body">
+            <span class="strong">예약이 확정되었습니다</span>
+            <div class="box act col">
+              <span class="lbl">2026년 8월 4일 (화) 14:00 – 14:30 · KST</span>
+              <span class="lbl dim">김영업 · 백팩커 · 서비스 소개 미팅 30분</span>
+              <span class="lbl">meet.google.com/abc-defg-hij</span>
+            </div>
+            <span class="lbl dim">park@example.com 으로 캘린더 초대와 안내 메일을 보냈습니다. 초대를 수락하시면 일정이 캘린더에 등록됩니다.</span>
+            <div class="row"><span class="btn">예약 취소하기</span></div>
+          </div>
+          <div class="wf-cap">이 화면과 확정 메일은 같은 정보를 담는다. 메일이 실패해도 리드는 여기서 내용을 확인할 수 있다.</div>
+        </div>
+
+        <div class="wf">
+          <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/bookings/{uuid}/cancel</span></div>
+          <div class="wf-body">
+            <span class="strong">예약을 취소하시겠습니까?</span>
+            <div class="box col">
+              <span class="lbl">2026년 8월 4일 (화) 14:00 – 14:30 · KST</span>
+              <span class="lbl dim">김영업 · 서비스 소개 미팅</span>
+            </div>
+            <div class="field"><span class="lbl dim">취소 사유 (선택) — 담당자에게 전달됩니다</span><div class="ph"></div></div>
+            <div class="row"><span class="btn pri">예약 취소</span><span class="btn">돌아가기</span></div>
+            <div class="rule"></div>
+            <span class="lbl dim">미팅 2시간 전 이후에는 이 화면이 아래로 바뀝니다.</span>
+            <div class="box err col">
+              <span class="lbl">미팅 시작 2시간 전이 지나 온라인 취소가 어렵습니다.</span>
+              <span class="lbl dim">김영업 · sales@backpac.kr · 010-0000-0000 으로 연락 주시면 바로 처리해 드립니다.</span>
+            </div>
+          </div>
+          <div class="wf-cap">취소가 성공하면 해당 시간은 즉시 다시 예약 가능한 슬롯이 된다.</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li>취소 링크는 <code>booking.id</code>(UUIDv4)를 그대로 쓴다. 확정 메일이 제3자에게 전달되면 그 사람도 취소할 수 있지만, 취소 시 담당자에게 알림이 가므로 복구 가능한 범위로 감수한다.</li>
+        <li>2시간 규칙은 <b>차단하되 막다른 길로 두지 않는다</b>. 담당자 연락처를 함께 노출한다.</li>
+        <li>담당자는 같은 화면을 쓰지 않는다. ①목록의 "다가오는 예약"에서 시간 제한 없이 취소한다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- states -->
+  <section class="screen">
+    <div class="screen-head">
+      <span class="num">—</span>
+      <h2>실패 상태</h2>
+      <div class="chips"><span class="chip">외부 리드</span><span class="chip v1">v1</span></div>
+    </div>
+    <div class="states">
+      <div class="wf">
+        <div class="wf-bar"><span>캘린더 미연동 · 토큰 철회</span></div>
+        <div class="wf-body" style="min-width:0">
+          <div class="box err col">
+            <span class="strong">지금은 예약을 받을 수 없습니다</span>
+            <span class="lbl dim">일시적인 문제로 예약이 중단되었습니다. 김영업 sales@backpac.kr 으로 연락 주시면 직접 일정을 잡아드립니다.</span>
+          </div>
+          <span class="lbl dim">담당자에게 슬랙 DM 발송</span>
+        </div>
+        <div class="wf-cap">busy를 모르는 채로 예약을 받으면 이중 부킹이 난다. 열지 않는 쪽을 택한다.</div>
+      </div>
+
+      <div class="wf">
+        <div class="wf-bar"><span>슬롯 선점 · 409</span></div>
+        <div class="wf-body" style="min-width:0">
+          <div class="box err col">
+            <span class="strong">방금 마감된 시간입니다</span>
+            <span class="lbl dim">다른 분이 먼저 예약했습니다. 다른 시간을 선택해 주세요.</span>
+          </div>
+          <div class="row"><span class="btn pri">시간 다시 고르기</span></div>
+        </div>
+        <div class="wf-cap">입력한 이름·회사·이메일은 유지한 채 1단계로 돌아간다.</div>
+      </div>
+
+      <div class="wf">
+        <div class="wf-bar"><span>캘린더 API 실패</span></div>
+        <div class="wf-body" style="min-width:0">
+          <div class="box err col">
+            <span class="strong">예약을 완료하지 못했습니다</span>
+            <span class="lbl dim">일시적인 오류가 발생해 예약이 저장되지 않았습니다. 잠시 후 다시 시도해 주세요.</span>
+          </div>
+          <div class="row"><span class="btn pri">다시 시도</span></div>
+        </div>
+        <div class="wf-cap">예약은 저장되지 않는다. 캘린더에 없는 예약을 만들지 않는다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="screen">
+    <div class="screen-head">
+      <span class="num">06</span>
+      <h2>조율 생성</h2>
+      <div class="chips"><span class="chip">영업 담당자</span><span class="chip">v2</span></div>
+    </div>
+    <div class="split">
+      <div class="wf">
+        <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/admin/polls/new</span></div>
+        <div class="wf-body">
+          <div class="field"><span class="lbl dim">미팅 제목</span><div class="ph w60"></div></div>
+          <div class="row" style="gap:18px; align-items:flex-start">
+            <div class="col grow">
+              <span class="lbl dim">후보 시간을 캘린더에서 고르세요</span>
+              <div class="cal">
+                <i class="head">일</i><i class="head">월</i><i class="head">화</i><i class="head">수</i><i class="head">목</i><i class="head">금</i><i class="head">토</i>
+                <i class="off">2</i><i class="on">3</i><i class="sel">4</i><i class="sel">5</i><i class="on">6</i><i class="sel">7</i><i class="off">8</i>
+              </div>
+            </div>
+            <div class="col" style="width:190px">
+              <span class="lbl">선택한 후보 4 / 최대 8</span>
+              <div class="col">
+                <span class="btn">8/4 (화) 14:00 ×</span>
+                <span class="btn">8/5 (수) 10:00 ×</span>
+                <span class="btn">8/5 (수) 16:00 ×</span>
+                <span class="btn">8/7 (금) 11:00 ×</span>
+              </div>
+            </div>
+          </div>
+          <div class="row between">
+            <span class="lbl dim">후보는 3개 이상 8개 이하로 고를 수 있습니다.</span>
+            <span class="btn pri">조율 링크 만들기</span>
+          </div>
+        </div>
+        <div class="wf-cap">드래그 그리드 대신 후보를 미리 좁히는 방식이다. 신규 컴포넌트 없이 만든다.</div>
+      </div>
+      <ul class="notes">
+        <li>주최자가 후보를 좁혀야 하므로 "언제든 편한 시간 찍어주세요"는 안 된다. 되는시간 방식과의 <b>의도적 트레이드오프</b>다.</li>
+        <li>후보 시간에도 캘린더 busy가 반영된다. 이미 찬 시간은 후보로 고를 수 없다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="screen">
+    <div class="screen-head">
+      <span class="num">07</span>
+      <h2>조율 응답 · 현황</h2>
+      <div class="chips"><span class="chip">외부 참석자 / 담당자</span><span class="chip">v2</span></div>
+    </div>
+    <div class="split">
+      <div class="col" style="gap:16px">
+        <div class="wf">
+          <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/polls/{id} — 참석자</span></div>
+          <div class="wf-body">
+            <span class="strong">가능한 시간을 표시해 주세요</span>
+            <span class="lbl dim">김영업 · 백팩커 · 데모 상세 미팅 60분</span>
+            <div class="row">
+              <div class="field grow"><span class="lbl dim">이름 *</span><div class="ph w60"></div></div>
+              <div class="field grow"><span class="lbl dim">이메일 * — 다시 들어오면 내 응답을 수정합니다</span><div class="ph w80"></div></div>
+            </div>
+            <div class="box col">
+              <div class="row between"><span class="lbl">8/4 (화) 14:00</span><div class="row"><span class="btn pri">가능</span><span class="btn">불가</span></div></div>
+              <div class="row between"><span class="lbl">8/5 (수) 10:00</span><div class="row"><span class="btn">가능</span><span class="btn pri">불가</span></div></div>
+              <div class="row between"><span class="lbl">8/5 (수) 16:00</span><div class="row"><span class="btn pri">가능</span><span class="btn">불가</span></div></div>
+              <div class="row between"><span class="lbl">8/7 (금) 11:00</span><div class="row"><span class="btn pri">가능</span><span class="btn">불가</span></div></div>
+            </div>
+            <div class="box dash"><span class="lbl dim">☐ 개인정보 수집·이용 동의 — 이름·이메일 · 미팅 일정 조율 · 미팅 종료 후 3개월</span></div>
+            <div class="row"><span class="btn pri">응답 저장</span></div>
+          </div>
+        </div>
+
+        <div class="wf">
+          <div class="wf-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>/admin/polls/{id} — 담당자</span></div>
+          <div class="wf-body">
+            <div class="row between">
+              <span class="strong">응답 현황 3 / 4명</span>
+              <span class="btn">링크 복사</span>
+            </div>
+            <table class="mx">
+              <thead>
+                <tr><th>후보 시간</th><th>박담당</th><th>이대표</th><th>최실장</th><th>가능</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr><td>8/4 (화) 14:00</td><td>O</td><td>X</td><td>O</td><td>2</td><td><span class="btn">확정</span></td></tr>
+                <tr class="best"><td>8/5 (수) 10:00</td><td>O</td><td>O</td><td>O</td><td>3</td><td><span class="btn pri">확정</span></td></tr>
+                <tr><td>8/5 (수) 16:00</td><td>X</td><td>O</td><td>O</td><td>2</td><td><span class="btn">확정</span></td></tr>
+                <tr><td>8/7 (금) 11:00</td><td>O</td><td>X</td><td>X</td><td>1</td><td><span class="btn">확정</span></td></tr>
+              </tbody>
+            </table>
+            <span class="lbl dim">확정하면 캘린더 이벤트를 만들고 응답자 전원을 초대합니다.</span>
+          </div>
+          <div class="wf-cap">가능 인원이 가장 많은 행을 강조하지만, 확정은 담당자가 직접 고른다.</div>
+        </div>
+      </div>
+      <ul class="notes">
+        <li>외부 참석자가 대상이라 <b>로그인이 없다</b>. 이메일로 본인 응답을 식별하고 수정한다.</li>
+        <li>다른 참석자의 이름은 담당자 화면에만 보인다. 참석자끼리는 서로의 응답을 보지 않는다.</li>
+        <li>응답자 이름·이메일도 미팅 후 3개월에 파기된다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    화면 7개 · v1 5개 / v2 2개 · 관리자 운영 화면 없음<br>
+    확정 전 필요한 것 — 예약 페이지 브랜딩 수준(디자인), 동의 문구 최종 문안(법무)
+  </footer>
+
+</div>
