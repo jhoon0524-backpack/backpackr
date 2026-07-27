@@ -426,6 +426,27 @@
     color: var(--muted);
   }
 
+  .field .hint { color: var(--muted); opacity: .8; }
+
+  .field .err { font-size: 11.5px; color: var(--warn); }
+
+  .field input[aria-invalid="true"] { border-color: var(--warn); }
+
+  .linkish {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .linkish:hover { color: var(--ink-2); }
+
+  .result a[href] { color: var(--accent); }
+
   .field input,
   .field textarea {
     font: inherit;
@@ -625,7 +646,13 @@
 
   /* ── 상태 ────────────────────────────────────────────── */
 
-  const today = startOfDay(new Date());
+  /* 브라우저가 어느 타임존이든 KST 벽시계로 계산한다 — 화면 표기가 KST이기 때문 */
+  function nowKst() {
+    const d = new Date();
+    return new Date(d.getTime() + (d.getTimezoneOffset() + 9 * 60) * 60000);
+  }
+
+  const today = startOfDay(nowKst());
   const windowEnd = addDays(today, WINDOW_DAYS);
 
   const state = {
@@ -703,7 +730,7 @@
     }
 
     /* 2. 리드타임 제외 */
-    const earliest = new Date(Date.now() + LEAD_TIME_HOURS * 3600 * 1000);
+    const earliest = new Date(nowKst().getTime() + LEAD_TIME_HOURS * 3600 * 1000);
 
     /* 3. 활성 예약 제외 */
     const taken = new Set(
@@ -719,6 +746,22 @@
       const open = at(dateIso, t) >= earliest && !taken.has(t) && !blockedByCal;
       return { start: t, open };
     });
+  }
+
+  function earliestOpenDate() {
+    for (let i = 0; i < WINDOW_DAYS; i++) {
+      const d = addDays(today, i);
+      if (dayHasOpen(d)) return d;
+    }
+    return null;
+  }
+
+  /* 진입 시 가장 빠른 날을 미리 골라 둔다 — 빈 패널로 시작하지 않는다 */
+  function selectEarliest() {
+    const d = earliestOpenDate();
+    state.date = d ? iso(d) : null;
+    state.month = d ? new Date(d.getFullYear(), d.getMonth(), 1)
+                    : new Date(today.getFullYear(), today.getMonth(), 1);
   }
 
   function dayHasOpen(d) {
@@ -765,7 +808,6 @@
       '<div class="meta">' +
         '<div><span class="k">소요</span>' + PAGE.durationMin + "분</div>" +
         '<div><span class="k">방식</span>구글 미트</div>' +
-        '<div><span class="k">시간대</span>한국 표준시 (KST)</div>' +
       "</div>" +
       '<div class="desc">' + PAGE.description + "</div>" +
     "</div>";
@@ -786,7 +828,9 @@
         cells += '<div class="day off">' + n + "</div>";
       } else {
         const cls = key === state.date ? "day on" : "day open";
-        cells += '<button type="button" class="' + cls + '" data-day="' + key + '">' + n + "</button>";
+        const aria = (state.month.getMonth() + 1) + "월 " + n + "일 " + DOW_KR[d.getDay()] + "요일, 예약 가능";
+        cells += '<button type="button" class="' + cls + '" data-day="' + key + '"' +
+          ' aria-label="' + aria + '"' + (key === state.date ? ' aria-current="date"' : "") + ">" + n + "</button>";
       }
     }
 
@@ -805,7 +849,8 @@
           : (open === 0 ? '<p class="empty">남은 시간이 없습니다.</p>' : "") +
             '<div class="slots">' + list.map(s =>
               s.open
-                ? '<button type="button" class="slot" data-time="' + s.start + '">' + hhmm(s.start) + "</button>"
+                ? '<button type="button" class="slot" data-time="' + s.start + '"' +
+                    ' aria-label="' + hhmm(s.start) + " 시작, " + PAGE.durationMin + '분">' + hhmm(s.start) + "</button>"
                 : '<div class="slot taken">' + hhmm(s.start) + "</div>"
             ).join("") + "</div>");
     }
@@ -835,7 +880,7 @@
       '<div class="fields">' +
         field("name", "이름", d.name, "text") +
         field("company", "회사명", d.company, "text") +
-        field("email", "이메일 — 캘린더 초대를 보냅니다", d.email, "email") +
+        field("email", "이메일", d.email, "email", "캘린더 초대를 보냅니다") +
         field("phone", "연락처", d.phone, "tel") +
         '<div class="field wide"><label for="f-memo">미리 알려주실 내용 (선택)</label>' +
           '<textarea id="f-memo">' + escapeHtml(d.memo) + "</textarea></div>" +
@@ -850,9 +895,49 @@
     "</div>";
   }
 
-  function field(id, label, value, type) {
-    return '<div class="field"><label for="f-' + id + '">' + label + " *</label>" +
-      '<input id="f-' + id + '" type="' + type + '" value="' + escapeHtml(value) + '"></div>';
+  function field(id, label, value, type, hint) {
+    return '<div class="field"><label for="f-' + id + '">' + label + " *" +
+      (hint ? ' <span class="hint">— ' + hint + "</span>" : "") + "</label>" +
+      '<input id="f-' + id + '" type="' + type + '" value="' + escapeHtml(value) + '">' +
+      (id === "email"
+        ? '<span class="err" id="email-err" hidden>이메일 주소를 다시 확인해 주세요.</span>'
+        : "") +
+      "</div>";
+  }
+
+  function markEmail() {
+    const input = document.getElementById("f-email");
+    const err = document.getElementById("email-err");
+    if (!input || !err) return;
+    const bad = Boolean(input.value.trim()) && !EMAIL_RE.test(input.value.trim());
+    err.hidden = !bad;
+    if (bad) input.setAttribute("aria-invalid", "true");
+    else input.removeAttribute("aria-invalid");
+  }
+
+  function icsText(b) {
+    const stamp = (mins) => b.date.replace(/-/g, "") + "T" + hhmm(mins).replace(":", "") + "00";
+    const body = [
+      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//backpackr//booking//KO",
+      "BEGIN:VEVENT",
+      "UID:" + b.date + "-" + b.start + "@backpac.kr",
+      "DTSTART;TZID=Asia/Seoul:" + stamp(b.start),
+      "DTEND;TZID=Asia/Seoul:" + stamp(b.start + PAGE.durationMin),
+      "SUMMARY:" + PAGE.title + " — " + PAGE.org,
+      "LOCATION:" + PAGE.meetingUrl,
+      "DESCRIPTION:" + PAGE.host + " (" + PAGE.email + ")",
+      "END:VEVENT", "END:VCALENDAR"
+    ].join("\r\n");
+    return body;
+  }
+
+  function downloadIcs(b) {
+    const url = URL.createObjectURL(new Blob([icsText(b)], { type: "text/calendar;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "meeting.ics";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   function viewDone() {
@@ -864,20 +949,23 @@
         '<div class="who">' + PAGE.host + " · " + PAGE.org + " · " + PAGE.title + " " + PAGE.durationMin + "분</div>" +
         "<a>" + PAGE.meetingUrl + "</a>" +
       "</div>" +
-      "<p>" + escapeHtml(b.email) + " 으로 캘린더 초대와 안내 메일을 보냈습니다. 초대를 수락하시면 일정이 캘린더에 등록됩니다.</p>" +
-      '<div class="row"><button type="button" class="btn" id="to-cancel">예약 취소하기</button></div>' +
+      "<p>" + escapeHtml(b.email) + " 으로 캘린더 초대와 안내 메일을 보냈습니다.</p>" +
+      '<div class="row"><button type="button" class="btn pri" id="add-ics">캘린더에 추가</button></div>' +
+      '<button type="button" class="linkish" id="to-cancel">일정을 변경하거나 취소해야 하나요?</button>' +
     "</div>";
   }
 
   function viewCancel() {
     const b = state.booking;
-    const closed = at(b.date, b.start) - Date.now() < CANCEL_WINDOW_HOURS * 3600 * 1000;
+    const closed = at(b.date, b.start) - nowKst() < CANCEL_WINDOW_HOURS * 3600 * 1000;
 
     if (closed) {
       return '<div class="result">' +
         "<h2>온라인 취소가 어렵습니다</h2>" +
         '<div class="alert"><b>미팅 시작 ' + CANCEL_WINDOW_HOURS + "시간 전이 지났습니다.</b>" +
-          "<p>" + PAGE.host + " · " + PAGE.email + " · " + PAGE.phone + " 으로 연락 주시면 바로 처리해 드립니다.</p></div>" +
+          "<p>" + PAGE.host + ' · <a href="mailto:' + PAGE.email + '">' + PAGE.email + "</a>" +
+          ' · <a href="tel:' + PAGE.phone.replace(/-/g, "") + '">' + PAGE.phone + "</a>" +
+          " 으로 연락 주시면 바로 처리해 드립니다.</p></div>" +
         '<div class="row"><button type="button" class="btn" id="to-done">돌아가기</button></div>' +
       "</div>";
     }
@@ -905,7 +993,9 @@
     return '<div class="result">' +
       "<h2>지금은 예약을 받을 수 없습니다</h2>" +
       '<div class="alert"><b>일시적인 문제로 예약이 중단되었습니다.</b>' +
-        "<p>" + PAGE.host + " " + PAGE.email + " 으로 연락 주시면 직접 일정을 잡아드립니다.</p></div>" +
+        "<p>" + PAGE.host + ' <a href="mailto:' + PAGE.email + '">' + PAGE.email + "</a>" +
+        ' · <a href="tel:' + PAGE.phone.replace(/-/g, "") + '">' + PAGE.phone + "</a>" +
+        " 으로 연락 주시면 직접 일정을 잡아드립니다.</p></div>" +
       "<p>담당자에게 알림 메일이 발송되었습니다.</p>" +
     "</div>";
   }
@@ -953,6 +1043,7 @@
     on("retry", () => { state.view = "form"; render(); });
     on("confirm", confirmBooking);
 
+    on("add-ics", () => downloadIcs(state.booking));
     on("to-cancel", () => { state.view = "cancel"; render(); });
     on("to-done", () => { state.view = "done"; render(); });
     on("do-cancel", () => {
@@ -966,8 +1057,10 @@
     if (form) {
       form.addEventListener("input", () => {
         readDraft();
+        markEmail();
         document.getElementById("confirm").disabled = !canConfirm();
       });
+      markEmail();
       document.getElementById("confirm").disabled = !canConfirm();
     }
   }
@@ -983,9 +1076,11 @@
     };
   }
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   function canConfirm() {
     const d = state.draft;
-    return Boolean(d.name && d.company && d.email && d.phone && d.agreed);
+    return Boolean(d.name && d.company && EMAIL_RE.test(d.email) && d.phone && d.agreed);
   }
 
   function confirmBooking() {
@@ -1018,14 +1113,13 @@
 
   function reset() {
     state.view = "pick";
-    state.date = null;
     state.time = null;
     state.error = null;
     state.booking = null;
-    state.month = new Date(today.getFullYear(), today.getMonth(), 1);
     state.draft = { name: "", company: "", email: "", phone: "", memo: "", agreed: false };
     state.bookings = [];
     seedBookings();
+    selectEarliest();
     render();
   }
 
@@ -1054,5 +1148,6 @@
 
   document.getElementById("t-reset").addEventListener("click", reset);
 
+  selectEarliest();
   render();
 </script>
