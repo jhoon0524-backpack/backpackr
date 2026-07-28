@@ -1179,7 +1179,7 @@
     if (state.nextResult === "409") {
       state.error = "409";
       state.view = "error";
-      /* 선점된 시간을 실제로 채워 둔다 — 돌아가면 취소선으로 보인다 */
+      /* 선점된 시간을 실제로 채워 둔다 — 돌아가면 목록에서 빠져 있다 */
       state.bookings.push({ date: state.date, start: state.time, email: "other@example.com" });
       state.time = null;
       return render();
