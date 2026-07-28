@@ -20,6 +20,12 @@ export function longDate(ymd: string): string {
   return `${m}월 ${d}일 (${KR[kstFields(kstEpoch(ymd)).dow]})`;
 }
 
+/** epoch ms → "8월 3일 (월) 10:00" */
+export function dateTime(startAt: number): string {
+  const { ymd, minutes } = kstFields(startAt);
+  return `${longDate(ymd)} ${toHhmm(minutes)}`;
+}
+
 /** epoch ms → "8월 3일 (월) 10:00–10:30" */
 export function range(startAt: number, durationMin: number): string {
   const start = kstFields(startAt);
