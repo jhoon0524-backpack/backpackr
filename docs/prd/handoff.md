@@ -25,6 +25,7 @@
 |---|---|---|
 | 1 | `lead_time_hours` · `window_days` 컬럼 | **상수로 둔다.** 담당자마다 다르게 쓸 근거가 없다. 컬럼 2개 + 폼 필드 2개 + 검증이 사라진다. 요청이 나오면 그때 컬럼으로 올린다 |
 | 1 | 예약 변경 기능 | 만들지 않는다. 취소 후 재예약이 같은 결과다 |
+| 1 | 앞뒤 여유 시간 자동 확보 | **만들지 않는다.** 담당자가 원하는 때에 캘린더 블록을 넣는 쪽이 정확하다. 일괄 규칙은 필요 없는 날까지 슬롯을 깎는다 |
 | 2 | 메일 발송 | 기존 알림 모듈 재사용. 발송기를 새로 만들지 않는다 |
 | 2 | refresh token 암호화 | **기존 암호화 유틸을 찾아 쓴다.** 새 암복호 클래스를 만들지 않는다 |
 | 2 | 담당자 인증 | 기존 `admin` 세션 인증 |
@@ -33,6 +34,7 @@
 | 3 | JSON 컬럼 매핑 | `AttributeConverter` 2개 + 이미 있는 Jackson. **JSON 매핑 라이브러리를 새로 넣지 않는다** |
 | 4 | 동시 예약 방지 | DB unique 제약. 애플리케이션 락을 만들지 않는다 |
 | 4 | 파기 중복 실행 방지 | 필요 없다. UPDATE가 멱등하다 |
+| 5 | 시간 단위 예약 불가 구간 | **구글 캘린더가 한다.** freebusy가 이미 돌려주므로 컬럼·폼·검증을 만들지 않는다 |
 | 5 | 구글 캘린더 SDK | **넣지 않는다.** 필요한 호출이 5개뿐이라 이미 있는 HTTP 클라이언트로 직접 부른다 (아래) |
 | 6 | 연동 여부 판별 | `calendarTokenRepository.existsById(memberId)` |
 | 6 | 취소 가능 판별 | `booking.startAt.minusHours(2).isAfter(now)` |
@@ -168,7 +170,6 @@ CREATE TABLE booking_page (
     weekly_hours    JSON         NOT NULL,           -- 아래 형식 참고
     blocked_dates   JSON         NOT NULL,           -- ["2026-08-11", ...]
     meeting_url     VARCHAR(500)     NULL,
-    buffer_min      INT          NOT NULL DEFAULT 0,  -- 앞뒤 여유. 0·30·60·90·120
     active          TINYINT(1)   NOT NULL DEFAULT 1,
     created_at      DATETIME(6)  NOT NULL,
     updated_at      DATETIME(6)  NOT NULL,
@@ -303,7 +304,6 @@ class BookingException extends RuntimeException {
    캘린더    freebusy.query(calendar_id, from, to) → [busy_start, busy_end)
 
 4. 겹침 제외
-   각 점유 구간을 앞뒤로 page.buffer_min 만큼 넓힌다 (0이면 그대로)
    → 점유 구간과 [t, t+duration) 이 겹치면 제거 (경계 접촉은 겹침 아님)
 
 5. 반환
@@ -313,8 +313,7 @@ class BookingException extends RuntimeException {
 - 2번의 정렬 기준은 **구간 시작점**이다. 자정이나 정시가 아니다. 10:00–12:00 / 30분이면 10:00·10:30·11:00·11:30, 10:15–11:45 / 30분이면 10:15·10:45·11:15다.
 - 3번의 freebusy 호출은 요청당 1회다. 날짜별로 나눠 부르지 않는다.
 - **활성 예약과 캘린더 busy를 같은 구간 목록으로 합쳐 4번 한 곳에서 판정한다.** 예전처럼 예약은 시각 일치로, busy는 겹침으로 나눠 처리하면 버퍼가 켜졌을 때 예약 쪽만 앞뒤가 안 막힌다.
-- **차단 범위는 슬롯 격자에 맞춰 올림된다.** 후보 `T + k·duration` 이 막히는 조건은 `k < 1 + buffer_min / duration_min` 이라, 소요 60분에 여유 30분이면 `k < 1.5` → 앞뒤 한 칸(=60분)이 막힌다. 설정값보다 덜 막히지는 않으므로 안전한 방향의 오차다.
-- 여유 30분·소요 30분이면 예약 1건이 슬롯 3칸(자기 + 앞뒤)을 소비한다. 하루 16칸이면 실질 8건 이하가 된다 — 담당자에게 설정 화면에서 이 점을 알린다.
+- **담당자가 특정 시간을 막고 싶으면 자기 캘린더에 일정을 넣는다.** 3번의 freebusy가 그 구간을 busy로 돌려주므로 코드에서 따로 할 일이 없다. 이동 시간·점심·개인 일정이 전부 같은 경로로 처리된다.
 
 ---
 
