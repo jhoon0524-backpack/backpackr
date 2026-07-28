@@ -12,6 +12,7 @@
 import type { PageRow } from "./bookingPage";
 import { connection } from "./calendar";
 import { createEvent, deleteEvent, freeBusy } from "./google";
+import { notifyFailure, sendCanceled, sendConfirmed, type MailBooking } from "./mail";
 import {
   availableSlots,
   guestCancelable,
@@ -149,7 +150,60 @@ export async function confirm(
     return { error: "CALENDAR_FAILED" };
   }
 
+  // 4. 여기서부터는 예약이 유효하다. 메일 실패로 예약을 되돌리지 않는다.
+  const host = await hostProfile(page.member_id);
+  await withMailErrorRecorded(data.seq, `확정 메일 (${data.id})`, () =>
+    sendConfirmed(mailBooking(data.id, startAt, page, guest), host),
+  );
+
   return { id: data.id };
+}
+
+function mailBooking(
+  id: string,
+  startAt: number,
+  page: PageWithOwner,
+  guest: { name: string; email: string },
+): MailBooking {
+  return {
+    id,
+    startAt,
+    durationMin: page.duration_min,
+    title: page.title,
+    meetingUrl: page.meeting_url,
+    guestName: guest.name,
+    guestEmail: guest.email,
+  };
+}
+
+/**
+ * 메일이 실패하면 `sync_error='MAIL'` 을 찍고 담당자에게 알린다. 재시도하지 않는다.
+ *
+ * **컬럼을 찍는 것이 알림 발송보다 먼저다.** 메일 서비스가 통째로 죽은 상황이면
+ * 담당자 알림 메일도 같이 실패한다. 컬럼을 먼저 찍어야 어드민 목록에 남는다.
+ */
+async function withMailErrorRecorded(
+  seq: number,
+  what: string,
+  send: () => Promise<void>,
+): Promise<void> {
+  try {
+    await send();
+  } catch (e) {
+    await addSyncError(seq, "MAIL");
+    await notifyFailure(`${what} 발송 실패`, String(e));
+  }
+}
+
+/** 값이 둘뿐이고 조회 조건으로 쓰지 않아서 콤마 결합 문자열로 둔다 */
+async function addSyncError(seq: number, code: string): Promise<void> {
+  const { data } = await db().from("booking").select("sync_error").eq("seq", seq).maybeSingle();
+  const codes = new Set((data?.sync_error ?? "").split(",").filter(Boolean));
+  codes.add(code);
+  await db()
+    .from("booking")
+    .update({ sync_error: [...codes].join(",") })
+    .eq("seq", seq);
 }
 
 export type BookingRow = {
@@ -160,12 +214,13 @@ export type BookingRow = {
   gcal_event_id: string | null;
   canceled_ref: number;
   guest_name: string | null;
+  guest_email: string | null;
 };
 
 export async function bookingByPublicId(uuid: string): Promise<BookingRow | null> {
   const { data } = await db()
     .from("booking")
-    .select("seq, id, page_id, start_at, gcal_event_id, canceled_ref, guest_name")
+    .select("seq, id, page_id, start_at, gcal_event_id, canceled_ref, guest_name, guest_email")
     .eq("id", uuid)
     .maybeSingle();
   return (data as BookingRow) ?? null;
@@ -199,9 +254,25 @@ export async function cancel(
     try {
       if (!calendar) throw new Error("연동이 끊겨 이벤트를 지울 수 없다");
       await deleteEvent(calendar.token, calendar.calendarId, booking.gcal_event_id);
-    } catch {
-      await db().from("booking").update({ sync_error: "CAL_DELETE" }).eq("seq", booking.seq);
+    } catch (e) {
+      await addSyncError(booking.seq, "CAL_DELETE");
+      await notifyFailure(`캘린더 이벤트 삭제 실패 (${booking.id})`, String(e));
     }
+  }
+
+  // 파기된 예약에는 보낼 주소가 없다. 3개월 지난 건을 담당자가 취소하는 경우다.
+  const guestEmail = booking.guest_email;
+  if (guestEmail) {
+    const host = await hostProfile(page.member_id);
+    await withMailErrorRecorded(booking.seq, `취소 메일 (${booking.id})`, () =>
+      sendCanceled(
+        mailBooking(booking.id, Date.parse(booking.start_at), page, {
+          name: booking.guest_name ?? "",
+          email: guestEmail,
+        }),
+        host,
+      ),
+    );
   }
 
   return { ok: true };
