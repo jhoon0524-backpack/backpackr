@@ -597,11 +597,9 @@
   </div>
 
   <div class="tool-group">
-    <span>앞뒤 여유</span>
-    <button type="button" id="t-buf-0" aria-pressed="true">없음</button>
-    <button type="button" id="t-buf-30" aria-pressed="false">30분</button>
-    <button type="button" id="t-buf-60" aria-pressed="false">60분</button>
-    <button type="button" id="t-buf-90" aria-pressed="false">90분</button>
+    <span>담당자 캘린더 블록 13–15시</span>
+    <button type="button" id="t-block-off" aria-pressed="true">없음</button>
+    <button type="button" id="t-block-on" aria-pressed="false">넣음</button>
   </div>
 
   <div class="tool-group">
@@ -633,7 +631,6 @@
     title: "서비스 소개 미팅",
     description: "제품 데모와 도입 사례를 중심으로 진행합니다. 미리 알려주실 내용이 있으면 아래에 적어 주세요.",
     durationMin: 30,
-    bufferMin: 0,           // 앞뒤 여유. 0 · 30 · 60 · 90 · 120
     meetingUrl: "meet.google.com/abc-defg-hij",
     weeklyHours: {
       MON: [["10:00", "12:00"], ["14:00", "18:00"]],
@@ -701,12 +698,16 @@
 
   /* ── 가짜 캘린더 busy — 날짜별로 항상 같은 값이 나온다 ── */
 
+  /* 담당자가 캘린더에 직접 넣은 블록. 테스트 도구로 켜고 끈다 */
+  const HOST_BLOCK = { on: false, from: 13 * 60, to: 15 * 60 };
+
   function busyFor(dateIso) {
     let h = 0;
     for (const ch of dateIso) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const out = [[600 + (h % 5) * 30, 0]];               // 오전 한 건은 항상 있다
     out[0][1] = out[0][0] + 60;
     if (h % 4 !== 1) { const s = 900 + (h % 6) * 30; out.push([s, s + 90]); }
+    if (HOST_BLOCK.on) out.push([HOST_BLOCK.from, HOST_BLOCK.to]);
     return out;
   }
 
@@ -739,14 +740,12 @@
     const earliest = new Date(nowKst().getTime() + LEAD_TIME_HOURS * 3600 * 1000);
 
     /* 3. 점유 구간 수집 — 활성 예약과 캘린더 busy를 한 목록으로 합친다 */
-    const pad = PAGE.bufferMin;
     const occupied = state.bookings
       .filter(b => b.date === dateIso)
       .map(b => [b.start, b.start + PAGE.durationMin])
-      .concat(busyFor(dateIso))
-      .map(([bs, be]) => [bs - pad, be + pad]);   /* 4. 버퍼만큼 넓힌다 */
+      .concat(busyFor(dateIso));
 
-    /* 겹침 판정 — 경계 접촉은 겹침이 아니다 */
+    /* 4. 겹침 판정 — 경계 접촉은 겹침이 아니다 */
     return candidates.map(t => {
       const end = t + PAGE.durationMin;
       const hit = occupied.some(([bs, be]) => t < be && bs < end);
@@ -788,7 +787,8 @@
   const note = document.getElementById("note");
 
   function render() {
-    if (state.calendar === "revoked" && (state.view === "pick" || state.view === "form")) {
+    /* 철회 상태면 예약을 받는 화면은 전부 중단 안내로 덮는다 */
+    if (state.calendar === "revoked" && state.view !== "done" && state.view !== "cancel" && state.view !== "canceled") {
       card.innerHTML = viewSuspended();
     } else if (state.view === "pick") {
       card.innerHTML = '<div class="pane">' + viewRail() + viewPicker() + "</div>";
@@ -811,9 +811,9 @@
     const open = state.bookings.length;
     return "가짜 캘린더로 도는 목업입니다 — 구글 연동 없이 슬롯 계산(운영시간 − 휴가일 − 캘린더 busy − 활성 예약 − 리드타임 " +
       LEAD_TIME_HOURS + "시간)만 실제 규칙대로 돌립니다. 예약 창 " + WINDOW_DAYS + "일, 활성 예약 " + open +
-      "건, 앞뒤 여유 " + (PAGE.bufferMin
-        ? PAGE.bufferMin + "분 — 실제 차단은 슬롯 격자에 맞춰 올림됩니다"
-        : "없음") + ".";
+      "건" + (HOST_BLOCK.on
+        ? ". 담당자가 캘린더에 넣은 13–15시 블록이 슬롯에서 빠집니다."
+        : ".");
   }
 
   function viewRail() {
@@ -1162,11 +1162,10 @@
   document.getElementById("t-503").addEventListener("click", () =>
     toggle(RES, "t-503", () => { state.nextResult = "503"; }));
 
-  const BUF = ["t-buf-0", "t-buf-30", "t-buf-60", "t-buf-90"];
-  BUF.forEach(id => {
-    const min = Number(id.split("-")[2]);
+  const BLK = ["t-block-off", "t-block-on"];
+  BLK.forEach(id => {
     document.getElementById(id).addEventListener("click", () =>
-      toggle(BUF, id, () => { PAGE.bufferMin = min; keepOrSelectEarliest(); }));
+      toggle(BLK, id, () => { HOST_BLOCK.on = id === "t-block-on"; keepOrSelectEarliest(); }));
   });
 
   document.getElementById("t-reset").addEventListener("click", reset);
