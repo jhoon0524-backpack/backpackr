@@ -60,7 +60,7 @@ booking_page     id, member_id, title, description, duration_min,
                  slug(UNIQUE), active
 booking          id(UUID), seq(AUTO_INCREMENT), page_id, start_at,
                  guest_name, guest_company, guest_email, guest_phone, memo,
-                 gcal_event_id, created_at, canceled_at, canceled_ref
+                 gcal_event_id, sync_error, created_at, canceled_at, canceled_ref
                  UNIQUE (page_id, start_at, canceled_ref)
 calendar_token   member_id(PK), refresh_token, calendar_id   # 행 존재 = 연동됨
 poll             id, member_id, title, candidate_slots(JSON), confirmed_slot
@@ -160,6 +160,7 @@ poll_response    id, poll_id, guest_name, guest_email, ox(JSON)
    → refresh token 저장 → ②예약 유형 편집
    → 제목·설명·소요시간·요일별 운영시간·휴가일·회의실 URL 입력
    → 저장 → /booking/{slug} 발급 → 링크 복사
+                              → (상대가 정해졌으면) 맞춤 링크로 상대 정보를 채워 복사
 ```
 캘린더 연동이 예약 유형 생성보다 먼저다. 미연동 상태에서 만든 링크는 어차피 열리지 않는다.
 
@@ -242,6 +243,8 @@ v2: 확정 → Salesmap 리드 조회·생성 + 미팅 노트 자동 기록 → 
 - [ ] 확정 시 담당자 캘린더에 이벤트가 생기고 예약자에게 구글 초대가 발송된다. 취소 시 해당 이벤트가 삭제된다.
 - [ ] 캘린더 미연동·토큰 철회 상태에서 예약 페이지가 예약을 받지 않는다.
 - [ ] 캘린더 API 실패 시 예약이 저장되지 않는다.
+- [ ] 확정 메일 발송이 실패하면 예약은 남고 어드민 예약 목록에 실패 뱃지가 뜬다. 담당자 알림 메일이 함께 실패해도 뱃지는 남는다.
+- [ ] 확정 메일의 발신자 표시가 담당자 이름이고, 답장하면 담당자 주소로 간다.
 - [ ] 미래 확정 예약이 있는 예약 유형은 삭제가 차단된다.
 - [ ] 동의 없이 예약 확정이 불가하고, 수집 항목과 3개월 보관·파기 기준이 동의 문구에 그대로 열거되어 있다.
 - [ ] 예약 페이지 진입 시 가장 빠른 예약 가능일이 선택된 상태로 열리고, 예약 창이 두 달에 걸치면 다음 달 이동으로 나머지 날짜에 도달한다.

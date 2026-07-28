@@ -453,6 +453,7 @@
               <span class="btn">취소</span>
             </div>
             <div class="row"><span class="lbl dim">이대표 · 스튜디오둘 · lee@example.com</span></div>
+            <div class="row"><span class="btn dis">메일 실패</span><span class="lbl dim">확정 메일이 나가지 않았다 — 수동 재발송 필요</span></div>
           </div>
         </div>
         <div class="wf-cap">담당자가 하루에 한 번 여는 화면. 맞춤 링크는 상대 정보를 <b>주소에만</b> 실어 보낸다 — 서버에 미리 저장하지 않으므로 동의 주체가 상대 본인으로 유지된다.</div>
@@ -460,6 +461,7 @@
       <ul class="notes">
         <li>캘린더 연동 상태를 <b>최상단</b>에 둔다. 미연동이면 이 배너가 붉은 경고로 바뀌고, 아래 링크들은 전부 열리지 않는 상태다.</li>
         <li>담당자 취소는 여기 "다가오는 예약"에서만 진입한다. 별도 예약 관리 화면을 만들지 않는다.</li>
+        <li><b>실패 뱃지</b>(<code>sync_error</code>)가 알림의 최종 안전망이다. 메일 서비스가 통째로 죽으면 담당자 알림 메일도 함께 실패하므로, 목록을 열면 보이는 이 자리가 유일한 복구 지점이 된다.</li>
         <li>리드 정보(이름·회사·이메일)를 목록에 노출해 담당자가 Salesmap에 옮겨 적을 수 있게 한다. v2에서 자동화되면 이 줄은 참고용으로 남는다.</li>
       </ul>
     </div>
@@ -639,10 +641,11 @@
               <span class="lbl dim">김영업 · 백팩커 · 서비스 소개 미팅 30분</span>
               <span class="lbl">meet.google.com/abc-defg-hij</span>
             </div>
-            <span class="lbl dim">park@example.com 으로 캘린더 초대와 안내 메일을 보냈습니다. 초대를 수락하시면 일정이 캘린더에 등록됩니다.</span>
-            <div class="row"><span class="btn">예약 취소하기</span></div>
+            <span class="lbl dim">park@example.com 으로 캘린더 초대와 안내 메일을 보냈습니다.</span>
+            <div class="row"><span class="btn pri">캘린더에 추가</span></div>
+            <span class="lbl dim">일정을 변경하거나 취소해야 하나요?</span>
           </div>
-          <div class="wf-cap">이 화면과 확정 메일은 같은 정보를 담는다. 메일이 실패해도 리드는 여기서 내용을 확인할 수 있다.</div>
+          <div class="wf-cap">1차 액션은 <b>캘린더에 추가</b>(.ics)다 — 구글 초대는 수락해야 들어가므로 확정 직후가 가장 확실하다. 취소는 텍스트 링크로 내린다.</div>
         </div>
 
         <div class="wf">
