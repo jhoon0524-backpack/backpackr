@@ -93,15 +93,17 @@ npm test         # 슬롯 계산·구글 호출·봉인 테스트
 
 `app/api/cron/purge` + `vercel.json` — 파기(handoff 6장). 쿼리 하나가 전부고 멱등하다. Vercel Cron 은 UTC 로 도므로 04:30 KST 는 `30 19 * * *`(전날 19:30 UTC)다. `CRON_SECRET` 을 확인하지 않으면 누구나 부를 수 있는 공개 경로가 된다.
 
-`lib/mail.ts` — 확정·취소 메일. SMTP + nodemailer 로 간다.
+`lib/mail.ts` — 확정·취소 메일. Resend HTTP API 로 보낸다.
 
-**From 은 시스템 고정 주소고 담당자 이름은 표시 이름으로만 넣는다.** From 을 실제 담당자 주소로 바꾸면 두 가지를 잃는다 — 주소 오타로 인한 반송 메일이 담당자 개인 받은편지함으로 흩어져 시스템이 실패를 관측하지 못하고(SMTP 단계는 성공이라 `sync_error` 도 안 찍힌다), 담당자가 바뀌면 과거 예약자의 회신 경로가 끊긴다. 회신은 `Reply-To` 가 받는다.
+**SMTP 대신 HTTP 를 고른 이유는 준비물이 API 키 하나로 끝나서다.** 호스트·포트·계정·비밀번호가 없고 의존성도 늘지 않는다 — 구글 캘린더를 SDK 없이 부른 것과 같은 이유다.
+
+**From 은 시스템 고정 주소고 담당자 이름은 표시 이름으로만 넣는다.** From 을 실제 담당자 주소로 바꾸면 두 가지를 잃는다 — 주소 오타로 인한 반송 메일이 담당자 개인 받은편지함으로 흩어져 시스템이 실패를 관측하지 못하고(발송 API 는 성공이라 `sync_error` 도 안 찍힌다), 담당자가 바뀌면 과거 예약자의 회신 경로가 끊긴다. 회신은 `Reply-To` 가 받는다.
 
 **`sync_error` 를 찍는 것이 알림 발송보다 먼저다.** 메일 서비스가 통째로 죽은 상황이면 담당자 알림 메일도 같이 실패한다. 컬럼을 먼저 찍어야 어드민 목록의 뱃지로 남는다. 그래서 알림 발송 실패는 삼킨다 — 거기서 더 할 수 있는 일이 없다.
 
 ## 남은 것
 
-**Supabase·GCP·SMTP 에 붙여서 실제로 예약이 되는지 확인하는 것만 남았다.** 기능은 전부 있다.
+**Supabase·GCP·Resend 에 붙여서 실제로 예약이 되는지 확인하는 것만 남았다.** 기능은 전부 있다.
 
 **지금까지의 테스트는 전부 단위 테스트다.** `fetch` 를 스텁으로 막고 확인한 것이라 구글 API 나 Supabase 에 한 번도 붙여본 적이 없다. handoff 8장 체크리스트는 통합 테스트를 요구하는데, 그건 준비물이 생긴 뒤에야 가능하다.
 
@@ -109,7 +111,7 @@ npm test         # 슬롯 계산·구글 호출·봉인 테스트
 
 - GCP 프로젝트 + OAuth 클라이언트 — 발급 절차는 handoff 0장. **리디렉션 URI 는 Supabase 콜백(`{supabase-url}/auth/v1/callback`)이다.** 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
 - Supabase 프로젝트 — Authentication → Google 제공자에 위 클라이언트 ID·시크릿을 넣는다
-- 메일 발신 주소 1개 + **SMTP 접속 정보**(호스트·포트·계정·비밀번호). 신규 발신 도메인이면 SPF/DKIM 확인이 필요하다
+- Resend API 키 1개 + 발신 주소 1개. 자체 도메인으로 보내려면 Resend 에 도메인을 등록하고 SPF/DKIM 레코드를 넣어야 한다. 급하면 `onboarding@resend.dev` 로 먼저 띄워볼 수 있다
 
 **환경 변수**
 
@@ -122,10 +124,7 @@ GOOGLE_CLIENT_SECRET      # access token 갱신에 쓴다. Supabase 에 넣는 �
 TOKEN_ENC_KEY             # refresh token 봉인 키. openssl rand -base64 32
 BOOKING_BASE_URL
 CRON_SECRET               # Vercel Cron 이 Authorization 헤더로 보낸다
-SMTP_HOST
-SMTP_PORT                 # 465 면 TLS, 아니면 STARTTLS
-SMTP_USER
-SMTP_PASS
+RESEND_API_KEY
 MAIL_FROM                 # 시스템 고정 발신 주소. 담당자 주소를 넣지 않는다
 MAIL_ADMIN_TO             # 실패 알림 수신 주소
 ```
