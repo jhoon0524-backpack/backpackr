@@ -30,7 +30,10 @@ create table booking_page (
 create table booking (
     seq           bigserial primary key,
     id            uuid         not null unique default gen_random_uuid(),  -- 공개 취소 링크
-    page_id       bigint       not null references booking_page (id),
+    -- 유형을 지우면 그 예약 이력도 함께 지운다. 미래 활성 예약이 있으면 API 4 가
+    -- 409 로 먼저 막으므로, 여기서 실제로 지워지는 건 지난 예약과 취소 이력이다.
+    -- cascade 가 없으면 지난 예약 한 건 때문에 유형을 영영 못 지운다.
+    page_id       bigint       not null references booking_page (id) on delete cascade,
     start_at      timestamptz  not null,
     guest_name    varchar(50),
     guest_company varchar(100),
