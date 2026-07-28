@@ -459,6 +459,38 @@
   .field textarea { resize: vertical; min-height: 62px; }
   .field input:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
 
+  .summary {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .summary .who { font-size: 15px; }
+
+  .summary .contact {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    word-break: break-all;
+  }
+
+  .summary .by {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 9px;
+    margin-top: 3px;
+  }
+
+  .summary .by span { font-size: 12px; color: var(--muted); }
+
   .consent {
     border: 1px dashed var(--line);
     border-radius: 2px;
@@ -597,6 +629,12 @@
   </div>
 
   <div class="tool-group">
+    <span>맞춤 링크</span>
+    <button type="button" id="t-link-off" aria-pressed="true">공용</button>
+    <button type="button" id="t-link-on" aria-pressed="false">상대 정보 채움</button>
+  </div>
+
+  <div class="tool-group">
     <span>담당자 캘린더 블록 13–15시</span>
     <button type="button" id="t-block-off" aria-pressed="true">없음</button>
     <button type="button" id="t-block-on" aria-pressed="false">넣음</button>
@@ -668,12 +706,24 @@
     error: null,
     booking: null,
     draft: { name: "", company: "", email: "", phone: "", memo: "", agreed: false },
+    prefilled: false,      // 맞춤 링크로 들어왔는가
+    editing: false,        // 요약 카드에서 수정을 눌렀는가
     bookings: [],          // 활성 예약 — canceled_ref = 0
     blocked: [iso(addDays(today, 9))]
   };
 
   /* 다른 사람이 먼저 잡아둔 예약 두 건을 심어 둔다 */
   seedBookings();
+
+  /* 맞춤 링크 — 담당자가 주소에 실어 보낸 값. 서버에 저장된 적 없다 */
+  function readPrefill() {
+    const q = new URLSearchParams(location.search);
+    const get = k => (q.get(k) || "").trim();
+    const d = { name: get("name"), company: get("company"), email: get("email"), phone: get("phone") };
+    if (!d.name && !d.company && !d.email && !d.phone) return;
+    Object.assign(state.draft, d);
+    state.prefilled = Boolean(d.name && d.company && d.phone && EMAIL_RE.test(d.email));
+  }
 
   /* ── 날짜 유틸 ───────────────────────────────────────── */
 
@@ -889,18 +939,13 @@
 
   function viewForm() {
     const d = state.draft;
+    const summary = state.prefilled && !state.editing;
+
     return '<div class="form">' +
-      '<div class="step">2단계 — 정보 입력</div>' +
+      '<div class="step">2단계 — ' + (summary ? "확인" : "정보 입력") + "</div>" +
       '<div class="picked"><span>' + range(state.date, state.time) + "</span>" +
         '<button type="button" class="btn sm" id="back">시간 다시 고르기</button></div>' +
-      '<div class="fields">' +
-        field("name", "이름", d.name, "text") +
-        field("company", "회사명", d.company, "text") +
-        field("email", "이메일", d.email, "email", "캘린더 초대를 보냅니다") +
-        field("phone", "연락처", d.phone, "tel") +
-        '<div class="field wide"><label for="f-memo">미리 알려주실 내용 (선택)</label>' +
-          '<textarea id="f-memo">' + escapeHtml(d.memo) + "</textarea></div>" +
-      "</div>" +
+      (summary ? viewSummary(d) : viewFields(d)) +
       '<div class="consent">' +
         '<input type="checkbox" id="agree"' + (d.agreed ? " checked" : "") + ">" +
         "<div><b>개인정보 수집·이용에 동의합니다 (필수)</b>" +
@@ -909,6 +954,26 @@
       '<div class="foot"><p>확정 즉시 캘린더 초대와 안내 메일이 발송됩니다.</p>' +
         '<button type="button" class="btn pri" id="confirm">예약 확정</button></div>' +
     "</div>";
+  }
+
+  function viewSummary(d) {
+    return '<div class="summary">' +
+      '<div class="who">' + escapeHtml(d.name) + " · " + escapeHtml(d.company) + "</div>" +
+      '<div class="contact">' + escapeHtml(d.email) + " · " + escapeHtml(d.phone) + "</div>" +
+      '<div class="by"><span>' + PAGE.host + " 담당자가 미리 입력한 정보입니다</span>" +
+        '<button type="button" class="btn sm" id="edit">수정</button></div>' +
+    "</div>";
+  }
+
+  function viewFields(d) {
+    return '<div class="fields">' +
+        field("name", "이름", d.name, "text") +
+        field("company", "회사명", d.company, "text") +
+        field("email", "이메일", d.email, "email", "캘린더 초대를 보냅니다") +
+        field("phone", "연락처", d.phone, "tel") +
+        '<div class="field wide"><label for="f-memo">미리 알려주실 내용 (선택)</label>' +
+          '<textarea id="f-memo">' + escapeHtml(d.memo) + "</textarea></div>" +
+      "</div>";
   }
 
   function field(id, label, value, type, hint) {
@@ -1069,6 +1134,8 @@
     });
     on("restart", reset);
 
+    on("edit", () => { state.editing = true; render(); });
+
     const form = card.querySelector(".form");
     if (form) {
       form.addEventListener("input", () => {
@@ -1077,12 +1144,18 @@
         document.getElementById("confirm").disabled = !canConfirm();
       });
       markEmail();
+      /* 요약 카드에서는 동의 체크박스만 상태를 바꾼다 */
+      const agree = document.getElementById("agree");
+      if (agree) agree.addEventListener("change", () => {
+        state.draft.agreed = agree.checked;
+        document.getElementById("confirm").disabled = !canConfirm();
+      });
       document.getElementById("confirm").disabled = !canConfirm();
     }
   }
 
   function readDraft() {
-    /* 폼이 화면에 없으면 읽지 않는다 — 409·503 화면에서 호출되면 입력값이 지워진다 */
+    /* 폼이 화면에 없으면 읽지 않는다 — 요약 카드·409·503 화면에서 입력값이 지워진다 */
     if (!document.getElementById("f-name")) return;
     const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
     const agree = document.getElementById("agree");
@@ -1133,8 +1206,12 @@
     state.error = null;
     state.booking = null;
     state.draft = { name: "", company: "", email: "", phone: "", memo: "", agreed: false };
+    state.prefilled = false;
+    state.editing = false;
     state.bookings = [];
     seedBookings();
+    readPrefill();
+    if (DEMO_LINK.on) applyDemoLink();
     selectEarliest();
     render();
   }
@@ -1162,6 +1239,31 @@
   document.getElementById("t-503").addEventListener("click", () =>
     toggle(RES, "t-503", () => { state.nextResult = "503"; }));
 
+  const DEMO_LINK = { on: false };
+
+  function applyDemoLink() {
+    Object.assign(state.draft, {
+      name: "박서준", company: "스튜디오리프",
+      email: "park@example.com", phone: "010-2345-6789"
+    });
+    state.prefilled = true;
+    state.editing = false;
+  }
+
+  const LNK = ["t-link-off", "t-link-on"];
+  LNK.forEach(id => {
+    document.getElementById(id).addEventListener("click", () =>
+      toggle(LNK, id, () => {
+        DEMO_LINK.on = id === "t-link-on";
+        if (DEMO_LINK.on) applyDemoLink();
+        else {
+          state.draft = { name: "", company: "", email: "", phone: "", memo: "", agreed: false };
+          state.prefilled = false;
+          state.editing = false;
+        }
+      }));
+  });
+
   const BLK = ["t-block-off", "t-block-on"];
   BLK.forEach(id => {
     document.getElementById(id).addEventListener("click", () =>
@@ -1170,6 +1272,7 @@
 
   document.getElementById("t-reset").addEventListener("click", reset);
 
+  readPrefill();
   selectEarliest();
   render();
 </script>
