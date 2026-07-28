@@ -6,7 +6,7 @@
 
 ```
 npm run dev      # 개발 서버
-npm test         # 슬롯 계산 테스트
+npm test         # 슬롯 계산·구글 호출·봉인 테스트
 ```
 
 ## 텀블벅과 독립으로 간다
@@ -31,23 +31,45 @@ npm test         # 슬롯 계산 테스트
 
 ## 지금까지 된 것
 
-`lib/slots.ts` — 슬롯 계산과 취소 가능 판별. 테스트 23건.
+`lib/slots.ts` — 슬롯 계산과 취소 가능 판별.
 
 문서가 "여기서 어긋나면 이중 부킹이 난다"고 지목한 자리라 먼저 짰다. 규칙을 하나씩 건다 — 구간 시작점 정렬, 리드타임 4시간(경계 포함), 활성 예약과 캘린더 busy 겹침 제외(경계 접촉은 겹침 아님), 취소 시 슬롯 재개방, 예약 창 14일.
 
 **시각은 전부 UTC epoch ms 로 다루고 KST 벽시계는 경계에서만 만든다.** 목업에서 `new Date()` 를 그대로 쓰다가 서버 타임존이 KST 가 아니면 슬롯이 달라지는 버그가 났다. 같은 실수를 막으려고 타임존 3개에서 결과가 같은지 확인하는 테스트를 넣었다.
 
+`lib/google.ts` — 구글 캘린더 호출. `lib/crypto.ts` — refresh token 봉인.
+
+**핸드오프의 호출 5개가 3개로 줄었다.** 동의 화면과 코드 교환은 Supabase Auth 가 한다 — 담당자 로그인이 곧 구글 OAuth 라 우리가 부를 자리가 없다. 남은 건 access token 갱신·freebusy·이벤트 생성·이벤트 삭제고, 응답에서 꺼내는 필드는 셋뿐이라 SDK 없이 `fetch` 로 부른다.
+
+`TokenRevokedError` 를 따로 둔 이유는 **연동 끊김이 에러가 아니라 상태**여서다. 갱신이 `400 invalid_grant` 로 오면 공개 페이지가 `bookable: false` 를 내리고 안내 문구를 렌더해야 하는데, 다른 실패와 섞이면 그 분기를 못 만든다.
+
+봉인 형식은 `iv(12) ‖ tag(16) ‖ 암호문`. `node:crypto` 가 AES-GCM 을 하므로 정할 게 형식뿐이다. 키가 바뀌면 복호가 실패하고 그 담당자는 재연동한다.
+
 ## 남은 것
 
-- 구글 OAuth 로그인 + 캘린더 연동, refresh token 암호화 저장
-- 구글 캘린더 HTTP 호출 5개 (SDK 없이)
-- 예약 확정·취소 트랜잭션, unique 위반 → 409
+- 구글 로그인(Supabase Auth) + 연동 상태 저장·해제 — API 6~8
+- Supabase 접근 계층, 예약 유형 CRUD — API 1~5
+- 공개 조회 API 9~10 (`bookable`, 슬롯)
+- 예약 확정·취소 트랜잭션, unique 위반 → 409 — API 11~13
 - 화면 5개 (담당자 목록·편집, 공개 예약·완료·취소)
 - 확정·취소 메일, 실패 시 `sync_error` 기록
 - 개인정보 파기 Cron
 
 ## 준비물
 
-- GCP 프로젝트 + OAuth 클라이언트 — 발급 절차는 handoff 0장
-- Supabase 프로젝트
+- GCP 프로젝트 + OAuth 클라이언트 — 발급 절차는 handoff 0장. **리디렉션 URI 는 Supabase 콜백(`{supabase-url}/auth/v1/callback`)이다.** 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
+- Supabase 프로젝트 — Authentication → Google 제공자에 위 클라이언트 ID·시크릿을 넣는다
 - 메일 발신 주소 1개
+
+**환경 변수**
+
+```
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET      # access token 갱신에 쓴다. Supabase 에 넣는 것과 같은 값
+TOKEN_ENC_KEY             # refresh token 봉인 키. base64 로 인코딩한 32바이트
+BOOKING_BASE_URL
+MAIL_FROM
+MAIL_ADMIN_TO
+```
+
+`GOOGLE_REDIRECT_URI` 는 없다 — 우리가 코드 교환을 하지 않는다.
