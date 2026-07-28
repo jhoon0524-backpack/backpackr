@@ -46,9 +46,12 @@ create table booking (
     constraint uk_slot unique (page_id, start_at, canceled_ref)
 );
 
+-- refresh_token 이 bytea 가 아니라 text 다. PostgREST 로는 bytea 가 \x 헥사 문자열로
+-- 오가서 어차피 인코딩을 한 겹 거친다. 봉인된 바이트는 어차피 불투명하므로
+-- base64 문자열로 두고 인코딩을 한 군데(lib/crypto.ts)에만 남긴다.
 create table calendar_token (
     member_id     uuid         primary key,     -- auth.users.id
-    refresh_token bytea        not null,        -- 암호화 저장
+    refresh_token text         not null,        -- base64(iv ‖ tag ‖ 암호문)
     calendar_id   varchar(255) not null,
     created_at    timestamptz  not null default now()
 );
