@@ -168,7 +168,7 @@ CREATE TABLE booking_page (
     weekly_hours    JSON         NOT NULL,           -- 아래 형식 참고
     blocked_dates   JSON         NOT NULL,           -- ["2026-08-11", ...]
     meeting_url     VARCHAR(500)     NULL,
-    buffer          TINYINT(1)   NOT NULL DEFAULT 0,  -- 1 = 앞뒤 한 칸 비움
+    buffer_min      INT          NOT NULL DEFAULT 0,  -- 앞뒤 여유. 0·30·60·90·120
     active          TINYINT(1)   NOT NULL DEFAULT 1,
     created_at      DATETIME(6)  NOT NULL,
     updated_at      DATETIME(6)  NOT NULL,
@@ -215,7 +215,6 @@ CREATE TABLE calendar_token (
 | `booking` 상태 enum 컬럼 | `canceled_ref = 0` 여부가 상태다 |
 | 취소 사유 컬럼 | 컬럼 + 폼 필드 + 메일 템플릿 한 줄이 붙는다. 취소 알림을 받은 담당자가 물어보면 된다 |
 | `lead_time_hours` · `window_days` 컬럼 | 상수 `LEAD_TIME_HOURS = 4`, `WINDOW_DAYS = 14`. 담당자별로 다르게 쓸 근거가 나오면 그때 컬럼으로 올린다 |
-| `buffer_min` 분 단위 컬럼 | `buffer` 불리언. 슬롯 격자가 `duration_min` 간격이라 **0 < 버퍼 ≤ duration 이면 결과가 전부 같다** — 분 단위로 받으면 설정값과 실제 동작이 어긋난다 |
 
 **`sync_error`는 파생할 수 없는 유일한 상태라 컬럼으로 뒀다.** 예약은 성공했는데 확정 메일이나 취소 시 캘린더 삭제가 깨진 경우, 다른 컬럼 어디에도 흔적이 남지 않는다. 어드민 목록에 뱃지로 띄우려면 저장할 곳이 필요하다. 값이 둘뿐이고 조회 조건으로 쓰지 않아서 콤마 결합 문자열로 둔다 — 목록에 이미 실려 오는 값을 프런트가 읽기만 한다. v2에서 Salesmap 연동이 붙으면 `CRM`이 세 번째 값으로 들어간다.
 
@@ -304,7 +303,7 @@ class BookingException extends RuntimeException {
    캘린더    freebusy.query(calendar_id, from, to) → [busy_start, busy_end)
 
 4. 겹침 제외
-   if page.buffer: 각 점유 구간을 앞뒤로 duration_min 만큼 넓힌다
+   각 점유 구간을 앞뒤로 page.buffer_min 만큼 넓힌다 (0이면 그대로)
    → 점유 구간과 [t, t+duration) 이 겹치면 제거 (경계 접촉은 겹침 아님)
 
 5. 반환
@@ -314,7 +313,8 @@ class BookingException extends RuntimeException {
 - 2번의 정렬 기준은 **구간 시작점**이다. 자정이나 정시가 아니다. 10:00–12:00 / 30분이면 10:00·10:30·11:00·11:30, 10:15–11:45 / 30분이면 10:15·10:45·11:15다.
 - 3번의 freebusy 호출은 요청당 1회다. 날짜별로 나눠 부르지 않는다.
 - **활성 예약과 캘린더 busy를 같은 구간 목록으로 합쳐 4번 한 곳에서 판정한다.** 예전처럼 예약은 시각 일치로, busy는 겹침으로 나눠 처리하면 버퍼가 켜졌을 때 예약 쪽만 앞뒤가 안 막힌다.
-- `buffer`가 켜지면 예약 1건이 슬롯 3칸(자기 + 앞뒤)을 소비한다. 하루 16칸이면 실질 8건 이하가 된다 — 담당자에게 설정 화면에서 이 점을 알린다.
+- **차단 범위는 슬롯 격자에 맞춰 올림된다.** 후보 `T + k·duration` 이 막히는 조건은 `k < 1 + buffer_min / duration_min` 이라, 소요 60분에 여유 30분이면 `k < 1.5` → 앞뒤 한 칸(=60분)이 막힌다. 설정값보다 덜 막히지는 않으므로 안전한 방향의 오차다.
+- 여유 30분·소요 30분이면 예약 1건이 슬롯 3칸(자기 + 앞뒤)을 소비한다. 하루 16칸이면 실질 8건 이하가 된다 — 담당자에게 설정 화면에서 이 점을 알린다.
 
 ---
 
