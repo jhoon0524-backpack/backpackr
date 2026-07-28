@@ -73,12 +73,13 @@ npm test         # 슬롯 계산·구글 호출·봉인 테스트
 
 **메일 주소는 선택이 아니다.** 캘린더 초대의 attendee 라 없으면 초대가 안 나간다.
 
+`app/api/cron/purge` + `vercel.json` — 파기(handoff 6장). 쿼리 하나가 전부고 멱등하다. Vercel Cron 은 UTC 로 도므로 04:30 KST 는 `30 19 * * *`(전날 19:30 UTC)다. `CRON_SECRET` 을 확인하지 않으면 누구나 부를 수 있는 공개 경로가 된다.
+
 ## 남은 것
 
 - Supabase 프로젝트에 붙여서 **실제로 예약이 되는지 확인** — 아래 전부 미검증이다
 - **확정·취소 메일** — 발송 수단이 정해지지 않았다. SMTP(nodemailer)냐 API(Resend 등)냐를 정해야 붙는다. `sync_error='MAIL'` 자리도 여기서 생긴다
 - 화면 5개 (담당자 목록·편집, 공개 예약·완료·취소) — `/admin` 은 로그인·연동 상태만 있는 껍데기다
-- 개인정보 파기 Cron
 
 **지금까지의 테스트는 전부 단위 테스트다.** `fetch` 를 스텁으로 막고 확인한 것이라 구글 API 나 Supabase 에 한 번도 붙여본 적이 없다. handoff 8장 체크리스트는 통합 테스트를 요구하는데, 그건 준비물이 생긴 뒤에야 가능하다.
 
@@ -98,6 +99,7 @@ GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET      # access token 갱신에 쓴다. Supabase 에 넣는 것과 같은 값
 TOKEN_ENC_KEY             # refresh token 봉인 키. openssl rand -base64 32
 BOOKING_BASE_URL
+CRON_SECRET               # Vercel Cron 이 Authorization 헤더로 보낸다
 MAIL_FROM
 MAIL_ADMIN_TO
 ```
