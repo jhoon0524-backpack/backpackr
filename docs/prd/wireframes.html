@@ -405,8 +405,22 @@
             <div class="row">
               <span class="lbl">backpac.kr/booking/a7f3k2m9</span>
               <span class="btn">링크 복사</span>
+              <span class="btn pri">맞춤 링크</span>
               <span class="btn">수정</span>
               <span class="btn">비활성</span>
+            </div>
+            <div class="box dash col">
+              <span class="lbl">맞춤 링크 만들기 — 상대 정보를 미리 채운다</span>
+              <div class="row">
+                <div class="field grow"><span class="lbl dim">이름</span><div class="ph w60"></div></div>
+                <div class="field grow"><span class="lbl dim">회사명</span><div class="ph w60"></div></div>
+              </div>
+              <div class="row">
+                <div class="field grow"><span class="lbl dim">이메일</span><div class="ph w80"></div></div>
+                <div class="field grow"><span class="lbl dim">연락처</span><div class="ph w60"></div></div>
+              </div>
+              <span class="lbl dim">backpac.kr/booking/a7f3k2m9?name=…&amp;company=…&amp;email=…&amp;phone=…</span>
+              <div class="row"><span class="btn pri">링크 복사</span></div>
             </div>
           </div>
 
@@ -441,7 +455,7 @@
             <div class="row"><span class="lbl dim">이대표 · 스튜디오둘 · lee@example.com</span></div>
           </div>
         </div>
-        <div class="wf-cap">담당자가 하루에 한 번 여는 화면. 링크 복사와 다가오는 예약 확인이 전부다.</div>
+        <div class="wf-cap">담당자가 하루에 한 번 여는 화면. 맞춤 링크는 상대 정보를 <b>주소에만</b> 실어 보낸다 — 서버에 미리 저장하지 않으므로 동의 주체가 상대 본인으로 유지된다.</div>
       </div>
       <ul class="notes">
         <li>캘린더 연동 상태를 <b>최상단</b>에 둔다. 미연동이면 이 배너가 붉은 경고로 바뀌고, 아래 링크들은 전부 열리지 않는 상태다.</li>
@@ -568,6 +582,14 @@
               <span class="lbl">2026년 8월 4일 (화) 14:00 – 14:30 · KST</span>
               <span class="btn">시간 다시 고르기</span>
             </div>
+            <div class="box dash col">
+              <span class="lbl">맞춤 링크로 들어오면 이 자리는 요약 카드가 된다</span>
+              <span class="lbl">박서준 · 스튜디오리프 · park@example.com · 010-2345-6789</span>
+              <div class="row between">
+                <span class="lbl dim">김영업 담당자가 미리 입력한 정보입니다</span>
+                <span class="btn">수정</span>
+              </div>
+            </div>
             <div class="row">
               <div class="field grow"><span class="lbl dim">이름 *</span><div class="ph w60"></div></div>
               <div class="field grow"><span class="lbl dim">회사명 *</span><div class="ph w60"></div></div>
@@ -592,6 +614,7 @@
       <ul class="notes">
         <li>외부 리드가 보는 <b>유일한 대외 화면</b>이다. 브랜딩 수준은 아직 미정 — 지금은 로고와 담당자 이름만 두었다.</li>
         <li>수집 항목 4개가 모두 필수다. 회사명·연락처는 영업 리드 정보로 쓰인다.</li>
+        <li><b>맞춤 링크</b>로 들어오면 4개가 이미 채워져 있어 확인·동의·확정 세 번이면 끝난다. 값은 주소에만 실려 오고 <b>저장은 확정 순간</b>에만 일어난다 — 동의 주체가 본인으로 유지된다.</li>
         <li>동의 문구에 <b>수집 항목·목적·3개월 보유</b>를 그대로 노출한다. 별도 약관 페이지를 만들지 않는다.</li>
         <li>슬롯 계산은 <code>운영시간 − 휴가일 − 캘린더 busy − 활성 예약 − 리드타임</code>이고, 담당자가 캘린더에 넣은 블록이 곧 예약 불가 시간이다.</li>
       </ul>
