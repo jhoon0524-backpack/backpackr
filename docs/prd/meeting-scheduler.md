@@ -57,7 +57,7 @@
 ```
 booking_page     id, member_id, title, description, duration_min,
                  weekly_hours(JSON), blocked_dates(JSON), meeting_url,
-                 buffer, slug(UNIQUE), active
+                 buffer_min, slug(UNIQUE), active
 booking          id(UUID), seq(AUTO_INCREMENT), page_id, start_at,
                  guest_name, guest_company, guest_email, guest_phone, memo,
                  gcal_event_id, created_at, canceled_at, canceled_ref
@@ -91,8 +91,9 @@ poll_response    id, poll_id, guest_name, guest_email, ox(JSON)
 
 *슬롯 조회·예약 (v1)*
 - 예약 페이지 진입 시 `운영시간 − blocked_dates − 캘린더 busy − 활성 예약 − (현재 + 4시간) 이전` 구간을 슬롯으로 계산해 KST로 표시한다. 취소된 예약의 시간은 다시 슬롯으로 노출한다.
-- 예약 유형에 **앞뒤 여유 시간**을 켜면 활성 예약과 캘린더 busy 구간을 앞뒤로 `duration_min` 만큼 넓혀 겹침을 판정한다. 연달아 붙는 미팅을 막아 이동·정리 시간을 확보한다. 기본값은 꺼짐이다.
-- 여유 시간은 **분 단위로 설정하지 않는다.** 슬롯이 `duration_min` 간격 격자에 정렬돼 있어 1분이든 29분이든 바로 앞뒤 슬롯 하나가 똑같이 막힌다. 담당자가 15분을 넣고 30분이 막히는 걸 보게 되므로 켜기/끄기로만 둔다.
+- 예약 유형에 **앞뒤 여유 시간**(`buffer_min`)을 두면 활성 예약과 캘린더 busy 구간을 앞뒤로 그만큼 넓혀 겹침을 판정한다. 연달아 붙는 미팅을 막아 이동·정리 시간을 확보한다. 기본값은 0(없음)이다.
+- 설정값은 **30분 단위**로 0·30·60·90·120 중에서 고른다. 이동 시간은 담당자가 분으로 인지하는 값이라 칸 수가 아니라 분으로 받는다.
+- 실제로 막히는 범위는 **슬롯 격자에 맞춰 올림된다.** 소요 60분 미팅에 여유 30분을 두면 바로 앞뒤 슬롯이 통째로 막혀 실질 60분이 된다. 설정값보다 덜 막히는 경우는 없으므로 이동 시간이 모자라는 방향의 오차는 나지 않는다.
 - 슬롯은 각 요일 운영시간의 시작 시각을 기준으로 `duration_min` 간격으로 정렬한다. 운영시간 10:00–12:00 / 30분 미팅이면 10:00·10:30·11:00·11:30이고, 이 정렬을 벗어난 시각으로는 예약할 수 없다.
 - **예약할 수 없는 시간은 목록에서 감추고** 아래에 `이미 마감된 시간 N개`만 남긴다. 사유는 노출하지 않는다. 눌러도 반응 없는 항목을 목록에 섞으면 남은 자리가 몇 개인지 읽기 어려워진다.
 - 방문자가 슬롯을 선택하고 이름·회사명·이메일·연락처·메모를 입력하면 개인정보 수집 동의 후 예약을 확정한다.
