@@ -26,6 +26,9 @@ export async function GET(_request: NextRequest, ctx: RouteContext<"/api/booking
     description: page.description,
     durationMin: page.duration_min,
     hostName: host.name,
+    hostEmail: host.email,
+    // 링크 자체는 확정 전에 내리지 않는다. 예약도 안 한 사람이 미팅방에 들어갈 수 있다.
+    online: page.meeting_url !== null,
     bookable: page.active && (await connection(page.member_id)) !== null,
   });
 }
