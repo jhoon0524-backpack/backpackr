@@ -109,8 +109,9 @@ npm test         # 슬롯 계산·구글 호출·봉인 테스트
 
 ## 준비물
 
-- GCP 프로젝트 + OAuth 클라이언트 — 발급 절차는 handoff 0장. **리디렉션 URI 는 Supabase 콜백(`{supabase-url}/auth/v1/callback`)이다.** 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
-- Supabase 프로젝트 — Authentication → Google 제공자에 위 클라이언트 ID·시크릿을 넣는다
+- ~~Supabase 프로젝트~~ — **만들었다.** ref `fffktazefwjechgyaqaf`, 리전 ap-northeast-2, 마이그레이션 적용 완료
+- GCP 프로젝트 + OAuth 클라이언트 — 발급 절차는 handoff 0장. **승인된 리디렉션 URI 는 `https://fffktazefwjechgyaqaf.supabase.co/auth/v1/callback` 이다.** 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
+- 위 클라이언트 ID·시크릿을 Supabase 대시보드 Authentication → Providers → Google 에 넣고 스코프 2개를 추가한다
 - Resend API 키 1개 + 발신 주소 1개. 자체 도메인으로 보내려면 Resend 에 도메인을 등록하고 SPF/DKIM 레코드를 넣어야 한다. 급하면 `onboarding@resend.dev` 로 먼저 띄워볼 수 있다
 
 **환경 변수**
