@@ -32,7 +32,7 @@
 
 ## GMV 트리 지표
 
-출처: 텀블벅 GMV 지표트리 대시보드 (`gmv-dashboard-update` 스킬 참조)
+출처: 텀블벅 GMV 지표트리 대시보드 (`outreach/gmv-dashboard-update` 참조)
 
 **거래**
 GMV · 성사프로젝트 · 론치프로젝트 · 성사율 · 프당성사액

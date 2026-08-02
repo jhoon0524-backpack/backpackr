@@ -47,6 +47,8 @@ YYYY-MM-DD | {영역} | {결정} | {근거 한 줄} | {출처 링크}
 | 2026-08-02 | `strategy-review` 스킬을 폐기한다. 레포에 편입하지 않는다 | PO 지시 |
 | 2026-08-02 | `creator-trend-newsletter`·`tumblbug-trend-roulette`를 PO 에이전트에서 제외한다 | PO 업무가 아닌데 섞여 들어갔다 |
 | 2026-08-02 | `strategy-doc`·`gmv-dashboard-update`를 PO 에이전트에서 제외한다 | PO 지시 |
+| 2026-08-02 | `strategy-doc`은 삭제하지 않고 `strategy/`로 분리한다 | 정보별 소유자 표에서 "개별 프로젝트 상태·결정"의 소유자다. 지우면 제거가 아니라 공백이 된다 |
+| 2026-08-02 | `product.md`·`business.md`·`policy.md`를 삭제한다 | 담긴 것이 전부 서비스 정책이고 Notion이 SSOT다. 사본을 두면 낡는다 |
 
 **폐기와 범위 밖은 다르다.** `strategy-review`는 안 쓰기로 한 것이고, 뉴스레터·룰렛은
 스킬 자체는 멀쩡하나 PO 에이전트에 속하지 않는 것이다. 나중에 뉴스레터가 다시 필요해지면
