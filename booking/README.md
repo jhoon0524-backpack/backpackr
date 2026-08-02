@@ -4,6 +4,9 @@
 
 기획은 [../docs/prd/meeting-scheduler.md](../docs/prd/meeting-scheduler.md), 구현 스펙은 [../docs/prd/handoff.md](../docs/prd/handoff.md), 동작 목업은 [../docs/prd/prototype.html](../docs/prd/prototype.html).
 
+배포 주소는 https://backpackr-eight.vercel.app 다. Vercel 프로젝트 `backpackr`,
+Root Directory 는 `booking`.
+
 ```
 npm run dev      # 개발 서버
 npm test         # 슬롯 계산·구글 호출·봉인 테스트
