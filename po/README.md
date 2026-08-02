@@ -18,7 +18,6 @@ po/context/
 ├── po-principles.md       ← 모든 스킬이 공유하는 판단 원칙. 소유자: PO
 ├── org.md                 ← 조직 구성. 소유자: PO
 ├── stack.md               ← 기술 스택. 소유자: BE/FE 리드
-├── metrics.md             ← 지표 사전. 소유자: PO
 └── decisions.md           ← 결정 로그. 사람만 쓴다
 
 outreach/                  ← PO 업무가 아닌 스킬. 스킬 경로 밖이라 로드되지 않는다
@@ -59,7 +58,7 @@ CI가 의미를 갖는 건 오케스트레이터가 들어와 라우팅 테이�
 | 조직 구성 | `po/context/org.md` (소유자 PO) | 파일 읽기 |
 | 기술 스택 | `po/context/stack.md` (소유자 BE/FE 리드) | 파일 읽기 |
 | 공통 판단 원칙 | `po/context/po-principles.md` | 파일 읽기 |
-| 지표 정의 | `po/context/metrics.md` | 파일 읽기 |
+| 목표 지표 | PRD 작성자(사람)가 직접 넣는다 | 스킬이 판정하지 않는다 |
 | 스킬 고유 절차·출력 형식 | 각 SKILL.md | 자체 보유 |
 | 제품 백로그·로드맵 | Drive 로드맵·백로그 시트 | 조회는 자유, 수정은 사람이 반영 |
 | 이슈·Epic 상세 | Jira (backpackr.atlassian.net) | 조회 |
