@@ -53,7 +53,8 @@ po/context/     사실 — 사람이 관리한다
 | `handoff` | 개발 착수 문서 | 미구현 — `docs/prd/handoff.md`에서 역추출 예정 |
 | `retro` | 출시 후 지표 대조 | 미구현 — 지표 접근 경로 확보 후 |
 
-PO 업무가 아닌데 섞여 있는 것: `creator-trend-newsletter`, `tumblbug-trend-roulette` → 이관 대상.
+범위 밖이라 제외한 것 (2026-08-02): `creator-trend-newsletter`, `tumblbug-trend-roulette`.
+스킬이 나빠서가 아니라 PO 업무가 아니라서다. 필요하면 별도 레포에서 관리한다.
 
 ## 정본이 어디인가
 
