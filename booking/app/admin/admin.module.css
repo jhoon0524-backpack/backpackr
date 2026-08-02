@@ -1,0 +1,219 @@
+/* 담당자 화면. 값은 globals.css 의 토큰을 그대로 쓴다 — 공개 화면과 같은 눈이다. */
+
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 20px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.page h1 {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.section {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.warn {
+  color: var(--warn);
+  font-size: 13.5px;
+}
+
+.error {
+  border: 1px solid var(--warn);
+  background: var(--warn-soft);
+  color: var(--warn);
+  border-radius: 3px;
+  padding: 11px 14px;
+  font-size: 13.5px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item {
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item h3 {
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.off {
+  opacity: 0.6;
+}
+
+.link {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  background: var(--fill);
+  border-radius: 2px;
+  padding: 5px 8px;
+  word-break: break-all;
+}
+
+.badge {
+  font-size: 11.5px;
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-radius: 2px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.when {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--surface);
+  color: inherit;
+  padding: 6px 12px;
+  font-size: 13.5px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--ink-2);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.pri {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.field input,
+.field textarea,
+.field select {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  padding: 7px 9px;
+}
+
+.field textarea {
+  min-height: 68px;
+  resize: vertical;
+}
+
+.hours {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.day {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.day > span:first-child {
+  width: 2.2em;
+  color: var(--ink-2);
+  font-size: 13.5px;
+}
+
+.day input {
+  width: 6.5em;
+}
+
+@media (max-width: 560px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+}

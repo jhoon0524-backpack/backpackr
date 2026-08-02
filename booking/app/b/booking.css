@@ -1,0 +1,476 @@
+/*
+ * 공개 예약 페이지 컴포넌트 스타일 — docs/prd/prototype.html 의 <style> 에서
+ * 그대로 옮겼다. 목업이 디자인 확정본이라 값을 다시 만들지 않는다.
+ * 토큰과 기본 규칙은 app/globals.css 에 있다.
+ *
+ * 전역 CSS 지만 /b 에서만 import 하고, 다른 화면은 CSS 모듈을 써서 겹치지 않는다.
+ */
+/* ── 페이지 골격 ────────────────────────────────────── */
+
+  .stage {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 40px 20px 72px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+  }
+
+  .pane {
+    display: grid;
+    grid-template-columns: 264px 1fr;
+    min-height: 462px;
+  }
+
+  @media (max-width: 760px) {
+    .pane { grid-template-columns: 1fr; min-height: 0; }
+    .rail { border-right: none !important; border-bottom: 1px solid var(--line-soft); }
+  }
+
+  /* ── 좌측 레일 — 미팅 정보 ──────────────────────────── */
+
+  .rail {
+    border-right: 1px solid var(--line-soft);
+    padding: 30px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-size: 14px;
+    letter-spacing: -.02em;
+  }
+
+  .host {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .rail h1 {
+    font-family: var(--serif);
+    font-size: 27px;
+    line-height: 1.25;
+    font-weight: 500;
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    color: var(--ink-2);
+    font-size: 13.5px;
+  }
+
+  .meta div {
+    display: flex;
+    gap: 9px;
+    align-items: baseline;
+  }
+
+  .meta .k {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    flex: 0 0 52px;
+  }
+
+  .desc {
+    color: var(--ink-2);
+    font-size: 13.5px;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 14px;
+    margin-top: auto;
+  }
+
+  /* ── 우측 — 달력과 슬롯 ─────────────────────────────── */
+
+  .picker {
+    display: grid;
+    grid-template-columns: 1fr 148px;
+    gap: 26px;
+    padding: 30px 26px;
+  }
+
+  @media (max-width: 560px) {
+    .picker { grid-template-columns: 1fr; gap: 20px; }
+  }
+
+  .step {
+    font-size: 11.5px;
+    letter-spacing: .04em;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .month {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .month strong {
+    font-weight: 500;
+    font-size: 14.5px;
+  }
+
+  .nav { display: flex; gap: 3px; }
+
+  .nav button {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    color: var(--ink-2);
+    line-height: 1;
+  }
+
+  .nav button:hover:not(:disabled) { border-color: var(--line); }
+  .nav button:disabled { opacity: .25; cursor: default; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .grid .dow {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding-bottom: 6px;
+  }
+
+  .day {
+    aspect-ratio: 1;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .day.blank { cursor: default; }
+
+  .day.off {
+    color: var(--muted);
+    opacity: .38;
+    cursor: default;
+  }
+
+  .day.open {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .day.open:hover { border-color: var(--accent); }
+
+  .day.on {
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+
+  .tz {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .slot-head {
+    font-size: 13.5px;
+    margin-bottom: 10px;
+  }
+
+  .slots {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 310px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  @media (max-width: 560px) {
+    .slots { max-height: none; }
+  }
+
+  .slot {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 2px;
+    padding: 8px 0;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .slot:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+  .closed {
+    margin: 10px 0 0;
+    padding-top: 9px;
+    border-top: 1px solid var(--line-soft);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .empty {
+    font-size: 12.5px;
+    color: var(--muted);
+    padding: 6px 0;
+  }
+
+  /* ── 2단계 폼 ───────────────────────────────────────── */
+
+  .form { padding: 30px 26px; display: flex; flex-direction: column; gap: 16px; }
+
+  .picked {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    padding: 11px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .picked span {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--accent);
+  }
+
+  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  @media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.wide { grid-column: 1 / -1; }
+
+  .field label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .field .hint { color: var(--muted); opacity: .8; }
+
+  .field .err { font-size: 11.5px; color: var(--warn); }
+
+  .field input[aria-invalid="true"] { border-color: var(--warn); }
+
+  .linkish {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .linkish:hover { color: var(--ink-2); }
+
+  .result a[href] { color: var(--accent); }
+
+  .field input,
+  .field textarea {
+    font: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 8px 10px;
+    width: 100%;
+  }
+
+  .field textarea { resize: vertical; min-height: 62px; }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
+
+  .summary {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .summary .who { font-size: 15px; }
+
+  .summary .contact {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    word-break: break-all;
+  }
+
+  .summary .by {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 9px;
+    margin-top: 3px;
+  }
+
+  .summary .by span { font-size: 12px; color: var(--muted); }
+
+  .consent {
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .consent input { margin-top: 4px; accent-color: var(--accent); }
+  .consent b { font-weight: 500; font-size: 13.5px; }
+  .consent p { margin: 3px 0 0; font-size: 12px; color: var(--muted); }
+
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 16px;
+  }
+
+  .foot p { margin: 0; font-size: 12px; color: var(--muted); }
+
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 2px;
+    padding: 8px 16px;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+
+  .btn:hover:not(:disabled) { border-color: var(--ink-2); }
+
+  .btn.pri {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .btn.pri:hover:not(:disabled) { filter: brightness(1.08); }
+
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn.sm { padding: 5px 11px; font-size: 12.5px; }
+
+  /* ── 결과 화면 ──────────────────────────────────────── */
+
+  .result {
+    padding: 44px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-start;
+    max-width: 560px;
+  }
+
+  .result h2 {
+    font-family: var(--serif);
+    font-size: 25px;
+    font-weight: 500;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .receipt {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 2px;
+    padding: 15px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+  }
+
+  .receipt .when {
+    font-family: var(--mono);
+    font-size: 14.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .receipt .who { font-size: 13px; color: var(--ink-2); }
+
+  .receipt a {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    word-break: break-all;
+  }
+
+  .result p { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+
+  .alert {
+    background: var(--warn-soft);
+    border: 1px solid var(--warn);
+    border-radius: 2px;
+    padding: 15px 18px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .alert b { font-weight: 500; color: var(--warn); }
+  .alert p { font-size: 13px; color: var(--ink-2); }
+
+  .row { display: flex; flex-wrap: wrap; gap: 9px; }
+
+  .note {
+    max-width: 940px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .note code {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    background: var(--fill);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
