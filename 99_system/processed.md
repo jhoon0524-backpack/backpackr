@@ -5,4 +5,4 @@
 
 형식: `- 00_raw/파일명 — YYYY-MM-DD`
 
-(없음)
+- 00_raw/karpathy-llm-wiki.md — 2026-08-01
