@@ -46,6 +46,7 @@ YYYY-MM-DD | {영역} | {결정} | {근거 한 줄} | {출처 링크}
 |---|---|---|
 | 2026-08-02 | `strategy-review` 스킬을 폐기한다. 레포에 편입하지 않는다 | PO 지시 |
 | 2026-08-02 | `creator-trend-newsletter`·`tumblbug-trend-roulette`를 PO 에이전트에서 제외한다 | PO 업무가 아닌데 섞여 들어갔다 |
+| 2026-08-02 | `strategy-doc`·`gmv-dashboard-update`를 PO 에이전트에서 제외한다 | PO 지시 |
 
 **폐기와 범위 밖은 다르다.** `strategy-review`는 안 쓰기로 한 것이고, 뉴스레터·룰렛은
 스킬 자체는 멀쩡하나 PO 에이전트에 속하지 않는 것이다. 나중에 뉴스레터가 다시 필요해지면

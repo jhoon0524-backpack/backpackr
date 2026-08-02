@@ -43,7 +43,6 @@ po/context/     사실 — 사람이 관리한다
 | `prd` | PRD 1장 | **구버전** — 157줄, Step 2.5 게이트 리뷰 없음. v2로 교체 필요 |
 | `validate` | 검증 리포트 | **구버전** — 집계 함정 taxonomy 병합 전 |
 | `strategy-review` | 착수 게이트 판정 | **폐기 (2026-08-02)** — 편입하지 않는다 |
-| `strategy-doc` | 전략 문서 갱신 | 개인 스킬로만 존재, 레포 이관 필요 |
 | `plan-review` | 개발 계획 리뷰 | 미설치 |
 | `weekly-report` | 주간 리포트 | 미설치 |
 | `pre-prd` | PRD 전 정리 | 미설치 |
@@ -53,8 +52,9 @@ po/context/     사실 — 사람이 관리한다
 | `handoff` | 개발 착수 문서 | 미구현 — `docs/prd/handoff.md`에서 역추출 예정 |
 | `retro` | 출시 후 지표 대조 | 미구현 — 지표 접근 경로 확보 후 |
 
-범위 밖이라 제외한 것 (2026-08-02): `creator-trend-newsletter`, `tumblbug-trend-roulette`.
-스킬이 나빠서가 아니라 PO 업무가 아니라서다. 필요하면 별도 레포에서 관리한다.
+범위 밖이라 제외한 것 (2026-08-02): `creator-trend-newsletter`, `tumblbug-trend-roulette`,
+`strategy-doc`, `gmv-dashboard-update`. 스킬이 나빠서가 아니라 PO 에이전트에 속하지 않아서다.
+필요하면 별도 레포에서 관리한다.
 
 ## 정본이 어디인가
 
