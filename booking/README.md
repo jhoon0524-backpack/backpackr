@@ -203,4 +203,3 @@ MAIL_ADMIN_TO             # 실패 알림 수신 주소
 
 **비밀 값은 Vercel 환경 변수와 각 서비스 콘솔에만 둔다.** `.env.local` 은 gitignore 되어 있고 커밋한 적 없다. `SUPABASE_SERVICE_ROLE_KEY` 와 `TOKEN_ENC_KEY` 는 대화나 문서에 남기지 않는다.
 
-**남은 정리 두 가지.** 구글 클라이언트 시크릿은 설정 과정에서 대화창을 거쳤으므로 GCP 콘솔에서 새로 발급하고 Vercel 값만 갈아끼우는 게 좋다(Supabase Providers 쪽 값도 같이 바꿔야 한다 — 같은 값을 두 곳이 쓴다). 그리고 Vercel 이 개인 `Hobby` 요금제인데 약관상 상업적 용도가 아니므로, 회사에서 계속 쓰려면 팀 요금제로 옮겨야 한다.
