@@ -119,11 +119,13 @@ Pretendard 는 브랜드 파일이 지정한 CDN 에서 받는다.
 
 `app/api/cron/purge` + `vercel.json` — 파기(handoff 6장). 쿼리 하나가 전부고 멱등하다. Vercel Cron 은 UTC 로 도므로 04:30 KST 는 `30 19 * * *`(전날 19:30 UTC)다. `CRON_SECRET` 을 확인하지 않으면 누구나 부를 수 있는 공개 경로가 된다.
 
-`lib/mail.ts` — 확정·취소 메일. Resend HTTP API 로 보낸다.
+`lib/mail.ts` — 확정·취소 메일. Gmail API 로 **담당자 계정에서** 보낸다.
 
-**SMTP 대신 HTTP 를 고른 이유는 준비물이 API 키 하나로 끝나서다.** 호스트·포트·계정·비밀번호가 없고 의존성도 늘지 않는다 — 구글 캘린더를 SDK 없이 부른 것과 같은 이유다.
+**SMTP 대신 HTTP 를 고른 이유는 준비물이 토큰 하나로 끝나서다.** 호스트·포트·계정·비밀번호가 없고 의존성도 늘지 않는다 — 구글 캘린더를 SDK 없이 부른 것과 같은 이유다. 발송 전용 서비스(Resend)를 쓰려면 발신 도메인 DNS 등록이 먼저인데 그 레코드를 넣어 줄 수 있는 사람이 우리 밖에 있었고, 담당자 로그인이 이미 구글 토큰을 내주므로 `gmail.send` 를 스코프에 얹는 쪽을 골랐다.
 
-**From 은 시스템 고정 주소고 담당자 이름은 표시 이름으로만 넣는다.** From 을 실제 담당자 주소로 바꾸면 두 가지를 잃는다 — 주소 오타로 인한 반송 메일이 담당자 개인 받은편지함으로 흩어져 시스템이 실패를 관측하지 못하고(발송 API 는 성공이라 `sync_error` 도 안 찍힌다), 담당자가 바뀌면 과거 예약자의 회신 경로가 끊긴다. 회신은 `Reply-To` 가 받는다.
+**그래서 From 이 담당자 본인 주소다.** Gmail 은 인증한 계정 명의로만 보내서 시스템 고정 주소를 쓸 수 없다. 대가로 하나를 잃는다 — 신청자 주소 오타로 생긴 반송이 담당자 개인 받은편지함으로 흩어져 시스템이 실패를 관측하지 못한다(발송 API 는 큐잉 성공이라 `sync_error` 도 안 찍힌다). 반송을 받는 담당자가 그 예약의 당사자라 사람이 먼저 알아챈다는 쪽에 걸었다. From 이 곧 회신 주소가 되므로 `Reply-To` 는 없앴다.
+
+**한글 제목과 본문은 인코딩을 거친다.** 제목은 RFC 2047 (`=?UTF-8?B?…?=`), 본문은 UTF-8 base64 를 76자로 접는다. 원문 그대로 넣으면 깨진다 — `lib/mail.test.ts` 가 그 왕복을 검사한다.
 
 **`sync_error` 를 찍는 것이 알림 발송보다 먼저다.** 메일 서비스가 통째로 죽은 상황이면 담당자 알림 메일도 같이 실패한다. 컬럼을 먼저 찍어야 어드민 목록의 뱃지로 남는다. 그래서 알림 발송 실패는 삼킨다 — 거기서 더 할 수 있는 일이 없다.
 
@@ -141,59 +143,45 @@ Pretendard 는 브랜드 파일이 지정한 CDN 에서 받는다.
 
 아직 확인 못 한 것:
 
-- **발신 도메인** — 진행 중이다. 아래 "이어서 할 일" 참고
+- **Gmail 발송** — 코드와 테스트는 통과했지만 실제 왕복은 아직이다. GCP 범위 추가와 담당자 재로그인이 선행돼야 한다. 아래 "이어서 할 일" 참고
 - handoff 8장의 적대적 항목들 — 같은 슬롯 동시 요청 2건 → 1건만 성공, 미팅 2시간 이내 취소 → 409, 취소 후 같은 슬롯 재예약 반복
 - 파기 Cron (하루 한 번 도는 것이라 관찰에 시간이 걸린다)
 
 단위 테스트 65건은 `fetch` 를 스텁으로 막고 도는 것이라 위 항목들을 대신하지 못한다.
 
-## 이어서 할 일 — 발신 도메인 등록
+## 이어서 할 일 — 담당자 재로그인
 
-**지금 막혀 있는 것은 이것 하나다.** 나머지는 다 돌아간다.
+**코드 쪽은 끝났다.** 남은 것은 사람이 한 번씩 눌러야 하는 두 가지다.
 
-지금 발신 주소가 Resend 기본값(`onboarding@resend.dev`)이라 **Resend 가입 주소로만 발송이 허용된다.** 그래서 외부인이 예약하면 확정 메일이 안 간다. 확정 메일이 예약자에게 먼저 나가고 담당자 알림이 그 다음이라, 첫 발송이 막히면 **담당자 알림까지 함께 죽는다** — 예약은 정상으로 저장되고 캘린더 일정도 생기지만 양쪽 다 메일을 못 받는다. 구글 캘린더 초대는 구글이 담당자 계정에서 직접 보내므로 이 경로와 무관하게 나간다.
+발송을 Resend 에서 **Gmail API** 로 옮겼다. 담당자 로그인이 이미 구글 토큰을 내주므로, 스코프에 `gmail.send` 를 얹으면 그 토큰으로 바로 보낼 수 있다. 발신 도메인 DNS 등록(SPF·MX·DKIM 3건)을 기다릴 이유가 없어졌고 — 그 레코드를 넣어 줄 수 있는 사람이 우리 밖에 있었다 — 새 계정도, 새 비밀 값도, 새 의존성도 없다. 그 판단의 배경과 대가로 잃은 것은 `lib/mail.ts` 머리말에 적어 두었다.
 
-취소 링크가 확정 메일 안에만 있어서, 메일이 막힌 동안은 **예약자가 스스로 취소할 수 없다.** 담당자가 어드민에서 대신 취소한다.
+### 남은 두 가지
 
-### 상태
+1. **GCP `Meetingtime` 프로젝트에서 Gmail 을 연다.** `API 및 서비스` → `Gmail API` 사용 설정. 그리고 OAuth 동의 화면(새 UI 는 `Google 인증 플랫폼` → `데이터 액세스`)에 `.../auth/gmail.send` 범위 추가. **내부(Internal) 앱이라 구글 심사가 없다** — 저장하면 바로 적용된다.
+2. **담당자 전원 `/admin` 에서 로그아웃 → 재로그인.** 스코프가 늘었으므로 예전 토큰에는 발송 권한이 없다. 그대로 두면 발송이 403 으로 떨어진다. `app/auth/login/route.ts` 가 `prompt=consent` 를 실어 보내므로 재로그인하면 새 토큰이 확실히 온다.
 
-Resend 에 `backpac.kr` 등록까지 했다. 리전은 `ap-northeast-1`(도쿄). **DNS 레코드 3건을 AWS 담당자가 넣어주기를 기다리는 중이다.**
+그다음 **`@backpac.kr` 이 아닌 외부 주소로 예약을 넣어** 확정 메일·담당자 알림·취소 메일이 다 도착하는지 본다. 어드민 목록에 `MAIL` 뱃지가 안 뜨는 것으로도 보인다.
 
-`backpac.kr` 의 DNS 는 **Route 53** 에 있다(Resend 가 네임서버를 보고 감지했다).
+### 이 전환으로 바뀐 것
 
-**루트(`@`)에 들어가는 레코드가 하나도 없다.** Resend 가 SPF·MX 를 `send.` 하위에 깔고 DKIM 만 `resend._domainkey` 에 두는 구조라, 구글 워크스페이스의 기존 MX·SPF 와 충돌하지 않는다. 그래서 기존 SPF 를 합치는 작업이 필요 없다 — 추가 3건뿐이고 수정·삭제가 없다.
-
-| 이름 (Route 53 이 `.backpac.kr` 을 붙인다) | 타입 | 값 |
-|---|---|---|
-| `resend._domainkey` | TXT | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaaUlCXFBBFzhNbwoClZcJdYcrkIkeZKNNf189CZDVmCpaCaa/JNlYXb4fKp39KsyRj6mVidtp/FimqoLxz5/pLf12ZGDZUPJJ2S+/py/uGqFP6y6/qxpM9djHk7StSHsWmsv4C5eH4pz0OJs4nliLv161djnND5hepuAYPdk+dQIDAQAB` |
-| `send` | MX | `10 feedback-smtp.ap-northeast-1.amazonses.com` |
-| `send` | TXT | `v=spf1 include:amazonses.com ~all` |
-
-DKIM 값은 218자라 Route 53 의 255자 한도 안에 들어온다 — **문자열을 나눌 필요가 없다.** TXT 두 건은 Route 53 규칙상 큰따옴표로 감싸고, MX 는 감싸지 않는다. `send` 가 MX·TXT 로 두 번 나오는데 타입이 달라 별도 레코드다.
-
-이 값들은 전부 공개 DNS 레코드라 대화나 문서에 남겨도 된다. DKIM 은 **공개** 키다.
-
-### DNS 반영 뒤
-
-1. Resend 도메인 화면에서 `I've already added the records` → `Verified` 확인
-2. Vercel 환경 변수 `MAIL_FROM` 을 **`project-outreach@backpac.kr`** 로 변경 후 재배포
-3. **가입 주소가 아닌 외부 메일 주소로 예약을 넣어 확정 메일이 도착하는지 확인.** 이걸 해야 실제로 풀린 것이다 — 어드민 목록에 `MAIL` 뱃지가 안 뜨는 것으로도 보인다
-4. 취소 메일도 같은 방법으로 확인
-
-`project-outreach@backpac.kr` 을 **구글 워크스페이스에 그룹이나 별칭으로 만들어 두는 게 좋다.** 코드가 `Reply-To` 를 담당자 실제 주소로 넣지만, 일부 메일 앱은 From 으로 답장한다 — 받는 주소가 없으면 그 답장이 반송된다.
+- **From 이 담당자 본인 주소다.** Gmail 은 인증한 계정 명의로만 보내서 시스템 고정 주소를 쓸 수 없다. From 이 곧 회신 주소가 되므로 `Reply-To` 는 없앴다.
+- `RESEND_API_KEY` 와 `MAIL_FROM` 을 **더 이상 읽지 않는다.** Vercel 에서 지워도 된다.
+- 신청자 주소 오타로 생긴 반송이 담당자 개인 받은편지함으로 간다 — 시스템은 그 실패를 관측하지 못한다. 반송을 받는 담당자가 그 예약의 당사자라 사람이 먼저 알아챈다는 쪽에 걸었다.
+- 담당자의 구글 연동이 끊긴 상태에서 취소하면 취소 메일이 나가지 않고 `sync_error='MAIL'` 이 찍힌다. 담당자 계정으로 보내니 따라오는 결과다 — 그 상태면 캘린더도 같이 끊겨 새 예약은 어차피 안 받아진다.
+- 확정 메일이 예약자에게 먼저 나가고 담당자 알림이 그 다음인 순서는 그대로다. 다만 **첫 발송이 막혀 담당자 알림까지 함께 죽던 문제는 사라졌다** — 수신자 제한이 없어졌다.
 
 ## 팀에 공유해도 되는가
 
 **담당자로 쓰는 것은 지금도 된다.** `/admin` 주소만 주면 각자 본인 구글 계정으로 로그인하고 그 순간 본인 캘린더가 연동된다. 조회가 전부 `member_id` 로 걸려 있어 서로의 예약 유형과 예약이 보이지 않는다. 구글 OAuth 가 **내부(Internal)** 라 `@backpac.kr` 계정만 로그인된다 — 주소를 알아도 외부인은 못 들어온다.
 
-**외부 고객 대상으로 링크를 뿌리는 것은 발신 도메인 등록 뒤로 미루는 게 맞다.** 위에 쓴 대로 예약자가 확정 메일도 취소 수단도 못 받는다.
+**외부 고객 대상으로 링크를 뿌리기 전에 위 "이어서 할 일" 두 가지를 끝내야 한다.** 스코프를 추가하고 재로그인하기 전까지는 발송이 403 으로 떨어져 예약자가 확정 메일도 취소 수단도 못 받는다.
 
 ## 준비물
 
 - ~~Supabase 프로젝트~~ — ref `rmphmbcoaccupfllrwvn`, 리전 ap-northeast-2. 회사 계정(khan@backpac.kr) 조직 아래에 있다
 - ~~GCP 프로젝트 + OAuth 클라이언트~~ — 프로젝트 `Meetingtime`. **대상은 내부(Internal)** 라 refresh token 7일 만료 제한이 없다. 승인된 리디렉션 URI 는 `https://rmphmbcoaccupfllrwvn.supabase.co/auth/v1/callback` — 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
 - ~~Supabase Authentication → Providers → Google~~ — 클라이언트 ID·시크릿 입력 완료. **스코프는 대시보드에 넣지 않는다.** 이 버전에는 그 칸이 없고, `app/auth/login/route.ts` 가 요청마다 직접 실어 보낸다
-- ~~Resend API 키~~ — 발급해서 넣었다. 확정·취소 메일이 실제로 오가는 것을 확인했다. **다만 발신 도메인이 아직 `onboarding@resend.dev` 라 Resend 가입 주소(khan@backpac.kr)로만 발송된다** — 아래 "이어서 할 일" 참고
+- ~~메일 발송~~ — **Gmail API 로 담당자 계정에서 보낸다.** 준비물이 따로 없다. 로그인 때 받는 토큰을 그대로 쓰므로 API 키도 발신 도메인 등록도 필요 없다. 다만 GCP 에서 Gmail API 사용 설정과 `gmail.send` 범위 추가가 선행돼야 한다 — 아래 "이어서 할 일" 참고. (Resend 연동은 걷어냈다)
 
 **환경 변수**
 
@@ -206,13 +194,13 @@ GOOGLE_CLIENT_SECRET      # access token 갱신에 쓴다. Supabase 에 넣는 �
 TOKEN_ENC_KEY             # refresh token 봉인 키. openssl rand -base64 32
 BOOKING_BASE_URL
 CRON_SECRET               # Vercel Cron 이 Authorization 헤더로 보낸다
-RESEND_API_KEY
-MAIL_FROM                 # 시스템 고정 발신 주소. 담당자 주소를 넣지 않는다
 MAIL_ADMIN_TO             # 실패 알림 수신 주소
 ```
 
+메일 발송용 변수는 없다 — 담당자 토큰으로 보내므로 발신 주소가 곧 담당자 주소다. `RESEND_API_KEY` 와 `MAIL_FROM` 은 이제 아무 데서도 읽지 않는다.
+
 `GOOGLE_REDIRECT_URI` 는 없다 — 우리가 코드 교환을 하지 않는다.
 
-**비밀 값은 Vercel 환경 변수와 각 서비스 콘솔에만 둔다.** `.env.local` 은 gitignore 되어 있고 커밋한 적 없다. `SUPABASE_SERVICE_ROLE_KEY` 와 `RESEND_API_KEY` 는 대화나 문서에 남기지 않는다.
+**비밀 값은 Vercel 환경 변수와 각 서비스 콘솔에만 둔다.** `.env.local` 은 gitignore 되어 있고 커밋한 적 없다. `SUPABASE_SERVICE_ROLE_KEY` 와 `TOKEN_ENC_KEY` 는 대화나 문서에 남기지 않는다.
 
 **남은 정리 두 가지.** 구글 클라이언트 시크릿은 설정 과정에서 대화창을 거쳤으므로 GCP 콘솔에서 새로 발급하고 Vercel 값만 갈아끼우는 게 좋다(Supabase Providers 쪽 값도 같이 바꿔야 한다 — 같은 값을 두 곳이 쓴다). 그리고 Vercel 이 개인 `Hobby` 요금제인데 약관상 상업적 용도가 아니므로, 회사에서 계속 쓰려면 팀 요금제로 옮겨야 한다.

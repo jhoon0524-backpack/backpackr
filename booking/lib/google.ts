@@ -17,11 +17,17 @@ const CALENDAR_URL = "https://www.googleapis.com/calendar/v3";
 
 /**
  * 로그인 때 요청하는 스코프. 전체 권한(`.../auth/calendar`)은 넣지 않는다 —
- * 이 두 개로 아래 호출이 전부 커버된다.
+ * 앞 두 개로 이 파일의 호출이 전부 커버된다.
+ *
+ * `gmail.send` 는 캘린더가 아니라 확정·취소 메일용이다(`lib/mail.ts`). 발송을
+ * 담당자 계정 명의로 하기 때문에 로그인 때 같이 받아 둔다 — 발송 시점에는
+ * 동의를 받을 화면이 없다. 스코프가 늘었으므로 **기존 담당자는 한 번 재로그인해야
+ * 한다.** 예전 토큰에는 이 권한이 없어 발송이 403 으로 떨어진다.
  */
 export const SCOPES = [
   "https://www.googleapis.com/auth/calendar.freebusy",
   "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/gmail.send",
 ];
 
 /**

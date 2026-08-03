@@ -151,8 +151,8 @@ export async function confirm(
   }
 
   // 4. 여기서부터는 예약이 유효하다. 메일 실패로 예약을 되돌리지 않는다.
-  const host = await hostProfile(page.member_id);
-  await withMailErrorRecorded(data.seq, `확정 메일 (${data.id})`, () =>
+  const host = { ...(await hostProfile(page.member_id)), token: calendar.token };
+  await withMailErrorRecorded(data.seq, calendar.token, `확정 메일 (${data.id})`, () =>
     sendConfirmed(mailBooking(data.id, startAt, page, guest), host),
   );
 
@@ -179,11 +179,14 @@ function mailBooking(
 /**
  * 메일이 실패하면 `sync_error='MAIL'` 을 찍고 담당자에게 알린다. 재시도하지 않는다.
  *
- * **컬럼을 찍는 것이 알림 발송보다 먼저다.** 메일 서비스가 통째로 죽은 상황이면
+ * **컬럼을 찍는 것이 알림 발송보다 먼저다.** 메일 경로가 통째로 죽은 상황이면
  * 담당자 알림 메일도 같이 실패한다. 컬럼을 먼저 찍어야 어드민 목록에 남는다.
+ *
+ * `token` 이 null 이면 연동이 끊긴 것이라 알릴 수단 자체가 없다 — 뱃지만 남긴다.
  */
 async function withMailErrorRecorded(
   seq: number,
+  token: string | null,
   what: string,
   send: () => Promise<void>,
 ): Promise<void> {
@@ -191,7 +194,7 @@ async function withMailErrorRecorded(
     await send();
   } catch (e) {
     await addSyncError(seq, "MAIL");
-    await notifyFailure(`${what} 발송 실패`, String(e));
+    if (token) await notifyFailure(token, `${what} 발송 실패`, String(e));
   }
 }
 
@@ -249,30 +252,37 @@ export async function cancel(
     .eq("canceled_ref", 0);
   if (error) throw new Error(`취소 저장 실패: ${error.message}`);
 
+  // 이벤트 삭제와 취소 메일이 같은 담당자 토큰을 쓴다 — 연동을 한 번만 부른다.
+  const calendar = await connection(page.member_id);
+
   if (booking.gcal_event_id) {
-    const calendar = await connection(page.member_id);
     try {
       if (!calendar) throw new Error("연동이 끊겨 이벤트를 지울 수 없다");
       await deleteEvent(calendar.token, calendar.calendarId, booking.gcal_event_id);
     } catch (e) {
       await addSyncError(booking.seq, "CAL_DELETE");
-      await notifyFailure(`캘린더 이벤트 삭제 실패 (${booking.id})`, String(e));
+      if (calendar) {
+        await notifyFailure(calendar.token, `캘린더 이벤트 삭제 실패 (${booking.id})`, String(e));
+      }
     }
   }
 
   // 파기된 예약에는 보낼 주소가 없다. 3개월 지난 건을 담당자가 취소하는 경우다.
   const guestEmail = booking.guest_email;
   if (guestEmail) {
-    const host = await hostProfile(page.member_id);
-    await withMailErrorRecorded(booking.seq, `취소 메일 (${booking.id})`, () =>
-      sendCanceled(
+    const token = calendar?.token ?? null;
+    await withMailErrorRecorded(booking.seq, token, `취소 메일 (${booking.id})`, async () => {
+      // 담당자 명의로 보내므로 연동이 끊기면 보낼 수단이 없다. 던져서 MAIL 을 남긴다.
+      if (!calendar) throw new Error("구글 연동이 끊겨 취소 메일을 보낼 수 없다");
+      const host = { ...(await hostProfile(page.member_id)), token: calendar.token };
+      await sendCanceled(
         mailBooking(booking.id, Date.parse(booking.start_at), page, {
           name: booking.guest_name ?? "",
           email: guestEmail,
         }),
         host,
-      ),
-    );
+      );
+    });
   }
 
   return { ok: true };
