@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 
 import { dateTime } from "@/lib/format";
 
+import { CopyButton } from "./CopyButton";
 import { Prefill } from "./Prefill";
 import styles from "./admin.module.css";
 
@@ -171,9 +172,7 @@ function Item({ page, onChange }: { page: AdminPage; onChange: () => void }) {
       <div className={styles.link}>{page.url}</div>
 
       <div className={styles.actions}>
-        <button className={styles.btn} onClick={() => navigator.clipboard.writeText(page.url)}>
-          링크 복사
-        </button>
+        <CopyButton text={page.url} label="링크 복사" />
         <button className={styles.btn} onClick={() => setShowPrefill(!showPrefill)}>
           맞춤 링크
         </button>

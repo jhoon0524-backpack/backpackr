@@ -8,6 +8,7 @@
  */
 import { useState } from "react";
 
+import { CopyButton } from "./CopyButton";
 import styles from "./admin.module.css";
 
 const FIELDS = [
@@ -41,9 +42,7 @@ export function Prefill({ url }: { url: string }) {
       </div>
       <div className={styles.link}>{link}</div>
       <div className={styles.actions}>
-        <button className={styles.btn} onClick={() => navigator.clipboard.writeText(link)}>
-          맞춤 링크 복사
-        </button>
+        <CopyButton text={link} label="맞춤 링크 복사" />
       </div>
     </>
   );
