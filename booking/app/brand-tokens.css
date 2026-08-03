@@ -1,0 +1,203 @@
+/**
+ * Backpackr Brand Design Tokens — Drop-in CSS
+ *
+ * Source of truth (2026-04-29):
+ * - workinghour_mgmt design-system v3.1
+ * - azit 2026-04-29 brand-orange 톤 변경 (#F84602 → #ED6E33)
+ *
+ * Usage:
+ *   @import './tokens.css';        // import in your globals.css / app.css
+ *
+ * Includes:
+ *   1. Pretendard Variable web font (CDN)
+ *   2. CSS custom properties for brand palette + semantic mapping (light + dark)
+ *   3. Tailwind utility classes (.bg-brand-*, .text-brand-*, .border-brand-*)
+ *   4. Display typography utilities (text-display-{xl,l,m,s})
+ *
+ * Dark mode toggle: relies on `html.dark { ... }`. Compatible with next-themes
+ * (`attribute="class"`) or any theme manager that toggles `.dark` on <html>.
+ */
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+/* ─────────────────────────────────────────────
+ * 1. Brand palette (light mode + token base)
+ * ───────────────────────────────────────────── */
+:root {
+  /* base */
+  --brand-black: #1a1a1a;
+  --brand-gray:  #bfbfbf;
+
+  /* HYPER FOR GROWTH */
+  --brand-blue:        #189dff;
+  --brand-blue-soft:   #e1f4ff;
+  --brand-blue-strong: #007ce0;
+
+  /* ONE TEAM FOR MISSION */
+  --brand-green:        #00a849;
+  --brand-green-soft:   #d6f7e3;
+  --brand-green-strong: #008a3a;
+
+  /* ACTION FOR WINNING (2026-04-29: vivid red-orange → burnt terracotta) */
+  --brand-orange:        #ed6e33;
+  --brand-orange-soft:   #fbe2d2;
+  --brand-orange-strong: #b2491d;
+
+  /* ─── 타이포 ─── */
+  --font-sans:    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+  --font-mono:    ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, monospace;
+
+  /* ─── 시멘틱 (라이트 모드) ─── */
+  --background: #ffffff;
+  --foreground: var(--brand-black);
+
+  --primary:            var(--brand-black);
+  --primary-foreground: #ffffff;
+
+  --secondary:            #f9fafb;
+  --secondary-foreground: var(--brand-black);
+
+  --accent:            var(--brand-orange);
+  --accent-foreground: #ffffff;
+
+  --muted:            #f4f4f5;
+  --muted-foreground: #64748b;
+
+  --card:                #ffffff;
+  --card-foreground:     var(--brand-black);
+  --popover:             #ffffff;
+  --popover-foreground:  var(--brand-black);
+
+  --surface:       #f9fafb;
+  --surface-hover: #f3f4f6;
+
+  --border: #e4e4e7;
+  --input:  #e4e4e7;
+  --ring:   var(--brand-orange);
+
+  --destructive:            #dc2626;
+  --destructive-foreground: #ffffff;
+
+  --warning: #f59e0b; /* amber-500 — brand 외부 시스템 색 (의도) */
+
+  --point: var(--brand-orange-strong); /* CTA orange 와 시각 차별화 */
+
+  /* ─── 형태 ─── */
+  --radius: 1rem;
+}
+
+html { color-scheme: light; }
+html.light { color-scheme: light; }
+
+/* ─────────────────────────────────────────────
+ * 2. Dark mode shifts
+ * ───────────────────────────────────────────── */
+html.dark {
+  color-scheme: dark;
+
+  --background: var(--brand-black);
+  --foreground: #fafafa;
+
+  --primary:            #f4f4f5;
+  --primary-foreground: var(--brand-black);
+
+  --secondary:            #262626;
+  --secondary-foreground: #fafafa;
+
+  --accent:            #f08654; /* 다크 가독성 보정 */
+  --accent-foreground: #ffffff;
+
+  --muted:            #262626;
+  --muted-foreground: #a1a1aa;
+
+  --card:               #262626;
+  --card-foreground:    #fafafa;
+  --popover:            #262626;
+  --popover-foreground: #fafafa;
+
+  --surface:       #1f1f1f;
+  --surface-hover: #2a2a2a;
+
+  --border: #3f3f46;
+  --input:  #3f3f46;
+  --ring:   #f08654;
+
+  --destructive:            #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* 브랜드 컬러 다크 시프트 (모두 base 톤 보정) */
+  --brand-blue:        #4cb6ff;
+  --brand-blue-soft:   #1a3a55;
+  --brand-blue-strong: #189dff;
+
+  --brand-green:        #20c060;
+  --brand-green-soft:   #1a3a25;
+  --brand-green-strong: #00a849;
+
+  --brand-orange:        #f08654;
+  --brand-orange-soft:   #4a2818;
+  --brand-orange-strong: #f8a37a;
+}
+
+/* ─────────────────────────────────────────────
+ * 3. Base body styles
+ * ───────────────────────────────────────────── */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01', 'ss03', 'ss04';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── 헤드라인: 굵은 산세리프 (브랜드 시그니처) ─── */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+h1 { font-weight: 900; letter-spacing: 0; }
+
+/* ─────────────────────────────────────────────
+ * 4. Display typography utilities
+ * ───────────────────────────────────────────── */
+.text-display-xl { font-size: 4rem;    line-height: 1.05; letter-spacing: 0; font-weight: 900; }
+.text-display-l  { font-size: 3rem;    line-height: 1.1;  letter-spacing: 0; font-weight: 900; }
+.text-display-m  { font-size: 2.25rem; line-height: 1.15; letter-spacing: 0; font-weight: 800; }
+.text-display-s  { font-size: 1.75rem; line-height: 1.2;  letter-spacing: 0; font-weight: 800; }
+
+@media (min-width: 768px) {
+  .text-display-xl { font-size: 5.5rem; }
+  .text-display-l  { font-size: 3.75rem; }
+}
+
+/* ─────────────────────────────────────────────
+ * 5. Brand color utility classes
+ * (Tailwind v4 @theme inline 미사용 시에도 동작하도록 직접 정의)
+ * ───────────────────────────────────────────── */
+.bg-brand-blue          { background-color: var(--brand-blue); }
+.bg-brand-blue-soft     { background-color: var(--brand-blue-soft); }
+.bg-brand-blue-strong   { background-color: var(--brand-blue-strong); }
+.bg-brand-green         { background-color: var(--brand-green); }
+.bg-brand-green-soft    { background-color: var(--brand-green-soft); }
+.bg-brand-green-strong  { background-color: var(--brand-green-strong); }
+.bg-brand-orange        { background-color: var(--brand-orange); }
+.bg-brand-orange-soft   { background-color: var(--brand-orange-soft); }
+.bg-brand-orange-strong { background-color: var(--brand-orange-strong); }
+.bg-brand-black         { background-color: var(--brand-black); }
+
+.text-brand-blue          { color: var(--brand-blue); }
+.text-brand-blue-strong   { color: var(--brand-blue-strong); }
+.text-brand-green         { color: var(--brand-green); }
+.text-brand-green-strong  { color: var(--brand-green-strong); }
+.text-brand-orange        { color: var(--brand-orange); }
+.text-brand-orange-strong { color: var(--brand-orange-strong); }
+.text-brand-black         { color: var(--brand-black); }
+
+.border-brand-blue   { border-color: var(--brand-blue); }
+.border-brand-green  { border-color: var(--brand-green); }
+.border-brand-orange { border-color: var(--brand-orange); }

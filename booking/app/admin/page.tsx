@@ -1,4 +1,6 @@
 /** 담당자 화면 ① — 로그인 게이트와 콘솔. */
+import Image from "next/image";
+
 import { host } from "@/lib/supabase";
 
 import { Console } from "./Console";
@@ -22,6 +24,7 @@ export default async function Admin({
 
   return (
     <div className={styles.page}>
+      <Image className={styles.logo} src="/logo.png" alt="백패커" width={2000} height={566} priority />
       <div className={styles.head}>
         <h1>미팅 예약 링크</h1>
         {user && (

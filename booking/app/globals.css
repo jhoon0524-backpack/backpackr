@@ -1,101 +1,73 @@
 /*
- * 디자인 토큰과 기본 규칙 — docs/prd/prototype.html 에서 옮긴 것.
- * 공개 화면과 담당자 화면이 같은 값을 본다.
+ * 디자인 토큰 — 회사 브랜드 소스를 그대로 쓴다.
+ *
+ * brand-tokens.css 는 bpk-culturedeck 의 assets/tokens.css 원본이다. 손대지 않는다.
+ * 회사가 갱신하면 파일만 갈아끼우면 되도록 두었다.
+ *
+ * 아래 :root 는 목업(prototype.html)에서 물려받은 이름들을 브랜드 값에 잇는 얇은 층이다.
+ * 화면 CSS 는 전부 이 이름들만 쓰므로 값이 여기 한 곳에서 바뀐다 — 실제로 화면 CSS 에는
+ * 하드코딩된 색이 하나도 없어서, 이 매핑만으로 전체가 브랜드로 넘어간다.
  */
+@import "./brand-tokens.css";
 
-  :root {
-    --ink: #16191c;
-    --ink-2: #414a4c;
-    --muted: #6d7879;
-    --paper: #eef1f1;
-    --surface: #ffffff;
-    --line: #c5cdcd;
-    --line-soft: #dde3e3;
-    --fill: #dfe5e5;
-    --accent: #0b6e5f;
-    --accent-ink: #ffffff;
-    --accent-soft: #dcebe7;
-    --warn: #a8481a;
-    --warn-soft: #f6e5da;
-    --tool: #3c3f52;
-    --tool-ink: #e8e9f0;
+:root {
+  /* 글자 */
+  --ink: var(--foreground);
+  --ink-2: #3f3f46;
+  --ink-3: var(--muted-foreground);
 
-    --serif: ui-serif, Georgia, "Nimbus Roman", "Times New Roman", serif;
-    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif;
-    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, "DejaVu Sans Mono", monospace;
-  }
+  /* 면 — 페이지는 옅게, 카드는 흰색. 카드가 배경에서 떠 보이게 하려는 것이다 */
+  --paper: var(--surface);
+  --panel: var(--card);
+  --fill: var(--muted);
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --ink: #e6eaea;
-      --ink-2: #b3bcbd;
-      --muted: #8a9495;
-      --paper: #121516;
-      --surface: #1a1e1f;
-      --line: #394142;
-      --line-soft: #2a3132;
-      --fill: #262d2e;
-      --accent: #5cb8a5;
-      --accent-ink: #0d1a18;
-      --accent-soft: #16302c;
-      --warn: #d4855c;
-      --warn-soft: #33221a;
-      --tool: #23252f;
-      --tool-ink: #c9ccd8;
-    }
-  }
+  /* 선 */
+  --line: var(--border);
+  --line-soft: color-mix(in srgb, var(--border) 55%, var(--background));
 
-  :root[data-theme="dark"] {
-    --ink: #e6eaea;
-    --ink-2: #b3bcbd;
-    --muted: #8a9495;
-    --paper: #121516;
-    --surface: #1a1e1f;
-    --line: #394142;
-    --line-soft: #2a3132;
-    --fill: #262d2e;
-    --accent: #5cb8a5;
-    --accent-ink: #0d1a18;
-    --accent-soft: #16302c;
-    --warn: #d4855c;
-    --warn-soft: #33221a;
-    --tool: #23252f;
-    --tool-ink: #c9ccd8;
-  }
+  /* 강조 — --accent 는 브랜드 파일이 정한다 (오렌지) */
+  --accent-ink: var(--accent-foreground);
+  --accent-soft: var(--brand-orange-soft);
 
-  :root[data-theme="light"] {
-    --ink: #16191c;
-    --ink-2: #414a4c;
-    --muted: #6d7879;
-    --paper: #eef1f1;
-    --surface: #ffffff;
-    --line: #c5cdcd;
-    --line-soft: #dde3e3;
-    --fill: #dfe5e5;
-    --accent: #0b6e5f;
-    --accent-ink: #ffffff;
-    --accent-soft: #dcebe7;
-    --warn: #a8481a;
-    --warn-soft: #f6e5da;
-    --tool: #3c3f52;
-    --tool-ink: #e8e9f0;
-  }
+  /*
+   * 경고는 빨강으로 간다. 목업에서는 주황이었는데, 브랜드 강조색이 주황이라
+   * 그대로 두면 "강조"와 "경고"가 같은 색이 된다. 실패 뱃지와 CTA 버튼이
+   * 나란히 놓이는 화면이 있어서 구분이 필요하다.
+   */
+  --warn: var(--destructive);
+  --warn-soft: color-mix(in srgb, var(--destructive) 12%, var(--background));
 
-  * { box-sizing: border-box; }
+  /*
+   * 목업은 제목에 세리프를 썼지만 브랜드는 굵은 산세리프가 시그니처다.
+   * 이름은 그대로 두고 값만 바꿔서 제목 스타일이 한 번에 넘어가게 한다.
+   */
+  --serif: var(--font-display);
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
 
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
+  /* --radius 는 브랜드 파일이 1rem 으로 정한다. 작은 요소용만 여기서 더한다 */
+  --radius-sm: 0.5rem;
+}
 
-  button { font: inherit; color: inherit; }
+* {
+  box-sizing: border-box;
+}
 
-  :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
