@@ -7,6 +7,7 @@
  * **슬롯은 예약 창 전체를 한 번에 받아 날짜별로 나눈다.** 날짜를 누를 때마다
  * 부르면 달을 넘길 때마다 왕복이 생기는데, 창이 14일이라 어차피 한 번에 들어온다.
  */
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
 import { DOW_KR, longDate, range } from "@/lib/format";
@@ -393,7 +394,7 @@ function Shell({
     <div className="stage">
       <div className="card">
         <div className="rail">
-          <div className="mark">{ORG.slice(0, 1)}</div>
+          <Image className="mark" src="/logo.png" alt={ORG} width={2000} height={566} priority />
           <div className="host">
             {hostName} · {ORG}
           </div>

@@ -92,7 +92,19 @@ npm test         # 슬롯 계산·구글 호출·봉인 테스트
 
 편집 폼에 앞뒤 여유 시간 설정이 없다. 막고 싶은 시간은 담당자가 자기 캘린더에 일정을 넣는 쪽이 정확하다 — freebusy 가 그 구간을 busy 로 돌려주므로 화면에서 할 일이 없다.
 
-디자인 토큰과 기본 규칙은 `app/globals.css` 로 옮겨 공개 화면과 담당자 화면이 같은 값을 본다. 웹폰트는 받지 않는다 — 목업이 시스템 폰트 스택을 쓴다.
+`app/brand-tokens.css` — 회사 브랜드 토큰(bpk-culturedeck `assets/tokens.css`) **원본 그대로**다. 손대지 않는다. 회사가 갱신하면 파일만 갈아끼우면 되도록 두었다.
+
+`app/globals.css` 는 목업에서 물려받은 토큰 이름을 브랜드 값에 잇는 얇은 층이다. **화면 CSS 에 하드코딩된 색이 하나도 없어서 이 매핑만으로 전체가 브랜드로 넘어간다.** 이름이 겹치던 둘(`--muted`·`--surface`)은 브랜드 파일이 다른 뜻으로 쓰고 있어 우리 쪽을 `--ink-3`·`--panel` 로 바꿨다 — 브랜드 파일을 건드리지 않으려는 것이다.
+
+**경고색만 목업과 다르게 갔다.** 목업에서 경고가 주황이었는데 브랜드 강조색이 주황이라, 그대로 두면 "강조"와 "경고"가 같은 색이 된다. 실패 뱃지와 CTA 버튼이 나란히 놓이는 화면이 있어서 경고를 `--destructive`(빨강)로 옮겼다.
+
+제목은 세리프에서 굵은 산세리프로 바뀐다. 브랜드 시그니처가 그쪽이라 `--serif` 의 값만 display 폰트로 바꿔 한 번에 넘겼다 — 이름은 그대로 둬서 화면 CSS 를 고칠 일이 없었다.
+
+로고는 워드마크 한 장(`public/logo.png`)만 쓴다. 원본이 검정 단색에 배경이 투명이라 다크에서 `filter: invert(1)` 로 흰 로고가 된다 — 파일을 둘 들고 다니지 않는다.
+
+브랜드 다크 모드는 `html.dark` 로 켜지는데(next-themes 규약) 이 앱에는 테마 토글이 없다. `app/layout.tsx` 가 OS 설정을 읽어 클래스만 붙인다. 이게 없으면 다크에서 토큰은 밝은 값 그대로인데 로고만 반전돼 흰 배경에 흰 로고가 된다.
+
+Pretendard 는 브랜드 파일이 지정한 CDN 에서 받는다.
 
 `app/api/cron/purge` + `vercel.json` — 파기(handoff 6장). 쿼리 하나가 전부고 멱등하다. Vercel Cron 은 UTC 로 도므로 04:30 KST 는 `30 19 * * *`(전날 19:30 UTC)다. `CRON_SECRET` 을 확인하지 않으면 누구나 부를 수 있는 공개 경로가 된다.
 
@@ -106,16 +118,28 @@ npm test         # 슬롯 계산·구글 호출·봉인 테스트
 
 ## 남은 것
 
-**Supabase·GCP·Resend 에 붙여서 실제로 예약이 되는지 확인하는 것만 남았다.** 기능은 전부 있다.
+**배포했고 전 기능이 실서비스에서 도는 것을 확인했다.** 배포 주소는 https://backpackr-eight.vercel.app.
 
-**지금까지의 테스트는 전부 단위 테스트다.** `fetch` 를 스텁으로 막고 확인한 것이라 구글 API 나 Supabase 에 한 번도 붙여본 적이 없다. handoff 8장 체크리스트는 통합 테스트를 요구하는데, 그건 준비물이 생긴 뒤에야 가능하다.
+확인한 왕복 — 구글 로그인과 캘린더 연동, 예약 유형 생성·수정·삭제, freebusy 로 담당자 캘린더를 읽어 슬롯에서 빼는 것, 예약 확정과 구글 캘린더 이벤트 생성, 확정된 슬롯이 목록에서 빠지는 것, 확정 메일과 그 안의 취소 링크, 취소.
+
+**취소 후 슬롯 목록이 예약 전과 완전히 동일해졌다.** 슬롯 계산이 활성 예약과 캘린더 busy 를 둘 다 빼므로, 원상복구는 DB 에서 슬롯이 풀린 것과 구글 캘린더에서 이벤트가 실제로 지워진 것을 함께 뜻한다.
+
+`sync_error='MAIL'` 경로도 우연히 밟았다. Resend 키를 넣기 전 예약에서 발송이 실패했고 어드민 목록에 뱃지가 떴다 — 메일이 죽어도 예약은 살아남는다는 설계가 실제로 그렇게 동작한다.
+
+아직 확인 못 한 것:
+
+- **발신 도메인** — `onboarding@resend.dev` 로 보내는 동안은 Resend 가입 주소로만 발송된다. 실제 고객에게 보내려면 `backpac.kr` 을 Resend 에 등록하고 SPF/DKIM 을 넣어야 한다
+- handoff 8장의 적대적 항목들 — 같은 슬롯 동시 요청 2건 → 1건만 성공, 미팅 2시간 이내 취소 → 409, 취소 후 같은 슬롯 재예약 반복
+- 파기 Cron (하루 한 번 도는 것이라 관찰에 시간이 걸린다)
+
+단위 테스트 65건은 `fetch` 를 스텁으로 막고 도는 것이라 위 항목들을 대신하지 못한다.
 
 ## 준비물
 
-- ~~Supabase 프로젝트~~ — **만들었다.** ref `fffktazefwjechgyaqaf`, 리전 ap-northeast-2, 마이그레이션 적용 완료
-- GCP 프로젝트 + OAuth 클라이언트 — 발급 절차는 handoff 0장. **승인된 리디렉션 URI 는 `https://fffktazefwjechgyaqaf.supabase.co/auth/v1/callback` 이다.** 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
-- 위 클라이언트 ID·시크릿을 Supabase 대시보드 Authentication → Providers → Google 에 넣고 스코프 2개를 추가한다
-- Resend API 키 1개 + 발신 주소 1개. 자체 도메인으로 보내려면 Resend 에 도메인을 등록하고 SPF/DKIM 레코드를 넣어야 한다. 급하면 `onboarding@resend.dev` 로 먼저 띄워볼 수 있다
+- ~~Supabase 프로젝트~~ — ref `rmphmbcoaccupfllrwvn`, 리전 ap-northeast-2. 회사 계정(khan@backpac.kr) 조직 아래에 있다
+- ~~GCP 프로젝트 + OAuth 클라이언트~~ — 프로젝트 `Meetingtime`. **대상은 내부(Internal)** 라 refresh token 7일 만료 제한이 없다. 승인된 리디렉션 URI 는 `https://rmphmbcoaccupfllrwvn.supabase.co/auth/v1/callback` — 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
+- ~~Supabase Authentication → Providers → Google~~ — 클라이언트 ID·시크릿 입력 완료. **스코프는 대시보드에 넣지 않는다.** 이 버전에는 그 칸이 없고, `app/auth/login/route.ts` 가 요청마다 직접 실어 보낸다
+- Resend API 키 — **아직 없다.** 없어도 예약은 되고 메일만 안 나간다(어드민 목록에 `MAIL` 뱃지). 자체 도메인으로 보내려면 Resend 에 도메인을 등록하고 SPF/DKIM 을 넣어야 한다
 
 **환경 변수**
 
