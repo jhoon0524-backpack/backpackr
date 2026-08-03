@@ -117,8 +117,13 @@ export function PageForm({ id, initial }: { id?: number; initial: FormValue }) {
       <div className={styles.card}>
         <span className={styles.section}>운영 시간</span>
         <p className={styles.muted}>
-          체크하지 않은 요일은 예약을 받지 않습니다. 특정 시간을 막으려면 구글 캘린더에 일정을
-          넣으면 그 시간이 자동으로 빠집니다.
+          체크한 요일에만 예약을 받습니다. 점심시간처럼 하루 중 일부를 비우려면{" "}
+          <b>시간대 추가</b>로 나누세요 — 예를 들어 10:00–12:00 과 14:00–18:00 두 개로 두면 그
+          사이는 예약이 잡히지 않습니다.
+        </p>
+        <p className={styles.muted}>
+          하루짜리 일정은 여기서 막지 않아도 됩니다. 구글 캘린더에 일정이 있으면 그 시간은 자동으로
+          빠집니다.
         </p>
 
         <div className={styles.hours}>
@@ -139,30 +144,41 @@ export function PageForm({ id, initial }: { id?: number; initial: FormValue }) {
                   }
                 />
                 {hours?.map((slot, i) => (
-                  <span className={styles.day} key={i}>
+                  <span className={styles.range} key={i}>
                     <input
                       type="time"
                       value={slot[0]}
                       onChange={(e) => setHour(dow, i, 0, e.target.value)}
+                      aria-label={`${label}요일 ${i + 1}번째 시간대 시작`}
                     />
                     <span>–</span>
                     <input
                       type="time"
                       value={slot[1]}
                       onChange={(e) => setHour(dow, i, 1, e.target.value)}
+                      aria-label={`${label}요일 ${i + 1}번째 시간대 종료`}
                     />
-                    <button
-                      className={styles.btn}
-                      onClick={() => removeRange(dow, i)}
-                      aria-label="구간 삭제"
-                    >
-                      −
-                    </button>
+                    {/* 시간대가 하나뿐이면 삭제를 숨긴다 — 그건 요일 체크를 끄는 것과 같고,
+                        버튼으로 지우면 체크가 저절로 풀려 놀라게 된다 */}
+                    {hours.length > 1 && (
+                      <button
+                        className={styles.btn}
+                        onClick={() => removeRange(dow, i)}
+                        title="이 시간대 삭제"
+                        aria-label={`${label}요일 ${i + 1}번째 시간대 삭제`}
+                      >
+                        −
+                      </button>
+                    )}
                   </span>
                 ))}
                 {hours && (
-                  <button className={styles.btn} onClick={() => addRange(dow)} aria-label="구간 추가">
-                    구간 추가
+                  <button
+                    className={styles.btn}
+                    onClick={() => addRange(dow)}
+                    title="이 요일에 예약받는 시간대를 하나 더 만듭니다"
+                  >
+                    + 시간대 추가
                   </button>
                 )}
               </div>
@@ -173,6 +189,10 @@ export function PageForm({ id, initial }: { id?: number; initial: FormValue }) {
 
       <div className={styles.card}>
         <span className={styles.section}>예약 불가 날짜</span>
+        <p className={styles.muted}>
+          휴가처럼 하루를 통째로 막을 때 씁니다. 운영 요일이어도 여기 넣은 날짜는 예약을 받지
+          않습니다.
+        </p>
         <div className={styles.day}>
           <input type="date" id="blocked" />
           <button

@@ -235,8 +235,28 @@
   font-size: 13.5px;
 }
 
-.day input {
-  width: 6.5em;
+/* 한 요일 안의 시간대 하나 — 시작·종료·삭제가 붙어 다닌다 */
+.range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/*
+ * 폭을 입력 종류별로 준다. 하나로 묶어 6.5em 을 주면 한국어 시각 입력
+ * (오전 10:00)과 날짜 입력(연도-월-일)이 잘려서 읽을 수 없다.
+ */
+.day input[type="time"] {
+  min-width: 8.5em;
+}
+
+.day input[type="date"] {
+  min-width: 10.5em;
+}
+
+.day input[type="checkbox"] {
+  width: auto;
+  flex: none;
 }
 
 @media (max-width: 560px) {
