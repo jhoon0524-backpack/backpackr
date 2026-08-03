@@ -106,16 +106,25 @@ npm test         # 슬롯 계산·구글 호출·봉인 테스트
 
 ## 남은 것
 
-**Supabase·GCP·Resend 에 붙여서 실제로 예약이 되는지 확인하는 것만 남았다.** 기능은 전부 있다.
+**배포했고 로그인·캘린더 연동·예약 유형 생성까지 실제로 도는 것을 확인했다.** 배포 주소는 https://backpackr-eight.vercel.app.
 
-**지금까지의 테스트는 전부 단위 테스트다.** `fetch` 를 스텁으로 막고 확인한 것이라 구글 API 나 Supabase 에 한 번도 붙여본 적이 없다. handoff 8장 체크리스트는 통합 테스트를 요구하는데, 그건 준비물이 생긴 뒤에야 가능하다.
+확인한 것 — 구글 로그인 왕복, `provider_refresh_token` 봉인 저장, 복호 후 access token 재발급, 예약 유형 생성(201).
+
+아직 확인 못 한 것:
+
+- **공개 예약 페이지에서 슬롯이 실제로 뜨는지** — freebusy 호출이 실서비스에서 처음 도는 자리다
+- 예약 확정 → 캘린더 이벤트 생성 → 취소 전체 왕복
+- 동시 예약 409, 취소 후 재예약 등 handoff 8장 체크리스트
+- 메일 (Resend 키가 아직 없다)
+
+단위 테스트 65건은 `fetch` 를 스텁으로 막고 도는 것이라 위 항목들을 대신하지 못한다.
 
 ## 준비물
 
-- ~~Supabase 프로젝트~~ — **만들었다.** ref `fffktazefwjechgyaqaf`, 리전 ap-northeast-2, 마이그레이션 적용 완료
-- GCP 프로젝트 + OAuth 클라이언트 — 발급 절차는 handoff 0장. **승인된 리디렉션 URI 는 `https://fffktazefwjechgyaqaf.supabase.co/auth/v1/callback` 이다.** 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
-- 위 클라이언트 ID·시크릿을 Supabase 대시보드 Authentication → Providers → Google 에 넣고 스코프 2개를 추가한다
-- Resend API 키 1개 + 발신 주소 1개. 자체 도메인으로 보내려면 Resend 에 도메인을 등록하고 SPF/DKIM 레코드를 넣어야 한다. 급하면 `onboarding@resend.dev` 로 먼저 띄워볼 수 있다
+- ~~Supabase 프로젝트~~ — ref `rmphmbcoaccupfllrwvn`, 리전 ap-northeast-2. 회사 계정(khan@backpac.kr) 조직 아래에 있다
+- ~~GCP 프로젝트 + OAuth 클라이언트~~ — 프로젝트 `Meetingtime`. **대상은 내부(Internal)** 라 refresh token 7일 만료 제한이 없다. 승인된 리디렉션 URI 는 `https://rmphmbcoaccupfllrwvn.supabase.co/auth/v1/callback` — 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
+- ~~Supabase Authentication → Providers → Google~~ — 클라이언트 ID·시크릿 입력 완료. **스코프는 대시보드에 넣지 않는다.** 이 버전에는 그 칸이 없고, `app/auth/login/route.ts` 가 요청마다 직접 실어 보낸다
+- Resend API 키 — **아직 없다.** 없어도 예약은 되고 메일만 안 나간다(어드민 목록에 `MAIL` 뱃지). 자체 도메인으로 보내려면 Resend 에 도메인을 등록하고 SPF/DKIM 을 넣어야 한다
 
 **환경 변수**
 
