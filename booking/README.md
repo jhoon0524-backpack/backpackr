@@ -7,6 +7,17 @@
 배포 주소는 https://backpackr-eight.vercel.app 다. Vercel 프로젝트 `backpackr`,
 Root Directory 는 `booking`.
 
+**프로덕션은 `claude/download-claude-md-rX79i` 브랜치를 본다.** 작업 브랜치에 push 하면
+프리뷰만 뜨고 프로덕션은 그대로다. 반영하려면 그 브랜치로 머지해야 한다.
+
+```
+git push -u origin <작업브랜치>
+git fetch origin claude/download-claude-md-rX79i
+git checkout -B deploy-tmp origin/claude/download-claude-md-rX79i
+git merge --no-ff <작업브랜치>
+git push origin HEAD:claude/download-claude-md-rX79i
+```
+
 ```
 npm run dev      # 개발 서버
 npm test         # 슬롯 계산·구글 호출·봉인 테스트
@@ -126,20 +137,63 @@ Pretendard 는 브랜드 파일이 지정한 CDN 에서 받는다.
 
 `sync_error='MAIL'` 경로도 우연히 밟았다. Resend 키를 넣기 전 예약에서 발송이 실패했고 어드민 목록에 뱃지가 떴다 — 메일이 죽어도 예약은 살아남는다는 설계가 실제로 그렇게 동작한다.
 
+브랜드 적용 뒤 화면별 UI/UX QA 도 한 바퀴 돌았다. 담당자 화면의 늘어난 로고, 한글에 모노를 물려 튀던 라벨, 대비가 모자라던 오렌지 글자, 서버가 실제로 막는 것과 어긋나던 필수 표시, 잘려서 못 읽던 시각·날짜 입력, 무슨 뜻인지 알 수 없던 `구간 추가` 라벨을 고쳤다.
+
 아직 확인 못 한 것:
 
-- **발신 도메인** — `onboarding@resend.dev` 로 보내는 동안은 Resend 가입 주소로만 발송된다. 실제 고객에게 보내려면 `backpac.kr` 을 Resend 에 등록하고 SPF/DKIM 을 넣어야 한다
+- **발신 도메인** — 진행 중이다. 아래 "이어서 할 일" 참고
 - handoff 8장의 적대적 항목들 — 같은 슬롯 동시 요청 2건 → 1건만 성공, 미팅 2시간 이내 취소 → 409, 취소 후 같은 슬롯 재예약 반복
 - 파기 Cron (하루 한 번 도는 것이라 관찰에 시간이 걸린다)
 
 단위 테스트 65건은 `fetch` 를 스텁으로 막고 도는 것이라 위 항목들을 대신하지 못한다.
+
+## 이어서 할 일 — 발신 도메인 등록
+
+**지금 막혀 있는 것은 이것 하나다.** 나머지는 다 돌아간다.
+
+지금 발신 주소가 Resend 기본값(`onboarding@resend.dev`)이라 **Resend 가입 주소로만 발송이 허용된다.** 그래서 외부인이 예약하면 확정 메일이 안 간다. 확정 메일이 예약자에게 먼저 나가고 담당자 알림이 그 다음이라, 첫 발송이 막히면 **담당자 알림까지 함께 죽는다** — 예약은 정상으로 저장되고 캘린더 일정도 생기지만 양쪽 다 메일을 못 받는다. 구글 캘린더 초대는 구글이 담당자 계정에서 직접 보내므로 이 경로와 무관하게 나간다.
+
+취소 링크가 확정 메일 안에만 있어서, 메일이 막힌 동안은 **예약자가 스스로 취소할 수 없다.** 담당자가 어드민에서 대신 취소한다.
+
+### 상태
+
+Resend 에 `backpac.kr` 등록까지 했다. 리전은 `ap-northeast-1`(도쿄). **DNS 레코드 3건을 AWS 담당자가 넣어주기를 기다리는 중이다.**
+
+`backpac.kr` 의 DNS 는 **Route 53** 에 있다(Resend 가 네임서버를 보고 감지했다).
+
+**루트(`@`)에 들어가는 레코드가 하나도 없다.** Resend 가 SPF·MX 를 `send.` 하위에 깔고 DKIM 만 `resend._domainkey` 에 두는 구조라, 구글 워크스페이스의 기존 MX·SPF 와 충돌하지 않는다. 그래서 기존 SPF 를 합치는 작업이 필요 없다 — 추가 3건뿐이고 수정·삭제가 없다.
+
+| 이름 (Route 53 이 `.backpac.kr` 을 붙인다) | 타입 | 값 |
+|---|---|---|
+| `resend._domainkey` | TXT | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaaUlCXFBBFzhNbwoClZcJdYcrkIkeZKNNf189CZDVmCpaCaa/JNlYXb4fKp39KsyRj6mVidtp/FimqoLxz5/pLf12ZGDZUPJJ2S+/py/uGqFP6y6/qxpM9djHk7StSHsWmsv4C5eH4pz0OJs4nliLv161djnND5hepuAYPdk+dQIDAQAB` |
+| `send` | MX | `10 feedback-smtp.ap-northeast-1.amazonses.com` |
+| `send` | TXT | `v=spf1 include:amazonses.com ~all` |
+
+DKIM 값은 218자라 Route 53 의 255자 한도 안에 들어온다 — **문자열을 나눌 필요가 없다.** TXT 두 건은 Route 53 규칙상 큰따옴표로 감싸고, MX 는 감싸지 않는다. `send` 가 MX·TXT 로 두 번 나오는데 타입이 달라 별도 레코드다.
+
+이 값들은 전부 공개 DNS 레코드라 대화나 문서에 남겨도 된다. DKIM 은 **공개** 키다.
+
+### DNS 반영 뒤
+
+1. Resend 도메인 화면에서 `I've already added the records` → `Verified` 확인
+2. Vercel 환경 변수 `MAIL_FROM` 을 **`project-outreach@backpac.kr`** 로 변경 후 재배포
+3. **가입 주소가 아닌 외부 메일 주소로 예약을 넣어 확정 메일이 도착하는지 확인.** 이걸 해야 실제로 풀린 것이다 — 어드민 목록에 `MAIL` 뱃지가 안 뜨는 것으로도 보인다
+4. 취소 메일도 같은 방법으로 확인
+
+`project-outreach@backpac.kr` 을 **구글 워크스페이스에 그룹이나 별칭으로 만들어 두는 게 좋다.** 코드가 `Reply-To` 를 담당자 실제 주소로 넣지만, 일부 메일 앱은 From 으로 답장한다 — 받는 주소가 없으면 그 답장이 반송된다.
+
+## 팀에 공유해도 되는가
+
+**담당자로 쓰는 것은 지금도 된다.** `/admin` 주소만 주면 각자 본인 구글 계정으로 로그인하고 그 순간 본인 캘린더가 연동된다. 조회가 전부 `member_id` 로 걸려 있어 서로의 예약 유형과 예약이 보이지 않는다. 구글 OAuth 가 **내부(Internal)** 라 `@backpac.kr` 계정만 로그인된다 — 주소를 알아도 외부인은 못 들어온다.
+
+**외부 고객 대상으로 링크를 뿌리는 것은 발신 도메인 등록 뒤로 미루는 게 맞다.** 위에 쓴 대로 예약자가 확정 메일도 취소 수단도 못 받는다.
 
 ## 준비물
 
 - ~~Supabase 프로젝트~~ — ref `rmphmbcoaccupfllrwvn`, 리전 ap-northeast-2. 회사 계정(khan@backpac.kr) 조직 아래에 있다
 - ~~GCP 프로젝트 + OAuth 클라이언트~~ — 프로젝트 `Meetingtime`. **대상은 내부(Internal)** 라 refresh token 7일 만료 제한이 없다. 승인된 리디렉션 URI 는 `https://rmphmbcoaccupfllrwvn.supabase.co/auth/v1/callback` — 로그인을 Supabase Auth 가 받으므로 우리 도메인이 아니다
 - ~~Supabase Authentication → Providers → Google~~ — 클라이언트 ID·시크릿 입력 완료. **스코프는 대시보드에 넣지 않는다.** 이 버전에는 그 칸이 없고, `app/auth/login/route.ts` 가 요청마다 직접 실어 보낸다
-- Resend API 키 — **아직 없다.** 없어도 예약은 되고 메일만 안 나간다(어드민 목록에 `MAIL` 뱃지). 자체 도메인으로 보내려면 Resend 에 도메인을 등록하고 SPF/DKIM 을 넣어야 한다
+- ~~Resend API 키~~ — 발급해서 넣었다. 확정·취소 메일이 실제로 오가는 것을 확인했다. **다만 발신 도메인이 아직 `onboarding@resend.dev` 라 Resend 가입 주소(khan@backpac.kr)로만 발송된다** — 아래 "이어서 할 일" 참고
 
 **환경 변수**
 
@@ -158,3 +212,7 @@ MAIL_ADMIN_TO             # 실패 알림 수신 주소
 ```
 
 `GOOGLE_REDIRECT_URI` 는 없다 — 우리가 코드 교환을 하지 않는다.
+
+**비밀 값은 Vercel 환경 변수와 각 서비스 콘솔에만 둔다.** `.env.local` 은 gitignore 되어 있고 커밋한 적 없다. `SUPABASE_SERVICE_ROLE_KEY` 와 `RESEND_API_KEY` 는 대화나 문서에 남기지 않는다.
+
+**남은 정리 두 가지.** 구글 클라이언트 시크릿은 설정 과정에서 대화창을 거쳤으므로 GCP 콘솔에서 새로 발급하고 Vercel 값만 갈아끼우는 게 좋다(Supabase Providers 쪽 값도 같이 바꿔야 한다 — 같은 값을 두 곳이 쓴다). 그리고 Vercel 이 개인 `Hobby` 요금제인데 약관상 상업적 용도가 아니므로, 회사에서 계속 쓰려면 팀 요금제로 옮겨야 한다.
