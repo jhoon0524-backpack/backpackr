@@ -198,7 +198,12 @@ export function Booking(props: {
             </div>
           ) : (
             <div className="fields">
-              <Field label="이름" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} />
+              <Field
+                label="이름"
+                required
+                value={draft.name}
+                onChange={(v) => setDraft({ ...draft, name: v })}
+              />
               <Field
                 label="회사명"
                 value={draft.company}
@@ -207,6 +212,7 @@ export function Booking(props: {
               <Field
                 label="이메일"
                 type="email"
+                required
                 hint="캘린더 초대를 보냅니다"
                 value={draft.email}
                 invalid={emailBad}
@@ -468,6 +474,7 @@ function Done({
   );
 }
 
+/** `required` 는 서버가 실제로 막는 것과 맞춘다 — 이름과 메일 주소 둘뿐이다 */
 function Field({
   label,
   value,
@@ -475,6 +482,7 @@ function Field({
   type = "text",
   hint,
   invalid,
+  required,
 }: {
   label: string;
   value: string;
@@ -482,12 +490,15 @@ function Field({
   type?: string;
   hint?: string;
   invalid?: boolean;
+  required?: boolean;
 }) {
   const id = `f-${label}`;
   return (
     <div className="field">
       <label htmlFor={id}>
-        {label} *{hint && <span className="hint"> — {hint}</span>}
+        {label}
+        {required && " *"}
+        {hint && <span className="hint"> — {hint}</span>}
       </label>
       <input
         id={id}

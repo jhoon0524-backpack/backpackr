@@ -89,8 +89,7 @@
   .meta .k {
     color: var(--ink-3);
     font-size: 11px;
-    letter-spacing: .09em;
-    text-transform: uppercase;
+    letter-spacing: .03em;
     flex: 0 0 52px;
   }
 
@@ -185,7 +184,7 @@
 
   .day.open {
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--point);
     font-weight: 600;
   }
 
@@ -229,7 +228,7 @@
     font-family: var(--mono);
     font-size: 13.5px;
     font-variant-numeric: tabular-nums;
-    color: var(--accent);
+    color: var(--point);
     cursor: pointer;
     width: 100%;
   }
@@ -267,9 +266,9 @@
   }
 
   .picked span {
-    font-family: var(--mono);
     font-size: 13.5px;
-    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    color: var(--point);
   }
 
   .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -303,7 +302,7 @@
 
   .linkish:hover { color: var(--ink-2); }
 
-  .result a[href] { color: var(--accent); }
+  .result a[href] { color: var(--point); }
 
   .field input,
   .field textarea {
@@ -431,8 +430,8 @@
   }
 
   .receipt .when {
-    font-family: var(--mono);
     font-size: 14.5px;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
 
@@ -441,7 +440,7 @@
   .receipt a {
     font-family: var(--mono);
     font-size: 13px;
-    color: var(--accent);
+    color: var(--point);
     word-break: break-all;
   }
 
