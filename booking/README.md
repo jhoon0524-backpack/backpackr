@@ -18,6 +18,17 @@ git merge --no-ff <작업브랜치>
 git push origin HEAD:claude/download-claude-md-rX79i
 ```
 
+**원격이 둘이다.** 사내 정본은 Bitbucket `backpackr/meetingtime` 의 `main`,
+배포는 아직 GitHub `jhoon0524-backpack/backpackr` 이 물고 있다. 그래서 위 절차를
+끝낸 뒤 같은 것을 Bitbucket 에도 올린다.
+
+```
+git push bitbucket HEAD:main
+```
+
+**GitHub 쪽을 먼저 지우면 배포가 끊긴다.** Vercel 연결을 Bitbucket 으로 옮기고
+프로덕션이 그 저장소에서 뜨는 것을 확인한 뒤에 정리하는 순서다.
+
 ```
 npm run dev      # 개발 서버
 npm test         # 슬롯 계산·구글 호출·봉인 테스트
