@@ -74,18 +74,66 @@
 
 ## 7. 생성 도구
 
-- 스프라이트 생성 도구는 **하나로 고정한다.** 도구를 섞으면 화풍이 갈린다.
-- 도구에 넣는 프롬프트에는 항상 이 문서의 **2번 팔레트와 3번 그리기 규칙**을
-  그대로 붙여 넣는다.
-- 생성 결과가 규격에서 벗어나면 채택하지 않는다. 다시 만든다.
+**SpriteCook 하나로 고정한다.** 도구를 섞으면 화풍이 갈린다.
+MCP 서버를 붙이면 Claude Code 안에서 코드와 에셋을 한 루프에 만들 수 있다.
+
+### 프롬프트 템플릿
+
+에셋을 요청할 때마다 아래 블록을 **그대로** 앞에 붙인다.
+매번 붙이는 것이 귀찮아도 생략하지 않는다. 이것이 화풍을 지키는 유일한 장치다.
+
+```
+Pixel art sprite, {크기}px canvas, transparent background.
+Style: soft pastel, cute, bright and light-hearted. NOT dark, NOT gritty.
+Shading: exactly 3 tones (light / base / shadow). No gradients, no dithering.
+Outline: 1px, NOT black — use a darker desaturated shade of the base color.
+Light source: top-left, consistent across every asset.
+No anti-aliasing. Hard pixel edges only.
+Palette — use ONLY these colors:
+#FFB3A7 #F4796B #C4574C #8E3A33
+#A7D8FF #6BAEF4 #4C7FC4 #33578E
+#D4BBFF #A87DF4 #7C57C4 #553A8E
+#A7F4C8 #6BD9A0 #4CA678 #337555
+#FFFFFF #F5F0E8 #DCD3C6 #B5A99A #8A7D6E #5C5247 #332E28
+
+Subject: {설명}
+```
+
+### 아이디를 만들 때
+
+`{설명}` 자리에 속성 색을 지정한다. 속성마다 쓸 색 계열이 정해져 있다.
+
+| 속성 | 주조색 | 예시 프롬프트 |
+|---|---|---|
+| 게임 | `#F4796B` 계열 | `a small pixel dragon made of retro game pixels, coral red` |
+| 테크 | `#6BAEF4` 계열 | `a cute soldering iron creature, sky blue` |
+| 디자인 | `#A87DF4` 계열 | `a tiny fairy holding a letterform, lavender purple` |
+| 만화 | `#6BD9A0` 계열 | `a round raccoon holding a comic panel, mint green` |
+
+3단계로 갈수록 같은 계열을 유지하되 크기와 장식을 키운다.
+계열 색이 바뀌면 진화가 아니라 다른 종처럼 보인다.
+
+### 생성 후 반드시 할 것
+
+AI 생성기는 팔레트를 정확히 지키지 못한다. 근사한 색을 섞어 내보낸다.
+그대로 넣으면 23색 제한이 무너지므로 **매번 검사 도구를 돌린다.**
+
+```
+python3 tools/check_sprite.py assets/sprites/새파일.png --fix
+```
+
+`--fix` 는 팔레트 밖 색을 가장 가까운 팔레트 색으로 바꾸고,
+반투명 픽셀을 불투명으로 만든다. 캔버스 크기는 고치지 않으니
+크기가 틀렸다면 다시 생성한다.
 
 ## 8. 검수 항목
 
 새 에셋을 프로젝트에 넣기 전 확인한다.
+앞의 네 항목은 `tools/check_sprite.py` 가 자동으로 잡아 준다.
 
 - [ ] 캔버스 크기가 1번 표와 같은가
 - [ ] 팔레트 밖의 색이 섞이지 않았는가
 - [ ] 외곽선이 검정이 아닌가
-- [ ] 광원이 좌측 상단인가
 - [ ] 안티에일리어싱된 반투명 픽셀이 없는가
+- [ ] (눈으로) 광원이 좌측 상단인가
 - [ ] 같은 분류의 기존 에셋과 나란히 놓았을 때 따로 놀지 않는가
