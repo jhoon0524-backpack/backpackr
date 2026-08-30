@@ -1,15 +1,15 @@
 [gd_resource type="Resource" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/idi_data.gd" id="1"]
-[ext_resource type="Resource" path="res://data/idis/circuitwood.tres" id="2"]
+[ext_resource type="Resource" path="res://data/idis/gridqueen.tres" id="2"]
 
 [resource]
 script = ExtResource("1")
-display_name = "납땜이"
-element = 1
-max_hp = 45
-attack = 11
-defense = 13
-speed = 8
-funding_goal = 3000000
+display_name = "타이포나비"
+element = 2
+max_hp = 55
+attack = 18
+defense = 15
+speed = 21
+funding_goal = 8000000
 evolves_into = ExtResource("2")
