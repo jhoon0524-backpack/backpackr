@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dropbid
 
-## Getting Started
+종료된 크라우드펀딩 창작 굿즈를 주 1회 드롭(동시 마감) 경매로 거래하는 서비스.
 
-First, run the development server:
+- 무엇을 만드는가 → `SPEC.md` (상세 근거는 `PRD.md`)
+- 어떻게 일하는가 → `CLAUDE.md`
+- 지금 무엇을 하는가 → `TASKS.md`
+- 어디까지 왔는가 → `PROGRESS.md`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 개발 환경
+
+```
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 검증 명령
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+커밋 전에 세 개를 모두 통과시킨다. 자세한 규칙은 `CLAUDE.md` 3장.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm test
+npm run lint
+npm run typecheck
+```
 
-## Learn More
+`typecheck` 는 `next typegen && tsc --noEmit` 이다. `tsc` 만 돌리면 Next 가 생성하는
+전역 타입(`LayoutProps` 등)이 없어서 갓 클론한 곳과 CI 에서 실패한다.
 
-To learn more about Next.js, take a look at the following resources:
+### 데이터베이스
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+정석은 Supabase 로컬 스택이다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+npx supabase start   # Docker 필요
+```
 
-## Deploy on Vercel
+Docker 를 쓸 수 없는 환경이라면 로컬 Postgres 로 대체할 수 있다.
+입찰 로직(`place_bid`)은 순수 Postgres 기능(행 잠금 + plpgsql)만 쓰므로 이걸로 개발·테스트한다.
+Auth·Storage·Realtime 은 이 방식으로 돌릴 수 없다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+sudo pg_ctlcluster 16 main start
+sudo -u postgres psql -c "CREATE USER dropbid WITH PASSWORD 'dropbid' SUPERUSER;"
+sudo -u postgres createdb -O dropbid dropbid_dev
+psql postgresql://dropbid:dropbid@127.0.0.1:5432/dropbid_dev -c "select 1"
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+주의: `supabase/config.toml` 은 Postgres 17 을 쓴다. 위 대체 경로는 16 이라 버전이 다르다.
+버전에 의존하는 기능을 쓰게 되면 Supabase 스택에서 반드시 다시 확인할 것.

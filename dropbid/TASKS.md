@@ -8,7 +8,10 @@
 - [x] Next.js(App Router) + TypeScript + Tailwind 프로젝트 생성 및 의존성 설치
 - [x] 검증 명령 3개(`npm test`, `npm run lint`, `npm run typecheck`)가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업 포함)
 - [x] CI 설정 — 푸시할 때 검증 명령 3개 자동 실행
-- [ ] Supabase 로컬 개발 환경 셋업 (`supabase init` + `supabase start`, 접속 확인)
+- [~] Supabase 로컬 개발 환경 셋업 — `supabase init` 과 DB 접속은 됐으나 `supabase start` 는 막힘 (아래 항목 참고)
+- [ ] `supabase start` 를 실제로 띄워 Auth·Storage·Realtime 확인 — **현재 환경에서 불가**.
+      Docker 이미지 CDN(`production.cloudfront.docker.com`)이 네트워크 정책에서 차단됨.
+      Docker 가 되는 환경에서 다시 시도한다
 - [ ] 환경변수 골격 정리 (`.env.example` — Supabase, 카카오, 포트원 키 자리만)
 
 ## [데이터]

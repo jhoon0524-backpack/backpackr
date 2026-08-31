@@ -1,6 +1,13 @@
 # 현재 진행 상황
 
 ## 최근 완료한 작업
+- [기반] Supabase 로컬 개발 환경 셋업 — **절반만 됐다**
+  - `supabase init` 완료 (`supabase/config.toml`). CLI 는 devDependency 로 설치
+  - **`supabase start` 는 이 환경에서 불가능하다.** Docker 데몬은 띄웠지만 이미지를 받을 수 없다.
+    `production.cloudfront.docker.com` 이 네트워크 정책에서 403(CONNECT 거부)으로 막혀 있다.
+    프록시 README 가 "우회하지 말고 보고하라"고 한 부류라 우회하지 않았다
+  - 대신 로컬 Postgres 16 을 띄워 개발용 DB 를 만들었다 (`dropbid_dev`). 접속 확인함
+  - 재현 절차는 `README.md` 에 적었고, 적은 그대로 실행해 확인했다
 - [기반] CI 설정 — 푸시할 때 검증 명령 3개 자동 실행
   - `.github/workflows/dropbid.yml` (저장소 루트). Node 22, `npm ci` 후 세 명령 순서대로
   - 이 저장소에는 MyAIGame·agent-starter·booking·docs 도 있어서 `dropbid/**` 변경일 때만 돌게 경로 필터를 걸었다
@@ -25,12 +32,17 @@
     `node_modules/next/dist/docs/` 문서를 먼저 읽으라는 내용. 코드 작성 작업 전에 참고할 것
 
 ## 다음에 진행할 작업
-- [기반] Supabase 로컬 개발 환경 셋업 (`supabase init` + `supabase start`, 접속 확인)
+- [기반] 환경변수 골격 정리 (`.env.example`)
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
 확인 안 한 것을 완료로 적으면 다음 세션이 그 위에 쌓는다.
 - `npm run dev` / `npm run build` 는 아직 안 돌려봤다
+- **Auth·Storage·Realtime 은 이 환경에서 한 번도 안 돌려봤다.** Docker 가 되는 환경에서 확인해야 한다.
+  이 셋에 의존하는 작업([기능]의 카카오 로그인·이미지 업로드, [화면]의 Realtime 갱신)은
+  여기서 완료로 표시하면 안 된다
+- 로컬 Postgres 는 16, `supabase/config.toml` 은 17 이다. 버전 차이에 의존하는 기능을 쓰면
+  Supabase 스택에서 다시 확인할 것
 - 서버 컴포넌트(async)는 Vitest 가 지원하지 않는다. Next 문서 권고는 E2E.
   현재 스모크 테스트는 도구 사슬 확인용이라 이 제약에 걸리지 않았다
 - 카카오 로그인·알림톡, 포트원 모두 계정·심사·템플릿 승인이 안 된 상태다
