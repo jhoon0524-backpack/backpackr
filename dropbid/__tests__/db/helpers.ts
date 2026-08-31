@@ -56,7 +56,10 @@ export async function seedLiveAuction(opts: { startPrice?: number; endsInSeconds
   const { rows } = await pool.query<{ auction_id: string; product_id: string }>(
     `with d as (
        insert into drops (round_number, starts_at, ends_at)
-       values (1, now(), now() + make_interval(secs => $2)) returning id, ends_at
+       -- 한 테스트에서 경매를 여러 개 만들 수 있어야 한다. 회차 번호가 겹치면 안 된다.
+       values ((select coalesce(max(round_number), 0) + 1 from drops),
+               now(), now() + make_interval(secs => $2))
+       returning id, ends_at
      ), p as (
        insert into products (seller_id, title, funding_project_name, category,
                              condition_grade, photo_urls, backer_proof_url, start_price)
