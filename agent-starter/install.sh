@@ -19,7 +19,7 @@ SRC=$(dirname "$0")
 copied=0
 skipped=0
 
-for f in CLAUDE.md SPEC.md TASKS.md PROGRESS.md; do
+for f in CLAUDE.md SPEC.md TASKS.md PROGRESS.md PROMPTS.md; do
   if [ -e "$TARGET/$f" ]; then
     echo "  건너뜀  $f (이미 있음)"
     skipped=$((skipped + 1))
@@ -37,5 +37,5 @@ if [ "$copied" -gt 0 ]; then
   echo "다음 할 일:"
   echo "  1. CLAUDE.md 의 << >> 를 채운다. 특히 3장 검증 명령"
   echo "  2. SPEC.md 를 채운다"
-  echo "  3. TASKS.md 를 이 프로젝트에 맞게 고친다"
+  echo "  3. PROMPTS.md 의 1번 프롬프트를 던져 TASKS.md 를 만든다"
 fi
