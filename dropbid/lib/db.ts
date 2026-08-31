@@ -26,13 +26,14 @@ export type LiveAuction = {
   ends_at: Date
   bid_count: number
   bidder_count: number
+  cover_url: string | null
 }
 
 /** 이번 회차 경매를 마감 임박순으로. */
 export async function listLiveAuctions(): Promise<LiveAuction[]> {
   const { rows } = await pool.query<LiveAuction>(`
     select a.id, p.title, p.funding_project_name, p.category, p.condition_grade,
-           a.current_price, a.ends_at,
+           a.current_price, a.ends_at, p.photo_urls[1] as cover_url,
            (select count(*) from bids b
              where b.auction_id = a.id and b.outcome = 'accepted')::int as bid_count,
            (select count(distinct b.bidder_id) from bids b
@@ -91,6 +92,7 @@ export async function listLastDropResults(): Promise<PastResult[]> {
 export type AuctionDetail = LiveAuction & {
   status: string
   funding_project_url: string | null
+  photo_urls: string[]
   min_next_amount: number
   extension_count: number
   seller_nickname: string | null
@@ -104,7 +106,7 @@ export type AuctionDetail = LiveAuction & {
 export async function getAuction(id: string): Promise<AuctionDetail | null> {
   const { rows } = await pool.query<AuctionDetail>(
     `select a.id, p.title, p.funding_project_name, p.funding_project_url,
-            p.category, p.condition_grade,
+            p.photo_urls, p.category, p.condition_grade,
             a.current_price, a.ends_at, a.status, a.extension_count,
             seller.nickname as seller_nickname,
             top.nickname as highest_bidder_nickname,

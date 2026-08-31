@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { listLastDropResults, listLiveAuctions } from '@/lib/db'
 import { Countdown } from './time'
+import { Photo } from './photo'
 import { won, kst, maskNickname } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -43,11 +44,20 @@ export default async function DropList() {
                 className="block rounded-lg border border-zinc-200 bg-white px-5 py-4 transition hover:border-zinc-400"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
+                  <div className="flex min-w-0 gap-3">
+                    {a.cover_url && (
+                      <Photo
+                        src={a.cover_url}
+                        alt=""
+                        className="h-14 w-14 shrink-0 rounded object-cover"
+                      />
+                    )}
+                    <div className="min-w-0">
                     <p className="truncate font-medium">{a.title}</p>
                     <p className="mt-0.5 truncate text-xs text-zinc-500">
                       {a.funding_project_name} · 상태 {a.condition_grade}
                     </p>
+                    </div>
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-xs text-zinc-500">

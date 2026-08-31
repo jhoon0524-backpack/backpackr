@@ -2,6 +2,7 @@ import { listOpenDrops, listPendingProducts, listStuckAuctions } from '@/lib/db'
 import { getCurrentUser } from '@/lib/session'
 import { ReviewForm } from './review-form'
 import { StuckForm } from './stuck-form'
+import { Photo } from '../photo'
 import { won, kst } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -91,10 +92,43 @@ export default async function AdminReview() {
                 </p>
               </div>
 
-              <p className="mt-2 text-xs text-zinc-500">
-                사진 {p.photo_urls.length}장 · 후원 인증{' '}
-                <span className="rounded bg-zinc-100 px-1.5 py-0.5">{p.backer_proof_url}</span>
-              </p>
+              {/* 검수는 눈으로 보는 일이다. 주소 글자만 보여 주면 확인이 안 된다. */}
+              <div className="mt-3 grid gap-4 sm:grid-cols-[auto_1fr]">
+                <div>
+                  <p className="mb-1 text-xs font-medium text-zinc-700">후원 인증</p>
+                  <a href={p.backer_proof_url} target="_blank" rel="noopener noreferrer nofollow">
+                    <Photo
+                      src={p.backer_proof_url}
+                      alt="후원 인증 이미지"
+                      className="h-40 w-40 rounded-lg border-2 border-amber-300 object-cover"
+                    />
+                  </a>
+                  <p className="mt-1 w-40 truncate text-[11px] text-zinc-400">
+                    {p.backer_proof_url}
+                  </p>
+                </div>
+                <div className="min-w-0">
+                  <p className="mb-1 text-xs font-medium text-zinc-700">
+                    상품 사진 {p.photo_urls.length}장
+                  </p>
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {p.photo_urls.map((url, i) => (
+                      <a
+                        key={`${url}-${i}`}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                      >
+                        <Photo
+                          src={url}
+                          alt={`상품 사진 ${i + 1}`}
+                          className="h-40 w-40 shrink-0 rounded-lg border border-zinc-200 object-cover"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
               <ReviewForm productId={p.id} drops={dropOptions} />
             </li>

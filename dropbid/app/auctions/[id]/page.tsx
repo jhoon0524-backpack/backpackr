@@ -6,6 +6,7 @@ import { Countdown } from '../../time'
 import { BidForm } from './bid-form'
 import { AuctionResult } from './result'
 import { LivePoller } from './live-poller'
+import { Photo } from '../../photo'
 import { won, CONDITION, maskNickname } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -44,6 +45,19 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
             원 펀딩 프로젝트 페이지 보기 ↗
           </a>
         </p>
+      )}
+
+      {auction.photo_urls.length > 0 && (
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+          {auction.photo_urls.map((url, i) => (
+            <Photo
+              key={`${url}-${i}`}
+              src={url}
+              alt={`${auction.title} 사진 ${i + 1}`}
+              className="h-48 w-48 shrink-0 rounded-lg border border-zinc-200 object-cover"
+            />
+          ))}
+        </div>
       )}
 
       <div className="mt-5 rounded-lg border border-zinc-200 bg-white px-5 py-4">
