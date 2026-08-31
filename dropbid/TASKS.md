@@ -19,7 +19,7 @@
 - [x] 스키마 정의 2 — `drops`(회차·시작/마감 시각), `auctions`(현재가·최고입찰자·마감 시각·연장 횟수·`live/sold/unsold/payment_failed` 상태)
 - [x] 스키마 정의 3 — `bids`(입찰 시도 기록: 성공·거부 모두, 사유 코드 포함), `orders`(결제 기한·상태), `notifications`(발송 기록·실패 로그)
 - [x] 마이그레이션 프로덕션 적용 절차 확정 (실행은 사람이) — `README.md`
-- [ ] `place_bid(auction_id, user_id, amount)` DB 함수 작성 — `FOR UPDATE` 잠금, 거부 규칙 4종, 현재가 갱신, 30초 연장(최대 20회)
+- [x] `place_bid(auction_id, user_id, amount)` DB 함수 작성 — `FOR UPDATE` 잠금, 거부 규칙 4종, 현재가 갱신, 30초 연장(최대 20회)
 - [ ] DB 테스트 하네스 셋업 — vitest 에서 로컬 Postgres 에 붙는다. 겸사겸사 스키마 제약을 테스트로 고정
       (사진 3장 미만 / 시작가 1,000원 미만 / 후원 인증 누락 / 반려 사유 누락. 지금은 수동으로만 확인한 상태)
 - [ ] `place_bid` 단위 테스트 — 거부 4종 + 연장 + 연장 상한 (로컬 Supabase 대상)
