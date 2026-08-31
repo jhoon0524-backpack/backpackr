@@ -25,7 +25,7 @@
 - [x] `place_bid` 동시성 테스트 — 동일 금액 동시 입찰 100건 중 1건만 성공 (인수 조건)
 - [x] 마감 처리 DB 함수 작성 — 기한 지난 `live` 를 `sold`/`unsold` 전환, 멱등 보장
 - [x] 마감 처리 멱등 테스트 — 두 번 연속 실행해도 낙찰 확정 1회 (인수 조건)
-- [ ] DB 권한 설정 — 앱 역할에서 `bids`/`auctions` 직접 쓰기 REVOKE, `place_bid` 만 EXECUTE 허용
+- [x] DB 권한 설정 — 앱 역할에서 `bids`/`auctions` 직접 쓰기 REVOKE, `place_bid` 만 EXECUTE 허용
 - [ ] pg_cron 잡 정의 작성 — 1분 주기 마감 처리, 실행·처리 건수 기록 (등록은 사람이)
 
 ## [기능]

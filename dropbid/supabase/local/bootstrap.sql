@@ -13,3 +13,20 @@ create table auth.users (
   id uuid primary key default gen_random_uuid(),
   email text
 );
+
+-- Supabase 가 만들어 주는 역할들. 권한 마이그레이션이 이 이름으로 grant/revoke 한다.
+do $$
+begin
+  create role anon nologin;
+  create role authenticated nologin;
+  create role service_role nologin;
+exception when duplicate_object then null;
+end $$;
+
+grant usage on schema public to anon, authenticated, service_role;
+-- Supabase 는 public 스키마의 테이블 권한을 이 역할들에 기본으로 준다.
+-- 그 상태에서 시작해야 권한 마이그레이션의 revoke 가 의미를 갖는다.
+alter default privileges in schema public
+  grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all on functions to anon, authenticated, service_role;
