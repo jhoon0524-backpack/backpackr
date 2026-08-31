@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { placeBid } from '@/lib/db'
+import { getCurrentUserId } from '@/lib/session'
 
 /** 거부 사유 코드를 사람이 읽는 문구로. PRD 화면 상태 설계의 "거부 사유별 문구". */
 const REJECT_MESSAGE: Record<string, string> = {
@@ -19,7 +20,8 @@ export type BidState = {
 
 export async function submitBid(_prev: BidState, formData: FormData): Promise<BidState> {
   const auctionId = String(formData.get('auctionId'))
-  const userId = String(formData.get('userId'))
+  const userId = await getCurrentUserId()
+  if (!userId) return { message: '먼저 사용자를 골라 주세요.', tone: 'error' }
   const amount = Number(formData.get('amount'))
 
   if (!Number.isInteger(amount) || amount <= 0) {

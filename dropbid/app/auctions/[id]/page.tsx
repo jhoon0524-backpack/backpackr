@@ -1,19 +1,20 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getAuction, listDemoUsers } from '@/lib/db'
+import { getAuction } from '@/lib/db'
+import { getCurrentUser } from '@/lib/session'
 import { Countdown } from '../../time'
 import { BidForm } from './bid-form'
+import { won } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
-const won = (n: number) => n.toLocaleString('ko-KR') + '원'
 
 export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) {
   const { id } = await props.params
   const auction = await getAuction(id)
   if (!auction) notFound()
 
-  const users = await listDemoUsers()
+  const me = await getCurrentUser()
 
   return (
     <div>
@@ -61,7 +62,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
         <BidForm
           auctionId={auction.id}
           minNextAmount={auction.min_next_amount}
-          users={users}
+          bidderNickname={me?.nickname ?? null}
         />
       ) : (
         <p className="mt-5 rounded-lg border border-zinc-200 bg-white px-5 py-4 text-sm text-zinc-600">

@@ -101,3 +101,157 @@ export async function listDemoUsers() {
   )
   return rows
 }
+
+// ── 마이페이지 ────────────────────────────────────────────────
+
+export type MyBidRow = {
+  auction_id: string
+  title: string
+  my_amount: number
+  current_price: number
+  status: string
+  is_winning: boolean
+}
+
+/** 내가 입찰한 경매. 경매당 내 최고액만. */
+export async function listMyBids(userId: string) {
+  const { rows } = await pool.query<MyBidRow>(
+    `select a.id as auction_id, p.title, max(b.amount) as my_amount,
+            a.current_price, a.status,
+            (a.highest_bidder_id = $1) as is_winning
+       from bids b
+       join auctions a on a.id = b.auction_id
+       join products p on p.id = a.product_id
+      where b.bidder_id = $1 and b.outcome = 'accepted'
+      group by a.id, p.title, a.current_price, a.status, a.highest_bidder_id
+      order by a.ends_at desc`,
+    [userId],
+  )
+  return rows
+}
+
+export type MyWinRow = {
+  auction_id: string
+  title: string
+  amount: number
+  order_status: string
+  due_at: Date
+}
+
+/** 내가 낙찰받은 것. 결제 기한이 붙어 있다. */
+export async function listMyWins(userId: string) {
+  const { rows } = await pool.query<MyWinRow>(
+    `select a.id as auction_id, p.title, o.amount, o.status as order_status, o.due_at
+       from orders o
+       join auctions a on a.id = o.auction_id
+       join products p on p.id = a.product_id
+      where o.buyer_id = $1
+      order by o.created_at desc`,
+    [userId],
+  )
+  return rows
+}
+
+export type MySaleRow = {
+  product_id: string
+  title: string
+  product_status: string
+  rejection_reason: string | null
+  auction_status: string | null
+  current_price: number | null
+}
+
+/** 내가 올린 것. 검수 대기·반려까지 포함한다. */
+export async function listMySales(userId: string) {
+  const { rows } = await pool.query<MySaleRow>(
+    `select p.id as product_id, p.title, p.status as product_status, p.rejection_reason,
+            a.status as auction_status, a.current_price
+       from products p
+       left join auctions a on a.product_id = p.id
+      where p.seller_id = $1
+      order by p.created_at desc`,
+    [userId],
+  )
+  return rows
+}
+
+// ── 운영자 검수 ────────────────────────────────────────────────
+
+export type PendingProduct = {
+  id: string
+  title: string
+  funding_project_name: string
+  category: string
+  condition_grade: string
+  start_price: number
+  backer_proof_url: string
+  photo_urls: string[]
+  seller_nickname: string | null
+  created_at: Date
+}
+
+export async function listPendingProducts() {
+  const { rows } = await pool.query<PendingProduct>(
+    `select p.id, p.title, p.funding_project_name, p.category, p.condition_grade,
+            p.start_price, p.backer_proof_url, p.photo_urls,
+            s.nickname as seller_nickname, p.created_at
+       from products p join profiles s on s.id = p.seller_id
+      where p.status = 'pending'
+      order by p.created_at`,
+  )
+  return rows
+}
+
+export type OpenDrop = { id: string; round_number: number; starts_at: Date; ends_at: Date }
+
+/** 아직 마감되지 않은 회차만. 마감된 회차에는 배정할 수 없다. */
+export async function listOpenDrops() {
+  const { rows } = await pool.query<OpenDrop>(
+    `select id, round_number, starts_at, ends_at from drops
+      where ends_at > now() order by starts_at`,
+  )
+  return rows
+}
+
+/** 검수 승인·반려는 DB 함수를 통한다. */
+export async function approveProduct(productId: string, dropId: string) {
+  await pool.query(`select approve_product($1, $2)`, [productId, dropId])
+}
+
+export async function rejectProduct(productId: string, reason: string) {
+  await pool.query(`select reject_product($1, $2)`, [productId, reason])
+}
+
+// ── 상품 등록 ──────────────────────────────────────────────────
+
+export type NewProduct = {
+  sellerId: string
+  title: string
+  fundingProjectName: string
+  fundingProjectUrl: string | null
+  category: string
+  conditionGrade: string
+  photoUrls: string[]
+  backerProofUrl: string
+  startPrice: number
+}
+
+export async function createProduct(p: NewProduct) {
+  const { rows } = await pool.query<{ id: string }>(
+    `insert into products (seller_id, title, funding_project_name, funding_project_url,
+                           category, condition_grade, photo_urls, backer_proof_url, start_price)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id`,
+    [
+      p.sellerId,
+      p.title,
+      p.fundingProjectName,
+      p.fundingProjectUrl,
+      p.category,
+      p.conditionGrade,
+      p.photoUrls,
+      p.backerProofUrl,
+      p.startPrice,
+    ],
+  )
+  return rows[0].id
+}

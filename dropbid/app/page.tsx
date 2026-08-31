@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { listLiveAuctions } from '@/lib/db'
 import { Countdown } from './time'
+import { won } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
-const won = (n: number) => n.toLocaleString('ko-KR') + '원'
 
 export default async function DropList() {
   const auctions = await listLiveAuctions()
