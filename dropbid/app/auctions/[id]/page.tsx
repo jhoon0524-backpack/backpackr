@@ -4,6 +4,7 @@ import { getAuction } from '@/lib/db'
 import { getCurrentUser } from '@/lib/session'
 import { Countdown } from '../../time'
 import { BidForm } from './bid-form'
+import { AuctionResult } from './result'
 import { won } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -65,9 +66,14 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
           bidderNickname={me?.nickname ?? null}
         />
       ) : (
-        <p className="mt-5 rounded-lg border border-zinc-200 bg-white px-5 py-4 text-sm text-zinc-600">
-          마감된 경매입니다. (상태: {auction.status})
-        </p>
+        <AuctionResult
+          status={auction.status}
+          currentPrice={auction.current_price}
+          winnerNickname={auction.winner_nickname}
+          orderStatus={auction.order_status}
+          orderDueAt={auction.order_due_at}
+          viewerIsWinner={!!me && me.id === auction.winner_id}
+        />
       )}
     </div>
   )

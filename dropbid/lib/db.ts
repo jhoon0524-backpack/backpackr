@@ -51,6 +51,10 @@ export type AuctionDetail = LiveAuction & {
   extension_count: number
   seller_nickname: string | null
   highest_bidder_nickname: string | null
+  winner_id: string | null
+  winner_nickname: string | null
+  order_status: string | null
+  order_due_at: Date | null
 }
 
 export async function getAuction(id: string): Promise<AuctionDetail | null> {
@@ -59,6 +63,8 @@ export async function getAuction(id: string): Promise<AuctionDetail | null> {
             a.current_price, a.ends_at, a.status, a.extension_count,
             seller.nickname as seller_nickname,
             top.nickname as highest_bidder_nickname,
+            a.winner_id, winner.nickname as winner_nickname,
+            o.status as order_status, o.due_at as order_due_at,
             (select count(*) from bids b
               where b.auction_id = a.id and b.outcome = 'accepted')::int as bid_count,
             (select count(distinct b.bidder_id) from bids b
@@ -72,6 +78,8 @@ export async function getAuction(id: string): Promise<AuctionDetail | null> {
        join products p on p.id = a.product_id
        join profiles seller on seller.id = p.seller_id
        left join profiles top on top.id = a.highest_bidder_id
+       left join profiles winner on winner.id = a.winner_id
+       left join orders o on o.auction_id = a.id
       where a.id = $1`,
     [id],
   )

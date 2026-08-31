@@ -12,6 +12,9 @@ export async function UserSwitcher() {
       <span className="text-xs text-zinc-400">로그인 대신</span>
       <select
         name="userId"
+        // 전환 뒤 서버가 새 값을 그려도 브라우저가 기존 select 를 재사용해 빈 칸으로 보인다.
+        // key 를 값에 묶어 다시 그리게 한다.
+        key={current ?? 'none'}
         defaultValue={current ?? ''}
         className="rounded border border-zinc-300 px-2 py-1 text-xs"
       >
