@@ -5,7 +5,7 @@
 위에서부터 순서대로 진행한다.
 
 ## [기반]
-- [ ] Next.js(App Router) + TypeScript + Tailwind 프로젝트 생성 및 의존성 설치
+- [x] Next.js(App Router) + TypeScript + Tailwind 프로젝트 생성 및 의존성 설치
 - [ ] 검증 명령 3개(`npm test`, `npm run lint`, `npx tsc --noEmit`)가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업 포함)
 - [ ] CI 설정 — 푸시할 때 검증 명령 3개 자동 실행
 - [ ] Supabase 로컬 개발 환경 셋업 (`supabase init` + `supabase start`, 접속 확인)

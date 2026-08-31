@@ -1,15 +1,20 @@
 # 현재 진행 상황
 
 ## 최근 완료한 작업
-- 킷 설치 및 PRD 기반으로 `SPEC.md` / `CLAUDE.md` / `TASKS.md` 작성 (코드는 아직 없음)
+- [기반] Next.js(App Router) + TypeScript + Tailwind 프로젝트 생성 및 의존성 설치
+  - create-next-app 최신 버전으로 생성 (ESLint 포함, npm, src 디렉터리 없음, `@/*` 별칭)
+  - `npm run lint` / `npx tsc --noEmit` 통과 확인. `npm test` 는 러너 미설치로 건너뜀 (다음 작업)
+  - 스캐폴드가 만든 `AGENTS.md` 를 남겨둠 — 설치된 Next.js 가 학습 데이터와 다를 수 있으니
+    `node_modules/next/dist/docs/` 문서를 먼저 읽으라는 내용. 코드 작성 작업 전에 참고할 것
 
 ## 다음에 진행할 작업
-- [기반] Next.js(App Router) + TypeScript + Tailwind 프로젝트 생성 및 의존성 설치
+- [기반] 검증 명령 3개(`npm test`, `npm run lint`, `npx tsc --noEmit`)가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업 포함)
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
 확인 안 한 것을 완료로 적으면 다음 세션이 그 위에 쌓는다.
-- 검증 명령 3개는 아직 한 번도 실행된 적 없다 (프로젝트 미생성)
+- `npm test` 는 아직 실행 불가 (테스트 러너 미설치)
+- `npm run dev` / `npm run build` 는 아직 안 돌려봤다
 - 카카오 로그인·알림톡, 포트원 모두 계정·심사·템플릿 승인이 안 된 상태다
 
 ## 알고 있는 문제
