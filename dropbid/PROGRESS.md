@@ -10,6 +10,7 @@
     로컬 재현이 통과했던 건 스캐폴드가 만들어둔 `.next` 가 남아 있었기 때문 (`node_modules` 만 지웠다).
     검증 명령을 `npm run typecheck` (= `next typegen && tsc --noEmit`) 로 바꿔 어디서든 자립하게 했다.
     `.next` 까지 지운 상태로 재현·수정·재확인함. CLAUDE.md 3장과 [규칙 목록] 에도 반영
+  - 수정 후 CI 초록불 확인 (`f8345df`)
 - [기반] 검증 명령 3개가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업)
   - Vitest + jsdom + Testing Library. `vitest.config.mts`, 스모크 테스트 1개(`__tests__/smoke.test.tsx`)
   - `npm test` 는 `vitest run` 으로 둔다. Next 문서는 `vitest` 를 쓰라고 하지만 그건 watch 모드라
@@ -29,7 +30,6 @@
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
 확인 안 한 것을 완료로 적으면 다음 세션이 그 위에 쌓는다.
-- 수정 후 CI 가 초록불이 된 것은 아직 못 봤다 (푸시 직후 Actions 확인 필요)
 - `npm run dev` / `npm run build` 는 아직 안 돌려봤다
 - 서버 컴포넌트(async)는 Vitest 가 지원하지 않는다. Next 문서 권고는 E2E.
   현재 스모크 테스트는 도구 사슬 확인용이라 이 제약에 걸리지 않았다
