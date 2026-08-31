@@ -212,3 +212,41 @@ describe('마감 임박 연장', () => {
     expect(after.extension_count).toBe(20)
   })
 })
+
+describe('연락처 미등록 차단', () => {
+  test('연락처가 없으면 입찰을 거부한다', async () => {
+    // PRD: 연락처가 미등록이면 상품 등록과 입찰을 차단한다.
+    // API 가 아니라 place_bid 에서 막는다 — 입찰의 유일한 통로가 여기다.
+    const { auctionId } = await seedLiveAuction()
+    const bidder = await createUser('연락처 없는 사람', null)
+
+    const result = await placeBid(auctionId, bidder, 10000)
+
+    expect(result.outcome).toBe('rejected')
+    expect(result.reject_reason).toBe('no_phone')
+  })
+
+  test('연락처를 등록하면 입찰할 수 있다', async () => {
+    const { auctionId } = await seedLiveAuction()
+    const bidder = await createUser('연락처 없는 사람', null)
+    await placeBid(auctionId, bidder, 10000)
+
+    await pool.query(`update profiles set phone = '010-1111-2222' where id = $1`, [bidder])
+    const result = await placeBid(auctionId, bidder, 10000)
+
+    expect(result.outcome).toBe('accepted')
+  })
+
+  test('연락처 없는 거부도 사유 코드와 함께 기록된다', async () => {
+    const { auctionId } = await seedLiveAuction()
+    const bidder = await createUser('연락처 없는 사람', null)
+
+    await placeBid(auctionId, bidder, 10000)
+
+    const { rows } = await pool.query<{ reject_reason: string }>(
+      `select reject_reason from bids where auction_id = $1`,
+      [auctionId],
+    )
+    expect(rows[0].reject_reason).toBe('no_phone')
+  })
+})
