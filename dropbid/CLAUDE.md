@@ -20,11 +20,13 @@
 ```
 npm test
 npm run lint
-npx tsc --noEmit
+npm run typecheck
 ```
 
-- [기반] 작업으로 프로젝트가 생성되기 전에는 실행할 수 없다.
-  두 번째 [기반] 작업이 "빈 프로젝트에서 세 명령 통과 확인"인 이유다.
+`typecheck` 는 `next typegen && tsc --noEmit` 이다. `tsc` 만 돌리면 안 된다.
+Next 16 은 `LayoutProps` 같은 전역 타입을 `.next/types/` 에 생성하는데 이 폴더는 git 에 없다.
+갓 클론한 곳과 CI 에서 `npx tsc --noEmit` 은 실패한다 (실제로 CI 에서 겪었다).
+
 - 이번 작업과 무관한 검사는 건너뛰어도 된다. 무엇을 건너뛰었는지 밝힌다.
 - 검사가 실패했는데 원인이 내 작업이 아니라면, 고치지 말고 `PROGRESS.md` 에 적는다.
 - **테스트를 지우거나 건너뛰어서 통과시키지 않는다.** 그건 통과가 아니다.
@@ -63,6 +65,9 @@ npx tsc --noEmit
 
 형식: `- [범위] 확인할 내용 — 검사 방법 (등록 사유)`
 
+- [검증] 검증 명령은 갓 클론한 상태에서도 통과해야 한다. 생성물(`.next`, `node_modules`)이 남아 있어서
+  통과하는 것을 통과로 착각하지 않는다 — `rm -rf node_modules .next && npm ci` 후 세 명령을 돌려 확인
+  (CI 에서 `LayoutProps` 타입 오류로 처음 겪음)
 - [입찰] 애플리케이션 코드가 `bids` / `auctions` 에 직접 쓰지 않는다. 모든 입찰은 `place_bid` DB 함수 호출로만 —
   `grep -rn "from('bids')\|from(\"bids\")\|from('auctions')\|from(\"auctions\")" app lib` 결과에 insert/update/upsert 가 없어야 하고,
   DB 권한(REVOKE)으로도 차단되어 있어야 한다 (PRD 인수 조건, 최초 등록)

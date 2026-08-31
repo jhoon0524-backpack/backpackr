@@ -5,6 +5,11 @@
   - `.github/workflows/dropbid.yml` (저장소 루트). Node 22, `npm ci` 후 세 명령 순서대로
   - 이 저장소에는 MyAIGame·agent-starter·booking·docs 도 있어서 `dropbid/**` 변경일 때만 돌게 경로 필터를 걸었다
   - 로컬에서 `node_modules` 를 지우고 `npm ci` 부터 전체 시퀀스를 재현해 통과 확인 (락파일 완전성까지 확인됨)
+  - **첫 CI 실행은 실패했다.** `npx tsc --noEmit` 이 `app/layout.tsx` 의 `LayoutProps` 를 못 찾음.
+    Next 16 이 `.next/types/` 에 생성하는 전역 타입인데 `.next` 는 git 에 없다.
+    로컬 재현이 통과했던 건 스캐폴드가 만들어둔 `.next` 가 남아 있었기 때문 (`node_modules` 만 지웠다).
+    검증 명령을 `npm run typecheck` (= `next typegen && tsc --noEmit`) 로 바꿔 어디서든 자립하게 했다.
+    `.next` 까지 지운 상태로 재현·수정·재확인함. CLAUDE.md 3장과 [규칙 목록] 에도 반영
 - [기반] 검증 명령 3개가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업)
   - Vitest + jsdom + Testing Library. `vitest.config.mts`, 스모크 테스트 1개(`__tests__/smoke.test.tsx`)
   - `npm test` 는 `vitest run` 으로 둔다. Next 문서는 `vitest` 를 쓰라고 하지만 그건 watch 모드라
@@ -24,8 +29,7 @@
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
 확인 안 한 것을 완료로 적으면 다음 세션이 그 위에 쌓는다.
-- CI 워크플로가 GitHub 에서 실제로 초록불이 된 것은 아직 못 봤다. 로컬에서 같은 명령을 재현했을 뿐이다.
-  푸시 후 Actions 탭에서 첫 실행 결과를 확인할 것
+- 수정 후 CI 가 초록불이 된 것은 아직 못 봤다 (푸시 직후 Actions 확인 필요)
 - `npm run dev` / `npm run build` 는 아직 안 돌려봤다
 - 서버 컴포넌트(async)는 Vitest 가 지원하지 않는다. Next 문서 권고는 E2E.
   현재 스모크 테스트는 도구 사슬 확인용이라 이 제약에 걸리지 않았다
