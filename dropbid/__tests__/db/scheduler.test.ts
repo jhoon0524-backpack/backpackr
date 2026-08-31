@@ -97,3 +97,50 @@ describe('스케줄러 기록 권한', () => {
     }
   })
 })
+
+describe('사람이 손대야 하는 건은 처리 건수에 넣지 않는다', () => {
+  test('needs_operator 는 processed 로 세지 않는다', async () => {
+    // 최고입찰자가 계정을 지운 경매는 자동 확정하지 않고 그대로 둔다.
+    // 매 실행마다 다시 잡히므로, 이걸 처리한 것으로 세면 1분마다 지표가 오염된다.
+    const { auctionId } = await seedLiveAuction()
+    const bidder = await createUser('입찰자')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, bidder])
+    await pool.query(`delete from auth.users where id = $1`, [bidder])
+    await expire(auctionId)
+
+    const run = await runScheduler()
+
+    expect(run.processed).toBe(0)
+    // 사람이 손대기 전까지 계속 떠 있어야 하는 알림이라 detail 에는 남긴다.
+    expect(run.detail).toEqual({ needs_operator: 1 })
+  })
+
+  test('여러 번 돌려도 처리 건수는 계속 0 이다', async () => {
+    const { auctionId } = await seedLiveAuction()
+    const bidder = await createUser('입찰자')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, bidder])
+    await pool.query(`delete from auth.users where id = $1`, [bidder])
+    await expire(auctionId)
+
+    const runs = [await runScheduler(), await runScheduler(), await runScheduler()]
+
+    expect(runs.map((r) => r.processed)).toEqual([0, 0, 0])
+    expect(runs.every((r) => r.detail.needs_operator === 1)).toBe(true)
+  })
+
+  test('실제로 처리한 것과 섞여 있으면 처리한 것만 센다', async () => {
+    const stuck = await seedLiveAuction()
+    const bidder = await createUser('입찰자')
+    await pool.query(`select place_bid($1, $2, 10000)`, [stuck.auctionId, bidder])
+    await pool.query(`delete from auth.users where id = $1`, [bidder])
+    await expire(stuck.auctionId)
+
+    const unsold = await seedLiveAuction()
+    await expire(unsold.auctionId)
+
+    const run = await runScheduler()
+
+    expect(run.processed).toBe(1)
+    expect(run.detail).toEqual({ unsold: 1, needs_operator: 1 })
+  })
+})
