@@ -1,6 +1,15 @@
 # 현재 진행 상황
 
 ## 최근 완료한 작업
+- [데이터] 스키마 정의 1 — `profiles`, `products`
+  - `supabase/migrations/20260831125721_profiles_products.sql`
+  - PRD 규칙을 앱이 아니라 스키마가 강제하게 했다. 후원 인증은 `not null` 자체가 "없으면 등록 거부" 규칙이고,
+    사진 3장·시작가 1,000원·반려 사유는 check 제약으로 넣었다
+  - 마이그레이션이 `auth.users` 를 참조하는데 로컬 Postgres 에는 없다.
+    `supabase/local/bootstrap.sql` 로 최소한만 흉내내고, `npm run db:reset` 으로 초기화·적용을 반복 가능하게 했다
+  - `reset.sh` 는 public 스키마를 통째로 지우므로 대상이 로컬이 아니면 멈춘다 (CLAUDE.md 4장).
+    원격처럼 보이는 주소로 실제 거부되는지 확인함
+  - 제약 5가지를 로컬 DB 에 직접 넣어보며 확인했다 (거부 4건 + 정상 등록 1건, 기본 status=pending)
 - [기반] 환경변수 골격 정리 — `.env.example` (자리만, 값 없음)
   - `.gitignore` 의 `.env*` 가 예시 파일까지 막아서 `!.env.example` 예외를 넣었다
   - `.env.local` / `.env.production` 을 실제로 만들어 git 이 무시하는지, 예시는 추적되는지 확인 후 삭제
@@ -35,7 +44,7 @@
     `node_modules/next/dist/docs/` 문서를 먼저 읽으라는 내용. 코드 작성 작업 전에 참고할 것
 
 ## 다음에 진행할 작업
-- [데이터] 스키마 정의 1 — `profiles`, `products`
+- [데이터] 스키마 정의 2 — `drops`, `auctions`
 
 [기반] 단계는 `supabase start` 확인만 남기고 끝났다. 그건 Docker 가 되는 환경에서 해야 한다.
 
@@ -46,6 +55,9 @@
 - **Auth·Storage·Realtime 은 이 환경에서 한 번도 안 돌려봤다.** Docker 가 되는 환경에서 확인해야 한다.
   이 셋에 의존하는 작업([기능]의 카카오 로그인·이미지 업로드, [화면]의 Realtime 갱신)은
   여기서 완료로 표시하면 안 된다
+- 스키마 제약은 수동으로만 확인했다. 자동 테스트로 고정되어 있지 않다 (TASKS 의 "DB 테스트 하네스" 항목)
+- 계정 삭제 시 입찰 보존은 아직 설계만 있다. `profiles` 는 `auth.users` 를 `on delete cascade` 로 참조하므로,
+  입찰 기록을 남기려면 `bids` 쪽에서 `on delete set null` 로 받아야 한다 (스키마 정의 3 에서 결정할 것)
 - 로컬 Postgres 는 16, `supabase/config.toml` 은 17 이다. 버전 차이에 의존하는 기능을 쓰면
   Supabase 스택에서 다시 확인할 것
 - 서버 컴포넌트(async)는 Vitest 가 지원하지 않는다. Next 문서 권고는 E2E.
