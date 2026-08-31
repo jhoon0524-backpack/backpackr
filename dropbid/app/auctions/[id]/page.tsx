@@ -16,6 +16,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
   if (!auction) notFound()
 
   const me = await getCurrentUser()
+  const serverNow = new Date().toISOString()
 
   return (
     <div>
@@ -38,7 +39,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
           <div className="text-right">
             <p className="text-xs text-zinc-500">남은 시간</p>
             <p className="text-lg">
-              <Countdown endsAt={auction.ends_at.toISOString()} />
+              <Countdown endsAt={auction.ends_at.toISOString()} serverNow={serverNow} />
             </p>
           </div>
         </div>

@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function DropList() {
   const auctions = await listLiveAuctions()
+  // 브라우저 시계 보정용. 서버가 그린 시각을 함께 내려보낸다.
+  const serverNow = new Date().toISOString()
 
   return (
     <div>
@@ -41,7 +43,7 @@ export default async function DropList() {
                   <div className="shrink-0 text-right">
                     <p className="font-semibold tabular-nums">{won(a.current_price)}</p>
                     <p className="mt-0.5 text-xs text-zinc-500">
-                      입찰 {a.bid_count}회 · <Countdown endsAt={a.ends_at.toISOString()} />
+                      입찰 {a.bid_count}회 · <Countdown endsAt={a.ends_at.toISOString()} serverNow={serverNow} />
                     </p>
                   </div>
                 </div>
