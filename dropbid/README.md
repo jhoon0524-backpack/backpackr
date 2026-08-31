@@ -48,3 +48,28 @@ psql postgresql://dropbid:dropbid@127.0.0.1:5432/dropbid_dev -c "select 1"
 
 주의: `supabase/config.toml` 은 Postgres 17 을 쓴다. 위 대체 경로는 16 이라 버전이 다르다.
 버전에 의존하는 기능을 쓰게 되면 Supabase 스택에서 반드시 다시 확인할 것.
+
+### 마이그레이션을 프로덕션에 적용하기
+
+**AI 는 마이그레이션 파일을 쓰기만 하고 실행하지 않는다** (`CLAUDE.md` 4장).
+아래는 사람이 직접 밟는 절차다.
+
+1. 적용될 것이 무엇인지 먼저 본다. 로컬에만 있고 원격에 없는 파일이 목록에 뜬다.
+   ```
+   npx supabase link --project-ref <프로젝트 ref>   # 최초 1회
+   npx supabase migration list
+   ```
+2. 파일을 눈으로 읽는다. `drop`, `truncate`, `alter ... drop column`, `not null` 추가가 있으면
+   기존 데이터가 어떻게 되는지 확인하기 전에는 진행하지 않는다.
+3. 빈 DB 에서 순서대로 적용되는지 확인한다. 로컬에서 `npm run db:reset` 이 통과해야 한다.
+4. 적용한다.
+   ```
+   npx supabase db push
+   ```
+5. 적용 후 `npx supabase migration list` 로 로컬과 원격이 같아졌는지 확인한다.
+
+**되돌리기.** Supabase 마이그레이션은 앞으로만 간다. 자동 롤백이 없다.
+잘못 나갔으면 되돌리는 마이그레이션을 새로 써서 다시 push 한다.
+그래서 데이터를 지우거나 컬럼을 없애는 마이그레이션은 2번에서 특히 오래 본다.
+
+**릴리즈 1단계(비공개 드롭) 전에는** 실제 결제가 포함되므로, push 직전에 백업 시점을 확인해 둔다.
