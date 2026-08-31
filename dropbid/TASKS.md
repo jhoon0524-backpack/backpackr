@@ -12,7 +12,7 @@
 - [ ] `supabase start` 를 실제로 띄워 Auth·Storage·Realtime 확인 — **현재 환경에서 불가**.
       Docker 이미지 CDN(`production.cloudfront.docker.com`)이 네트워크 정책에서 차단됨.
       Docker 가 되는 환경에서 다시 시도한다
-- [ ] 환경변수 골격 정리 (`.env.example` — Supabase, 카카오, 포트원 키 자리만)
+- [x] 환경변수 골격 정리 (`.env.example` — Supabase, 카카오, 포트원 키 자리만)
 
 ## [데이터]
 - [ ] 스키마 정의 1 — `profiles`(연락처 포함), `products`(상태 등급·후원 인증 이미지·`pending/scheduled` 상태)

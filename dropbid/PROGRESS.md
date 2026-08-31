@@ -1,6 +1,9 @@
 # 현재 진행 상황
 
 ## 최근 완료한 작업
+- [기반] 환경변수 골격 정리 — `.env.example` (자리만, 값 없음)
+  - `.gitignore` 의 `.env*` 가 예시 파일까지 막아서 `!.env.example` 예외를 넣었다
+  - `.env.local` / `.env.production` 을 실제로 만들어 git 이 무시하는지, 예시는 추적되는지 확인 후 삭제
 - [기반] Supabase 로컬 개발 환경 셋업 — **절반만 됐다**
   - `supabase init` 완료 (`supabase/config.toml`). CLI 는 devDependency 로 설치
   - **`supabase start` 는 이 환경에서 불가능하다.** Docker 데몬은 띄웠지만 이미지를 받을 수 없다.
@@ -32,7 +35,9 @@
     `node_modules/next/dist/docs/` 문서를 먼저 읽으라는 내용. 코드 작성 작업 전에 참고할 것
 
 ## 다음에 진행할 작업
-- [기반] 환경변수 골격 정리 (`.env.example`)
+- [데이터] 스키마 정의 1 — `profiles`, `products`
+
+[기반] 단계는 `supabase start` 확인만 남기고 끝났다. 그건 Docker 가 되는 환경에서 해야 한다.
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
