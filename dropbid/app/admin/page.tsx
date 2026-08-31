@@ -1,12 +1,17 @@
-import { listOpenDrops, listPendingProducts } from '@/lib/db'
+import { listOpenDrops, listPendingProducts, listStuckAuctions } from '@/lib/db'
 import { ReviewForm } from './review-form'
-import { won } from '@/lib/format'
+import { StuckForm } from './stuck-form'
+import { won, kst } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
 
 export default async function AdminReview() {
-  const [products, drops] = await Promise.all([listPendingProducts(), listOpenDrops()])
+  const [products, drops, stuck] = await Promise.all([
+    listPendingProducts(),
+    listOpenDrops(),
+    listStuckAuctions(),
+  ])
   const dropOptions = drops.map((d) => ({
     id: d.id,
     round_number: d.round_number,
@@ -15,6 +20,37 @@ export default async function AdminReview() {
 
   return (
     <div>
+      {stuck.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-base font-semibold text-amber-900">확인이 필요한 경매</h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            마감됐는데 최고입찰자가 계정을 지워 자동 확정되지 못했습니다.
+            처리하기 전까지 매분 다시 보고됩니다.
+          </p>
+          <ul className="mt-3 space-y-3">
+            {stuck.map((a) => (
+              <li
+                key={a.id}
+                className="rounded-lg border border-amber-200 bg-amber-50/40 px-5 py-4"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="font-medium">{a.title}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">
+                      입찰 {a.bid_count}회 · 마감 {kst(a.ends_at)}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-sm font-semibold tabular-nums">
+                    {won(a.current_price)}
+                  </p>
+                </div>
+                <StuckForm auctionId={a.id} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <h1 className="text-xl font-semibold tracking-tight">검수 대기</h1>
       <p className="mt-1 text-sm text-zinc-500">
         후원 인증 이미지를 확인하고 승인하거나 반려합니다. 승인하면 고른 회차에 배정됩니다.

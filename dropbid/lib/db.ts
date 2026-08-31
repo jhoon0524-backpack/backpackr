@@ -263,3 +263,34 @@ export async function createProduct(p: NewProduct) {
   )
   return rows[0].id
 }
+
+export type StuckAuction = {
+  id: string
+  title: string
+  current_price: number
+  ends_at: Date
+  bid_count: number
+}
+
+/**
+ * 마감 시각이 지났는데 스케줄러가 확정하지 못한 경매.
+ * 최고입찰자가 계정을 지운 경우다. 사람이 손대기 전까지 매분 다시 보고된다.
+ */
+export async function listStuckAuctions() {
+  const { rows } = await pool.query<StuckAuction>(
+    `select a.id, p.title, a.current_price, a.ends_at,
+            (select count(*) from bids b
+              where b.auction_id = a.id and b.outcome = 'accepted')::int as bid_count
+       from auctions a join products p on p.id = a.product_id
+      where a.status = 'live' and a.ends_at <= now()
+        and a.highest_bidder_id is null
+        and exists (select 1 from bids b
+                     where b.auction_id = a.id and b.outcome = 'accepted')
+      order by a.ends_at`,
+  )
+  return rows
+}
+
+export async function resolveStuckAuction(auctionId: string) {
+  await pool.query(`select resolve_stuck_auction($1)`, [auctionId])
+}
