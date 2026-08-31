@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/session'
 import { Countdown } from '../../time'
 import { BidForm } from './bid-form'
 import { AuctionResult } from './result'
+import { LivePoller } from './live-poller'
 import { won, CONDITION, maskNickname } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -80,11 +81,15 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
       </div>
 
       {auction.status === 'live' ? (
-        <BidForm
-          auctionId={auction.id}
-          minNextAmount={auction.min_next_amount}
-          bidderNickname={me?.nickname ?? null}
-        />
+        <>
+          {/* Realtime 이 붙기 전까지의 폴백. 현재가가 멈춰 있으면 헛입찰이 난다. */}
+          <LivePoller endsAt={auction.ends_at.toISOString()} serverNow={serverNow} />
+          <BidForm
+            auctionId={auction.id}
+            minNextAmount={auction.min_next_amount}
+            bidderNickname={me?.nickname ?? null}
+          />
+        </>
       ) : (
         <AuctionResult
           status={auction.status}
