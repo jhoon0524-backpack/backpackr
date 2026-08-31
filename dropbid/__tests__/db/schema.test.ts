@@ -154,43 +154,60 @@ describe('bids — 사유 코드와 결과가 어긋나면 막는다', () => {
   })
 })
 
-describe('알림 멱등 — 같은 알림은 두 번 들어가지 않는다', () => {
-  test('같은 (경매, 수신자, 종류, 채널) 은 한 번만', async () => {
+describe('알림 아웃박스 — 같은 알림은 한 줄만 생긴다', () => {
+  test('같은 (경매, 수신자, 종류) 는 한 번만 적재된다', async () => {
     const { auctionId } = await seedLiveAuction()
     const userId = await createUser('낙찰자')
-    const insert = `insert into notifications (auction_id, user_id, kind, channel, status)
-                    values ($1, $2, 'won', 'alimtalk', 'sent')`
+    const insert = `insert into notifications (auction_id, user_id, kind)
+                    values ($1, $2, 'won')`
     await pool.query(insert, [auctionId, userId])
     expect(await isRejected(insert, [auctionId, userId])).toBe(true)
   })
 
-  test('알림톡이 실패하면 이메일 폴백은 들어간다', async () => {
+  test('적재하면 pending 으로 시작하고 채널은 비어 있다', async () => {
+    // 채널은 보낼 때 정해진다. 알림톡을 먼저 쓰고 실패하면 이메일로 간다.
+    const { auctionId } = await seedLiveAuction()
+    const userId = await createUser('낙찰자')
+    const { rows } = await pool.query<{ status: string; channel: string | null }>(
+      `insert into notifications (auction_id, user_id, kind) values ($1, $2, 'won')
+       returning status, channel`,
+      [auctionId, userId],
+    )
+    expect(rows[0]).toEqual({ status: 'pending', channel: null })
+  })
+
+  test('보냈다고 표시하려면 채널과 발송 시각이 있어야 한다', async () => {
     const { auctionId } = await seedLiveAuction()
     const userId = await createUser('낙찰자')
     await pool.query(
-      `insert into notifications (auction_id, user_id, kind, channel, status, error)
-       values ($1, $2, 'won', 'alimtalk', 'failed', '알림톡 오류')`,
+      `insert into notifications (auction_id, user_id, kind) values ($1, $2, 'won')`,
       [auctionId, userId],
     )
-    await pool.query(
-      `insert into notifications (auction_id, user_id, kind, channel, status)
-       values ($1, $2, 'won', 'email', 'sent')`,
-      [auctionId, userId],
-    )
-    const { rows } = await pool.query<{ count: string }>(
-      `select count(*)::text as count from notifications where auction_id = $1`,
-      [auctionId],
-    )
-    expect(rows[0].count).toBe('2')
+    expect(await isRejected(`update notifications set status = 'sent'`)).toBe(true)
+    expect(
+      await isRejected(
+        `update notifications set status='sent', channel='alimtalk', sent_at=now()`,
+      ),
+    ).toBe(false)
   })
 
   test('실패인데 사유가 없으면 막는다', async () => {
     const { auctionId } = await seedLiveAuction()
     const userId = await createUser('낙찰자')
+    await pool.query(
+      `insert into notifications (auction_id, user_id, kind) values ($1, $2, 'won')`,
+      [auctionId, userId],
+    )
+    expect(await isRejected(`update notifications set status = 'failed'`)).toBe(true)
+  })
+
+  test('아직 안 보낸 것에 채널이 붙어 있으면 막는다', async () => {
+    const { auctionId } = await seedLiveAuction()
+    const userId = await createUser('낙찰자')
     expect(
       await isRejected(
-        `insert into notifications (auction_id, user_id, kind, channel, status)
-         values ($1, $2, 'won', 'alimtalk', 'failed')`,
+        `insert into notifications (auction_id, user_id, kind, channel)
+         values ($1, $2, 'won', 'alimtalk')`,
         [auctionId, userId],
       ),
     ).toBe(true)
