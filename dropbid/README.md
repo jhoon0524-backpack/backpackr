@@ -73,3 +73,15 @@ psql postgresql://dropbid:dropbid@127.0.0.1:5432/dropbid_dev -c "select 1"
 그래서 데이터를 지우거나 컬럼을 없애는 마이그레이션은 2번에서 특히 오래 본다.
 
 **릴리즈 1단계(비공개 드롭) 전에는** 실제 결제가 포함되므로, push 직전에 백업 시점을 확인해 둔다.
+
+### 마감 스케줄러 켜기
+
+마이그레이션은 함수와 기록 테이블만 만든다. **1분마다 실제로 돌기 시작하는 시점은 사람이 정한다.**
+`supabase/scheduler.sql` 을 Supabase SQL Editor 에서 실행한다.
+
+돌고 있는지는 기록으로 본다. 처리 건수가 0인 실행도 남기므로, **기록이 끊긴 구간이 곧 멈춘 구간이다.**
+
+```sql
+select ran_at, processed, detail from scheduler_runs
+ where job = 'close_due_auctions' order by ran_at desc limit 20;
+```
