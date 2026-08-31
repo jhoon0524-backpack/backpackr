@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import { submitProduct, type SellState } from './actions'
+import { MoneyInput } from '../money-input'
 
 const field = 'mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm'
 
@@ -58,12 +59,10 @@ export function SellForm() {
 
       <label className="block text-xs text-zinc-500">
         시작가 (1,000원 이상)
-        <input
+        <MoneyInput
           name="startPrice"
-          type="number"
-          step={1000}
           defaultValue={v.startPrice ?? '10000'}
-          className={`${field} tabular-nums`}
+          className={`${field} pr-8 tabular-nums`}
         />
       </label>
 

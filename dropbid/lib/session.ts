@@ -12,13 +12,18 @@ export async function getCurrentUserId() {
   return jar.get('demo_user')?.value ?? null
 }
 
-export type CurrentUser = { id: string; nickname: string; phone: string | null }
+export type CurrentUser = {
+  id: string
+  nickname: string
+  phone: string | null
+  is_operator: boolean
+}
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const id = await getCurrentUserId()
   if (!id) return null
   const { rows } = await pool.query<CurrentUser>(
-    `select id, nickname, phone from profiles where id = $1`,
+    `select id, nickname, phone, is_operator from profiles where id = $1`,
     [id],
   )
   return rows[0] ?? null

@@ -1,4 +1,5 @@
 import { listOpenDrops, listPendingProducts, listStuckAuctions } from '@/lib/db'
+import { getCurrentUser } from '@/lib/session'
 import { ReviewForm } from './review-form'
 import { StuckForm } from './stuck-form'
 import { won, kst } from '@/lib/format'
@@ -7,6 +8,19 @@ export const dynamic = 'force-dynamic'
 
 
 export default async function AdminReview() {
+  // 검수 대기 목록에는 판매자 이름·연락 단서가 붙는다. 운영자가 아니면 조회 자체를 하지 않는다.
+  const me = await getCurrentUser()
+  if (!me?.is_operator) {
+    return (
+      <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-12 text-center">
+        <p className="text-sm text-zinc-700">운영자만 볼 수 있는 화면입니다.</p>
+        <p className="mt-1 text-xs text-zinc-500">
+          검수 권한이 필요하면 운영자에게 요청해 주세요.
+        </p>
+      </div>
+    )
+  }
+
   const [products, drops, stuck] = await Promise.all([
     listPendingProducts(),
     listOpenDrops(),

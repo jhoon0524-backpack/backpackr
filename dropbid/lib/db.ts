@@ -45,8 +45,52 @@ export async function listLiveAuctions(): Promise<LiveAuction[]> {
   return rows
 }
 
+export type PastResult = {
+  id: string
+  title: string
+  status: string
+  final_price: number
+  bid_count: number
+  winner_nickname: string | null
+  round_number: number
+  ends_at: Date
+}
+
+/**
+ * 가장 최근에 마감된 회차의 결과.
+ * 드롭이 끝나면 홈이 통째로 비어 방금 끝난 경매를 볼 곳이 없었다 (QA 에서 확인).
+ */
+export async function listLastDropResults(): Promise<PastResult[]> {
+  // 회차 행의 마감 시각이 아니라 실제로 마감된 경매를 기준으로 잡는다.
+  // 연장이 붙거나 운영자가 손대면 둘이 어긋난다 (처음에 회차 기준으로 짰다가 아무것도 안 나왔다).
+  const { rows } = await pool.query<PastResult>(`
+    with last_drop as (
+      select a.drop_id, max(a.ends_at) as closed_at
+        from auctions a
+       where a.status in ('sold', 'unsold', 'payment_failed')
+       group by a.drop_id
+       order by max(a.ends_at) desc
+       limit 1
+    )
+    select a.id, p.title, a.status, a.current_price as final_price,
+           d.round_number, ld.closed_at as ends_at,
+           w.nickname as winner_nickname,
+           (select count(*) from bids b
+             where b.auction_id = a.id and b.outcome = 'accepted')::int as bid_count
+      from last_drop ld
+      join drops d on d.id = ld.drop_id
+      join auctions a on a.drop_id = ld.drop_id
+      join products p on p.id = a.product_id
+      left join profiles w on w.id = a.winner_id
+     where a.status in ('sold', 'unsold', 'payment_failed')
+     order by a.status, a.current_price desc
+  `)
+  return rows
+}
+
 export type AuctionDetail = LiveAuction & {
   status: string
+  funding_project_url: string | null
   min_next_amount: number
   extension_count: number
   seller_nickname: string | null
@@ -59,7 +103,8 @@ export type AuctionDetail = LiveAuction & {
 
 export async function getAuction(id: string): Promise<AuctionDetail | null> {
   const { rows } = await pool.query<AuctionDetail>(
-    `select a.id, p.title, p.funding_project_name, p.category, p.condition_grade,
+    `select a.id, p.title, p.funding_project_name, p.funding_project_url,
+            p.category, p.condition_grade,
             a.current_price, a.ends_at, a.status, a.extension_count,
             seller.nickname as seller_nickname,
             top.nickname as highest_bidder_nickname,
@@ -118,6 +163,7 @@ export type MyBidRow = {
   my_amount: number
   current_price: number
   status: string
+  ends_at: Date
   is_winning: boolean
 }
 
@@ -125,13 +171,13 @@ export type MyBidRow = {
 export async function listMyBids(userId: string) {
   const { rows } = await pool.query<MyBidRow>(
     `select a.id as auction_id, p.title, max(b.amount) as my_amount,
-            a.current_price, a.status,
+            a.current_price, a.status, a.ends_at,
             (a.highest_bidder_id = $1) as is_winning
        from bids b
        join auctions a on a.id = b.auction_id
        join products p on p.id = a.product_id
       where b.bidder_id = $1 and b.outcome = 'accepted'
-      group by a.id, p.title, a.current_price, a.status, a.highest_bidder_id
+      group by a.id, p.title, a.current_price, a.status, a.ends_at, a.highest_bidder_id
       order by a.ends_at desc`,
     [userId],
   )
@@ -167,13 +213,17 @@ export type MySaleRow = {
   rejection_reason: string | null
   auction_status: string | null
   current_price: number | null
+  can_relist: boolean
 }
 
 /** 내가 올린 것. 검수 대기·반려까지 포함한다. */
 export async function listMySales(userId: string) {
   const { rows } = await pool.query<MySaleRow>(
     `select p.id as product_id, p.title, p.status as product_status, p.rejection_reason,
-            a.status as auction_status, a.current_price
+            a.status as auction_status, a.current_price,
+            (a.status in ('unsold', 'payment_failed')
+             and not exists (select 1 from products r where r.relisted_from = p.id)
+            ) as can_relist
        from products p
        left join auctions a on a.product_id = p.id
       where p.seller_id = $1
@@ -221,13 +271,13 @@ export async function listOpenDrops() {
   return rows
 }
 
-/** 검수 승인·반려는 DB 함수를 통한다. */
-export async function approveProduct(productId: string, dropId: string) {
-  await pool.query(`select approve_product($1, $2)`, [productId, dropId])
+/** 검수 승인·반려는 DB 함수를 통한다. 운영자 id 를 넘겨 DB 에서도 한 번 더 막는다. */
+export async function approveProduct(productId: string, dropId: string, operatorId: string) {
+  await pool.query(`select approve_product($1, $2, $3)`, [productId, dropId, operatorId])
 }
 
-export async function rejectProduct(productId: string, reason: string) {
-  await pool.query(`select reject_product($1, $2)`, [productId, reason])
+export async function rejectProduct(productId: string, reason: string, operatorId: string) {
+  await pool.query(`select reject_product($1, $2, $3)`, [productId, reason, operatorId])
 }
 
 // ── 상품 등록 ──────────────────────────────────────────────────
@@ -289,6 +339,11 @@ export async function listStuckAuctions() {
       order by a.ends_at`,
   )
   return rows
+}
+
+/** 유찰·미결제로 끝난 상품을 같은 내용으로 다시 검수에 올린다. 원본은 기록으로 남는다. */
+export async function relistProduct(productId: string, sellerId: string) {
+  await pool.query(`select relist_product($1, $2)`, [productId, sellerId])
 }
 
 export async function resolveStuckAuction(auctionId: string) {

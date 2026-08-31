@@ -11,7 +11,20 @@ import { useEffect, useState } from 'react'
  *
  * 마운트 전에는 자리만 잡는다. 서버와 브라우저가 다른 문구를 그리면 히드레이션이 깨진다.
  */
-export function Countdown({ endsAt, serverNow }: { endsAt: string; serverNow: string }) {
+export function Countdown({
+  endsAt,
+  serverNow,
+  format = 'clock',
+}: {
+  endsAt: string
+  serverNow: string
+  /**
+   * 'clock' — 01:59:47. 마감이 몇 시간 안 남은 경매용.
+   * 'long'  — 23시간 45분 남음. 결제 기한처럼 하루 단위인 것용.
+   *           하루짜리를 시계꼴로 쓰면 "23:45:12" 가 시각으로 읽힌다.
+   */
+  format?: 'clock' | 'long'
+}) {
   const [left, setLeft] = useState<number | null>(null)
 
   useEffect(() => {
@@ -24,15 +37,24 @@ export function Countdown({ endsAt, serverNow }: { endsAt: string; serverNow: st
     return () => clearInterval(id)
   }, [endsAt, serverNow])
 
-  if (left === null) return <span className="tabular-nums text-zinc-400">--:--:--</span>
-  if (left <= 0) return <span className="tabular-nums text-zinc-500">마감</span>
+  if (left === null) {
+    return <span className="tabular-nums text-zinc-400">{format === 'long' ? '…' : '--:--:--'}</span>
+  }
+  if (left <= 0) {
+    return <span className="tabular-nums text-zinc-500">{format === 'long' ? '기한 지남' : '마감'}</span>
+  }
 
   const s = Math.floor(left / 1000)
-  const parts = [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60]
-  const urgent = left < 60_000
+  const [h, m, sec] = [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60]
+  const urgent = format === 'long' ? left < 3600_000 : left < 60_000
+  const text =
+    format === 'long'
+      ? h >= 1
+        ? `${h}시간 ${m}분 남음`
+        : `${m}분 남음`
+      : [h, m, sec].map((n) => String(n).padStart(2, '0')).join(':')
+
   return (
-    <span className={`tabular-nums ${urgent ? 'font-semibold text-red-600' : ''}`}>
-      {parts.map((n) => String(n).padStart(2, '0')).join(':')}
-    </span>
+    <span className={`tabular-nums ${urgent ? 'font-semibold text-red-600' : ''}`}>{text}</span>
   )
 }

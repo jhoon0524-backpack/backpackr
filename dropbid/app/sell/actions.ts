@@ -46,5 +46,5 @@ export async function submitProduct(_prev: SellState, formData: FormData): Promi
     return fail('등록하지 못했습니다. 입력값을 확인해 주세요.')
   }
 
-  redirect('/me')
+  redirect('/me?registered=1')
 }

@@ -2,6 +2,8 @@
 
 import { useActionState } from 'react'
 import { submitBid, type BidState } from './actions'
+import { MoneyInput } from '../../money-input'
+import { comma } from '@/lib/format'
 
 type Props = {
   auctionId: string
@@ -27,13 +29,11 @@ export function BidForm({ auctionId, minNextAmount, bidderNickname }: Props) {
       )}
 
       <label className="mt-3 block text-xs text-zinc-500">
-        입찰가 (최소 {minNextAmount.toLocaleString('ko-KR')}원)
-        <input
+        입찰가 (최소 {comma(minNextAmount)}원)
+        <MoneyInput
           name="amount"
-          type="number"
           defaultValue={minNextAmount}
-          step={100}
-          className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 text-sm tabular-nums text-zinc-900"
+          className="mt-1 block w-full rounded border border-zinc-300 px-3 py-2 pr-8 text-sm tabular-nums text-zinc-900"
         />
       </label>
 

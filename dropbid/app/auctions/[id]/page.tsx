@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/session'
 import { Countdown } from '../../time'
 import { BidForm } from './bid-form'
 import { AuctionResult } from './result'
-import { won } from '@/lib/format'
+import { won, CONDITION, maskNickname } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,14 +26,31 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
 
       <h1 className="mt-3 text-xl font-semibold tracking-tight">{auction.title}</h1>
       <p className="mt-1 text-sm text-zinc-500">
-        {auction.funding_project_name} · 상태 {auction.condition_grade} · 판매자{' '}
+        {auction.funding_project_name} · 상태 {auction.condition_grade}
+        {CONDITION[auction.condition_grade] && ` · ${CONDITION[auction.condition_grade]}`} · 판매자{' '}
         {auction.seller_nickname}
       </p>
+
+      {auction.funding_project_url && (
+        <p className="mt-2 text-sm">
+          {/* 원 프로젝트 확인은 판매자가 적어 준 공개 링크로만 한다. */}
+          <a
+            href={auction.funding_project_url}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            className="text-zinc-600 underline underline-offset-2 hover:text-zinc-900"
+          >
+            원 펀딩 프로젝트 페이지 보기 ↗
+          </a>
+        </p>
+      )}
 
       <div className="mt-5 rounded-lg border border-zinc-200 bg-white px-5 py-4">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs text-zinc-500">현재가</p>
+            <p className="text-xs text-zinc-500">
+              {auction.bid_count === 0 ? '시작가' : '현재가'}
+            </p>
             <p className="text-2xl font-semibold tabular-nums">{won(auction.current_price)}</p>
           </div>
           <div className="text-right">
@@ -51,7 +68,9 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
           </div>
           <div>
             <dt className="text-zinc-500">최고입찰자</dt>
-            <dd className="mt-0.5">{auction.highest_bidder_nickname ?? '아직 없음'}</dd>
+            <dd className="mt-0.5">
+              {maskNickname(auction.highest_bidder_nickname) ?? '아직 없음'}
+            </dd>
           </div>
           <div>
             <dt className="text-zinc-500">마감 연장</dt>
@@ -70,7 +89,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
         <AuctionResult
           status={auction.status}
           currentPrice={auction.current_price}
-          winnerNickname={auction.winner_nickname}
+          winnerNickname={maskNickname(auction.winner_nickname)}
           orderStatus={auction.order_status}
           orderDueAt={auction.order_due_at}
           viewerIsWinner={!!me && me.id === auction.winner_id}

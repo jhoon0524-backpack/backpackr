@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { UserSwitcher } from "./user-switcher";
+import { getCurrentUser } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: "Dropbid",
@@ -12,10 +13,12 @@ const NAV = [
   { href: "/", label: "드롭" },
   { href: "/sell", label: "상품 등록" },
   { href: "/me", label: "마이페이지" },
-  { href: "/admin", label: "검수" },
 ] as const;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // "검수" 는 운영자에게만 보인다. 일반 사용자에게 보일 이유가 없다.
+  const me = await getCurrentUser();
+  const nav = me?.is_operator ? [...NAV, { href: "/admin", label: "검수" }] : NAV;
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">
@@ -24,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <div className="flex items-baseline gap-4">
               <Link href="/" className="text-lg font-semibold tracking-tight">Dropbid</Link>
               <nav className="flex gap-3 text-sm text-zinc-600">
-                {NAV.map((n) => (
+                {nav.map((n) => (
                   <Link key={n.href} href={n.href} className="hover:text-zinc-900">
                     {n.label}
                   </Link>

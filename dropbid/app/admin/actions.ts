@@ -1,10 +1,14 @@
 'use server'
 
 import { approveProduct, rejectProduct, resolveStuckAuction } from '@/lib/db'
+import { getCurrentUser } from '@/lib/session'
 
 export type ReviewState = { message: string; tone: 'success' | 'error' } | null
 
 export async function review(_prev: ReviewState, formData: FormData): Promise<ReviewState> {
+  const me = await getCurrentUser()
+  if (!me?.is_operator) return { message: '운영자만 검수할 수 있습니다.', tone: 'error' }
+
   const productId = String(formData.get('productId'))
   const decision = String(formData.get('decision'))
 
@@ -12,11 +16,11 @@ export async function review(_prev: ReviewState, formData: FormData): Promise<Re
     if (decision === 'approve') {
       const dropId = String(formData.get('dropId'))
       if (!dropId) return { message: '배정할 회차를 골라 주세요.', tone: 'error' }
-      await approveProduct(productId, dropId)
+      await approveProduct(productId, dropId, me.id)
       return { message: '승인했습니다. 해당 회차에 배정되었습니다.', tone: 'success' }
     }
 
-    await rejectProduct(productId, String(formData.get('reason') ?? ''))
+    await rejectProduct(productId, String(formData.get('reason') ?? ''), me.id)
     return { message: '반려했습니다. 사유가 판매자에게 전달됩니다.', tone: 'success' }
   } catch (e) {
     // DB 함수가 던진 사유를 그대로 보여준다 (마감된 회차, 사유 없는 반려 등).
@@ -27,6 +31,9 @@ export async function review(_prev: ReviewState, formData: FormData): Promise<Re
 
 /** 최고입찰자가 계정을 지워 스케줄러가 확정하지 못한 경매를 유찰로 마무리한다. */
 export async function resolveStuck(_prev: ReviewState, formData: FormData): Promise<ReviewState> {
+  const me = await getCurrentUser()
+  if (!me?.is_operator) return { message: '운영자만 처리할 수 있습니다.', tone: 'error' }
+
   try {
     await resolveStuckAuction(String(formData.get('auctionId')))
     return { message: '유찰로 마무리했습니다. 판매자에게 알림이 갑니다.', tone: 'success' }

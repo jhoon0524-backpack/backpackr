@@ -46,7 +46,9 @@ export function AuctionResult({
           <p className="font-medium text-emerald-700">낙찰</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums">{won(currentPrice)}</p>
           <p className="mt-1 text-sm text-zinc-500">
-            {winnerNickname ?? '알 수 없음'} 님에게 낙찰되었습니다.
+            {viewerIsWinner
+              ? '회원님이 낙찰받았습니다.'
+              : `${winnerNickname ?? '알 수 없음'} 님에게 낙찰되었습니다.`}
           </p>
         </div>
 
