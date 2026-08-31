@@ -10,8 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
-    "db:reset": "sh supabase/local/reset.sh",
-    "db:seed": "psql \"${DATABASE_URL:-postgresql://dropbid:dropbid@127.0.0.1:5432/dropbid_dev}\" -v ON_ERROR_STOP=1 -q -f supabase/local/seed.sql && echo '시연용 데이터 넣음'"
+    "db:reset": "node scripts/db.mjs reset",
+    "db:seed": "node scripts/db.mjs seed",
+    "db:setup": "node scripts/db.mjs setup"
   },
   "dependencies": {
     "next": "16.3.3",
