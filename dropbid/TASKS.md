@@ -16,7 +16,7 @@
 
 ## [데이터]
 - [x] 스키마 정의 1 — `profiles`(연락처 포함), `products`(상태 등급·후원 인증 이미지·`pending/scheduled` 상태)
-- [ ] 스키마 정의 2 — `drops`(회차·시작/마감 시각), `auctions`(현재가·최고입찰자·마감 시각·연장 횟수·`live/sold/unsold/payment_failed` 상태)
+- [x] 스키마 정의 2 — `drops`(회차·시작/마감 시각), `auctions`(현재가·최고입찰자·마감 시각·연장 횟수·`live/sold/unsold/payment_failed` 상태)
 - [ ] 스키마 정의 3 — `bids`(입찰 시도 기록: 성공·거부 모두, 사유 코드 포함), `orders`(결제 기한·상태), `notifications`(발송 기록·실패 로그)
 - [ ] 마이그레이션 파일 작성 (실행은 사람이)
 - [ ] `place_bid(auction_id, user_id, amount)` DB 함수 작성 — `FOR UPDATE` 잠금, 거부 규칙 4종, 현재가 갱신, 30초 연장(최대 20회)
