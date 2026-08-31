@@ -22,7 +22,7 @@
 - [x] `place_bid(auction_id, user_id, amount)` DB 함수 작성 — `FOR UPDATE` 잠금, 거부 규칙 4종, 현재가 갱신, 30초 연장(최대 20회)
 - [x] DB 테스트 하네스 셋업 — vitest 에서 로컬 Postgres 에 붙는다. 겸사겸사 스키마 제약을 테스트로 고정
 - [x] `place_bid` 단위 테스트 — 거부 4종 + 연장 + 연장 상한
-- [ ] `place_bid` 동시성 테스트 — 동일 금액 동시 입찰 100건 중 1건만 성공 (인수 조건)
+- [x] `place_bid` 동시성 테스트 — 동일 금액 동시 입찰 100건 중 1건만 성공 (인수 조건)
 - [ ] 마감 처리 DB 함수 작성 — 기한 지난 `live` 를 `sold`/`unsold` 전환, 멱등 보장
 - [ ] 마감 처리 멱등 테스트 — 두 번 연속 실행해도 낙찰 확정 1회 (인수 조건)
 - [ ] DB 권한 설정 — 앱 역할에서 `bids`/`auctions` 직접 쓰기 REVOKE, `place_bid` 만 EXECUTE 허용
