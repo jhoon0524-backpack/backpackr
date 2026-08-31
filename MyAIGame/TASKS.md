@@ -4,15 +4,15 @@
 위에서부터 순서대로 진행한다.
 
 ## [기반]
-- [ ] Godot 4 프로젝트 생성 (렌더러: Compatibility)
-- [ ] 프로젝트 설정: 기준 해상도 640x360, 창 크기 1280x720
-- [ ] 프로젝트 설정: 스트레치 모드 `viewport`, 종횡비 `keep`
-- [ ] 픽셀 아트 임포트 기본값을 Nearest 필터로 변경
-- [ ] `.gitignore` 추가 (`.godot/`, `*.translation` 등 캐시 제외)
-- [ ] 폴더 구조 생성: `scenes/`, `scripts/`, `assets/sprites/`, `assets/audio/`, `data/`
-- [ ] `Main.tscn` 생성 후 프로젝트 시작 씬으로 지정
-- [ ] Main 씬에 Node2D 루트 + Camera2D 배치, 확대 배율 확인
-- [ ] 인풋 맵 등록: `move_up/down/left/right`, `confirm`(Z·Enter), `cancel`(X)
+- [x] Godot 4 프로젝트 생성 (렌더러: Compatibility)
+- [x] 프로젝트 설정: 기준 해상도 640x360, 창 크기 1280x720
+- [x] 프로젝트 설정: 스트레치 모드 `viewport`, 종횡비 `keep`
+- [x] 픽셀 아트 임포트 기본값을 Nearest 필터로 변경
+- [x] `.gitignore` 추가 (`.godot/`, `*.translation` 등 캐시 제외)
+- [x] 폴더 구조 생성: `scenes/`, `scripts/`, `assets/sprites/`, `assets/audio/`, `data/`
+- [x] `Main.tscn` 생성 후 프로젝트 시작 씬으로 지정
+- [x] Main 씬에 Node2D 루트 + Camera2D 배치, 확대 배율 확인
+- [x] 인풋 맵 등록: `move_up/down/left/right`, `confirm`(Z·Enter), `cancel`(X)
 
 ## [플레이어]
 - [ ] 임시 플레이어 스프라이트 준비 (단색 사각형이라도 무방)
@@ -102,7 +102,7 @@
 - [ ] 최종 보스 처치 시 엔딩 화면 표시
 
 ## [QA]
-- [ ] `godot --path . --quit-after 300` 자동 검사가 에러 없이 끝나는지 확인
+- [x] `godot --path . --quit-after 300` 자동 검사가 에러 없이 끝나는지 확인
 - [ ] 스크린샷 캡처 명령을 정리해 `PROGRESS.md` 에 기록
 - [ ] 전투 화면 시각 QA — 레이어 겹침, UI 텍스트 넘침 확인
 - [ ] 필드 화면 시각 QA — 타일 이음새, 캐릭터 발밑 정렬 확인
