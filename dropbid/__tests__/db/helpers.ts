@@ -32,7 +32,8 @@ export async function resetDb() {
 /** 테이블 내용만 비운다. 스키마는 그대로 둔다. */
 export async function truncateAll() {
   await pool.query(`
-    truncate bids, orders, notifications, auctions, products, drops, profiles cascade;
+    truncate bids, orders, notifications, auctions, products, drops, profiles,
+             scheduler_runs cascade;
     delete from auth.users;
   `)
 }

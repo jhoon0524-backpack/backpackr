@@ -7,7 +7,6 @@ beforeAll(async () => {
 })
 beforeEach(async () => {
   await truncateAll()
-  await pool.query(`truncate scheduler_runs`)
 })
 afterAll(async () => {
   await pool.end()
