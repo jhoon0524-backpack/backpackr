@@ -1,6 +1,10 @@
 # 현재 진행 상황
 
 ## 최근 완료한 작업
+- [기반] CI 설정 — 푸시할 때 검증 명령 3개 자동 실행
+  - `.github/workflows/dropbid.yml` (저장소 루트). Node 22, `npm ci` 후 세 명령 순서대로
+  - 이 저장소에는 MyAIGame·agent-starter·booking·docs 도 있어서 `dropbid/**` 변경일 때만 돌게 경로 필터를 걸었다
+  - 로컬에서 `node_modules` 를 지우고 `npm ci` 부터 전체 시퀀스를 재현해 통과 확인 (락파일 완전성까지 확인됨)
 - [기반] 검증 명령 3개가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업)
   - Vitest + jsdom + Testing Library. `vitest.config.mts`, 스모크 테스트 1개(`__tests__/smoke.test.tsx`)
   - `npm test` 는 `vitest run` 으로 둔다. Next 문서는 `vitest` 를 쓰라고 하지만 그건 watch 모드라
@@ -15,11 +19,13 @@
     `node_modules/next/dist/docs/` 문서를 먼저 읽으라는 내용. 코드 작성 작업 전에 참고할 것
 
 ## 다음에 진행할 작업
-- [기반] CI 설정 — 푸시할 때 검증 명령 3개 자동 실행
+- [기반] Supabase 로컬 개발 환경 셋업 (`supabase init` + `supabase start`, 접속 확인)
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
 확인 안 한 것을 완료로 적으면 다음 세션이 그 위에 쌓는다.
+- CI 워크플로가 GitHub 에서 실제로 초록불이 된 것은 아직 못 봤다. 로컬에서 같은 명령을 재현했을 뿐이다.
+  푸시 후 Actions 탭에서 첫 실행 결과를 확인할 것
 - `npm run dev` / `npm run build` 는 아직 안 돌려봤다
 - 서버 컴포넌트(async)는 Vitest 가 지원하지 않는다. Next 문서 권고는 E2E.
   현재 스모크 테스트는 도구 사슬 확인용이라 이 제약에 걸리지 않았다

@@ -1,0 +1,32 @@
+name: dropbid
+
+# dropbid/CLAUDE.md 3장의 검증 명령 3개를 그대로 돌린다.
+# 이 파일과 3장이 어긋나면 3장이 원본이다.
+on:
+  push:
+    paths:
+      - 'dropbid/**'
+      - '.github/workflows/dropbid.yml'
+  pull_request:
+    paths:
+      - 'dropbid/**'
+      - '.github/workflows/dropbid.yml'
+
+defaults:
+  run:
+    working-directory: dropbid
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dropbid/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      - run: npx tsc --noEmit
