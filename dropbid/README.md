@@ -14,6 +14,18 @@ npm install
 npm run dev          # http://localhost:3000
 ```
 
+### 시연용 데이터
+
+로그인이 아직 없어서 화면에서 사람을 골라 입찰한다. 카카오 로그인이 붙으면 그 선택기는 사라진다.
+
+```
+npm run db:reset && npm run db:seed
+npm run dev            # http://localhost:3000
+```
+
+**주의: `npm test` 는 로컬 DB 를 초기화한다.** 테스트가 스키마를 지우고 마이그레이션을 다시 적용하기
+때문이다. 테스트를 돌린 뒤 화면을 보려면 `npm run db:seed` 를 다시 실행한다.
+
 ### 검증 명령
 
 커밋 전에 세 개를 모두 통과시킨다. 자세한 규칙은 `CLAUDE.md` 3장.
