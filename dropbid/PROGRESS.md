@@ -1,6 +1,13 @@
 # 현재 진행 상황
 
 ## 최근 완료한 작업
+- [기반] 검증 명령 3개가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업)
+  - Vitest + jsdom + Testing Library. `vitest.config.mts`, 스모크 테스트 1개(`__tests__/smoke.test.tsx`)
+  - `npm test` 는 `vitest run` 으로 둔다. Next 문서는 `vitest` 를 쓰라고 하지만 그건 watch 모드라
+    검증 명령과 CI 에서 멈춘다. watch 가 필요하면 `npm run test:watch`
+  - `vite-tsconfig-paths` 는 설치했다가 제거했다. Vite 가 네이티브로 지원해서
+    `resolve.tsconfigPaths: true` 로 대체 (Vite 가 직접 경고로 알려줌). `@/` 해석 실제로 확인함
+  - 세 명령 모두 통과 확인
 - [기반] Next.js(App Router) + TypeScript + Tailwind 프로젝트 생성 및 의존성 설치
   - create-next-app 최신 버전으로 생성 (ESLint 포함, npm, src 디렉터리 없음, `@/*` 별칭)
   - `npm run lint` / `npx tsc --noEmit` 통과 확인. `npm test` 는 러너 미설치로 건너뜀 (다음 작업)
@@ -8,13 +15,14 @@
     `node_modules/next/dist/docs/` 문서를 먼저 읽으라는 내용. 코드 작성 작업 전에 참고할 것
 
 ## 다음에 진행할 작업
-- [기반] 검증 명령 3개(`npm test`, `npm run lint`, `npx tsc --noEmit`)가 빈 프로젝트에서 통과하는지 확인 (테스트 러너 셋업 포함)
+- [기반] CI 설정 — 푸시할 때 검증 명령 3개 자동 실행
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
 확인 안 한 것을 완료로 적으면 다음 세션이 그 위에 쌓는다.
-- `npm test` 는 아직 실행 불가 (테스트 러너 미설치)
 - `npm run dev` / `npm run build` 는 아직 안 돌려봤다
+- 서버 컴포넌트(async)는 Vitest 가 지원하지 않는다. Next 문서 권고는 E2E.
+  현재 스모크 테스트는 도구 사슬 확인용이라 이 제약에 걸리지 않았다
 - 카카오 로그인·알림톡, 포트원 모두 계정·심사·템플릿 승인이 안 된 상태다
 
 ## 알고 있는 문제
