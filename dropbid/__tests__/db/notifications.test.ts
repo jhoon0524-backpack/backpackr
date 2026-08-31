@@ -160,3 +160,150 @@ describe('최고입찰자가 계정을 지운 경우', () => {
     expect(await queued(auctionId)).toEqual([])
   })
 })
+
+describe('상위 입찰 알림', () => {
+  test('밀려난 직전 최고입찰자에게 적재된다', async () => {
+    const { auctionId } = await seedLiveAuction({ startPrice: 10000 })
+    const first = await createUser('먼저')
+    const second = await createUser('나중')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, first])
+
+    await pool.query(`select place_bid($1, $2, 11000)`, [auctionId, second])
+
+    const rows = await queued(auctionId)
+    expect(rows).toEqual([{ kind: 'outbid', user_id: first, status: 'pending' }])
+  })
+
+  test('첫 입찰은 밀어낼 사람이 없으므로 적재하지 않는다', async () => {
+    const { auctionId } = await seedLiveAuction()
+    const bidder = await createUser('첫 입찰자')
+
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, bidder])
+
+    expect(await queued(auctionId)).toEqual([])
+  })
+
+  test('같은 사람이 여러 번 밀리면 그때마다 적재된다', async () => {
+    // 다른 알림과 달리 "경매당 한 번" 이 아니다. 밀릴 때마다 알려야 한다.
+    const { auctionId } = await seedLiveAuction({ startPrice: 10000 })
+    const a = await createUser('A')
+    const b = await createUser('B')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, a])
+    await pool.query(`select place_bid($1, $2, 11000)`, [auctionId, b])
+    await pool.query(`select place_bid($1, $2, 12000)`, [auctionId, a])
+    await pool.query(`select place_bid($1, $2, 13000)`, [auctionId, b])
+
+    const { rows } = await pool.query<{ count: string }>(
+      `select count(*)::text as count from notifications
+        where auction_id = $1 and kind = 'outbid' and user_id = $2`,
+      [auctionId, a],
+    )
+    expect(rows[0].count).toBe('2')
+  })
+
+  test('거부된 입찰은 아무에게도 알리지 않는다', async () => {
+    const { auctionId } = await seedLiveAuction({ startPrice: 10000 })
+    const first = await createUser('먼저')
+    const second = await createUser('나중')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, first])
+
+    await pool.query(`select place_bid($1, $2, 10500)`, [auctionId, second]) // 인상폭 부족
+
+    expect(await queued(auctionId)).toEqual([])
+  })
+})
+
+describe('검수 반려 알림', () => {
+  test('반려하면 판매자에게 적재된다', async () => {
+    const seller = await createUser('판매자')
+    const { rows } = await pool.query<{ id: string }>(
+      `insert into products (seller_id, title, funding_project_name, category,
+         condition_grade, photo_urls, backer_proof_url, start_price)
+       values ($1,'상품','펀딩','만화','A',array['1','2','3'],'proof',10000) returning id`,
+      [seller],
+    )
+
+    await pool.query(`select reject_product($1, $2)`, [rows[0].id, '인증 이미지가 흐립니다'])
+
+    const { rows: n } = await pool.query<{ kind: string; user_id: string; product_id: string }>(
+      `select kind, user_id, product_id from notifications`,
+    )
+    expect(n).toEqual([
+      { kind: 'product_rejected', user_id: seller, product_id: rows[0].id },
+    ])
+  })
+})
+
+describe('결제 기한 임박 알림', () => {
+  async function seedWinner() {
+    const { auctionId } = await seedLiveAuction()
+    const buyer = await createUser('낙찰자')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, buyer])
+    await expire(auctionId)
+    await pool.query(`select close_due_auctions()`)
+    return { auctionId, buyer }
+  }
+
+  test('기한 3시간 안으로 들어오면 적재된다', async () => {
+    const { auctionId, buyer } = await seedWinner()
+    await pool.query(`update orders set due_at = now() + interval '2 hours'`)
+
+    await pool.query(`select notify_payment_due()`)
+
+    const { rows } = await pool.query<{ count: string }>(
+      `select count(*)::text as count from notifications
+        where auction_id = $1 and user_id = $2 and kind = 'payment_due'`,
+      [auctionId, buyer],
+    )
+    expect(rows[0].count).toBe('1')
+  })
+
+  test('아직 3시간 넘게 남았으면 적재하지 않는다', async () => {
+    await seedWinner()
+    await pool.query(`update orders set due_at = now() + interval '10 hours'`)
+
+    await pool.query(`select notify_payment_due()`)
+
+    const { rows } = await pool.query<{ count: string }>(
+      `select count(*)::text as count from notifications where kind = 'payment_due'`,
+    )
+    expect(rows[0].count).toBe('0')
+  })
+
+  test('매분 돌아도 한 번만 적재된다', async () => {
+    await seedWinner()
+    await pool.query(`update orders set due_at = now() + interval '2 hours'`)
+
+    await pool.query(`select notify_payment_due()`)
+    await pool.query(`select notify_payment_due()`)
+    await pool.query(`select notify_payment_due()`)
+
+    const { rows } = await pool.query<{ count: string }>(
+      `select count(*)::text as count from notifications where kind = 'payment_due'`,
+    )
+    expect(rows[0].count).toBe('1')
+  })
+
+  test('기한이 이미 지났으면 적재하지 않는다', async () => {
+    // 그건 만료 처리가 할 일이다.
+    await seedWinner()
+    await pool.query(`update orders set due_at = now() - interval '1 minute'`)
+
+    await pool.query(`select notify_payment_due()`)
+
+    const { rows } = await pool.query<{ count: string }>(
+      `select count(*)::text as count from notifications where kind = 'payment_due'`,
+    )
+    expect(rows[0].count).toBe('0')
+  })
+
+  test('스케줄러 실행 기록에 남는다', async () => {
+    await seedWinner()
+    await pool.query(`update orders set due_at = now() + interval '2 hours'`)
+
+    const { rows } = await pool.query<{ detail: Record<string, number> }>(
+      `select detail from run_close_due_auctions()`,
+    )
+    expect(rows[0].detail).toEqual({ payment_due: 1 })
+  })
+})
