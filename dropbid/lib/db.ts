@@ -233,6 +233,14 @@ export async function listMySales(userId: string) {
   return rows
 }
 
+/**
+ * 연락처 저장. 형식은 DB 제약(`profiles_phone_format`)이 최종 판정한다.
+ * 입찰 차단이 `phone is not null` 이라 빈 문자열이 들어가면 구멍이 된다.
+ */
+export async function updatePhone(userId: string, phone: string) {
+  await pool.query(`update profiles set phone = $2 where id = $1`, [userId, phone])
+}
+
 // ── 운영자 검수 ────────────────────────────────────────────────
 
 export type PendingProduct = {

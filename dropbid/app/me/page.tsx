@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/session'
 import { won, kst } from '@/lib/format'
 import { Countdown } from '../time'
 import { RelistForm } from './relist-form'
+import { PhoneForm } from './phone-form'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,6 +56,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
   const sp = await props.searchParams
   const registered = sp.registered === '1'
   const relisted = sp.relisted === '1'
+  const phoneSaved = sp.phone === 'saved'
   const me = await getCurrentUser()
   if (!me) {
     return (
@@ -84,6 +86,11 @@ export default async function MyPage(props: PageProps<'/me'>) {
             목록에서 진행 상태를 볼 수 있습니다.
           </p>
         )}
+        {phoneSaved && (
+          <p className="mb-4 rounded bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            연락처를 저장했습니다. 이제 입찰과 상품 등록을 할 수 있습니다.
+          </p>
+        )}
         {relisted && (
           <p className="mb-4 rounded bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             같은 내용으로 다시 올렸습니다. <span className="font-medium">검수 대기</span> 상태이며,
@@ -91,11 +98,26 @@ export default async function MyPage(props: PageProps<'/me'>) {
           </p>
         )}
         <h1 className="text-xl font-semibold tracking-tight">{me.nickname} 님</h1>
-        {!me.phone && (
-          <p className="mt-2 rounded bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            연락처가 등록되어 있지 않아 입찰과 상품 등록이 막혀 있습니다.
+        {/* 연락처가 없으면 입찰도 등록도 막힌다. 여기서 바로 풀 수 있게 한다. */}
+        <div
+          className={`mt-3 rounded px-4 py-3 ${
+            me.phone ? 'bg-zinc-100' : 'bg-amber-50'
+          }`}
+        >
+          <p className={`text-sm ${me.phone ? 'text-zinc-700' : 'text-amber-900'}`}>
+            {me.phone ? (
+              <>
+                연락처 <span className="font-medium tabular-nums">{me.phone}</span>
+              </>
+            ) : (
+              '연락처가 등록되어 있지 않아 입찰과 상품 등록이 막혀 있습니다.'
+            )}
           </p>
-        )}
+          <PhoneForm current={me.phone} />
+          <p className="mt-2 text-xs text-zinc-500">
+            낙찰·배송 연락에만 씁니다. 다른 사용자에게 보이지 않습니다.
+          </p>
+        </div>
       </div>
 
       <section>

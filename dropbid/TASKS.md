@@ -32,7 +32,7 @@
 > 아래 항목 중 Auth·Storage·Realtime 이 필요한 것은 이 환경에서 검증할 수 없다.
 > Docker 이미지 CDN 이 막혀 `supabase start` 가 안 된다. DB 로 검증되는 것부터 먼저 했다.
 - [ ] 카카오 로그인 연동 (Supabase Auth) — 가입 시 이메일·닉네임 저장 **(Auth 필요)**
-- [~] 연락처 미등록 입찰 차단은 `place_bid` 에 넣고 테스트로 고정함. 등록 화면·API 는 남음 (Auth 필요)
+- [x] 연락처 — `place_bid` 차단 + 등록·변경 화면(`/me`). 형식은 DB 제약으로도 못박음
 - [ ] 이미지 업로드 (Supabase Storage) — 용량·형식 검증, 실패 시 허용 형식 안내
 - [x] 상품 등록 — 폼(`/sell`)과 검증 완료. 사진은 아직 주소 입력 (업로드는 Storage 필요)
 - [x] 운영자 검수 — DB 함수와 화면(`/admin`) 완료
