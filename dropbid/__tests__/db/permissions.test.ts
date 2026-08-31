@@ -92,3 +92,88 @@ describe('함수 실행 권한', () => {
     expect(await blockedAs('authenticated', `select bid_increment(10000)`)).toBe(false)
   })
 })
+
+/** 지정한 역할·사용자로 조회하고 보이는 행 수를 센다. */
+async function visibleAs(role: string, userId: string | null, sql: string) {
+  const client = await pool.connect()
+  try {
+    await client.query('begin')
+    await client.query(`set local role ${role}`)
+    if (userId) await client.query(`select set_config('request.jwt.claim.sub', $1, true)`, [userId])
+    const { rows } = await client.query<{ count: string }>(sql)
+    return Number(rows[0].count)
+  } finally {
+    await client.query('rollback').catch(() => {})
+    client.release()
+  }
+}
+
+describe('행 수준 보안 — 남의 것은 안 보인다', () => {
+  test('연락처가 든 프로필은 로그인 안 한 사람에게 안 보인다', async () => {
+    // 이게 없으면 브라우저 키만으로 전체 연락처를 긁을 수 있다.
+    await createUser('아무개')
+    expect(await visibleAs('anon', null, `select count(*) from profiles`)).toBe(0)
+  })
+
+  test('프로필은 본인 것만 보인다', async () => {
+    const me = await createUser('나')
+    await createUser('남')
+    expect(await visibleAs('authenticated', me, `select count(*) from profiles`)).toBe(1)
+  })
+
+  test('주문은 당사자만 본다', async () => {
+    const { auctionId, sellerId } = await seedLiveAuction()
+    const buyer = await createUser('낙찰자')
+    const stranger = await createUser('남')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, buyer])
+    await pool.query(`update auctions set ends_at = now() - interval '1 second' where id = $1`, [
+      auctionId,
+    ])
+    await pool.query(`select close_due_auctions()`)
+
+    expect(await visibleAs('authenticated', buyer, `select count(*) from orders`)).toBe(1)
+    expect(await visibleAs('authenticated', sellerId, `select count(*) from orders`)).toBe(1)
+    expect(await visibleAs('authenticated', stranger, `select count(*) from orders`)).toBe(0)
+    expect(await visibleAs('anon', null, `select count(*) from orders`)).toBe(0)
+  })
+
+  test('알림은 본인 것만 보인다', async () => {
+    const { auctionId, sellerId } = await seedLiveAuction()
+    const buyer = await createUser('낙찰자')
+    await pool.query(`select place_bid($1, $2, 10000)`, [auctionId, buyer])
+    await pool.query(`update auctions set ends_at = now() - interval '1 second' where id = $1`, [
+      auctionId,
+    ])
+    await pool.query(`select close_due_auctions()`)
+
+    expect(await visibleAs('authenticated', buyer, `select count(*) from notifications`)).toBe(1)
+    expect(await visibleAs('authenticated', sellerId, `select count(*) from notifications`)).toBe(1)
+    expect(await visibleAs('anon', null, `select count(*) from notifications`)).toBe(0)
+  })
+
+  test('검수 대기 중인 상품은 남에게 안 보인다', async () => {
+    const seller = await createUser('판매자')
+    await pool.query(
+      `insert into products (seller_id, title, funding_project_name, category,
+         condition_grade, photo_urls, backer_proof_url, start_price)
+       values ($1, '상품', '펀딩', '만화', 'A', array['1','2','3'], 'proof', 10000)`,
+      [seller],
+    )
+    expect(await visibleAs('anon', null, `select count(*) from products`)).toBe(0)
+    expect(await visibleAs('authenticated', seller, `select count(*) from products`)).toBe(1)
+  })
+
+  test('진행 중인 경매와 상품은 누구나 본다', async () => {
+    await seedLiveAuction()
+    expect(await visibleAs('anon', null, `select count(*) from auctions`)).toBe(1)
+    expect(await visibleAs('anon', null, `select count(*) from products`)).toBe(1)
+    expect(await visibleAs('anon', null, `select count(*) from drops`)).toBe(1)
+  })
+
+  test('스케줄러 운영 기록은 아무에게도 안 보인다', async () => {
+    await pool.query(`select run_close_due_auctions()`)
+    expect(await visibleAs('anon', null, `select count(*) from scheduler_runs`)).toBe(0)
+    const someone = await createUser('아무개')
+    expect(await visibleAs('authenticated', someone, `select count(*) from scheduler_runs`)).toBe(0)
+  })
+})

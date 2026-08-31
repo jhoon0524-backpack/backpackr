@@ -63,8 +63,9 @@ export async function seedLiveAuction(opts: { startPrice?: number; endsInSeconds
        returning id, ends_at
      ), p as (
        insert into products (seller_id, title, funding_project_name, category,
-                             condition_grade, photo_urls, backer_proof_url, start_price)
-       values ($1, '상품', '펀딩', '만화', 'A', array['1','2','3'], 'proof', $3)
+                             condition_grade, photo_urls, backer_proof_url, start_price, status)
+       -- 경매가 있다는 것은 검수를 통과했다는 뜻이다. status 도 그에 맞춘다.
+       values ($1, '상품', '펀딩', '만화', 'A', array['1','2','3'], 'proof', $3, 'scheduled')
        returning id
      )
      insert into auctions (product_id, drop_id, current_price, ends_at, status)

@@ -19,11 +19,25 @@ do $$
 begin
   create role anon nologin;
   create role authenticated nologin;
-  create role service_role nologin;
+  -- Supabase 의 service_role 은 RLS 를 통과한다 (서버 라우트가 이 역할로 붙는다).
+  create role service_role nologin bypassrls;
 exception when duplicate_object then null;
 end $$;
 
+-- 역할은 스키마를 지워도 남는다. 이미 있던 경우에도 속성이 맞도록 따로 건다.
+alter role service_role bypassrls;
+alter role anon nobypassrls;
+alter role authenticated nobypassrls;
+
+-- Supabase 가 제공하는 함수. RLS 정책이 이걸로 "내 것" 을 가린다.
+-- 로컬에서는 세션 변수로 흉내낸다.
+create function auth.uid() returns uuid language sql stable as $$
+  select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid;
+$$;
+
 grant usage on schema public to anon, authenticated, service_role;
+grant usage on schema auth to anon, authenticated, service_role;
+grant execute on function auth.uid() to anon, authenticated, service_role;
 -- Supabase 는 public 스키마의 테이블 권한을 이 역할들에 기본으로 준다.
 -- 그 상태에서 시작해야 권한 마이그레이션의 revoke 가 의미를 갖는다.
 alter default privileges in schema public
