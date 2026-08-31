@@ -46,10 +46,23 @@ Docker 가 있으면 `npx supabase start` 가 정석이다. 없으면 `README.md
 - **CI** — 푸시마다 진짜 Postgres 를 띄워 테스트 105개를 돌린다
 - **행 수준 보안(RLS)** — 연락처·주문·알림은 본인만 본다. 공개 점검에서 오류 0건
 
-## 켜지 않은 것 (일부러)
+## 마감 스케줄러 — 켜져 있다
 
-**마감 스케줄러(pg_cron)** 는 등록하지 않았다. 켜는 순간 프로덕션에서 1분마다 경매가 마감된다.
-절차는 `supabase/scheduler.sql` 에 있고, **사람이 판단해서 실행한다** (`CLAUDE.md` 4장).
+승인을 받아 `dropbid` 프로젝트에 등록했고 **1분 주기로 돌고 있다.**
+끄려면 Supabase SQL Editor 에서:
+
+```sql
+select cron.unschedule('close-due-auctions');
+```
+
+돌고 있는지 확인:
+
+```sql
+select ran_at, processed, detail from scheduler_runs
+ where job = 'close_due_auctions' order by ran_at desc limit 20;
+```
+
+처리 건수가 0인 실행도 남으므로 **기록이 끊긴 구간이 곧 스케줄러가 멈춘 구간**이다.
 
 ## 코드 밖에서 막혀 있는 것
 
