@@ -6,12 +6,29 @@ declare global {
   var dropbidPool: Pool | undefined
 }
 
-export const pool =
-  global.dropbidPool ??
-  new Pool({
-    connectionString:
-      process.env.DATABASE_URL ?? 'postgresql://dropbid:dropbid@127.0.0.1:5432/dropbid_dev',
-  })
+const connectionString =
+  process.env.DATABASE_URL ?? 'postgresql://dropbid:dropbid@127.0.0.1:5432/dropbid_dev'
+
+/**
+ * 배포에서 무엇으로 접속을 시도하는지 한 줄 남긴다. **비밀번호는 찍지 않는다** — 길이만 남긴다.
+ *
+ * 배포 중 "password authentication failed" 만 보고 원인을 좁히지 못해 넣었다.
+ * 사용자명이 `postgres` 인지 `postgres.<project-ref>` 인지에 따라 원인이 갈린다
+ * (풀러는 후자를 요구한다). 원인을 잡고 나면 지운다.
+ */
+if (process.env.NODE_ENV === 'production') {
+  try {
+    const u = new URL(connectionString)
+    console.log(
+      `[db] host=${u.hostname} port=${u.port} user=${u.username} ` +
+        `db=${u.pathname.slice(1)} pw_len=${u.password.length}`,
+    )
+  } catch {
+    console.log('[db] DATABASE_URL 을 주소로 해석하지 못했다 (형식이 깨졌을 수 있다)')
+  }
+}
+
+export const pool = global.dropbidPool ?? new Pool({ connectionString })
 
 // 개발 중 핫 리로드마다 풀이 새로 생기는 것을 막는다.
 if (process.env.NODE_ENV !== 'production') global.dropbidPool = pool
