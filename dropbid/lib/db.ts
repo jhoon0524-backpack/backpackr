@@ -101,7 +101,18 @@ export type AuctionDetail = LiveAuction & {
   order_due_at: Date | null
 }
 
+/**
+ * uuid 꼴이 아닌 값은 DB 까지 보내지 않는다.
+ *
+ * 보내면 Postgres 가 `22P02 invalid input syntax for type uuid` 를 던지고,
+ * 화면은 어차피 404 인데 서버 오류 로그만 쌓인다. 주소는 아무나 칠 수 있으니
+ * 오류 대시보드가 이걸로 덮이면 진짜 오류가 묻힌다 (QA 1회차 발견 8번).
+ */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function getAuction(id: string): Promise<AuctionDetail | null> {
+  if (!UUID.test(id)) return null
+
   const { rows } = await pool.query<AuctionDetail>(
     `select a.id, p.title, p.funding_project_name, p.funding_project_url,
             p.photo_urls, p.category, p.condition_grade,

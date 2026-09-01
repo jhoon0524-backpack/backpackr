@@ -43,7 +43,13 @@ export default async function DropList() {
                 href={`/auctions/${a.id}`}
                 className="block rounded-lg border border-zinc-200 bg-white px-5 py-4 transition hover:border-zinc-400"
               >
-                <div className="flex items-start justify-between gap-4">
+                {/*
+                  390px 에서는 오른쪽 금액 칸이 자리를 먼저 가져가 제목 칸이 121px 로
+                  눌렸다. 두 줄을 허용해도 긴 제목은 여전히 잘린다 (QA 1회차 발견 6번).
+                  좁은 화면에서는 금액을 제목 아래로 내려 제목이 가로 폭을 다 쓰게 하고,
+                  sm 이상에서는 원래대로 좌우로 나눈다.
+                */}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                   <div className="flex min-w-0 gap-3">
                     {a.cover_url && (
                       <Photo
@@ -53,18 +59,18 @@ export default async function DropList() {
                       />
                     )}
                     <div className="min-w-0">
-                    <p className="truncate font-medium">{a.title}</p>
+                    <p className="line-clamp-2 font-medium sm:truncate">{a.title}</p>
                     <p className="mt-0.5 truncate text-xs text-zinc-500">
                       {a.funding_project_name} · 상태 {a.condition_grade}
                     </p>
                     </div>
                   </div>
-                  <div className="shrink-0 text-right">
+                  <div className="flex shrink-0 items-baseline gap-2 sm:block sm:text-right">
                     <p className="text-xs text-zinc-500">
                       {a.bid_count === 0 ? '시작가' : '현재가'}
                     </p>
                     <p className="font-semibold tabular-nums">{won(a.current_price)}</p>
-                    <p className="mt-0.5 text-xs text-zinc-500">
+                    <p className="text-xs text-zinc-500 sm:mt-0.5">
                       입찰 {a.bid_count}회 · <Countdown endsAt={a.ends_at.toISOString()} serverNow={serverNow} />
                     </p>
                   </div>

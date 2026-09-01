@@ -92,7 +92,12 @@ export default async function AdminReview() {
                 </p>
               </div>
 
-              {/* 검수는 눈으로 보는 일이다. 주소 글자만 보여 주면 확인이 안 된다. */}
+              {/*
+                검수는 눈으로 보는 일이다. 주소 글자만 보여 주면 확인이 안 된다.
+                그리고 판단 근거는 후원 인증 하나다. 전에는 둘 다 h-40 이라 상품 사진과
+                같은 크기였고, 테두리 때문에 오히려 2px 작았다 (QA 1회차 발견 5번).
+                후원 인증을 크게, 상품 사진을 곁다리로 둔다.
+              */}
               <div className="mt-3 grid gap-4 sm:grid-cols-[auto_1fr]">
                 <div>
                   <p className="mb-1 text-xs font-medium text-zinc-700">후원 인증</p>
@@ -100,10 +105,10 @@ export default async function AdminReview() {
                     <Photo
                       src={p.backer_proof_url}
                       alt="후원 인증 이미지"
-                      className="h-40 w-40 rounded-lg border-2 border-amber-300 object-cover"
+                      className="h-64 w-64 rounded-lg border-2 border-amber-300 object-cover"
                     />
                   </a>
-                  <p className="mt-1 w-40 truncate text-[11px] text-zinc-400">
+                  <p className="mt-1 w-64 truncate text-[11px] text-zinc-400">
                     {p.backer_proof_url}
                   </p>
                 </div>
@@ -122,7 +127,7 @@ export default async function AdminReview() {
                         <Photo
                           src={url}
                           alt={`상품 사진 ${i + 1}`}
-                          className="h-40 w-40 shrink-0 rounded-lg border border-zinc-200 object-cover"
+                          className="h-28 w-28 shrink-0 rounded-lg border border-zinc-200 object-cover"
                         />
                       </a>
                     ))}

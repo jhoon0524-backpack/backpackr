@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { kst, won } from '@/lib/format'
+import { Countdown } from '../../time'
 
 type Props = {
   status: string
@@ -8,6 +9,7 @@ type Props = {
   orderStatus: string | null
   orderDueAt: Date | null
   viewerIsWinner: boolean
+  serverNow: string
 }
 
 /** 마감된 경매는 입찰 자리를 결과로 바꾼다 (PRD 화면 상태 설계의 "마감 후"). */
@@ -18,6 +20,7 @@ export function AuctionResult({
   orderStatus,
   orderDueAt,
   viewerIsWinner,
+  serverNow,
 }: Props) {
   if (status === 'unsold') {
     return (
@@ -53,13 +56,25 @@ export function AuctionResult({
         </div>
 
         {viewerIsWinner && orderStatus === 'pending' && orderDueAt && (
-          <div className="mt-4 rounded bg-amber-50 px-4 py-3 text-center">
-            <p className="text-sm text-amber-900">
-              {kst(orderDueAt)}까지 결제해야 합니다.
+          /*
+           * 결제 기한을 낙찰 금액보다 크게 둔다.
+           * 금액은 이미 알고 온 값이지만, 기한은 놓치면 거래가 날아간다.
+           * 전에는 금액이 text-2xl, 기한이 text-sm 이라 잃을 것이 더 작게 보였다
+           * (QA 1회차 발견 4번. 디자인 시안에도 같은 지적이 있었다).
+           */
+          <div className="mt-4 rounded bg-amber-50 px-4 py-4 text-center">
+            <p className="text-xs text-amber-800">결제 기한</p>
+            <p className="mt-1 text-2xl font-semibold text-amber-900">
+              <Countdown
+                endsAt={orderDueAt.toISOString()}
+                serverNow={serverNow}
+                format="long"
+              />
             </p>
+            <p className="mt-1 text-sm text-amber-900">{kst(orderDueAt)}까지</p>
             <Link
               href="/me"
-              className="mt-2 inline-block rounded bg-zinc-900 px-4 py-2 text-sm text-white"
+              className="mt-3 inline-block rounded bg-zinc-900 px-4 py-2 text-sm text-white"
             >
               결제하러 가기
             </Link>
