@@ -1,26 +1,37 @@
 @import "tailwindcss";
 
+/*
+ * 이 서비스는 **밝은 화면 한 벌만** 쓴다.
+ *
+ * 왜 이걸 명시하나 —
+ * create-next-app 이 만들어 준 기본 globals.css 가 그대로 남아 있었고, 거기
+ * `@media (prefers-color-scheme: dark)` 가 배경을 #0a0a0a, 글자를 #ededed 로
+ * 바꿨다. 그런데 카드·헤더는 Tailwind 의 `bg-white` 라 흰색 그대로였다.
+ * 결과는 **흰 카드 위의 흰 글자** — 휴대폰을 어두운 테마로 쓰는 사람에게는
+ * 목록이 통째로 안 읽혔다 (실제 기기에서 발견).
+ *
+ * 게다가 그 `body { }` 규칙은 레이어 밖에 있어서, 레이어 안에 있는 Tailwind
+ * 유틸리티(`bg-zinc-50` `text-zinc-900`)를 **specificity 와 무관하게 항상 이긴다.**
+ * 그래서 레이아웃에 색을 적어 둔 것이 아무 소용이 없었다.
+ *
+ * 어두운 화면을 제대로 지원하려면 색을 한 벌 더 설계해야 한다. 지금 브랜드
+ * 색은 밝은 쪽 한 벌뿐이므로, 밝은 쪽만 쓴다고 브라우저에 알리는 쪽을 택했다.
+ * `only` 를 붙여야 브라우저가 제 마음대로 어둡게 뒤집지 않는다.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: only light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /*
+   * 전에는 `var(--font-geist-sans)` 를 가리켰는데 그 변수는 어디에도 정의된
+   * 적이 없다. 값이 비어 본문이 Arial 로 떨어졌고, 한글은 Arial 에 없으니
+   * 기기마다 제각각인 글꼴로 나왔다.
+   */
+  --font-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }

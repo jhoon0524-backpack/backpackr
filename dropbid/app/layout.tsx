@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { UserSwitcher } from "./user-switcher";
@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   title: "Dropbid",
   description: "종료된 창작 굿즈를 경매로 거래합니다",
 };
+
+// CSS 가 오기 전에도 브라우저가 밝은 바탕을 깔도록 알린다.
+// 이게 없으면 어두운 테마 기기에서 첫 순간 검은 화면이 번쩍인다.
+export const viewport: Viewport = { colorScheme: "light" };
 
 const NAV = [
   { href: "/", label: "드롭" },

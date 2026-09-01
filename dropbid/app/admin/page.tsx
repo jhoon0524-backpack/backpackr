@@ -108,7 +108,7 @@ export default async function AdminReview() {
                       className="h-64 w-64 rounded-lg border-2 border-amber-300 object-cover"
                     />
                   </a>
-                  <p className="mt-1 w-64 truncate text-[11px] text-zinc-400">
+                  <p className="mt-1 w-64 truncate text-[11px] text-zinc-500">
                     {p.backer_proof_url}
                   </p>
                 </div>
