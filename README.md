@@ -40,6 +40,28 @@ bash loop/loopctl.sh status   # 상태 + 최근 로그 20줄
 > 주의: 자동 실행은 평소 터미널 PATH를 물려받지 않습니다. `which claude` 로 확인한
 > 경로가 유닛 파일의 `Environment=PATH=...` 에 포함되어 있어야 합니다.
 
+## 깃헙에서 돌리기 (내 컴퓨터 없이)
+
+`.github/workflows/ai-loop.yml` 이 루프의 깃헙판입니다. 항상 켜진 컴퓨터 대신,
+예약 시간마다 깃헙이 컴퓨터를 잠깐 빌려줘서 **한 바퀴만** 돌고 결과를 커밋합니다.
+기본 주기는 6시간마다(하루 4바퀴)입니다.
+
+켜는 법 (한 번만):
+1. GitHub 저장소 → Settings → Secrets and variables → Actions → New repository secret
+   - 이름 `ANTHROPIC_API_KEY`, 값은 console.anthropic.com 에서 발급한 API 키 (종량제 과금)
+   - 또는 Claude Pro/Max 구독자는 터미널에서 `claude setup-token` 으로 만든 토큰을
+     `CLAUDE_CODE_OAUTH_TOKEN` 이름으로 등록
+2. 이 브랜치를 저장소의 **기본 브랜치에 병합** — 예약 실행은 기본 브랜치의
+   워크플로우만 작동합니다
+3. 확인은 Actions 탭 → ai-loop. "Run workflow" 버튼으로 수동 한 바퀴도 가능
+
+끄는 법: Actions 탭에서 ai-loop 워크플로우 Disable, 또는 `loop/STOP` 파일을 커밋.
+
+한계: 깃헙이 빌려주는 컴퓨터에는 화면이 없어 Godot 실행·스크린샷 QA 를 못 합니다.
+코드·데이터·문서 작업에 알맞고, 화면 확인이 필요한 작업은 본인 컴퓨터 루프로 돌리세요.
+비공개 저장소는 Actions 실행 시간이 요금제 무료 분량(Free 기준 월 2,000분)을 소모하니
+주기를 늘릴 때 참고하세요.
+
 ## 켜기 전에 반드시 할 일
 
 1. `loop/PROMPT.md` 의 ①합격 기준, ②읽을 범위, ③규칙과 근거를 직접 채우세요.
