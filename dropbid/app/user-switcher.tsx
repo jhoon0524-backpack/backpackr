@@ -16,7 +16,7 @@ export async function UserSwitcher() {
         // key 를 값에 묶어 다시 그리게 한다.
         key={current ?? 'none'}
         defaultValue={current ?? ''}
-        className="rounded border border-zinc-300 px-2 py-1 text-xs"
+        className="min-h-11 rounded border border-zinc-300 px-2 text-xs"
       >
         <option value="">— 선택 —</option>
         {users.map((u) => (
@@ -25,7 +25,7 @@ export async function UserSwitcher() {
           </option>
         ))}
       </select>
-      <button type="submit" className="rounded bg-zinc-200 px-2 py-1 text-xs hover:bg-zinc-300">
+      <button type="submit" className="inline-flex min-h-11 items-center rounded bg-zinc-200 px-3 text-xs hover:bg-zinc-300">
         전환
       </button>
     </form>

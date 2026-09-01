@@ -40,10 +40,19 @@ export function BidForm({ auctionId, minNextAmount, bidderNickname }: Props) {
       <button
         type="submit"
         disabled={pending || !bidderNickname}
-        className="mt-4 w-full rounded bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white disabled:bg-zinc-400"
+        className="mt-4 w-full rounded bg-zinc-900 px-4 py-3 text-sm font-medium text-white disabled:bg-zinc-400"
       >
         {pending ? '처리 중…' : '입찰하기'}
       </button>
+
+      {/*
+        입찰은 되돌릴 수 없고, 낙찰되면 결제 의무가 생긴다. 그 사실이 누르기 전
+        화면 어디에도 없었다 (UI/UX 1회차 발견 1번). 돈이 걸린 행동은 무엇을
+        약속하는지 보이는 자리에서 알려 준다.
+      */}
+      <p className="mt-2 text-center text-xs text-zinc-500">
+        입찰은 취소할 수 없습니다. 낙찰되면 24시간 안에 결제해야 합니다.
+      </p>
 
       {state && (
         <p

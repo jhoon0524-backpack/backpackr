@@ -158,7 +158,9 @@ export default async function MyPage(props: PageProps<'/me'>) {
       <section>
         <h2 className="mb-2 text-sm font-medium text-zinc-700">낙찰</h2>
         {wins.length === 0 ? (
-          <Empty>아직 낙찰받은 것이 없습니다.</Empty>
+          <Empty>
+            아직 낙찰받은 것이 없습니다. <Link href="/" className="underline">드롭 목록 보기</Link>
+          </Empty>
         ) : (
           <ul className="space-y-2">
             {wins.map((w) => (
@@ -224,9 +226,21 @@ export default async function MyPage(props: PageProps<'/me'>) {
           <ul className="space-y-2">
             {sales.map((s) => (
               <li key={s.product_id} className="rounded-lg border border-zinc-200 bg-white px-4 py-3">
-                <div className="flex items-center justify-between">
-                  <span className="min-w-0 truncate">{s.title}</span>
-                  <span className="ml-4 shrink-0 text-xs">
+                {/*
+                  390 에서 뱃지와 금액이 자리를 먼저 가져가 제목이 146px 로 눌렸다.
+                  필요한 폭은 287px 이라 "미공개 일러스..." 로 끊겼다 (UI/UX 1회차 발견 5번).
+                  홈 목록과 같은 방식으로, 좁은 화면에서는 아래로 내린다.
+                */}
+                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                  {/* 내가 올린 것을 열어 볼 길이 없었다. 경매가 생긴 뒤에는 상세로 보낸다. */}
+                  {s.auction_id ? (
+                    <Link href={`/auctions/${s.auction_id}`} className="min-w-0 hover:underline">
+                      {s.title}
+                    </Link>
+                  ) : (
+                    <span className="min-w-0">{s.title}</span>
+                  )}
+                  <span className="shrink-0 text-xs sm:ml-4">
                     <span className="rounded bg-zinc-100 px-1.5 py-0.5">
                       {PRODUCT_STATUS[s.product_status] ?? s.product_status}
                     </span>

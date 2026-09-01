@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { listLastDropResults, listLiveAuctions } from '@/lib/db'
 import { Countdown } from './time'
 import { Photo } from './photo'
-import { won, kst, maskNickname } from '@/lib/format'
+import { won, kst, maskNickname, CONDITION } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +25,19 @@ export default async function DropList() {
         <p className="mt-1 text-sm text-zinc-500">
           마감 임박순입니다. 회차에 속한 경매는 같은 시각에 함께 마감합니다.
         </p>
+        {/*
+          한 회차는 같이 마감하므로 카드마다 같은 숫자가 반복됐다. 게다가 카드의
+          "입찰 2회 · 01:59:29" 에는 무엇의 시간인지 라벨이 없었다
+          (UI/UX 1회차 발견 8번). 시안대로 회차 마감을 위에 한 번만 둔다.
+        */}
+        {auctions.length > 0 && (
+          <p className="mt-3 inline-flex items-baseline gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm">
+            <span className="text-zinc-500">이번 회차 마감까지</span>
+            <span className="font-semibold">
+              <Countdown endsAt={auctions[0].ends_at.toISOString()} serverNow={serverNow} />
+            </span>
+          </p>
+        )}
       </div>
 
       {auctions.length === 0 ? (
@@ -61,7 +74,8 @@ export default async function DropList() {
                     <div className="min-w-0">
                     <p className="line-clamp-2 font-medium sm:truncate">{a.title}</p>
                     <p className="mt-0.5 truncate text-xs text-zinc-500">
-                      {a.funding_project_name} · 상태 {a.condition_grade}
+                      {/* 목록에는 등급만 있고 뜻풀이가 상세에만 있었다 (발견 10번). */}
+                      {a.funding_project_name} · {CONDITION[a.condition_grade] ?? `상태 ${a.condition_grade}`}
                     </p>
                     </div>
                   </div>
@@ -70,9 +84,7 @@ export default async function DropList() {
                       {a.bid_count === 0 ? '시작가' : '현재가'}
                     </p>
                     <p className="font-semibold tabular-nums">{won(a.current_price)}</p>
-                    <p className="text-xs text-zinc-500 sm:mt-0.5">
-                      입찰 {a.bid_count}회 · <Countdown endsAt={a.ends_at.toISOString()} serverNow={serverNow} />
-                    </p>
+                    <p className="text-xs text-zinc-500 sm:mt-0.5">입찰 {a.bid_count}회</p>
                   </div>
                 </div>
                 {a.bidder_count >= 2 && (

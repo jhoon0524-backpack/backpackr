@@ -12,7 +12,7 @@ export function RelistForm({ productId }: { productId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded border border-zinc-300 px-3 py-1.5 text-xs hover:bg-zinc-50 disabled:text-zinc-400"
+        className="inline-flex min-h-11 items-center rounded border border-zinc-300 px-3 text-xs hover:bg-zinc-50 disabled:text-zinc-400"
       >
         {pending ? '올리는 중…' : '같은 내용으로 다시 올리기'}
       </button>
