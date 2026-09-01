@@ -23,12 +23,12 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
 
   return (
     <div>
-      <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-900">
+      <Link href="/" className="text-sm text-muted hover:text-ink">
         ← 드롭 목록
       </Link>
 
       <h1 className="mt-3 text-xl font-semibold tracking-tight">{auction.title}</h1>
-      <p className="mt-1 text-sm text-zinc-500">
+      <p className="mt-1 text-sm text-muted">
         {auction.funding_project_name} · 상태 {auction.condition_grade}
         {CONDITION[auction.condition_grade] && ` · ${CONDITION[auction.condition_grade]}`} · 판매자{' '}
         {auction.seller_nickname}
@@ -41,7 +41,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
             href={auction.funding_project_url}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className="text-zinc-600 underline underline-offset-2 hover:text-zinc-900"
+            className="text-strong underline underline-offset-2 hover:text-ink"
           >
             원 펀딩 프로젝트 페이지 보기 ↗
           </a>
@@ -55,7 +55,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
               key={`${url}-${i}`}
               src={url}
               alt={`${auction.title} 사진 ${i + 1}`}
-              className="h-48 w-48 shrink-0 rounded-lg border border-zinc-200 object-cover"
+              className="h-48 w-48 shrink-0 rounded-lg border border-line object-cover"
             />
           ))}
         </div>
@@ -69,30 +69,30 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
         PRD 화면 상태 설계의 "마감 후 — 입찰 영역을 결과 표시로 교체" 를
         입찰 폼만 지키고 있었다.
       */}
-      <div className="mt-5 rounded-lg border border-zinc-200 bg-white px-5 py-4">
+      <div className="mt-5 rounded-lg bg-white shadow-card px-5 py-4">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-muted">
               {auction.bid_count === 0 ? '시작가' : live ? '현재가' : '낙찰가'}
             </p>
             <p className="text-2xl font-semibold tabular-nums">{won(auction.current_price)}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-zinc-500">남은 시간</p>
+            <p className="text-xs text-muted">남은 시간</p>
             <p className="text-lg">
               <Countdown endsAt={auction.ends_at.toISOString()} serverNow={serverNow} />
             </p>
           </div>
         </div>
 
-        <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-4 text-xs">
+        <dl className="mt-4 grid grid-cols-3 gap-3 border-t border-line pt-4 text-xs">
           <div>
-            <dt className="text-zinc-500">입찰</dt>
+            <dt className="text-muted">입찰</dt>
             <dd className="mt-0.5 tabular-nums">{auction.bid_count}회 · {auction.bidder_count}명</dd>
           </div>
           <div>
             {/* 유찰이면 낙찰자가 없다. 입찰이 0건인 경우와 갈라 준다. */}
-            <dt className="text-zinc-500">
+            <dt className="text-muted">
               {auction.bid_count === 0 || live ? '최고입찰자' : '낙찰자'}
             </dt>
             <dd className="mt-0.5">
@@ -102,7 +102,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
           </div>
           {live && (
             <div>
-              <dt className="text-zinc-500">마감 연장</dt>
+              <dt className="text-muted">마감 연장</dt>
               <dd className="mt-0.5 tabular-nums">{auction.extension_count}회 / 20회</dd>
             </div>
           )}
@@ -110,7 +110,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
 
         {/* 남은 시간이 늘어날 수 있다는 규칙을 화면이 말한 적이 없었다. */}
         {live && (
-          <p className="mt-3 border-t border-zinc-100 pt-3 text-xs text-zinc-500">
+          <p className="mt-3 border-t border-line pt-3 text-xs text-muted">
             마감 직전에 입찰이 들어오면 마감이 조금씩 미뤄집니다 (최대 20회).
           </p>
         )}

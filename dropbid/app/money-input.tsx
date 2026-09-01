@@ -38,7 +38,7 @@ export function MoneyInput({
         onChange={(e) => setDigits(digitsOnly(e.target.value))}
         className={className}
       />
-      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500">
+      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">
         원
       </span>
     </span>

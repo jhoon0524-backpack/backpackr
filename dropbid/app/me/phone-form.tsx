@@ -16,12 +16,12 @@ export function PhoneForm({ current }: { current: string | null }) {
         aria-label="휴대폰 번호"
         placeholder="010-1234-5678"
         defaultValue={state?.value ?? current ?? ''}
-        className="min-h-11 w-44 rounded border border-zinc-300 px-3 text-sm tabular-nums"
+        className="min-h-11 w-44 rounded border border-line px-3 text-sm tabular-nums"
       />
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex min-h-11 items-center rounded bg-zinc-900 px-4 text-sm text-white disabled:bg-zinc-400"
+        className="inline-flex min-h-11 items-center rounded bg-ash px-4 text-sm text-white disabled:bg-faint"
       >
         {pending ? '저장 중…' : current ? '연락처 변경' : '연락처 등록'}
       </button>

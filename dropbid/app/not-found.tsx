@@ -9,14 +9,14 @@ import Link from 'next/link'
  */
 export default function NotFound() {
   return (
-    <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-14 text-center">
-      <p className="text-base font-medium text-zinc-800">찾을 수 없는 페이지입니다.</p>
-      <p className="mt-2 text-sm text-zinc-500">
+    <div className="rounded-lg border border-dashed border-line bg-white px-5 py-14 text-center">
+      <p className="text-base font-medium text-ink">찾을 수 없는 페이지입니다.</p>
+      <p className="mt-2 text-sm text-muted">
         주소가 잘못되었거나, 마감되어 내려간 경매일 수 있습니다.
       </p>
       <Link
         href="/"
-        className="mt-5 inline-block rounded bg-zinc-900 px-4 py-2 text-sm text-white"
+        className="mt-5 inline-block rounded bg-ash px-4 py-2 text-sm text-white"
       >
         드롭 목록으로
       </Link>

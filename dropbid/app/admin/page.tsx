@@ -13,9 +13,9 @@ export default async function AdminReview() {
   const me = await getCurrentUser()
   if (!me?.is_operator) {
     return (
-      <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-12 text-center">
-        <p className="text-sm text-zinc-700">운영자만 볼 수 있는 화면입니다.</p>
-        <p className="mt-1 text-xs text-zinc-500">
+      <div className="rounded-lg border border-dashed border-line bg-white px-5 py-12 text-center">
+        <p className="text-sm text-strong">운영자만 볼 수 있는 화면입니다.</p>
+        <p className="mt-1 text-xs text-muted">
           검수 권한이 필요하면 운영자에게 요청해 주세요.
         </p>
       </div>
@@ -38,7 +38,7 @@ export default async function AdminReview() {
       {stuck.length > 0 && (
         <section className="mb-8">
           <h2 className="text-base font-semibold text-amber-900">확인이 필요한 경매</h2>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-muted">
             마감됐는데 최고입찰자가 계정을 지워 자동 확정되지 못했습니다.
             처리하기 전까지 매분 다시 보고됩니다.
           </p>
@@ -51,7 +51,7 @@ export default async function AdminReview() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <p className="font-medium">{a.title}</p>
-                    <p className="mt-0.5 text-xs text-zinc-500">
+                    <p className="mt-0.5 text-xs text-muted">
                       입찰 {a.bid_count}회 · 마감 {kst(a.ends_at)}
                     </p>
                   </div>
@@ -67,22 +67,22 @@ export default async function AdminReview() {
       )}
 
       <h1 className="text-xl font-semibold tracking-tight">검수 대기</h1>
-      <p className="mt-1 text-sm text-zinc-500">
+      <p className="mt-1 text-sm text-muted">
         후원 인증 이미지를 확인하고 승인하거나 반려합니다. 승인하면 고른 회차에 배정됩니다.
       </p>
 
       {products.length === 0 ? (
-        <div className="mt-5 rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-12 text-center text-sm text-zinc-600">
+        <div className="mt-5 rounded-lg border border-dashed border-line bg-white px-5 py-12 text-center text-sm text-strong">
           검수할 상품이 없습니다.
         </div>
       ) : (
         <ul className="mt-5 space-y-3">
           {products.map((p) => (
-            <li key={p.id} className="rounded-lg border border-zinc-200 bg-white px-5 py-4">
+            <li key={p.id} className="rounded-lg bg-white shadow-card px-5 py-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-medium">{p.title}</p>
-                  <p className="mt-0.5 text-xs text-zinc-500">
+                  <p className="mt-0.5 text-xs text-muted">
                     {p.funding_project_name} · {p.category} · 상태 {p.condition_grade} · 판매자{' '}
                     {p.seller_nickname}
                   </p>
@@ -100,7 +100,7 @@ export default async function AdminReview() {
               */}
               <div className="mt-3 grid gap-4 sm:grid-cols-[auto_1fr]">
                 <div>
-                  <p className="mb-1 text-xs font-medium text-zinc-700">후원 인증</p>
+                  <p className="mb-1 text-xs font-medium text-strong">후원 인증</p>
                   <a href={p.backer_proof_url} target="_blank" rel="noopener noreferrer nofollow">
                     <Photo
                       src={p.backer_proof_url}
@@ -108,12 +108,12 @@ export default async function AdminReview() {
                       className="h-64 w-64 rounded-lg border-2 border-amber-300 object-cover"
                     />
                   </a>
-                  <p className="mt-1 w-64 truncate text-[11px] text-zinc-500">
+                  <p className="mt-1 w-64 truncate text-[11px] text-muted">
                     {p.backer_proof_url}
                   </p>
                 </div>
                 <div className="min-w-0">
-                  <p className="mb-1 text-xs font-medium text-zinc-700">
+                  <p className="mb-1 text-xs font-medium text-strong">
                     상품 사진 {p.photo_urls.length}장
                   </p>
                   <div className="flex gap-2 overflow-x-auto pb-1">
@@ -127,7 +127,7 @@ export default async function AdminReview() {
                         <Photo
                           src={url}
                           alt={`상품 사진 ${i + 1}`}
-                          className="h-28 w-28 shrink-0 rounded-lg border border-zinc-200 object-cover"
+                          className="h-28 w-28 shrink-0 rounded-lg border border-line object-cover"
                         />
                       </a>
                     ))}

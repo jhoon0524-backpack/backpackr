@@ -25,14 +25,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const nav = me?.is_operator ? [...NAV, { href: "/admin", label: "검수" }] : NAV;
   return (
     <html lang="ko" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">
-        <header className="border-b border-zinc-200 bg-white">
+      <body className="min-h-full flex flex-col bg-paper text-ink">
+        <header className="border-b border-line bg-white">
           <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-5 py-3">
             <div className="flex items-baseline gap-4">
-              <Link href="/" className="text-lg font-semibold tracking-tight">Dropbid</Link>
-              <nav className="flex gap-3 text-sm text-zinc-600">
+              <Link href="/" className="text-xl font-bold tracking-tight text-ink">
+                Drop<span className="text-urgent">bid</span>
+              </Link>
+              <nav className="flex gap-3 text-sm text-strong">
                 {nav.map((n) => (
-                  <Link key={n.href} href={n.href} className="hover:text-zinc-900">
+                  <Link key={n.href} href={n.href} className="hover:text-ink">
                     {n.label}
                   </Link>
                 ))}

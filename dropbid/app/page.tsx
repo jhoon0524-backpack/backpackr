@@ -10,8 +10,8 @@ export const dynamic = 'force-dynamic'
 
 const RESULT_LABEL: Record<string, { text: string; tone: string }> = {
   sold: { text: '낙찰', tone: 'bg-emerald-50 text-emerald-700' },
-  unsold: { text: '유찰', tone: 'bg-zinc-100 text-zinc-500' },
-  payment_failed: { text: '미결제 종료', tone: 'bg-zinc-100 text-zinc-500' },
+  unsold: { text: '유찰', tone: 'bg-fill text-muted' },
+  payment_failed: { text: '미결제 종료', tone: 'bg-fill text-muted' },
 }
 
 export default async function DropList() {
@@ -23,7 +23,7 @@ export default async function DropList() {
     <div>
       <div className="mb-5">
         <h1 className="text-xl font-semibold tracking-tight">이번 드롭</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-sm text-muted">
           마감 임박순입니다. 회차에 속한 경매는 같은 시각에 함께 마감합니다.
         </p>
         {/*
@@ -32,8 +32,8 @@ export default async function DropList() {
           (UI/UX 1회차 발견 8번). 시안대로 회차 마감을 위에 한 번만 둔다.
         */}
         {auctions.length > 0 && (
-          <p className="mt-3 inline-flex items-baseline gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm">
-            <span className="text-zinc-500">이번 회차 마감까지</span>
+          <p className="mt-3 inline-flex items-baseline gap-2 rounded-lg bg-white shadow-card px-3 py-2 text-sm">
+            <span className="text-muted">이번 회차 마감까지</span>
             <span className="font-semibold">
               <Countdown endsAt={auctions[0].ends_at.toISOString()} serverNow={serverNow} />
             </span>
@@ -42,9 +42,9 @@ export default async function DropList() {
       </div>
 
       {auctions.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-12 text-center">
-          <p className="text-sm text-zinc-600">지금 진행 중인 경매가 없습니다.</p>
-          <p className="mt-1 text-xs text-zinc-500">
+        <div className="rounded-lg border border-dashed border-line bg-white px-5 py-12 text-center">
+          <p className="text-sm text-strong">지금 진행 중인 경매가 없습니다.</p>
+          <p className="mt-1 text-xs text-muted">
             다음 드롭이 열리면 알려드릴게요.
             {past.length > 0 && ' 방금 끝난 회차 결과는 아래에서 볼 수 있습니다.'}
           </p>
@@ -65,42 +65,53 @@ export default async function DropList() {
             <li key={a.id}>
               <Link
                 href={`/auctions/${a.id}`}
-                className="flex h-full flex-col rounded-lg border border-zinc-200 bg-white p-3 transition hover:border-zinc-400"
+                className="flex h-full flex-col rounded-lg bg-card p-3 shadow-card transition hover:-translate-y-0.5"
               >
                 {/* 판매자를 맨 위로. 누가 파는지가 살지 말지를 가른다. */}
                 <div className="mb-2 flex min-w-0 items-center gap-1.5">
                   <Avatar name={a.seller_nickname} className="h-5 w-5 text-[10px]" />
-                  <span className="truncate text-xs font-medium text-zinc-700">
+                  <span className="truncate text-xs font-medium text-strong">
                     {a.seller_nickname ?? '알 수 없음'}
                   </span>
                 </div>
 
-                <div className="relative overflow-hidden rounded bg-zinc-100">
+                <div className="relative overflow-hidden rounded bg-fill">
                   <Photo
                     src={a.cover_url ?? ''}
                     alt=""
                     className="aspect-square w-full object-cover"
                   />
                   {a.bidder_count >= 2 && (
-                    <span className="absolute bottom-1 left-1 rounded bg-emerald-700 px-1.5 py-0.5 text-[11px] font-medium text-white">
+                    <span className="absolute bottom-1.5 left-1.5 rounded bg-good px-2 py-0.5 text-[11px] font-semibold text-white">
                       경쟁 {a.bidder_count}명
                     </span>
                   )}
                 </div>
 
-                <p className="mt-2 line-clamp-2 text-sm font-medium">{a.title}</p>
-                <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500">
+                <p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-ink">{a.title}</p>
+                <p className="mt-0.5 line-clamp-1 text-xs text-muted">
                   {/* 목록에는 등급만 있고 뜻풀이가 상세에만 있었다 (UI/UX 발견 10번). */}
                   {CONDITION[a.condition_grade] ?? `상태 ${a.condition_grade}`}
                 </p>
 
-                {/* 금액은 카드 맨 아래에 붙여 카드마다 같은 높이에 오게 한다. */}
+                {/*
+                  금액이 주인공이다. 전에는 라벨·금액·입찰수가 11~16px 로 세 줄
+                  비슷한 무게로 쌓여 아무것도 도드라지지 않았다.
+                  라벨은 작게 위로 올리고, 입찰 수는 금액 옆에 붙여 한 줄로 줄인다.
+                  금액을 카드 바닥에 붙여 카드마다 같은 높이에 오게 한다.
+                */}
                 <div className="mt-auto pt-2">
-                  <p className="text-[11px] text-zinc-500">
+                  <p className="text-[11px] text-muted">
                     {a.bid_count === 0 ? '시작가' : '현재가'}
                   </p>
-                  <p className="font-semibold tabular-nums">{won(a.current_price)}</p>
-                  <p className="text-[11px] text-zinc-500">입찰 {a.bid_count}회</p>
+                  <p className="flex items-baseline gap-1.5">
+                    <span className="text-lg font-bold tabular-nums text-ink">
+                      {won(a.current_price)}
+                    </span>
+                    <span className="text-[11px] text-muted">
+                      {a.bid_count > 0 && `입찰 ${a.bid_count}`}
+                    </span>
+                  </p>
                 </div>
               </Link>
             </li>
@@ -114,29 +125,29 @@ export default async function DropList() {
           <h2 className="text-base font-semibold tracking-tight">
             지난 드롭 결과 · {past[0].round_number}회차
           </h2>
-          <p className="mt-1 text-sm text-zinc-500">{kst(past[0].ends_at)} 마감</p>
+          <p className="mt-1 text-sm text-muted">{kst(past[0].ends_at)} 마감</p>
           <ul className="mt-3 space-y-2">
             {past.map((r) => (
               <li key={r.id}>
                 <Link
                   href={`/auctions/${r.id}`}
-                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-4 py-3 transition hover:border-zinc-400"
+                  className="flex items-center justify-between rounded-lg bg-white shadow-card px-4 py-3 transition hover:border-faint"
                 >
                   <span className="min-w-0 truncate text-sm">{r.title}</span>
                   <span className="ml-4 shrink-0 text-right text-xs">
-                    <span className="tabular-nums text-zinc-700">{won(r.final_price)}</span>
+                    <span className="tabular-nums text-strong">{won(r.final_price)}</span>
                     <span
                       className={`ml-2 rounded px-1.5 py-0.5 ${RESULT_LABEL[r.status]?.tone ?? ''}`}
                     >
                       {RESULT_LABEL[r.status]?.text ?? r.status}
                     </span>
                     {r.status === 'sold' && r.winner_nickname && (
-                      <span className="ml-2 text-zinc-500">
+                      <span className="ml-2 text-muted">
                         {maskNickname(r.winner_nickname)} 님
                       </span>
                     )}
                     {r.status === 'unsold' && (
-                      <span className="ml-2 text-zinc-500">입찰 없음</span>
+                      <span className="ml-2 text-muted">입찰 없음</span>
                     )}
                   </span>
                 </Link>
