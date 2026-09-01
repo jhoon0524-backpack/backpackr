@@ -8,28 +8,37 @@
 <x-dc>
 <helmet>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* 텀블벅 팀 라이브러리 "[Tumblbug] NEW Colors + Icons" 에서 읽은 실제 값 */
     :root {
-      --paper: oklch(0.985 0.006 85);
-      --card: #ffffff;
-      --ink: oklch(0.25 0.012 55);
-      --muted: oklch(0.58 0.012 60);
-      --faint: oklch(0.72 0.010 65);
-      --line: oklch(0.92 0.008 70);
-      --urgent: oklch(0.55 0.13 38);
-      --urgent-wash: oklch(0.965 0.022 50);
-      --good: oklch(0.55 0.13 152);
-      --good-wash: oklch(0.965 0.022 160);
-      --serif: 'Gowun Batang', 'Nanum Myeongjo', 'Apple Myungjo', serif;
-      --sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-      --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+      --paper: #f8f8f8;          /* gray/100 */
+      --card: #FFFFFF;
+      --ink: #0D0D0D;            /* Text/Primary */
+      --strong: #3D3D3D;         /* Text/Secondary */
+      --muted: #6D6D6D;          /* Text/Tertiary */
+      --faint: #9E9E9E;          /* Text/Disabled */
+      --line: #E4E4E4;           /* gray/200 */
+      --fill: #F0F0F0;           /* Surface/Tertiary */
+      --urgent: #EB4B38;         /* peach/500 — 마감·결제 기한 */
+      --urgent-wash: #fff4f2;    /* peach/50 */
+      --urgent-line: #ffdad5;    /* peach/150 */
+      --good: #0152CC;           /* navy/500 — 최고가·낙찰 */
+      --good-wash: #F2F3FF;      /* navy/50 */
+      --card-shadow: 0 0.8px 0 rgba(0,0,0,0.031), 0 4px 12px rgba(0,0,0,0.039);
+      /* Pretendard 는 Google Fonts 에 없다. 깔려 있으면 진짜 브랜드 글꼴로,
+         없으면 Noto Sans KR 로 떨어진다 (둘 다 이 시스템의 글꼴이다). */
+      --sans: 'Pretendard', 'Pretendard Variable', -apple-system, 'Apple SD Gothic Neo',
+              'Noto Sans KR', sans-serif;
+      --display: var(--sans);
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans);
+           -webkit-font-smoothing: antialiased; }
     a { color: var(--urgent); text-decoration: none; }
-    a:hover { color: oklch(0.45 0.13 38); }
-    .num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    a:hover { color: #c93c2b; }
+    /* 이 시스템에는 고정폭 글꼴이 없다. 카운트다운·금액은 Pretendard 의 표 숫자를 쓴다. */
+    .num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
     .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   </style>
 </helmet>

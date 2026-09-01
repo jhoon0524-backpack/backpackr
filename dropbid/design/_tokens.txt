@@ -1,8 +1,21 @@
-종이(배경)  oklch(0.985 0.006 85)   기존 zinc-50 #fafafa 를 따뜻하게
-카드        #ffffff
-잉크(본문)  oklch(0.25 0.012 55)    기존 zinc-900 #18181b
-흐린 글자   oklch(0.58 0.012 60)    기존 zinc-500 #71717a
-실선        oklch(0.92 0.008 70)    기존 zinc-200 #e4e4e7
-급함(강조)  oklch(0.55 0.13 38)     마감 임박·결제 기한
-좋음(강조)  oklch(0.55 0.13 152)    최고가·낙찰  (같은 명도/채도, 색상만 다름)
-라운드      12px 카드 / 8px 요소    기존 rounded-lg 8px 에서 카드만 키움
+텀블벅 실제 토큰 — Figma 팀 라이브러리 "[Tumblbug] NEW Colors + Icons" 에서 읽음
+(파일: MOMRtGNhP17Kh4jT5oSLp2 / node 2338-38037)
+
+글꼴   Pretendard (Text/* 전 스케일), Paperlogy (디스플레이), Noto Sans KR (구 스타일)
+브랜드 peach/500 #EB4B38 · Background/Accent #F86453
+       peach/50 #fff4f2 · 150 #ffdad5 · 250 #ffc7bf
+글자   Primary #0D0D0D · Secondary #3D3D3D · Tertiary #6D6D6D · Disabled #9E9E9E
+회색   700 #1C1C1C · 500 #545454 · 333 #333333 · 300 #9E9E9E · 200 #E4E4E4
+       150 #F0F0F0 · 100 #f8f8f8
+보조   navy 500 #0152CC / 50 #F2F3FF · sky 500 #1593F3 / 50 #F3FAFF
+       red 500 #e53c41 / 50 #fff2f3 · green 500 #14b8a6
+그림자 nav card — 0 0.8px 0 #00000008, 0 4px 12px #0000000A
+타입   headline2 32/700 · headline4 20/700 · body1 16 · body2 14 · body3 13
+       body4 12 · caption1 11 · caption2 10 (line-height 1.2 또는 1.5)
+
+넣지 못한 것
+- Pretendard 는 Google Fonts 에 없다. 캔버스는 Google Fonts 만 불러올 수 있어서
+  Pretendard 를 1순위로 두고 Noto Sans KR 을 실제로 불러오는 대체로 뒀다.
+  Pretendard 가 깔린 기기에서는 진짜 브랜드 글꼴로 보인다.
+- Paperlogy 도 같은 이유로 못 넣었다. 제목은 그들의 타입 스케일대로 Pretendard Bold 다.
+- 라운드 값은 이 라이브러리에 없다(색·아이콘 전용). 기존 앱의 8px 를 유지했다.

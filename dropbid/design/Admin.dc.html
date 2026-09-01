@@ -29,7 +29,7 @@
     body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
     a { color: var(--urgent); text-decoration: none; }
     a:hover { color: oklch(0.45 0.13 38); }
-    .num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .num { font-family: var(--sans); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
     .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   </style>
 </helmet>
@@ -37,7 +37,7 @@
 
   <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; background: var(--card); border-bottom: 1px solid var(--line)">
     <div style="display: flex; align-items: baseline; gap: 18px">
-      <div style="font-family: var(--serif); font-size: 21px; font-weight: 700">Dropbid</div>
+      <div style="font-family: var(--display); font-size: 21px; font-weight: 700">Dropbid</div>
       <div style="display: flex; gap: 16px; font-size: 13px; color: var(--muted)"><span>드롭</span><span>상품 등록</span><span>마이페이지</span><span style="color: var(--ink); font-weight: 600">검수</span></div>
     </div>
     <div style="display: flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; background: var(--good-wash); color: var(--good); font-size: 12px; font-weight: 600">
@@ -48,13 +48,13 @@
 
   <div style="padding: 26px 28px">
     <div style="display: flex; align-items: baseline; justify-content: space-between">
-      <h1 style="margin: 0; font-family: var(--serif); font-size: 24px; font-weight: 700">검수 대기</h1>
+      <h1 style="margin: 0; font-family: var(--display); font-size: 24px; font-weight: 700">검수 대기</h1>
       <div class="num" style="font-size: 13px; color: var(--muted)">2건</div>
     </div>
     <p style="margin: 8px 0 0; font-size: 13px; color: var(--muted)">후원 인증 이미지를 확인하고 승인하거나 반려합니다. 승인하면 고른 회차에 배정됩니다.</p>
 
     <!-- 검수 카드 -->
-    <div style="margin-top: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden">
+    <div style="margin-top: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--card-shadow); overflow: hidden">
       <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--line)">
         <div>
           <div style="font-size: 16px; font-weight: 600">한정판 엽서 세트</div>

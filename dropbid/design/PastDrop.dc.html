@@ -29,14 +29,14 @@
     body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
     a { color: var(--urgent); text-decoration: none; }
     a:hover { color: oklch(0.45 0.13 38); }
-    .num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .num { font-family: var(--sans); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
     .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   </style>
 </helmet>
 <div style="min-height: 800px; display: flex; flex-direction: column; background: var(--paper)">
 
   <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--card); border-bottom: 1px solid var(--line)">
-    <div style="font-family: var(--serif); font-size: 21px; font-weight: 700">Dropbid</div>
+    <div style="font-family: var(--display); font-size: 21px; font-weight: 700">Dropbid</div>
     <div style="display: flex; align-items: center; gap: 6px; padding: 6px 10px 6px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; color: var(--muted)">이수집
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
     </div>
@@ -63,7 +63,7 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 8px">
-      <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--card-shadow)">
         <div style="flex-shrink: 0; width: 52px; height: 52px; border-radius: 8px; background: linear-gradient(150deg, oklch(0.93 0.03 60), oklch(0.88 0.04 45)); filter: saturate(0.6)"></div>
         <div style="flex-grow: 1; min-width: 0">
           <div class="clamp2" style="font-size: 14px; line-height: 1.4">미공개 일러스트집 &lt;새벽 산책&gt;</div>
@@ -75,7 +75,7 @@
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--card-shadow)">
         <div style="flex-shrink: 0; width: 52px; height: 52px; border-radius: 8px; background: linear-gradient(150deg, oklch(0.93 0.025 155), oklch(0.88 0.035 140)); filter: saturate(0.6)"></div>
         <div style="flex-grow: 1; min-width: 0">
           <div class="clamp2" style="font-size: 14px; line-height: 1.4">보드게임 &lt;달빛 상단&gt; 확장팩 세트</div>
@@ -87,7 +87,7 @@
         </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; opacity: 0.72">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--card-shadow); opacity: 0.72">
         <div style="flex-shrink: 0; width: 52px; height: 52px; border-radius: 8px; background: linear-gradient(150deg, oklch(0.94 0.02 340), oklch(0.89 0.03 330)); filter: saturate(0.4)"></div>
         <div style="flex-grow: 1; min-width: 0">
           <div class="clamp2" style="font-size: 14px; line-height: 1.4">아크릴 스탠드 풀세트 (7종)</div>
