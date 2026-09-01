@@ -61,6 +61,7 @@ copy_one "docs/STATUS.md"         "docs/STATUS.md"
 copy_one "docs/feedback/INBOX.md" "docs/feedback/INBOX.md"
 copy_one "LOOP-README.md"         "LOOP-README.md"
 copy_one "gitignore"              ".gitignore"
+copy_one "claude-agents/design-critic.md" ".claude/agents/design-critic.md"
 
 chmod +x "$TARGET/loop/loop.sh" "$TARGET/loop/loopctl.sh" 2>/dev/null || true
 mkdir -p "$TARGET/logs"

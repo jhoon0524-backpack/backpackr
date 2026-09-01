@@ -36,6 +36,8 @@ ai-loop-kit/
     │   ├── DESIGN.md       ← 무엇을 만드는가 (직접 작성)
     │   ├── STATUS.md       ← 어디까지 했나 (루프가 갱신)
     │   └── feedback/INBOX.md ← 사람이 던지는 지시함
+    ├── claude-agents/
+    │   └── design-critic.md ← 비평가 에이전트 등록 파일 (설치 시 .claude/agents/ 로)
     ├── LOOP-README.md      ← 설치된 프로젝트용 사용 설명서
     └── gitignore           ← 설치 시 .gitignore 로 이름이 바뀜
 ```
