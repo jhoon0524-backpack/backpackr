@@ -38,7 +38,7 @@ export function Countdown({
   }, [endsAt, serverNow])
 
   if (left === null) {
-    return <span className="tabular-nums text-zinc-400">{format === 'long' ? '…' : '--:--:--'}</span>
+    return <span className="tabular-nums text-zinc-500">{format === 'long' ? '…' : '--:--:--'}</span>
   }
   if (left <= 0) {
     return <span className="tabular-nums text-zinc-500">{format === 'long' ? '기한 지남' : '마감'}</span>

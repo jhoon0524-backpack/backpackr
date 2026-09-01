@@ -114,7 +114,7 @@ export default async function DropList() {
                       </span>
                     )}
                     {r.status === 'unsold' && (
-                      <span className="ml-2 text-zinc-400">입찰 없음</span>
+                      <span className="ml-2 text-zinc-500">입찰 없음</span>
                     )}
                   </span>
                 </Link>
