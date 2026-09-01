@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: oklch(0.985 0.006 85);
+      --card: #ffffff;
+      --ink: oklch(0.25 0.012 55);
+      --muted: oklch(0.58 0.012 60);
+      --faint: oklch(0.72 0.010 65);
+      --line: oklch(0.92 0.008 70);
+      --urgent: oklch(0.55 0.13 38);
+      --urgent-wash: oklch(0.965 0.022 50);
+      --good: oklch(0.55 0.13 152);
+      --good-wash: oklch(0.965 0.022 160);
+      --serif: 'Gowun Batang', 'Nanum Myeongjo', 'Apple Myungjo', serif;
+      --sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: var(--urgent); text-decoration: none; }
+    a:hover { color: oklch(0.45 0.13 38); }
+    .num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
+</helmet>
+<div style="min-height: 1000px; display: flex; flex-direction: column; background: var(--paper)">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--card); border-bottom: 1px solid var(--line)">
+    <div style="font-family: var(--serif); font-size: 21px; font-weight: 700">Dropbid</div>
+    <div style="font-size: 13px; color: var(--muted)">김창작</div>
+  </div>
+
+  <div style="padding: 22px 20px 0">
+    <h1 style="margin: 0; font-family: var(--serif); font-size: 23px; font-weight: 700">상품 등록</h1>
+    <p style="margin: 8px 0 0; font-size: 13px; color: var(--muted); line-height: 1.6">등록하면 검수 대기 상태가 됩니다. 운영자가 후원 인증을 확인한 뒤 다음 드롭에 배정합니다.</p>
+  </div>
+
+  <div style="margin: 18px 16px 0; padding: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; gap: 18px">
+
+    <div>
+      <label style="display: block; font-size: 13px; font-weight: 600">상품명</label>
+      <div style="display: flex; align-items: center; margin-top: 7px; padding: 0 13px; height: 46px; border: 1px solid var(--line); border-radius: 9px; font-size: 14px">한정판 엽서 세트</div>
+    </div>
+
+    <div>
+      <label style="display: block; font-size: 13px; font-weight: 600">원 펀딩 프로젝트명</label>
+      <div style="display: flex; align-items: center; margin-top: 7px; padding: 0 13px; height: 46px; border: 1px solid var(--line); border-radius: 9px; font-size: 14px">겨울 편지 펀딩</div>
+      <div style="margin-top: 7px; font-size: 11px; color: var(--faint); line-height: 1.55">텀블벅 등 원 프로젝트의 공개 페이지 주소를 함께 넣으면 구매자가 확인할 수 있습니다.</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: 600">카테고리</label>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 7px; padding: 0 13px; height: 46px; border: 1px solid var(--line); border-radius: 9px; font-size: 14px">웹툰·일러스트
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: 600">상태 등급</label>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 7px; padding: 0 13px; height: 46px; border: 1px solid var(--line); border-radius: 9px; font-size: 14px">A · 미개봉
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label style="display: block; font-size: 13px; font-weight: 600">사진 <span style="color: var(--muted); font-weight: 400">· 3장 이상</span></label>
+      <div style="display: flex; gap: 8px; margin-top: 8px">
+        <div style="width: 74px; height: 74px; border-radius: 9px; background: linear-gradient(150deg, oklch(0.93 0.03 60), oklch(0.88 0.04 45))"></div>
+        <div style="width: 74px; height: 74px; border-radius: 9px; background: linear-gradient(150deg, oklch(0.94 0.025 320), oklch(0.89 0.03 310))"></div>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 74px; height: 74px; border: 1.5px dashed oklch(0.86 0.01 70); border-radius: 9px; color: var(--faint)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span class="num" style="font-size: 10px">2 / 3</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label style="display: block; font-size: 13px; font-weight: 600">후원 인증 이미지</label>
+      <div style="display: flex; align-items: center; gap: 11px; margin-top: 8px; padding: 12px; background: oklch(0.975 0.012 85); border: 1px solid oklch(0.90 0.02 80); border-radius: 9px">
+        <div style="flex-shrink: 0; width: 46px; height: 46px; border-radius: 7px; background: linear-gradient(150deg, oklch(0.94 0.035 85), oklch(0.90 0.05 75))"></div>
+        <div style="font-size: 12px; color: oklch(0.45 0.05 70); line-height: 1.55">후원 내역 캡처. <strong style="font-weight: 600">없으면 등록되지 않습니다.</strong></div>
+      </div>
+    </div>
+
+    <div>
+      <label style="display: block; font-size: 13px; font-weight: 600">시작가</label>
+      <div style="display: flex; align-items: center; gap: 8px; margin-top: 7px; padding: 0 13px; height: 46px; border: 1px solid var(--line); border-radius: 9px">
+        <span class="num" style="flex-grow: 1; font-size: 16px; font-weight: 600">15,500</span>
+        <span style="font-size: 14px; color: var(--muted)">원</span>
+      </div>
+      <div style="margin-top: 7px; font-size: 11px; color: var(--faint)">1,000원 이상이면 얼마든 됩니다.</div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 10px; background: var(--ink); color: oklch(0.985 0.006 85); font-size: 16px; font-weight: 600">검수 신청</div>
+  </div>
+
+  <div style="height: 24px"></div>
+</div>
+</x-dc>
+</body>
+</html>

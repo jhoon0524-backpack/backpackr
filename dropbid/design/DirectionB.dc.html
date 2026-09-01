@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: oklch(0.985 0.006 85);
+      --card: #ffffff;
+      --ink: oklch(0.25 0.012 55);
+      --muted: oklch(0.58 0.012 60);
+      --faint: oklch(0.72 0.010 65);
+      --line: oklch(0.92 0.008 70);
+      --urgent: oklch(0.55 0.13 38);
+      --urgent-wash: oklch(0.965 0.022 50);
+      --good: oklch(0.55 0.13 152);
+      --good-wash: oklch(0.965 0.022 160);
+      --serif: 'Gowun Batang', 'Nanum Myeongjo', 'Apple Myungjo', serif;
+      --sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+    a { color: var(--urgent); text-decoration: none; }
+    a:hover { color: oklch(0.45 0.13 38); }
+    .num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
+</helmet>
+<div style="min-height: 620px; padding: 20px; background: #12100e; color: oklch(0.92 0.01 80)">
+  <div style="font-size: 10px; letter-spacing: 0.14em; color: oklch(0.60 0.06 80)">대안 B</div>
+  <div style="margin-top: 5px; font-family: var(--serif); font-size: 18px; font-weight: 700; color: oklch(0.95 0.02 85)">어두운 경매장</div>
+  <div style="margin-top: 7px; font-size: 12px; color: oklch(0.65 0.02 80); line-height: 1.6">긴장감을 앞세운다. 사진과 숫자만 빛나고 나머지는 물러난다.</div>
+
+  <div style="margin-top: 18px; padding: 16px; border: 1px solid oklch(0.28 0.02 70); border-radius: 10px; background: #1a1714">
+    <div style="font-size: 10px; letter-spacing: 0.1em; color: oklch(0.60 0.06 80)">1회차 마감까지</div>
+    <div class="num" style="margin-top: 4px; font-size: 34px; font-weight: 600; color: oklch(0.80 0.16 75)">01:59:47</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 9px; margin-top: 12px">
+    <div style="display: flex; gap: 11px; padding: 11px; border: 1px solid oklch(0.26 0.015 70); border-radius: 10px; background: #1a1714">
+      <div style="flex-shrink: 0; width: 58px; height: 58px; border-radius: 7px; background: linear-gradient(150deg, oklch(0.62 0.09 55), oklch(0.45 0.08 40))"></div>
+      <div style="flex-grow: 1; min-width: 0">
+        <div style="font-size: 13px; color: oklch(0.93 0.01 80)">미공개 일러스트집</div>
+        <div class="num" style="margin-top: 6px; font-size: 17px; font-weight: 600; color: oklch(0.88 0.10 80)">50,000원</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 11px; padding: 11px; border: 1px solid oklch(0.26 0.015 70); border-radius: 10px; background: #1a1714">
+      <div style="flex-shrink: 0; width: 58px; height: 58px; border-radius: 7px; background: linear-gradient(150deg, oklch(0.58 0.07 150), oklch(0.42 0.06 145))"></div>
+      <div style="flex-grow: 1; min-width: 0">
+        <div style="font-size: 13px; color: oklch(0.93 0.01 80)">보드게임 확장팩</div>
+        <div class="num" style="margin-top: 6px; font-size: 17px; font-weight: 600; color: oklch(0.88 0.10 80)">28,000원</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px; padding: 12px; border: 1px dashed oklch(0.32 0.02 70); border-radius: 9px; font-size: 11px; color: oklch(0.62 0.02 80); line-height: 1.65">
+    <strong style="color: oklch(0.80 0.05 80); font-weight: 600">얻는 것</strong> — 마감 압박이 강하게 걸린다. 사진이 잘 산다.<br>
+    <strong style="color: oklch(0.80 0.05 80); font-weight: 600">잃는 것</strong> — 창작 굿즈의 따뜻함이 사라진다. 판매자·검수 화면은 오래 보기 피로하다.
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
