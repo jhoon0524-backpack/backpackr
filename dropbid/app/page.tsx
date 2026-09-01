@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { listLastDropResults, listLiveAuctions } from '@/lib/db'
 import { Countdown } from './time'
 import { Photo } from './photo'
+import { Avatar } from './avatar'
 import { won, kst, maskNickname, CONDITION } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -49,49 +50,58 @@ export default async function DropList() {
           </p>
         </div>
       ) : (
-        <ul className="space-y-3">
+        /*
+          Whatnot 목록을 참고해 짜맞췄다 (사장님이 화면을 주셨다).
+          가져온 것 — 판매자를 카드 위로, 사진을 먼저 크게, 경쟁 배지를 사진 위에 얹기,
+                     좁은 화면 2열.
+          안 가져온 것 — 어두운 테마와 색. 우리는 밝은 쪽 한 벌이고 브랜드는 텀블벅이다.
+                       카테고리 칩도 뺐다. 한 회차에 상품이 몇 개뿐이라 걸러 봐야
+                       빈 화면만 나온다. 참고를 그대로 베끼면 제품이 나빠지는 자리다.
+
+          굿즈는 눈으로 고르는 물건인데 56px 썸네일로는 판단이 안 됐다. 사진을 앞세운다.
+        */
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {auctions.map((a) => (
             <li key={a.id}>
               <Link
                 href={`/auctions/${a.id}`}
-                className="block rounded-lg border border-zinc-200 bg-white px-5 py-4 transition hover:border-zinc-400"
+                className="flex h-full flex-col rounded-lg border border-zinc-200 bg-white p-3 transition hover:border-zinc-400"
               >
-                {/*
-                  390px 에서는 오른쪽 금액 칸이 자리를 먼저 가져가 제목 칸이 121px 로
-                  눌렸다. 두 줄을 허용해도 긴 제목은 여전히 잘린다 (QA 1회차 발견 6번).
-                  좁은 화면에서는 금액을 제목 아래로 내려 제목이 가로 폭을 다 쓰게 하고,
-                  sm 이상에서는 원래대로 좌우로 나눈다.
-                */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                  <div className="flex min-w-0 gap-3">
-                    {a.cover_url && (
-                      <Photo
-                        src={a.cover_url}
-                        alt=""
-                        className="h-14 w-14 shrink-0 rounded object-cover"
-                      />
-                    )}
-                    <div className="min-w-0">
-                    <p className="line-clamp-2 font-medium sm:truncate">{a.title}</p>
-                    <p className="mt-0.5 truncate text-xs text-zinc-500">
-                      {/* 목록에는 등급만 있고 뜻풀이가 상세에만 있었다 (발견 10번). */}
-                      {a.funding_project_name} · {CONDITION[a.condition_grade] ?? `상태 ${a.condition_grade}`}
-                    </p>
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-baseline gap-2 sm:block sm:text-right">
-                    <p className="text-xs text-zinc-500">
-                      {a.bid_count === 0 ? '시작가' : '현재가'}
-                    </p>
-                    <p className="font-semibold tabular-nums">{won(a.current_price)}</p>
-                    <p className="text-xs text-zinc-500 sm:mt-0.5">입찰 {a.bid_count}회</p>
-                  </div>
+                {/* 판매자를 맨 위로. 누가 파는지가 살지 말지를 가른다. */}
+                <div className="mb-2 flex min-w-0 items-center gap-1.5">
+                  <Avatar name={a.seller_nickname} className="h-5 w-5 text-[10px]" />
+                  <span className="truncate text-xs font-medium text-zinc-700">
+                    {a.seller_nickname ?? '알 수 없음'}
+                  </span>
                 </div>
-                {a.bidder_count >= 2 && (
-                  <p className="mt-2 inline-block rounded bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
-                    경쟁 입찰 중 · {a.bidder_count}명
+
+                <div className="relative overflow-hidden rounded bg-zinc-100">
+                  <Photo
+                    src={a.cover_url ?? ''}
+                    alt=""
+                    className="aspect-square w-full object-cover"
+                  />
+                  {a.bidder_count >= 2 && (
+                    <span className="absolute bottom-1 left-1 rounded bg-emerald-700 px-1.5 py-0.5 text-[11px] font-medium text-white">
+                      경쟁 {a.bidder_count}명
+                    </span>
+                  )}
+                </div>
+
+                <p className="mt-2 line-clamp-2 text-sm font-medium">{a.title}</p>
+                <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500">
+                  {/* 목록에는 등급만 있고 뜻풀이가 상세에만 있었다 (UI/UX 발견 10번). */}
+                  {CONDITION[a.condition_grade] ?? `상태 ${a.condition_grade}`}
+                </p>
+
+                {/* 금액은 카드 맨 아래에 붙여 카드마다 같은 높이에 오게 한다. */}
+                <div className="mt-auto pt-2">
+                  <p className="text-[11px] text-zinc-500">
+                    {a.bid_count === 0 ? '시작가' : '현재가'}
                   </p>
-                )}
+                  <p className="font-semibold tabular-nums">{won(a.current_price)}</p>
+                  <p className="text-[11px] text-zinc-500">입찰 {a.bid_count}회</p>
+                </div>
               </Link>
             </li>
           ))}
