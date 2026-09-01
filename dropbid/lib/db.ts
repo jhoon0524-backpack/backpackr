@@ -25,6 +25,8 @@ export type LiveAuction = {
   bid_count: number
   bidder_count: number
   cover_url: string | null
+  /** 목록에서 판매자를 앞세우려고 함께 읽는다. 입찰자와 달리 판매자는 가리지 않는다. */
+  seller_nickname: string | null
 }
 
 /** 이번 회차 경매를 마감 임박순으로. */
@@ -32,12 +34,14 @@ export async function listLiveAuctions(): Promise<LiveAuction[]> {
   const { rows } = await pool.query<LiveAuction>(`
     select a.id, p.title, p.funding_project_name, p.category, p.condition_grade,
            a.current_price, a.ends_at, p.photo_urls[1] as cover_url,
+           seller.nickname as seller_nickname,
            (select count(*) from bids b
              where b.auction_id = a.id and b.outcome = 'accepted')::int as bid_count,
            (select count(distinct b.bidder_id) from bids b
              where b.auction_id = a.id and b.outcome = 'accepted')::int as bidder_count
       from auctions a
       join products p on p.id = a.product_id
+      left join profiles seller on seller.id = p.seller_id
      where a.status = 'live'
      order by a.ends_at asc
   `)
