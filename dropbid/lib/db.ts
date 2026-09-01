@@ -222,6 +222,8 @@ export type MySaleRow = {
   title: string
   product_status: string
   rejection_reason: string | null
+  /** 경매가 생긴 뒤에만 있다. 판매자가 자기 상품을 열어 보는 길에 쓴다. */
+  auction_id: string | null
   auction_status: string | null
   current_price: number | null
   can_relist: boolean
@@ -231,7 +233,7 @@ export type MySaleRow = {
 export async function listMySales(userId: string) {
   const { rows } = await pool.query<MySaleRow>(
     `select p.id as product_id, p.title, p.status as product_status, p.rejection_reason,
-            a.status as auction_status, a.current_price,
+            a.id as auction_id, a.status as auction_status, a.current_price,
             (a.status in ('unsold', 'payment_failed')
              and not exists (select 1 from products r where r.relisted_from = p.id)
             ) as can_relist

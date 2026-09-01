@@ -74,10 +74,17 @@ export function AuctionResult({
             <p className="mt-1 text-sm text-amber-900">{kst(orderDueAt)}까지</p>
             <Link
               href="/me"
-              className="mt-3 inline-block rounded bg-zinc-900 px-4 py-2 text-sm text-white"
+              className="mt-3 inline-block rounded bg-zinc-900 px-4 py-3 text-sm text-white"
             >
               결제하러 가기
             </Link>
+            {/*
+              기한은 크게 보였지만 "어기면 무슨 일이 나는지" 가 없었다
+              (UI/UX 1회차 발견 3번). 잃을 것을 모르면 기한도 무게가 없다.
+            */}
+            <p className="mt-2 text-xs text-amber-800">
+              기한이 지나면 낙찰이 취소되고 상품은 다시 판매됩니다.
+            </p>
           </div>
         )}
         {viewerIsWinner && orderStatus === 'paid' && (

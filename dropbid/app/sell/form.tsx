@@ -46,15 +46,38 @@ export function SellForm() {
         </label>
       </div>
 
+      {/*
+        두 칸 모두 "무엇을 넣으라는 것인지" 가 없어 처음 팔아 보는 사람이 막혔다
+        (UI/UX 1회차 발견 2번). 사진칸은 빈 여러 줄 입력칸이라 파일을 올리는
+        곳처럼 보이는데 실제로는 주소를 받는다. 예시를 넣어 그 오해를 끊는다.
+      */}
       <label className="block text-xs text-zinc-500">
         사진 (3장 이상, 한 줄에 하나씩)
         {/* 업로드가 아직 없어서 주소를 받는다. Supabase Storage 가 붙으면 파일 선택으로 바뀐다. */}
-        <textarea name="photoUrls" rows={3} defaultValue={v.photoUrls} className={field} />
+        <textarea
+          name="photoUrls"
+          rows={3}
+          defaultValue={v.photoUrls}
+          placeholder={'https://…/앞면.jpg\nhttps://…/뒷면.jpg\nhttps://…/구성품.jpg'}
+          className={field}
+        />
+        <span className="mt-1 block font-normal text-zinc-500">
+          파일 올리기는 아직 준비 중입니다. 지금은 <b>이미지 주소</b>를 한 줄에 하나씩 넣어 주세요.
+        </span>
       </label>
 
       <label className="block text-xs text-zinc-500">
         후원 인증 이미지 — 없으면 등록되지 않습니다
-        <input name="backerProofUrl" defaultValue={v.backerProofUrl} className={field} />
+        <input
+          name="backerProofUrl"
+          defaultValue={v.backerProofUrl}
+          placeholder="https://…/후원내역.png"
+          className={field}
+        />
+        <span className="mt-1 block font-normal text-zinc-500">
+          원 펀딩에서 <b>이 상품을 후원한 내역</b>이 보이는 화면을 캡처해 올린 주소입니다.
+          운영자가 눈으로 확인합니다. 결제 정보는 가리고 올려 주세요.
+        </span>
       </label>
 
       <label className="block text-xs text-zinc-500">
