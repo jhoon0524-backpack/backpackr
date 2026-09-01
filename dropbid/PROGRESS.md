@@ -1,5 +1,36 @@
 # 현재 진행 상황
 
+## 2026-09-01 — 실제 Supabase 재구축 + 배포 준비
+
+**실제 DB를 최신 구조로 다시 지었다** (사용자 승인 후). 데이터는 0건이라 잃은 것이 없다.
+
+- 프로덕션 스키마가 로컬과 갈라져 있었다. `place_bid`·`reject_product` 본문 길이부터
+  달랐고, `is_operator`·`relisted_from`·연락처 형식 제약·`relist_product`·
+  `resolve_stuck_auction`·`notify_payment_due` 가 통째로 없었다.
+  마이그레이션을 덧대는 대신 **로컬(테스트를 통과한 상태)의 스키마를 그대로 떠서** 넣었다.
+- `drop schema public` 은 쓰지 않았다. Supabase 가 `supabase_admin` 으로 걸어 둔
+  default privileges 를 내가 되돌릴 수 없기 때문이다. 앱 테이블·함수만 지우고 다시 만들었다.
+- 로컬 덤프 중 Supabase 에 맞지 않는 두 가지는 뺐다:
+  `ALTER DEFAULT PRIVILEGES FOR ROLE dropbid`(그런 역할이 없다),
+  `REVOKE USAGE ON SCHEMA public FROM PUBLIC`(Supabase 내부 역할이 쓴다).
+- 결과가 로컬과 일치하는 것을 확인했다: 함수 11, 테이블 8, 정책 8, 인덱스 22.
+- 시연 데이터도 넣었다. 사진은 붙여넣지 않고 SQL 에서 만들어 냈다
+  (`encode(convert_to(...),'base64')`). 로컬에서 먼저 돌려 본 뒤 적용했다.
+
+**운영 빌드를 처음 돌려 봤다** — `npm run build` 통과. 모든 화면이 동적이라
+빌드 시 DB 가 필요 없다. 즉 `DATABASE_URL` 없이도 배포 빌드는 성공한다.
+
+**Vercel 배포는 못 했다.** 연결된 Vercel 권한으로 프로젝트 생성이 막혀 있다(403).
+`create_git_project` 와 `deploy_to_vercel` 둘 다 같은 오류다.
+소스 80KB 를 옮기기 전에 작은 파일로 먼저 찔러 보고 확인했다.
+→ `인터넷에-올리기.md` 에 사람이 직접 할 순서를 적었다.
+
+저장소 기본 브랜치(`claude/download-claude-md-rX79i`)에도 코드를 올렸다 (사용자 승인).
+fast-forward 라 기존 이력은 그대로다. 이제 Vercel 이 기본 브랜치를 보면 바로 빌드된다.
+
+**감안할 점**: 무료 플랜은 비밀번호를 걸 수 없어 주소를 아는 사람은 누구나 들어온다.
+로그인이 없어 아무나 운영자로 전환해 검수까지 할 수 있다. 사용자에게 알리고 진행했다.
+
 ## 2026-09-01 — 윈도우에서 돌릴 수 있게
 
 사용자가 직접 만져 보려면 자기 컴퓨터에서 돌려야 하는데, 설정 명령이 `sh` 와 `psql` 을 써서
