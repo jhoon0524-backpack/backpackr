@@ -34,7 +34,7 @@ export function Photo({
   if (broken) {
     return (
       <div
-        className={`flex items-center justify-center bg-zinc-100 text-[11px] text-zinc-600 ${className}`}
+        className={`flex items-center justify-center bg-fill text-[11px] text-strong ${className}`}
       >
         사진 없음
       </div>

@@ -38,10 +38,10 @@ export function Countdown({
   }, [endsAt, serverNow])
 
   if (left === null) {
-    return <span className="tabular-nums text-zinc-500">{format === 'long' ? '…' : '--:--:--'}</span>
+    return <span className="tabular-nums text-muted">{format === 'long' ? '…' : '--:--:--'}</span>
   }
   if (left <= 0) {
-    return <span className="tabular-nums text-zinc-500">{format === 'long' ? '기한 지남' : '마감'}</span>
+    return <span className="tabular-nums text-muted">{format === 'long' ? '기한 지남' : '마감'}</span>
   }
 
   const s = Math.floor(left / 1000)
@@ -55,6 +55,6 @@ export function Countdown({
       : [h, m, sec].map((n) => String(n).padStart(2, '0')).join(':')
 
   return (
-    <span className={`tabular-nums ${urgent ? 'font-semibold text-red-600' : ''}`}>{text}</span>
+    <span className={`tabular-nums ${urgent ? 'font-semibold text-urgent' : ''}`}>{text}</span>
   )
 }

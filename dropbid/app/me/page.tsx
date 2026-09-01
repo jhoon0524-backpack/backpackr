@@ -32,21 +32,21 @@ function bidBadge(status: string, isWinning: boolean) {
   if (status === 'live') {
     return isWinning
       ? { label: '최고가', tone: 'bg-emerald-50 text-emerald-700' }
-      : { label: '밀림', tone: 'bg-zinc-100 text-zinc-600' }
+      : { label: '밀림', tone: 'bg-fill text-strong' }
   }
   if (status === 'sold') {
     return isWinning
       ? { label: '낙찰', tone: 'bg-emerald-50 text-emerald-700' }
-      : { label: '낙찰 실패', tone: 'bg-zinc-100 text-zinc-500' }
+      : { label: '낙찰 실패', tone: 'bg-fill text-muted' }
   }
-  if (status === 'unsold') return { label: '유찰', tone: 'bg-zinc-100 text-zinc-500' }
-  if (status === 'payment_failed') return { label: '미결제 종료', tone: 'bg-zinc-100 text-zinc-500' }
-  return { label: '시작 전', tone: 'bg-zinc-100 text-zinc-500' }
+  if (status === 'unsold') return { label: '유찰', tone: 'bg-fill text-muted' }
+  if (status === 'payment_failed') return { label: '미결제 종료', tone: 'bg-fill text-muted' }
+  return { label: '시작 전', tone: 'bg-fill text-muted' }
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-dashed border-zinc-300 bg-white px-5 py-8 text-center text-sm text-zinc-600">
+    <div className="rounded-lg border border-dashed border-line bg-white px-5 py-8 text-center text-sm text-strong">
       {children}
     </div>
   )
@@ -63,7 +63,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
       <Empty>
         위쪽에서 사용자를 고르면 내 입찰·낙찰·판매를 볼 수 있습니다.
         <br />
-        <span className="text-xs text-zinc-500">카카오 로그인이 붙으면 이 선택은 사라집니다.</span>
+        <span className="text-xs text-muted">카카오 로그인이 붙으면 이 선택은 사라집니다.</span>
       </Empty>
     )
   }
@@ -101,10 +101,10 @@ export default async function MyPage(props: PageProps<'/me'>) {
         {/* 연락처가 없으면 입찰도 등록도 막힌다. 여기서 바로 풀 수 있게 한다. */}
         <div
           className={`mt-3 rounded px-4 py-3 ${
-            me.phone ? 'bg-zinc-100' : 'bg-amber-50'
+            me.phone ? 'bg-fill' : 'bg-amber-50'
           }`}
         >
-          <p className={`text-sm ${me.phone ? 'text-zinc-700' : 'text-amber-900'}`}>
+          <p className={`text-sm ${me.phone ? 'text-strong' : 'text-amber-900'}`}>
             {me.phone ? (
               <>
                 연락처 <span className="font-medium tabular-nums">{me.phone}</span>
@@ -114,14 +114,14 @@ export default async function MyPage(props: PageProps<'/me'>) {
             )}
           </p>
           <PhoneForm current={me.phone} />
-          <p className="mt-2 text-xs text-zinc-500">
+          <p className="mt-2 text-xs text-muted">
             낙찰·배송 연락에만 씁니다. 다른 사용자에게 보이지 않습니다.
           </p>
         </div>
       </div>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-zinc-700">내 입찰</h2>
+        <h2 className="mb-2 text-sm font-medium text-strong">내 입찰</h2>
         {bids.length === 0 ? (
           <Empty>
             아직 입찰한 경매가 없습니다. <Link href="/" className="underline">드롭 목록 보기</Link>
@@ -131,20 +131,20 @@ export default async function MyPage(props: PageProps<'/me'>) {
             {bids.map((b) => (
               <li
                 key={b.auction_id}
-                className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white px-4 py-3"
+                className="flex items-center justify-between rounded-lg bg-white shadow-card px-4 py-3"
               >
                 <Link href={`/auctions/${b.auction_id}`} className="min-w-0 truncate hover:underline">
                   {b.title}
                 </Link>
                 <span className="ml-4 shrink-0 text-right text-xs">
                   <span className="tabular-nums">내 입찰 {won(b.my_amount)}</span>
-                  <span className="mx-1 text-zinc-300">/</span>
-                  <span className="tabular-nums text-zinc-500">현재 {won(b.current_price)}</span>
+                  <span className="mx-1 text-line">/</span>
+                  <span className="tabular-nums text-muted">현재 {won(b.current_price)}</span>
                   <span className={`ml-2 rounded px-1.5 py-0.5 ${bidBadge(b.status, b.is_winning).tone}`}>
                     {bidBadge(b.status, b.is_winning).label}
                   </span>
                   {b.status === 'live' && (
-                    <span className="ml-2 text-zinc-500">
+                    <span className="ml-2 text-muted">
                       마감 <Countdown endsAt={b.ends_at.toISOString()} serverNow={serverNow} />
                     </span>
                   )}
@@ -156,7 +156,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-zinc-700">낙찰</h2>
+        <h2 className="mb-2 text-sm font-medium text-strong">낙찰</h2>
         {wins.length === 0 ? (
           <Empty>
             아직 낙찰받은 것이 없습니다. <Link href="/" className="underline">드롭 목록 보기</Link>
@@ -166,7 +166,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
             {wins.map((w) => (
               <li
                 key={w.auction_id}
-                className="rounded-lg border border-zinc-200 bg-white px-4 py-3"
+                className="rounded-lg bg-white shadow-card px-4 py-3"
               >
                 <div className="flex items-center justify-between">
                   <Link
@@ -177,7 +177,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
                   </Link>
                   <span className="ml-4 shrink-0 text-right text-xs">
                     <span className="tabular-nums">{won(w.amount)}</span>
-                    <span className="ml-2 rounded bg-zinc-100 px-1.5 py-0.5">
+                    <span className="ml-2 rounded bg-fill px-1.5 py-0.5">
                       {ORDER_STATUS[w.order_status] ?? w.order_status}
                     </span>
                   </span>
@@ -196,7 +196,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
                       type="button"
                       disabled
                       title="포트원 결제 연동 후 열립니다"
-                      className="mt-2 rounded bg-zinc-300 px-4 py-2 text-sm text-white"
+                      className="mt-2 rounded bg-faint px-4 py-2 text-sm text-white"
                     >
                       결제하러 가기
                     </button>
@@ -206,7 +206,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
                   </div>
                 )}
                 {w.order_status === 'failed' && (
-                  <p className="mt-3 rounded bg-zinc-100 px-3 py-2 text-xs text-zinc-600">
+                  <p className="mt-3 rounded bg-fill px-3 py-2 text-xs text-strong">
                     기한 안에 결제되지 않아 거래가 종료되었습니다.
                   </p>
                 )}
@@ -217,7 +217,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-zinc-700">판매</h2>
+        <h2 className="mb-2 text-sm font-medium text-strong">판매</h2>
         {sales.length === 0 ? (
           <Empty>
             아직 올린 상품이 없습니다. <Link href="/sell" className="underline">상품 등록하기</Link>
@@ -225,7 +225,7 @@ export default async function MyPage(props: PageProps<'/me'>) {
         ) : (
           <ul className="space-y-2">
             {sales.map((s) => (
-              <li key={s.product_id} className="rounded-lg border border-zinc-200 bg-white px-4 py-3">
+              <li key={s.product_id} className="rounded-lg bg-white shadow-card px-4 py-3">
                 {/*
                   390 에서 뱃지와 금액이 자리를 먼저 가져가 제목이 146px 로 눌렸다.
                   필요한 폭은 287px 이라 "미공개 일러스..." 로 끊겼다 (UI/UX 1회차 발견 5번).
@@ -241,16 +241,16 @@ export default async function MyPage(props: PageProps<'/me'>) {
                     <span className="min-w-0">{s.title}</span>
                   )}
                   <span className="shrink-0 text-xs sm:ml-4">
-                    <span className="rounded bg-zinc-100 px-1.5 py-0.5">
+                    <span className="rounded bg-fill px-1.5 py-0.5">
                       {PRODUCT_STATUS[s.product_status] ?? s.product_status}
                     </span>
                     {s.auction_status && (
-                      <span className="ml-2 rounded bg-zinc-100 px-1.5 py-0.5">
+                      <span className="ml-2 rounded bg-fill px-1.5 py-0.5">
                         {AUCTION_STATUS[s.auction_status] ?? s.auction_status}
                       </span>
                     )}
                     {s.current_price !== null && (
-                      <span className="ml-2 tabular-nums text-zinc-500">{won(s.current_price)}</span>
+                      <span className="ml-2 tabular-nums text-muted">{won(s.current_price)}</span>
                     )}
                   </span>
                 </div>
