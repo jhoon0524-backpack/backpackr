@@ -2,7 +2,7 @@
 
 ## 2026-09-01 — 배포 성공
 
-`https://dropbid-....vercel.app` 에서 화면이 뜬다. 실제 Supabase 를 읽는다.
+`https://dropbid-khan-9759s-projects.vercel.app` 에서 화면이 뜬다. 실제 Supabase 를 읽는다.
 
 **원인은 결국 비밀번호 하나였다.** 거기까지 가는 데 네 번 막혔고, 매번 다른 이유였다.
 

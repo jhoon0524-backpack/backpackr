@@ -2,8 +2,17 @@
 
 import { approveProduct, rejectProduct, resolveStuckAuction } from '@/lib/db'
 import { getCurrentUser } from '@/lib/session'
+import { adminErrorMessage, FALLBACK } from '@/lib/admin-message'
 
 export type ReviewState = { message: string; tone: 'success' | 'error' } | null
+
+/** 문구 고르기는 `lib/admin-message.ts` 에 있다 (테스트 가능하게 분리). 여기서는 로그만 더한다. */
+function toMessage(e: unknown, where: string): string {
+  const message = adminErrorMessage(e)
+  // 모르는 오류는 화면으로 내보내지 않았으니, 사람이 볼 곳은 서버 로그다.
+  if (message === FALLBACK) console.error(`[${where}] 처리 실패:`, e)
+  return message
+}
 
 export async function review(_prev: ReviewState, formData: FormData): Promise<ReviewState> {
   const me = await getCurrentUser()
@@ -23,9 +32,7 @@ export async function review(_prev: ReviewState, formData: FormData): Promise<Re
     await rejectProduct(productId, String(formData.get('reason') ?? ''), me.id)
     return { message: '반려했습니다. 사유가 판매자에게 전달됩니다.', tone: 'success' }
   } catch (e) {
-    // DB 함수가 던진 사유를 그대로 보여준다 (마감된 회차, 사유 없는 반려 등).
-    const detail = e instanceof Error ? e.message.replace(/^.*?:\s*/, '') : '처리하지 못했습니다.'
-    return { message: detail, tone: 'error' }
+    return { message: toMessage(e, 'review'), tone: 'error' }
   }
 }
 
@@ -38,7 +45,6 @@ export async function resolveStuck(_prev: ReviewState, formData: FormData): Prom
     await resolveStuckAuction(String(formData.get('auctionId')))
     return { message: '유찰로 마무리했습니다. 판매자에게 알림이 갑니다.', tone: 'success' }
   } catch (e) {
-    const detail = e instanceof Error ? e.message.replace(/^.*?:\s*/, '') : '처리하지 못했습니다.'
-    return { message: detail, tone: 'error' }
+    return { message: toMessage(e, 'resolveStuck'), tone: 'error' }
   }
 }

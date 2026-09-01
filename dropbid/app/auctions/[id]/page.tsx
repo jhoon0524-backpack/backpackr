@@ -112,6 +112,7 @@ export default async function AuctionDetail(props: PageProps<'/auctions/[id]'>) 
           orderStatus={auction.order_status}
           orderDueAt={auction.order_due_at}
           viewerIsWinner={!!me && me.id === auction.winner_id}
+          serverNow={serverNow}
         />
       )}
     </div>
