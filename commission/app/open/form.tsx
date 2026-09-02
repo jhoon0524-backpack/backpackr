@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import { MoneyInput } from '@/app/money-input'
-import { ALERT, BTN_PRIMARY, HELP, INPUT, LABEL } from '@/app/ui'
+import { ALERT, BTN_INK, H2, HELP, INPUT, LABEL } from '@/app/ui'
 import { openCommission, type OpenState } from './actions'
 
 export function OpenForm({ categories }: { categories: readonly string[] }) {
@@ -13,7 +13,7 @@ export function OpenForm({ categories }: { categories: readonly string[] }) {
     <form action={action} className="space-y-8">
       {/* 텀블벅 프로젝트 만들기처럼 묶음마다 제목을 두고 사이를 구분선으로 나눈다. */}
       <section className="space-y-5">
-        <h2 className="text-lg font-bold">기본 정보</h2>
+        <h2 className={H2}>기본 정보</h2>
         <label className="block">
           <span className={LABEL}>제목</span>
           <input name="title" required maxLength={60} defaultValue={v.title} placeholder="예: 수채 느낌 반신 일러스트" className={INPUT} />
@@ -34,8 +34,8 @@ export function OpenForm({ categories }: { categories: readonly string[] }) {
         </label>
       </section>
 
-      <section className="space-y-5 border-t border-line pt-8">
-        <h2 className="text-lg font-bold">가격과 일정</h2>
+      <section className="space-y-5 pt-4">
+        <h2 className={H2}>가격과 일정</h2>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           <label className="block">
             <span className={LABEL}>기본 가격</span>
@@ -55,8 +55,8 @@ export function OpenForm({ categories }: { categories: readonly string[] }) {
         </div>
       </section>
 
-      <section className="space-y-5 border-t border-line pt-8">
-        <h2 className="text-lg font-bold">샘플</h2>
+      <section className="space-y-5 pt-4">
+        <h2 className={H2}>샘플</h2>
         <label className="block">
           <span className={LABEL}>샘플 이미지 주소 <span className="font-normal text-muted">(선택)</span></span>
           <textarea name="sampleUrls" rows={3} defaultValue={v.sampleUrls} placeholder="한 줄에 하나씩" className={INPUT} />
@@ -65,8 +65,8 @@ export function OpenForm({ categories }: { categories: readonly string[] }) {
       </section>
 
       {state?.message && <p role="alert" className={ALERT}>{state.message}</p>}
-      <button type="submit" disabled={pending} className={BTN_PRIMARY}>
-        {pending ? '여는 중…' : '커미션 열기'}
+      <button type="submit" disabled={pending} className={BTN_INK}>
+        {pending ? '여는 중…' : '작업실 열기'}
       </button>
     </form>
   )

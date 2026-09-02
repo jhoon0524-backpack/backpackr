@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getRequest } from '@/lib/db'
 import { REQUEST_STATUS, daysLeft, kst, kstDate, won } from '@/lib/format'
 import { getCurrentUser } from '@/lib/session'
-import { BACK, LINK, NOTICE } from '@/app/ui'
+import { BACK, EYEBROW, LINK, NOTICE } from '@/app/ui'
 import { CreatorDecision, DeliverForm, OneButton } from './forms'
 
 export const dynamic = 'force-dynamic'
@@ -28,15 +28,15 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
   return (
     <div>
       <div className="mb-6">
-        <Link href="/me" className={BACK}>← 마이페이지</Link>
+        <Link href="/me" className={BACK}>← 내 작업실</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-[26px] font-bold leading-tight tracking-tight">
+          <h1 className="serif text-[30px] font-bold leading-tight tracking-tight sm:text-[36px]">
             <Link href={`/commissions/${r.commission_id}`} className="inline-flex min-h-11 items-center hover:underline">{r.commission_title}</Link>
           </h1>
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${s.tone}`}>{s.text}</span>
         </div>
-        <p className="mt-2 text-[15px] text-muted">
-          창작자 <span className="font-semibold text-strong">{r.creator_nickname}</span> · 의뢰인 <span className="font-semibold text-strong">{r.client_nickname}</span> · {kst(r.created_at)} 의뢰
+        <p className={EYEBROW + ' mt-2'}>
+          창작자 {r.creator_nickname} · 의뢰인 {r.client_nickname} · {kst(r.created_at)} 의뢰
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div>
           <section>
-            <h2 className="text-lg font-bold">의뢰 내용</h2>
+            <h2 className="serif text-xl font-bold">의뢰 내용</h2>
             <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-strong">{r.brief}</p>
             {r.reference_url && (
               <p className="mt-3 text-sm">
@@ -60,14 +60,14 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
 
           {r.decline_reason && (
             <section className="mt-8 border-t border-line pt-6">
-              <h2 className="text-lg font-bold">거절 사유</h2>
+              <h2 className="serif text-xl font-bold">거절 사유</h2>
               <p className="mt-3 text-[15px] leading-relaxed text-strong">{r.decline_reason}</p>
             </section>
           )}
 
           {(r.delivery_url || r.delivery_note) && (
             <section className="mt-8 border-t border-line pt-6">
-              <h2 className="text-lg font-bold">전달된 결과물</h2>
+              <h2 className="serif text-xl font-bold">전달된 결과물</h2>
               {r.delivery_url && (
                 <a href={r.delivery_url} target="_blank" rel="noreferrer" className={LINK + ' mt-2'}>{r.delivery_url}</a>
               )}
@@ -76,7 +76,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
           )}
 
           <section className="mt-8 border-t border-line pt-6">
-            <h2 className="text-lg font-bold">기록</h2>
+            <h2 className="serif text-xl font-bold">기록</h2>
             <ul className="mt-3 space-y-1.5 text-sm text-muted">
               <li>{kst(r.created_at)} 의뢰</li>
               {r.accepted_at && <li>{kst(r.accepted_at)} 수락</li>}
@@ -87,20 +87,20 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="rounded-lg border border-line p-6">
+          <div className="border border-ink p-6">
             <dl className="space-y-4">
               <div>
                 {/* 커미션 상세와 같은 말 "기본 가격". 수락 전 금액이 확정가처럼 읽히지 않게 한 줄 덧붙인다 (UI/UX 1회차 발견 7). */}
-                <dt className="text-sm text-muted">{r.final_price === null ? '기본 가격' : '최종가'}</dt>
-                <dd className="num mt-1 text-[28px] font-bold leading-none">{won(price)}</dd>
+                <dt className={EYEBROW}>{r.final_price === null ? '기본 가격' : '최종가'}</dt>
+                <dd className="serif num mt-1 text-[32px] font-bold leading-none">{won(price)}</dd>
                 {r.final_price === null && r.status === 'requested' && (
                   <dd className="mt-2 text-[13px] text-muted">창작자가 수락하며 최종가를 정합니다.</dd>
                 )}
               </div>
               {r.due_at && (
                 <div>
-                  <dt className="text-sm text-muted">마감일</dt>
-                  <dd className="num mt-1 text-xl font-bold">
+                  <dt className={EYEBROW}>마감일</dt>
+                  <dd className="serif num mt-1 text-xl font-bold">
                     {kstDate(r.due_at)}
                     {active && (
                       <span className={`ml-2 text-sm font-semibold ${daysLeft(r.due_at) < 0 ? 'text-urgent-text' : 'text-muted'}`}>
@@ -112,7 +112,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
               )}
             </dl>
 
-            <div className="mt-6 border-t border-line pt-6">
+            <div className="mt-6 border-t border-ink pt-6">
               {isCreator && r.status === 'requested' && (
                 <CreatorDecision id={r.id} quotedPrice={r.quoted_price} maxSlots={r.max_slots} activeCount={r.active_count}
                   dueAtIfNow={r.due_at_if_now.toISOString()} />

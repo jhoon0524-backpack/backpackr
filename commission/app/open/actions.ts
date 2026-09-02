@@ -39,7 +39,7 @@ export async function openCommission(_prev: OpenState, formData: FormData): Prom
       price, turnaroundDays, maxSlots, sampleUrls,
     })
   } catch {
-    return fail('커미션을 열지 못했습니다. 입력값을 확인해 주세요.')
+    return fail('작업실을 열지 못했습니다. 입력값을 확인해 주세요.')
   }
 
   redirect('/me?opened=1')
