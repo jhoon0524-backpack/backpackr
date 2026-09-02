@@ -3,43 +3,39 @@ import type { CommissionCard as Card } from '@/lib/db'
 import { won } from '@/lib/format'
 import { Photo } from './photo'
 
-/** 남은 자리 배지. 목록과 마이페이지가 같은 모양을 쓴다. */
-export function SlotBadge({ active, max, status }: { active: number; max: number; status: string }) {
-  if (status === 'closed') {
-    return <span className="rounded bg-fill px-1.5 py-0.5 text-[11px] font-medium text-muted">마감</span>
-  }
+/**
+ * 남은 자리. 텀블벅 카드의 "123% 달성" 자리다 — 피치색 굵은 숫자 하나가 눈을 끈다.
+ * 자리가 없거나 닫혔으면 회색으로 물러난다.
+ */
+export function SlotText({ active, max, status }: { active: number; max: number; status: string }) {
+  if (status === 'closed') return <span className="font-semibold text-muted">마감</span>
   const left = max - active
-  if (left <= 0) {
-    return <span className="rounded bg-fill px-1.5 py-0.5 text-[11px] font-medium text-muted">자리 없음</span>
-  }
-  return (
-    <span className="rounded bg-good-wash px-1.5 py-0.5 text-[11px] font-medium text-good">
-      {left}자리 남음
-    </span>
-  )
+  if (left <= 0) return <span className="font-semibold text-muted">자리 없음</span>
+  return <span className="num font-bold text-accent-deep">{left}자리 남음</span>
 }
 
+/**
+ * 텀블벅 프로젝트 카드 — 4:3 썸네일(라운드 8), 그 아래 "분류 · 창작자" 작은 회색 글자,
+ * 제목 두 줄, 마지막 줄에 굵은 숫자. 그림자와 테두리는 없다. 카드가 아니라 사진이 경계다.
+ */
 export function CommissionCard({ c }: { c: Card }) {
   return (
-    <Link
-      href={`/commissions/${c.id}`}
-      className="flex h-full flex-col rounded-lg bg-card p-3 shadow-card transition hover:-translate-y-0.5"
-    >
-      {/* 창작자를 맨 위로. 누구에게 맡기는지가 의뢰할지 말지를 가른다. */}
-      <p className="mb-2 truncate text-xs font-medium text-strong">{c.creator_nickname}</p>
-      <div className="relative aspect-square overflow-hidden rounded-md bg-fill">
+    <Link href={`/commissions/${c.id}`} className="group block">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-fill">
         {c.cover_url ? (
-          <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
+          <Photo src={c.cover_url} alt={c.title}
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
         ) : (
-          <div className="flex h-full items-center justify-center text-[11px] text-muted">샘플 없음</div>
+          <div className="flex h-full items-center justify-center text-xs text-muted">샘플 없음</div>
         )}
-        <div className="absolute left-2 top-2">
-          <SlotBadge active={c.active_count} max={c.max_slots} status={c.status} />
-        </div>
       </div>
-      <p className="mt-2 line-clamp-2 text-sm font-medium text-ink">{c.title}</p>
-      <p className="mt-1 text-xs text-muted">{c.category} · {c.turnaround_days}일</p>
-      <p className="mt-auto pt-2 text-sm font-semibold text-ink">{won(c.price)}<span className="text-xs font-normal text-muted">부터</span></p>
+      <p className="mt-3 truncate text-xs text-muted">{c.category} · {c.creator_nickname}</p>
+      <p className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug text-ink group-hover:underline">{c.title}</p>
+      <p className="mt-2 flex flex-wrap items-baseline gap-x-2 text-sm">
+        <SlotText active={c.active_count} max={c.max_slots} status={c.status} />
+        <span className="num text-strong">{won(c.price)}~</span>
+        <span className="text-muted">{c.turnaround_days}일</span>
+      </p>
     </Link>
   )
 }

@@ -49,8 +49,8 @@ export function daysLeft(due: Date | string, now: Date = new Date()) {
 
 /** 의뢰 상태 문구. 화면마다 다르게 쓰지 않도록 한 곳에 둔다. */
 export const REQUEST_STATUS: Record<string, { text: string; tone: string }> = {
-  requested: { text: '수락 대기', tone: 'bg-good-wash text-good' },
-  accepted: { text: '작업 중', tone: 'bg-urgent-wash text-urgent' },
+  requested: { text: '수락 대기', tone: 'bg-sky-wash text-sky' },
+  accepted: { text: '작업 중', tone: 'bg-urgent-wash text-accent-deep' },
   delivered: { text: '전달됨 · 확인 대기', tone: 'bg-good-wash text-good' },
   completed: { text: '완료', tone: 'bg-emerald-50 text-emerald-700' },
   declined: { text: '거절됨', tone: 'bg-fill text-muted' },

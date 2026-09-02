@@ -7,6 +7,9 @@ import { CreatorDecision, DeliverForm, OneButton } from './forms'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * 의뢰 상세. 커미션 상세와 같은 두 칸 구조 — 왼쪽에 내용, 오른쪽 고정 패널에 금액·마감과 할 일.
+ */
 export default async function RequestPage({ params, searchParams }: PageProps<'/requests/[id]'>) {
   const [{ id }, sp, me] = await Promise.all([params, searchParams, getCurrentUser()])
   const r = await getRequest(id)
@@ -19,87 +22,110 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
 
   const s = REQUEST_STATUS[r.status] ?? { text: r.status, tone: 'bg-fill text-muted' }
   const price = r.final_price ?? r.quoted_price
+  const active = r.status === 'accepted' || r.status === 'delivered'
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link href="/me" className="text-xs text-muted hover:text-ink">← 마이페이지</Link>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-semibold tracking-tight">
+    <div>
+      <div className="mb-6">
+        <Link href="/me" className="text-sm text-muted hover:text-ink">← 마이페이지</Link>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <h1 className="text-[26px] font-bold leading-tight tracking-tight">
             <Link href={`/commissions/${r.commission_id}`} className="hover:underline">{r.commission_title}</Link>
           </h1>
-          <span className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${s.tone}`}>{s.text}</span>
+          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${s.tone}`}>{s.text}</span>
         </div>
-        <p className="mt-1 text-sm text-muted">
-          창작자 {r.creator_nickname} · 의뢰인 {r.client_nickname} · {kst(r.created_at)} 의뢰
+        <p className="mt-2 text-[15px] text-muted">
+          창작자 <span className="font-semibold text-strong">{r.creator_nickname}</span> · 의뢰인 <span className="font-semibold text-strong">{r.client_nickname}</span> · {kst(r.created_at)} 의뢰
         </p>
       </div>
 
       {sp.sent && (
-        <p className="rounded bg-good-wash px-3 py-2 text-sm text-good">
+        <p className="mb-6 rounded-lg bg-sky-wash px-4 py-3 text-sm text-sky">
           의뢰를 보냈습니다. 창작자가 수락하면 여기서 최종가와 마감일을 볼 수 있습니다.
         </p>
       )}
 
-      <section className="rounded-lg bg-white p-5 shadow-card">
-        <p className="text-xs text-muted">의뢰 내용</p>
-        <p className="mt-1 whitespace-pre-line text-sm text-strong">{r.brief}</p>
-        {r.reference_url && (
-          <p className="mt-2 text-xs">
-            참고 링크: <a href={r.reference_url} target="_blank" rel="noreferrer" className="break-all text-good underline">{r.reference_url}</a>
-          </p>
-        )}
-      </section>
-
-      <section className="rounded-lg bg-white p-5 shadow-card">
-        <dl className="grid grid-cols-2 gap-y-2 text-sm">
-          <dt className="text-muted">{r.final_price === null ? '기본가' : '최종가'}</dt>
-          <dd className="font-semibold">{won(price)}</dd>
-          {r.due_at && (
-            <>
-              <dt className="text-muted">마감일</dt>
-              <dd>
-                {kstDate(r.due_at)}
-                {(r.status === 'accepted' || r.status === 'delivered') && (
-                  <span className={`ml-1 text-xs ${daysLeft(r.due_at) < 0 ? 'text-urgent' : 'text-muted'}`}>
-                    {daysLeft(r.due_at) < 0 ? `${-daysLeft(r.due_at)}일 지남` : `${daysLeft(r.due_at)}일 남음`}
-                  </span>
-                )}
-              </dd>
-            </>
-          )}
-          {r.decline_reason && (<><dt className="text-muted">거절 사유</dt><dd>{r.decline_reason}</dd></>)}
-          {r.delivered_at && (<><dt className="text-muted">전달</dt><dd>{kst(r.delivered_at)}</dd></>)}
-          {r.completed_at && (<><dt className="text-muted">완료</dt><dd>{kst(r.completed_at)}</dd></>)}
-        </dl>
-        {(r.delivery_url || r.delivery_note) && (
-          <div className="mt-3 rounded bg-paper p-3 text-sm">
-            <p className="text-xs text-muted">전달된 결과물</p>
-            {r.delivery_url && (
-              <a href={r.delivery_url} target="_blank" rel="noreferrer" className="mt-1 block break-all text-good underline">{r.delivery_url}</a>
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div>
+          <section>
+            <h2 className="text-lg font-bold">의뢰 내용</h2>
+            <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-strong">{r.brief}</p>
+            {r.reference_url && (
+              <p className="mt-3 text-sm">
+                참고 링크 <a href={r.reference_url} target="_blank" rel="noreferrer" className="break-all font-medium text-sky underline">{r.reference_url}</a>
+              </p>
             )}
-            {r.delivery_note && <p className="mt-1 whitespace-pre-line text-strong">{r.delivery_note}</p>}
-          </div>
-        )}
-      </section>
+          </section>
 
-      <section className="rounded-lg bg-white p-5 shadow-card">
-        <h2 className="mb-3 text-base font-semibold">{isCreator ? '창작자 할 일' : '의뢰인 할 일'}</h2>
-        {isCreator && r.status === 'requested' && <CreatorDecision id={r.id} quotedPrice={r.quoted_price} />}
-        {isCreator && r.status === 'accepted' && <DeliverForm id={r.id} />}
-        {isCreator && r.status === 'delivered' && <p className="text-sm text-muted">의뢰인이 확인하면 완료됩니다.</p>}
-        {isClient && r.status === 'requested' && (
-          <OneButton id={r.id} kind="cancel" label="의뢰 취소" help="창작자가 수락하기 전까지만 취소할 수 있습니다." />
-        )}
-        {isClient && r.status === 'accepted' && <p className="text-sm text-muted">창작자가 작업 중입니다. 전달되면 여기서 확인합니다.</p>}
-        {isClient && r.status === 'delivered' && (
-          <OneButton id={r.id} kind="complete" label="결과물 확인 · 완료" tone="primary"
-            help="확인을 누르면 의뢰가 끝나고 창작자의 자리가 하나 빕니다. 이 뒤로는 되돌릴 수 없습니다." />
-        )}
-        {['completed', 'declined', 'cancelled'].includes(r.status) && (
-          <p className="text-sm text-muted">끝난 의뢰입니다.</p>
-        )}
-      </section>
+          {r.decline_reason && (
+            <section className="mt-8 border-t border-line pt-6">
+              <h2 className="text-lg font-bold">거절 사유</h2>
+              <p className="mt-3 text-[15px] leading-relaxed text-strong">{r.decline_reason}</p>
+            </section>
+          )}
+
+          {(r.delivery_url || r.delivery_note) && (
+            <section className="mt-8 border-t border-line pt-6">
+              <h2 className="text-lg font-bold">전달된 결과물</h2>
+              {r.delivery_url && (
+                <a href={r.delivery_url} target="_blank" rel="noreferrer" className="mt-3 block break-all font-medium text-sky underline">{r.delivery_url}</a>
+              )}
+              {r.delivery_note && <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-strong">{r.delivery_note}</p>}
+            </section>
+          )}
+
+          <section className="mt-8 border-t border-line pt-6">
+            <h2 className="text-lg font-bold">기록</h2>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted">
+              <li>{kst(r.created_at)} 의뢰</li>
+              {r.accepted_at && <li>{kst(r.accepted_at)} 수락</li>}
+              {r.delivered_at && <li>{kst(r.delivered_at)} 전달</li>}
+              {r.completed_at && <li>{kst(r.completed_at)} 완료</li>}
+            </ul>
+          </section>
+        </div>
+
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-lg border border-line p-6">
+            <dl className="space-y-4">
+              <div>
+                <dt className="text-sm text-muted">{r.final_price === null ? '기본가' : '최종가'}</dt>
+                <dd className="num mt-1 text-[28px] font-bold leading-none">{won(price)}</dd>
+              </div>
+              {r.due_at && (
+                <div>
+                  <dt className="text-sm text-muted">마감일</dt>
+                  <dd className="num mt-1 text-xl font-bold">
+                    {kstDate(r.due_at)}
+                    {active && (
+                      <span className={`ml-2 text-sm font-semibold ${daysLeft(r.due_at) < 0 ? 'text-urgent' : 'text-muted'}`}>
+                        {daysLeft(r.due_at) < 0 ? `${-daysLeft(r.due_at)}일 지남` : `${daysLeft(r.due_at)}일 남음`}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              )}
+            </dl>
+
+            <div className="mt-6 border-t border-line pt-6">
+              {isCreator && r.status === 'requested' && <CreatorDecision id={r.id} quotedPrice={r.quoted_price} />}
+              {isCreator && r.status === 'accepted' && <DeliverForm id={r.id} />}
+              {isCreator && r.status === 'delivered' && <p className="text-sm text-muted">의뢰인이 확인하면 완료됩니다.</p>}
+              {isClient && r.status === 'requested' && (
+                <OneButton id={r.id} kind="cancel" label="의뢰 취소" help="창작자가 수락하기 전까지만 취소할 수 있습니다." />
+              )}
+              {isClient && r.status === 'accepted' && <p className="text-sm text-muted">창작자가 작업 중입니다. 전달되면 여기서 확인합니다.</p>}
+              {isClient && r.status === 'delivered' && (
+                <OneButton id={r.id} kind="complete" label="결과물 확인 · 완료" tone="primary"
+                  help="확인을 누르면 의뢰가 끝나고 창작자의 자리가 하나 빕니다. 되돌릴 수 없습니다." />
+              )}
+              {['completed', 'declined', 'cancelled'].includes(r.status) && (
+                <p className="text-sm text-muted">끝난 의뢰입니다.</p>
+              )}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }

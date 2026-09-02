@@ -35,7 +35,13 @@
  *   faint  #9E9E9E → 2.65. 그들 체계에서도 "Disabled" 다. 읽어야 하는 글자에 쓰지 않는다
  */
 @theme {
+  /* 텀블벅은 흰 바탕에 구분선으로 나눈다. dropbid 의 회색 바탕(gray/100)은 --color-paper 로 남겨 두고 채움색으로만 쓴다. */
   --color-paper: #f8f8f8;
+  /* Background/Accent — 텀블벅의 "후원하기" 버튼색. 흰 글자는 굵은 16px 이상에서만 얹는다 (대비 3.4). */
+  --color-accent: #f86453;
+  --color-accent-deep: #eb4b38;
+  --color-sky: #1593f3;
+  --color-sky-wash: #f3faff;
   --color-card: #ffffff;
   --color-ink: #0d0d0d;
   --color-strong: #3d3d3d;
@@ -64,4 +70,9 @@
 
 body {
   font-family: var(--font-sans);
+  /* 텀블벅 본문 글자 간격. Pretendard 는 살짝 조여야 그들 화면과 같아 보인다. */
+  letter-spacing: -0.01em;
 }
+
+/* 텀블벅 본문 숫자(모인 금액·달성률)는 표 숫자다. 금액이 바뀌어도 자리가 안 흔들린다. */
+.num { font-variant-numeric: tabular-nums; }

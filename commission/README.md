@@ -47,6 +47,11 @@ npm run db:reset && npm run db:seed
 `supabase/local/bootstrap.sql` 은 로컬 전용이다 — Supabase 가 만들어 주는 `auth.users` 와 역할을 흉내낸다.
 **프로덕션에는 `supabase/migrations/` 만 적용한다.** 절차는 `dropbid/README.md` "마이그레이션을 프로덕션에 적용하기" 와 같고, AI 는 파일을 쓰기만 하고 실행하지 않는다 (`CLAUDE.md` 4장).
 
+## 디자인
+
+텀블벅을 따랐다. 색·글꼴은 텀블벅 Figma 라이브러리 값(`app/globals.css`), 버튼·입력칸·칩 모양은 `app/ui.ts` 한 곳에 있다.
+화면 구조도 텀블벅과 같다 — 흰 바탕 GNB, 4:3 썸네일 카드, 상세의 오른쪽 고정 패널과 피치색 CTA.
+
 ## 화면
 
 | 주소 | 무엇 |
