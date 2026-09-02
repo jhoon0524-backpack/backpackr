@@ -11,10 +11,8 @@ import { RequestForm } from './request-form'
 export const dynamic = 'force-dynamic'
 
 /**
- * 작품 상세. 위에 꼬리표 → 큰 명조 제목. 사진은 4:5 세로.
- * 그 아래 세 칸(기본 가격·작업 기간·동시 진행)을 괘선으로 나눈 표, 작업 안내, 진행 방식.
- * 넓은 화면은 오른쪽에 고정 패널(의뢰 폼). 좁은 화면은 화면 아래에 금액과 [의뢰하기] 막대가 붙어 있고
- * 누르면 폼으로 내려간다 — 텀블벅 모바일의 "후원하기" 자리다.
+ * 전단 한 장을 크게 펼친 상세. 정사각 사진에 스티커, 검은고딕 제목, 검정 테두리 3칸 표(기본 가격·작업 기간·동시 진행),
+ * 검정 막대 제목의 안내와 진행 순서. 넓은 화면은 오른쪽 고정 패널(의뢰 폼), 좁은 화면은 아래 고정 막대가 폼으로 내려보낸다.
  */
 export default async function CommissionPage({ params }: PageProps<'/commissions/[id]'>) {
   const { id } = await params
@@ -26,98 +24,99 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
   const canRequest = !!me && !isMine && c.status === 'open' && left > 0
 
   return (
-    <div className="pb-24 lg:pb-0">
-      <div className="mb-6 flex flex-col gap-2">
-        <Link href="/" className={BACK}>← 둘러보기</Link>
-        <p className={EYEBROW}>{c.category} · {c.creator_nickname}의 작업실</p>
-        <h1 className="serif text-[34px] font-bold leading-[1.15] tracking-tight sm:text-[44px]">{c.title}</h1>
-        {c.creator_bio && <p className="text-[15px] leading-relaxed text-strong">{c.creator_bio}</p>}
-      </div>
+    <div className="pb-28 lg:pb-0">
+      <Link href="/" className={BACK}>← 메뉴판</Link>
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="mt-2 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div>
-          <div className="relative -mx-5 sm:mx-0">
+          <div className="relative border-[3px] border-ink bg-fill shadow-hard">
             {c.sample_urls.length > 0 ? (
-              <div className="aspect-[4/5] overflow-hidden bg-fill sm:rounded-sm">
+              <div className="aspect-square overflow-hidden">
                 <Photo src={c.sample_urls[0]} alt="샘플 1" className="h-full w-full object-cover" />
               </div>
             ) : (
-              <div className="serif flex aspect-[4/5] items-center justify-center bg-fill text-5xl font-bold text-faint sm:rounded-sm">Aa</div>
+              <div className="disp flex aspect-square items-center justify-center bg-sky-wash text-8xl text-ink">가</div>
             )}
-            <div className="absolute right-4 top-4">
+            <div className="absolute -bottom-4 left-4">
               <SlotText active={c.active_count} max={c.max_slots} status={c.status} size="md" />
             </div>
           </div>
           {c.sample_urls.length > 1 && (
-            <ul className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
+            <ul className="mt-8 grid grid-cols-4 gap-3 sm:grid-cols-6">
               {c.sample_urls.slice(1).map((u, i) => (
-                <li key={i} className="aspect-square overflow-hidden rounded-sm bg-fill">
+                <li key={i} className="aspect-square overflow-hidden border-2 border-ink bg-fill">
                   <Photo src={u} alt={`샘플 ${i + 2}`} className="h-full w-full object-cover" />
                 </li>
               ))}
             </ul>
           )}
 
-          <dl className="num mt-6 grid grid-cols-3 border-b border-ink">
-            <div className="flex flex-col gap-1 border-r border-line py-4 pr-3">
+          <div className="mt-9 flex flex-col gap-2">
+            <p className={EYEBROW}>{c.category} · {c.creator_nickname}</p>
+            <h1 className="disp text-[38px] leading-[1.05] text-ink sm:text-[52px]">{c.title}</h1>
+            {c.creator_bio && <p className="text-[15px] font-medium leading-relaxed text-strong">{c.creator_bio}</p>}
+          </div>
+
+          <dl className="num mt-6 grid grid-cols-3 border-[3px] border-ink bg-white shadow-hard">
+            <div className="flex flex-col gap-1 border-r-[3px] border-ink p-3">
               <dt className={EYEBROW}>기본 가격</dt>
-              <dd className="serif whitespace-nowrap text-xl font-bold sm:text-2xl">{won(c.price)}<span className="text-xs font-normal text-muted">부터</span></dd>
+              <dd className="disp whitespace-nowrap text-[20px] sm:text-[24px]">{won(c.price)}<span className="text-xs">~</span></dd>
             </div>
-            <div className="flex flex-col gap-1 border-r border-line px-3 py-4">
+            <div className="flex flex-col gap-1 border-r-[3px] border-ink bg-yellow p-3">
               <dt className={EYEBROW}>작업 기간</dt>
-              <dd className="serif text-xl font-bold sm:text-2xl">{c.turnaround_days}<span className="text-xs font-normal text-muted">일</span></dd>
+              <dd className="disp text-[20px] sm:text-[24px]">{c.turnaround_days}<span className="text-xs">일</span></dd>
             </div>
-            <div className="flex flex-col gap-1 py-4 pl-3">
+            <div className="flex flex-col gap-1 p-3">
               <dt className={EYEBROW}>동시 진행</dt>
-              <dd className="serif text-xl font-bold sm:text-2xl">{c.active_count}<span className="text-xs font-normal text-muted">/{c.max_slots}</span></dd>
+              <dd className="disp text-[20px] sm:text-[24px]">{c.active_count}<span className="text-xs">/{c.max_slots}</span></dd>
             </div>
           </dl>
 
-          <section className="border-b border-line py-6">
-            <h2 className="serif text-xl font-bold">작업 안내</h2>
-            <p className="mt-3 whitespace-pre-line text-[15px] leading-[1.75] text-strong">{c.description}</p>
+          <section className="mt-9 flex flex-col gap-3">
+            <h2 className={H2}>작업 안내</h2>
+            <p className="whitespace-pre-line text-[15px] font-medium leading-[1.75] text-ink">{c.description}</p>
           </section>
 
-          <section className="py-6">
-            <h2 className="serif text-xl font-bold">진행 방식</h2>
-            <ol className="mt-4 space-y-4 text-[15px] leading-relaxed text-strong">
+          <section className="mt-8 flex flex-col gap-3">
+            <h2 className={H2}>이렇게 진행돼요</h2>
+            <ol className="flex flex-col gap-3 text-[15px] font-medium leading-relaxed text-ink">
               {[
-                '의뢰 내용을 보내면 창작자가 확인합니다. 보내는 것은 무료입니다.',
-                `창작자가 최종가를 정해 수락하면 그날부터 ${c.turnaround_days}일 안에 작업합니다.`,
-                '결과물을 전달받고 확인하면 완료됩니다.',
+                '의뢰 내용을 보내면 창작자가 확인해요. 보내는 건 무료.',
+                `창작자가 최종가를 정해 수락하면 그날부터 ${c.turnaround_days}일 안에 작업해요.`,
+                '결과물을 받고 확인하면 끝.',
               ].map((t, i) => (
-                <li key={i} className="flex gap-4">
-                  <span className="serif num w-7 shrink-0 text-[28px] font-bold leading-none text-urgent-text">{i + 1}</span>
-                  <span>{t}</span>
+                <li key={i} className="flex items-start gap-3">
+                  <span className="disp num flex h-9 w-9 shrink-0 items-center justify-center border-[3px] border-ink bg-white text-lg shadow-hard-sm">{i + 1}</span>
+                  <span className="pt-1.5">{t}</span>
                 </li>
               ))}
             </ol>
           </section>
         </div>
 
-        <aside id="request" className="scroll-mt-32 lg:sticky lg:top-24 lg:self-start">
-          <div className="border border-ink p-6">
+        <aside id="request" className="scroll-mt-40 lg:sticky lg:top-32 lg:self-start">
+          <div className="border-[3px] border-ink bg-white p-5 shadow-hard">
             <h2 className={H2}>의뢰하기</h2>
             <div className="pt-5">
               {!me ? (
-                <p className="text-sm leading-relaxed text-strong">의뢰하려면 먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
+                <p className="text-sm font-medium leading-relaxed text-strong">의뢰하려면 먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
               ) : isMine ? (
                 <>
-                  <p className="text-sm leading-relaxed text-strong">내가 연 작업실입니다. 들어온 의뢰는 내 페이지에서 봅니다.</p>
-                  <Link href="/me" className={BTN_SECONDARY + ' mt-4'}>내 페이지로</Link>
+                  <p className="text-sm font-medium leading-relaxed text-strong">내가 붙인 메뉴예요. 들어온 의뢰는 내 것에서 봅니다.</p>
+                  <Link href="/me" className={BTN_SECONDARY + ' mt-4'}>내 것으로</Link>
                 </>
               ) : c.status !== 'open' ? (
                 <>
-                  <p className="text-sm leading-relaxed text-strong">창작자가 이 작업실을 닫아 두었습니다. 다시 열리면 여기서 의뢰할 수 있습니다.</p>
-                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>작업실 둘러보기</Link>
+                  <p className="text-sm font-medium leading-relaxed text-strong">창작자가 이 메뉴를 내려 두었어요. 다시 붙으면 여기서 의뢰할 수 있어요.</p>
+                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>메뉴판으로</Link>
                 </>
               ) : left <= 0 ? (
                 <>
-                  <p className="text-sm leading-relaxed text-strong">
-                    진행 가능한 자리가 모두 찼습니다. 작업이 하나 끝나면 다시 열립니다.
-                    {c.next_free_at && <> 가장 이른 마감은 <span className="num font-semibold">{kstDate(c.next_free_at)}</span>입니다.</>}
+                  <p className="text-sm font-medium leading-relaxed text-strong">
+                    자리가 다 찼어요. 작업이 하나 끝나면 다시 열려요.
+                    {c.next_free_at && <> 가장 이른 마감은 <span className="num font-bold">{kstDate(c.next_free_at)}</span>이에요.</>}
                   </p>
-                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>작업실 둘러보기</Link>
+                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>메뉴판으로</Link>
                 </>
               ) : (
                 <RequestForm commissionId={c.id} />
@@ -127,15 +126,14 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
         </aside>
       </div>
 
-      {/* 좁은 화면 아래 고정 막대. 넓은 화면은 오른쪽 패널이 그 역할을 한다. */}
       {canRequest && (
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-ink bg-paper/95 backdrop-blur lg:hidden">
-          <div className="mx-auto flex max-w-[1100px] items-center gap-4 px-5 py-3">
+        <div className="fixed inset-x-0 bottom-0 z-10 border-t-[3px] border-ink bg-white lg:hidden">
+          <div className="mx-auto flex max-w-[1100px] items-center gap-4 px-4 py-3">
             <div className="num flex min-w-0 flex-col">
-              <span className="serif text-lg font-bold leading-tight">{won(c.price)}~</span>
-              <span className="text-xs text-muted">보내는 것은 무료</span>
+              <span className="disp text-[22px] leading-none">{won(c.price)}~</span>
+              <span className="text-xs font-bold text-muted">보내는 건 무료</span>
             </div>
-            <a href="#request" className={BTN_PRIMARY + ' ml-auto !w-auto px-8'}>의뢰하기</a>
+            <a href="#request" className={BTN_PRIMARY + ' ml-auto !w-auto px-7'}>의뢰하기</a>
           </div>
         </div>
       )}

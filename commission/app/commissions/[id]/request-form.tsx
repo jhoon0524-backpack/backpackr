@@ -26,9 +26,9 @@ export function RequestForm({ commissionId }: { commissionId: string }) {
       </label>
       {state?.message && <p role="alert" className={ALERT}>{state.message}</p>}
       <button type="submit" disabled={pending} className={BTN_PRIMARY}>
-        {pending ? '보내는 중…' : '이 작업실에 의뢰하기'}
+        {pending ? '보내는 중…' : '의뢰 보내기'}
       </button>
-      <p className="text-center text-[13px] text-muted">보내는 것은 무료입니다. 수락 전까지 취소할 수 있습니다.</p>
+      <p className="text-center text-[13px] font-medium text-muted">보내는 건 무료. 수락 전까지 취소할 수 있어요.</p>
     </form>
   )
 }

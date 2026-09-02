@@ -60,13 +60,13 @@ export function OpenForm({ categories }: { categories: readonly string[] }) {
         <label className="block">
           <span className={LABEL}>샘플 이미지 주소 <span className="font-normal text-muted">(선택)</span></span>
           <textarea name="sampleUrls" rows={3} defaultValue={v.sampleUrls} placeholder="한 줄에 하나씩" className={INPUT} />
-          <span className={HELP}>첫 줄이 대표 이미지가 됩니다. 아직 업로드가 없어 주소를 적습니다.</span>
+          <span className={HELP}>첫 줄이 대표 이미지가 돼요. 아직 업로드가 없어 주소를 적어요.</span>
         </label>
       </section>
 
       {state?.message && <p role="alert" className={ALERT}>{state.message}</p>}
       <button type="submit" disabled={pending} className={BTN_INK}>
-        {pending ? '여는 중…' : '작업실 열기'}
+        {pending ? '붙이는 중…' : '메뉴 붙이기'}
       </button>
     </form>
   )

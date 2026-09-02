@@ -36,34 +36,37 @@
  */
 @theme {
   /*
-   * "작업실" 방향 (design 캔버스 A안). 텀블벅의 피치색은 유일한 강조색으로 남기고 나머지는 갈아탔다.
-   * 바탕은 따뜻한 종이색, 글자는 먹색, 구분은 가는 괘선. 대비는 전부 재서 4.5 이상만 작은 글자에 쓴다 —
-   *   ink     #171412 / paper → 16.0
-   *   strong  #4a433c / paper → 8.5
-   *   muted   #6f675f / paper → 4.85 (작은 글자 하한)
-   *   urgent-text #c0361f / paper → 4.84, 흰 글자 얹으면 5.5 (버튼)
-   *   good    #0152cc / paper → 5.96
+   * "게시판" 방향 (design 캔버스 B안). 흰 바탕, 검정 3px 테두리, 딱딱한 그림자, 형광 노랑, 스티커.
+   * 대비를 잰 값 —
+   *   ink #111111 / white → 18.9, / yellow #f6ef4f → 16.3
+   *   strong #333333 / white → 12.6 · muted #555555 / white → 7.5 (작은 글자에도 안전)
+   *   accent #eb4b38 위 흰 글자 → 3.75. 그래서 굵은 디스플레이 글자(18px 이상)에만 얹는다
+   *   urgent-text #c0361f / white → 5.5 (작은 붉은 글자)
    */
-  --color-paper: #f4efe7;
+  --color-paper: #ffffff;
   --color-card: #ffffff;
-  --color-ink: #171412;
-  --color-strong: #4a433c;
-  --color-muted: #6f675f;
-  --color-faint: #a59c90;
-  --color-line: #d9d0c4;
-  --color-fill: #ebe4d9;
-  --color-ash: #171412;
-  --color-accent: #c0361f;
-  --color-accent-deep: #a82c1a;
-  --color-urgent: #c0361f;
+  --color-ink: #111111;
+  --color-strong: #333333;
+  --color-muted: #555555;
+  --color-faint: #8a8a8a;
+  --color-line: #111111;
+  --color-fill: #f2f2f2;
+  --color-ash: #111111;
+  --color-yellow: #f6ef4f;
+  --color-accent: #eb4b38;
+  --color-accent-deep: #d43a27;
+  --color-urgent: #eb4b38;
   --color-urgent-text: #c0361f;
-  --color-urgent-wash: #fbe9e4;
+  --color-urgent-wash: #fde5e0;
   --color-urgent-line: #f0c9bf;
   --color-good: #0152cc;
-  --color-good-wash: #eef0fb;
+  --color-good-wash: #e8f1ff;
   --color-sky: #0152cc;
-  --color-sky-wash: #eef0fb;
+  --color-sky-wash: #e8f1ff;
   --shadow-card: 0 0.8px 0 rgba(0, 0, 0, 0.031), 0 4px 12px rgba(0, 0, 0, 0.039);
+  /* 딱딱한 그림자. 흐림 없이 검정을 오른쪽 아래로 민다. */
+  --shadow-hard: 6px 6px 0 #111111;
+  --shadow-hard-sm: 3px 3px 0 #111111;
 }
 
 @theme inline {
@@ -74,8 +77,8 @@
    */
   --font-sans: "Pretendard", "Pretendard Variable", "Apple SD Gothic Neo",
     "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
-  /* 제목용 명조. Google Fonts 의 고운바탕을 레이아웃에서 불러온다. 없으면 기기 명조로 떨어진다. */
-  --font-serif: "Gowun Batang", "Noto Serif KR", "Apple Myungjo", "Nanum Myeongjo", serif;
+  /* 제목용 디스플레이. Google Fonts 의 검은고딕(Black Han Sans)을 레이아웃에서 불러온다. 없으면 굵은 고딕으로 떨어진다. */
+  --font-display: "Black Han Sans", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
 
 body {
@@ -90,18 +93,24 @@ body {
 /* 금액·날짜는 표 숫자다. 값이 바뀌어도 자리가 안 흔들린다. */
 .num { font-variant-numeric: tabular-nums; }
 
-/* 제목은 명조. 잡지의 작품 목록처럼 읽히게 하는 한 가지 장치다. */
-.serif { font-family: var(--font-serif); }
+/* 제목은 검은고딕. 전단지 헤드라인처럼 굵고 크게. 검은고딕은 한 굵기뿐이라 font-weight 는 400 으로 고정한다. */
+.disp { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
+.serif { font-family: var(--font-display); font-weight: 400; letter-spacing: -0.01em; }
 
-/* 도장 — "N자리 남음" 을 기울여 찍는다. 목록·상세·마이페이지가 같은 도장을 쓴다. */
+ /* 전광판. 글줄 두 벌을 이어 붙이고 왼쪽으로 흘린다. 움직임을 줄인 설정에서는 멈춘 채 첫 벌만 보인다. */
+.ticker { display: flex; width: max-content; animation: ticker 40s linear infinite; }
+.ticker > span { padding-right: 3rem; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker { animation: none; } }
+
+/* 스티커 — "N자리 남음" 을 기울여 붙인다. 검정 테두리, 딱딱한 그림자. 목록·상세·내 페이지가 같은 스티커를 쓴다. */
 .stamp {
   display: inline-block;
-  transform: rotate(-6deg);
-  border: 1.5px solid currentColor;
-  border-radius: 999px;
-  padding: 0.3em 0.75em;
-  font-family: var(--font-serif);
-  font-weight: 700;
+  transform: rotate(6deg);
+  border: 3px solid #111111;
+  padding: 0.35em 0.7em;
+  font-family: var(--font-display);
+  font-weight: 400;
   line-height: 1;
-  background: rgba(244, 239, 231, 0.88);
+  box-shadow: 3px 3px 0 #111111;
 }

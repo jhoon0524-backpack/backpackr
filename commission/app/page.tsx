@@ -1,52 +1,39 @@
 import Link from 'next/link'
 import { listOpenCommissions } from '@/lib/db'
 import { CommissionCard } from './commission-card'
-import { BTN_INK, EYEBROW } from './ui'
+import { BTN_INK } from './ui'
 
 export const dynamic = 'force-dynamic'
 
-const MONTH = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long' })
-
 export default async function CommissionList() {
   const commissions = await listOpenCommissions()
-  const [first, ...rest] = commissions
 
   return (
     <div>
-      {/* 잡지 머리: 작은 꼬리표, 큰 명조 제목, 한 줄 설명. 열린 수는 제목 안에 피치색 숫자로. */}
-      <div className="flex flex-col gap-3 pb-7">
-        <p className={EYEBROW}>창작자 맞춤 작업 · {MONTH.format(new Date())}</p>
-        <h1 className="serif text-[40px] font-bold leading-[1.12] tracking-tight sm:text-[52px]">
-          지금 열려 있는<br />작업실 <span className="num text-urgent-text">{commissions.length}</span>
-        </h1>
-        <p className="max-w-md text-[15px] leading-relaxed text-strong">창작자가 이번 달에 받는 작업입니다. 자리가 남은 곳에 의뢰할 수 있습니다.</p>
+      <div className="flex flex-col gap-2 pb-6">
+        <h1 className="disp text-[44px] leading-[1.02] text-ink sm:text-[64px]">이번 달<br />받는 작업</h1>
+        <p className="text-[15px] font-medium leading-relaxed text-strong">창작자가 붙여 둔 메뉴판. 자리 있는 것부터 골라 보세요.</p>
       </div>
 
       {commissions.length === 0 ? (
-        <div className="border-t border-ink py-16 text-center">
-          <p className="serif text-xl font-bold">아직 열린 작업실이 없습니다.</p>
-          <p className="mt-2 text-sm text-muted">창작자라면 첫 작업실을 열어 보세요.</p>
-          <Link href="/open" className={BTN_INK + ' mt-6 !w-auto'}>작업실 열기</Link>
+        <div className="border-[3px] border-ink bg-white p-8 text-center shadow-hard">
+          <p className="disp text-2xl">아직 붙은 메뉴가 없어요.</p>
+          <p className="mt-2 text-sm font-medium text-muted">창작자라면 첫 메뉴를 붙여 보세요.</p>
+          <Link href="/open" className={BTN_INK + ' mt-6 !w-auto'}>메뉴 붙이기</Link>
         </div>
       ) : (
-        <div className="border-t border-ink">
-          {/* 첫 칸은 크게 한 줄을 다 쓴다. 나머지는 좁은 화면 2열, 넓은 화면 4열. */}
-          <div className="border-b border-line py-5 lg:hidden">
-            <CommissionCard c={first} featured />
-          </div>
-          <ul className="grid grid-cols-2 gap-x-5 gap-y-9 py-6 sm:grid-cols-3 lg:grid-cols-4">
-            <li className="hidden lg:block"><CommissionCard c={first} /></li>
-            {rest.map((c) => (
-              <li key={c.id}><CommissionCard c={c} /></li>
-            ))}
-          </ul>
-        </div>
+        /* 스티커가 카드 밖으로 삐져나오므로 위쪽과 오른쪽에 숨 쉴 자리를 둔다. */
+        <ul className="grid grid-cols-1 gap-x-6 gap-y-8 pr-2 pt-3 sm:grid-cols-2 lg:grid-cols-3">
+          {commissions.map((c) => (
+            <li key={c.id}><CommissionCard c={c} /></li>
+          ))}
+        </ul>
       )}
 
-      <div className="mt-6 flex flex-col gap-2 border border-ink p-6">
-        <p className="serif text-xl font-bold">창작자이신가요</p>
-        <p className="text-sm leading-relaxed text-strong">받고 싶은 작업 하나를 메뉴로 열어 두면, 의뢰가 이 작업실로 들어옵니다.</p>
-        <Link href="/open" className={BTN_INK + ' mt-3 sm:!w-auto'}>작업실 열기</Link>
+      <div className="mt-12 flex flex-col gap-2 border-[3px] border-ink bg-yellow p-6 shadow-hard">
+        <p className="disp text-[28px] leading-none">그리는 분이세요?</p>
+        <p className="text-sm font-medium leading-relaxed text-strong">받고 싶은 작업 하나를 메뉴로 붙여 두면, 의뢰가 들어와요.</p>
+        <Link href="/open" className={BTN_INK + ' mt-3 sm:!w-auto'}>메뉴 붙이기</Link>
       </div>
     </div>
   )

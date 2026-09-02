@@ -20,8 +20,8 @@ function Confirm({ message, submitLabel, pending, onCancel }: {
   message: React.ReactNode; submitLabel: string; pending: boolean; onCancel: () => void
 }) {
   return (
-    <div role="alertdialog" className="space-y-3 border-2 border-ink bg-white p-4">
-      <p className="text-sm leading-relaxed text-ink">{message}</p>
+    <div role="alertdialog" className="space-y-3 border-[3px] border-ink bg-yellow p-4 shadow-hard-sm">
+      <p className="text-sm font-bold leading-relaxed text-ink">{message}</p>
       <button type="submit" disabled={pending} className={BTN_PRIMARY}>{pending ? '처리 중…' : submitLabel}</button>
       <button type="button" disabled={pending} onClick={onCancel} className={BTN_SECONDARY}>아니오, 돌아가기</button>
     </div>
@@ -40,17 +40,17 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
 
   return (
     <div className="space-y-4">
-      <form action={action} className="space-y-4 border border-line p-5">
+      <form action={action} className="space-y-4 border-[3px] border-ink p-4">
         <input type="hidden" name="id" value={id} />
         <input type="hidden" name="kind" value="accept" />
-        <p className="serif text-lg font-bold">수락하기</p>
+        <p className="disp text-[22px]">수락하기</p>
         <label className="block">
           <span className={LABEL}>최종가</span>
           <MoneyInput name="finalPrice" defaultValue={quotedPrice} className={INPUT + ' pr-9'} />
           <span className={HELP}>기본 가격에서 조정할 수 있습니다.</span>
         </label>
         {/* 결정에 필요한 숫자를 실제 값으로. "작업 기간만큼" 이라고만 적혀 있어 며칠인지 알 수 없었다 (UI/UX 1회차 발견 1). */}
-        <dl className="num grid grid-cols-2 gap-y-1 border border-line bg-white px-4 py-3 text-sm">
+        <dl className="num grid grid-cols-2 gap-y-1 border-2 border-ink bg-white px-4 py-3 text-sm font-medium">
           <dt className="text-muted">마감일</dt>
           <dd className="font-semibold">{kstDate(dueAt)} <span className="font-normal text-muted">({daysLeft(dueAt)}일 뒤)</span></dd>
           <dt className="text-muted">남은 자리</dt>
@@ -63,10 +63,10 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
           <button type="button" onClick={() => setArming(true)} className={BTN_PRIMARY}>이 가격으로 수락</button>
         )}
       </form>
-      <form action={action} className="space-y-4 border border-line p-5">
+      <form action={action} className="space-y-4 border-[3px] border-ink p-4">
         <input type="hidden" name="id" value={id} />
         <input type="hidden" name="kind" value="decline" />
-        <p className="serif text-lg font-bold">거절하기</p>
+        <p className="disp text-[22px]">거절하기</p>
         <textarea name="reason" rows={2} required placeholder="사유는 의뢰인에게 그대로 전달됩니다." className={INPUT} />
         <button type="submit" disabled={pending} className={BTN_SECONDARY}>{pending ? '처리 중…' : '거절'}</button>
       </form>
@@ -79,10 +79,10 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
 export function DeliverForm({ id }: { id: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
   return (
-    <form action={action} className="space-y-4 border border-line p-5">
+    <form action={action} className="space-y-4 border-[3px] border-ink p-4">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="kind" value="deliver" />
-      <p className="serif text-lg font-bold">완성물 전달</p>
+      <p className="disp text-[22px]">완성물 전달</p>
       <label className="block">
         <span className={LABEL}>결과물 주소</span>
         <input name="deliveryUrl" type="url" placeholder="https:// (드라이브·클라우드 공유 링크)" className={INPUT} />
@@ -116,7 +116,7 @@ export function OneButton({ id, kind, label, help, tone = 'secondary', confirm }
       ) : (
         <button type="submit" disabled={pending} className={cls}>{pending ? '처리 중…' : label}</button>
       )}
-      <p className="text-center text-[13px] text-muted">{help}</p>
+      <p className="text-center text-[13px] font-medium text-muted">{help}</p>
       <Alert state={state} />
     </form>
   )
