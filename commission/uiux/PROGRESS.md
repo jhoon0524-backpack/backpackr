@@ -1,4 +1,219 @@
-**판정: 통과** (3회차 — 높음 0, 중간 0, 낮음 5)
+**판정: 통과** (4회차 — 높음 0, 중간 0, 낮음 4)
+
+## 4회차 (2026-09-02)
+
+- **대상:** http://localhost:3100 프로덕션 빌드, 새로 심은 시연 데이터. 3회차 통과 뒤 디자인을 "게시판" 방향(흰 바탕·검정 3px 테두리·딱딱한 그림자·형광 노랑·검은고딕 제목·기울인 스티커·머리 아래 검정 전광판 띠·좁은 화면 아래 고정 [의뢰하기] 막대)으로 통째로 갈아입히고 낱말을 "메뉴판 / 메뉴 붙이기 / 내리기 / 내 것" 으로 바꾼 상태. 사람 전환은 오른쪽 위 선택기(채점 제외, "전환" 36px 도 제외). 앞 회차와 다른 눈으로 처음부터 다시 봄
+- **방법:** Playwright(chromium, ko-KR, 외부 요청 차단) 폭 390(높이 844)·1280. 화면마다 제목 요소를 기다린 뒤 `fullPage` 캡처, 확인 상자·오류·고정 막대가 있는 순간은 보이는 화면(`-view`)도 따로. 그림을 전부 직접 열어 봄. DOM 에서 흰 바탕 기준 대비(작은 글자 4.5 / 굵은·디스플레이 18px+ 3.0)·누르는 요소 44px·가로 넘침(`scrollWidth > innerWidth`)·말줄임/클립·**버튼 글자가 두 줄로 갈라지는지**(글자 상자의 줄 수)·**스티커가 화면 밖·옆 카드·글자와 겹치는 넓이**·**고정 막대가 폼 마지막 요소를 덮는지**(끝까지 내린 뒤 막대 윗변과 상자 아랫변)·막대 [의뢰하기] 뒤 상자 윗변과 머리 아랫변·**전광판 속도**(한 벌 폭 ÷ 40초)와 `aria-label`·움직임 줄임 설정에서 보이는 글자를 잼. 홈 카드는 글자가 아니라 주소로 눌렀다. 스크립트 `scratchpad/grade4.mjs`(A = 여정 1~4, B = 여정 5~7)·`grade4rm.mjs`(움직임 줄임), 원자료 `scratchpad/grade4/run-A.log`·`run-B.log`
+- **한 줄 결론:** 디자인을 또 갈아입혔는데 3회차 낮음 5건이 모두 고쳐졌고, 앞서 통과한 것(확인 상자 둘, 마감 셋째 줄, 390 머리 탭, 자리 없음·내림 상세의 나가는 길, 막대가 폼을 안 덮음)도 전부 살아 있다. 새로 찾은 것은 낮음 4건 — 390 내 것 목록에서 "전달됨 · 확인 대기" 옆 제목이 말줄임되는 것, 전광판·스티커에 남은 옛말 "열림/닫힘" 과 내린 메뉴의 세 이름, 움직임 줄임 설정에서 전광판이 두어 항목에서 잘리는 것, 1280 머리 "내 것" 링크 폭 35px. 처음 온 사람이 멈추거나 헤매는 곳은 없었다.
+
+### 3회차 발견 재확인
+
+| # | 3회차 발견 | 결과 | 확인한 곳 |
+|---|---|---|---|
+| 1 | 390 상세 기본 가격 칸 "부 / 터" 갈라짐 | **고쳐짐** | 칸이 "150,000원~" / "120,000원~" 한 줄(`whitespace-nowrap`). 390 에서 말줄임·클립 0 (02·12·13 캡처) |
+| 2 | 회색 글자를 회색 바탕에 얹어 4.4 | **고쳐짐** | 회색이 #555 로 바뀌어 흰 바탕 7.5, "취소됨/거절됨" 배지 #333 on #f2f2f2 = 11.4. 390·1280 전 화면 대비 실패 0 (전환기 제외) |
+| 3 | 404 옛말·홈 가는 버튼 이름 다섯 | **고쳐짐** | 404 "찾을 수 없는 페이지입니다. 주소가 잘못되었거나 없어진 페이지입니다." + [메뉴판으로]. 홈으로 가는 길이 탭 "메뉴판", "← 메뉴판", [메뉴판으로](자리 없음·내림·404), "메뉴판 보기"(빈 내 것) 로 한 낱말 (40·41·42 캡처) |
+| 4 | "작업실" 한 낱말이 셋을 가리킴 | **고쳐짐** | 메뉴 하나 = "메뉴"(내가 붙인 메뉴, 이 메뉴를 내려 두었어요), 목록 = "메뉴판", 내 페이지 = "내 것". 주인이 자기 상세를 열면 "내가 붙인 메뉴예요. 들어온 의뢰는 내 것에서 봅니다. [내 것으로]" (36·39 캡처) |
+| 5 | 390 막대 [의뢰하기] 뒤 상자 윗변 13px 가림 | **고쳐짐** | 잰 값: 상자 윗변 160 > 머리 아랫변 141 (`scroll-mt-40`). 제목 "의뢰하기" 183 (06b 캡처) |
+
+### 본 것
+
+여정 7개 전부, 각 화면 390 과 1280. 확인 상자·오류·고정 막대는 390 보이는 화면도 따로.
+
+| 여정 | 사람 | 화면 |
+|---|---|---|
+| 1 | 아무도 안 고름 | 메뉴판 → 로고 상세 → 내 것 → 메뉴 붙이기. 390 머리 탭 "메뉴판 · 메뉴 붙이기 · 내 것"(128~131×44) 로 /, /open, /me 이동. 홈 카드를 주소로 눌러 상세 이동. 전광판 3초 관찰 |
+| 2 | 최의뢰 | 메뉴판 → 로고 상세 → 390 고정 막대 [의뢰하기] 로 폼까지 → 끝까지 내려 막대가 폼을 덮는지 → 3글자 오류 → 정상 제출 → 보낸 뒤 → 내 것 → 의뢰 상세 → 취소. 전신(자리 없음)·SNS(내림) 상세 |
+| 3 | 김창작 | 내 것(390 마감 줄·[내리기] 한 줄) → 수채에 온 최의뢰 대기 의뢰 → 수락 상자 숫자 → 70,000 → 확인 상자 → 아니오 → 다시 → 수락 확정 → 빈 전달 오류 → 메모 전달 → 내 것 |
+| 4 | 최의뢰 | 내 것(전달됨) → 의뢰 상세 → 확인 상자 → 아니오 → 완료 → 내 것. 김창작 내 것에서 자리 돌아온 것 |
+| 5 | 박덕후 | 내 것 → 메뉴 붙이기 빈 제출 → 가격 500 → 정상 → 내 것 → 메뉴판 → 내리기 → 메뉴판 → 내린 상세(주인) → 다시 붙이기. 이글꼴 내 것(붙인 것 + 내린 SNS), 내린 SNS 상세(주인), 이글꼴이 본 박덕후 로고 의뢰의 수락 상자(누르지 않음) |
+| 6 | 최의뢰 | `/commissions/abc`, `/requests/0000…`, `/nothing-here` |
+| 7 | — | 모든 화면의 본문·머리·바닥글 글자를 모아 "작업실 / 커미션 / 마이페이지 / 닫기 / 닫힘 / 둘러보기 / 열기 / 열림 / 열려" 와 "메뉴", "내 것" 이 쓰인 문장을 대조. 움직임 줄임 설정의 전광판 |
+
+**잘 되어 있던 것**
+- 잰 것: 가로 넘침 0(390·1280 전 화면 — 전광판은 `overflow-hidden` 안에서만 흐른다), 대비 실패 0(전환기 제외 — 피치 위 흰 글자는 스티커 18px·버튼 20px 디스플레이뿐, 14px 이하 흰 글자가 피치 위에 있는 곳 없음), 44px 미만은 아래 발견 4 하나, **버튼 글자가 두 줄로 갈라진 곳 0**([내리기] 71×44, [다시 붙이기] 101×44 한 줄, 피치·검정 큰 버튼 전부 한 줄), 확인 상자 둘 다 390 화면 안(수락 394~659, 완료 599~819 / 844), 오류 문구 셋 다 버튼 위 화면 안(498~568, 703~773, 673~723). 한국어만 나온다.
+- **스티커가 카드 밖으로 삐져나오지만 아무것도 가리지 않는다.** 홈 카드 스티커는 카드 오른쪽 위로 8px 나가되 화면 오른쪽 끝에서 17px 안(390), 옆 카드·글자와 겹침 0(1280 세 칸 나란히도 0). 상세 스티커는 사진 왼쪽 아래 모서리에 걸쳐 사진만 덮고 "분류 · 창작자" 줄과 겹침 0. 내 것 "들어온 의뢰" 옆 숫자 스티커도 제목과 겹침 0 (01·05·14·33·38 캡처).
+- **고정 막대가 본문을 덮지 않는다.** 390 로고 상세에서 끝까지 내리면 의뢰 상자 아랫변 617 < 막대 윗변 761. 오류 문구가 떠서 폼이 길어져도 같다(07b 캡처). 막대는 의뢰할 수 있는 사람에게만 뜬다 — 미선택·자리 없음·내림·주인 상세에는 0 (02·12·13·36 캡처). 막대 [의뢰하기] 를 누르면 "의뢰하기" 상자가 머리 바로 아래(160 > 141) 온전히 온다(06b 캡처).
+- **전광판**: 한 벌 912px 가 40초 → 22.8px/s(1280 에서 4개일 때 27.4px/s), 13px 굵은 노랑 글자로 초당 두 글자쯤이라 따라 읽힌다. `aria-label` 에 "지금 3개 열림, 수채 느낌 반신 일러스트 2자리, …, 보내는 건 무료" 전체 문장이 있다. 3초 뒤 69px 옮겨 간 것을 캡처로 확인(01b 캡처). 메뉴를 붙이면 즉시 "지금 4개 열림 · 픽셀아트 아이콘 세트 3자리" 가 띠에 오르고, 수락하면 "1자리" 로 바뀐다.
+- 3회차까지 통과한 것이 새 디자인에서도 그대로다 — 수락 상자에 "마감일 2026년 9월 17일 (14일 뒤) / 남은 자리 2 → 1 / 3" 이 버튼 위에 있고, 노랑 확인 상자가 같은 날짜를 다시 말하며 "아니오" 뒤 70,000 이 남는다. 완료 확인 상자도 같은 모양. 전달 뒤 창작자 "의뢰인이 확인하면 완료돼요", 의뢰인 "결과물 확인 · 완료" + "자리가 하나 비어요". 완료 뒤 김창작 "2자리 남음 · 동시 진행 1/3" 로 돌아온다(27 캡처). 390 내 것의 마감 줄 "마감 9월 17일 · 14일 남음" 214/214px 로 끝까지 보인다.
+- 흐름의 각 단계가 다음 할 일을 말한다 — 보낸 뒤 노랑 띠 "의뢰를 보냈어요. 창작자가 수락하면 여기서 최종가와 마감일을 볼 수 있어요.", 붙인 뒤 "메뉴를 붙였어요. 메뉴판에 바로 보여요.", 자리 없음 "자리가 다 찼어요. 작업이 하나 끝나면 다시 열려요. 가장 이른 마감은 2026년 9월 24일이에요. [메뉴판으로]", 내림 "창작자가 이 메뉴를 내려 두었어요. 다시 붙으면 여기서 의뢰할 수 있어요. [메뉴판으로]", 끝난 의뢰 "끝난 의뢰예요.".
+- 사람을 안 고른 세 화면이 같은 문장 "먼저 오른쪽 위에서 사용자를 골라 주세요." 390 에서도 선택기가 오른쪽 위다. 의뢰인의 내 것은 "내가 넣은 의뢰" 가 맨 위, 빈 "들어온 의뢰" 에 "메뉴를 붙이면 의뢰가 여기로 들어와요.".
+- 내리면 메뉴판에서 즉시 빠지고(픽셀아트 3 → 0) 전광판 숫자도 4 → 3, 내 것 줄은 "내려 둠 · 30,000원~ · 동시 진행 0/3" + [다시 붙이기] (33·34·35 캡처).
+
+**본 것 중 발견으로는 안 세운 것 (4장 근거에 안 걸림 — 기록만)**
+- 390 내 것 "내가 붙인 메뉴" 둘째 줄 "2자리 남음 · 60,000원~ · 동시 진행 / 1/3" — "1/3" 만 다음 줄로 내려간다. 띄어쓰기에서 접혀 낱말은 안 갈라지고 바로 아래라 읽힌다 (14·21·27·32 캡처)
+- 메뉴판 제목 "이번 달 받는 작업" — 달마다 바뀌는 것이 아닌데 "이번 달" 이라 한다. SPEC 에 달 개념이 없고 부제 "창작자가 붙여 둔 메뉴판" 이 바로 밑에 있어 근거 1·5 에 못 걸었다
+- 390 로고 상세에서 폼까지 내려가면 피치 버튼이 둘 보인다 — 폼의 [의뢰 보내기] 와 막대의 [의뢰하기]. 3회차와 같은 판단 (06b·07 캡처)
+- 390 고정 막대가 바닥글 "커미션! / 창작자 맞춤 작업 의뢰" 를 덮는다. 정보가 아니라 세지 않았다
+- 상세 3칸 표의 "동시 진행 0/2" 에서 "/2" 가 12px 로 작다. 옆 스티커 "2자리 남음" 이 같은 뜻을 크게 말한다
+- 390 수락 상자의 마감일 칸이 "2026년 9월 17일 / (14일 뒤)" 두 줄 — 3회차와 같음
+- "의뢰 취소" 는 확인 없이 한 번에 된다 (앞 회차와 같은 판단 — SPEC 5장 밖)
+- 흰 바탕에 흰 카드라 카드 경계는 검정 3px 테두리와 그림자로만 구분된다. 잴 수 있는 것이 아니라 세지 않았다
+
+### 발견 (세기순)
+
+#### 1. 390 내 것 목록에서 "전달됨 · 확인 대기" 배지 옆 제목이 말줄임된다 · 낮음 · 근거 2
+```
+어디서   — 내 것, 390. 김창작 "들어온 의뢰" 셋째 줄과 최의뢰 "내가 넣은 의뢰" 셋째 줄 — 상태가 "전달됨 · 확인 대기" 인 줄 (21·22 캡처).
+           잰 값: 제목 "수채 느낌 반신 일러스트" 필요 폭 214px, 칸 193px → "수채 느낌 반신 일…". 배지가 "수락 대기"·"작업 중"·"완료" 인 줄은 한 줄에 다 들어간다. 1280 은 모두 온전
+무엇을   — 전달된 것이 어느 의뢰인지 알아채고 들어가기
+막힌 곳  — 제목이 잘려 "일…" 로 끝난다. 둘째 줄 "김창작 · 70,000원" 과 마감 줄로 짐작은 되고 눌러 들어가면 제목이 온전하다. 3회차에는 말줄임 0 이었는데,
+           제목이 검은고딕 20px 로 커지고 배지 "전달됨 · 확인 대기" 가 넓어(120px) 남는 폭이 줄었다
+왜       — 근거 2 글자 잘림. 멈추지는 않아 낮음
+대신     — 390 에서 배지를 제목 아래 줄로 내리거나(마감 줄처럼), 긴 배지를 "전달됨" 으로 줄이고 "확인 대기" 는 상세에서 말한다
+```
+
+#### 2. 옛말 "열림 / 닫힘" 이 전광판과 스티커에 남아, 내린 메뉴를 세 이름으로 부른다 · 낮음 · 근거 5
+```
+어디서   — 전광판 첫 항목 "지금 3개 열림"(모든 화면 머리) ↔ 탭·버튼·띠 "메뉴 붙이기", "메뉴를 붙였어요", "내가 붙인 메뉴".
+           내린 메뉴: 상세 스티커 "닫힘"(13·36·39 캡처) ↔ 내 것 목록 "내려 둠"(34·38 캡처) ↔ 같은 상세 아래 문장 "창작자가 이 메뉴를 내려 두었어요", 버튼 [내리기]·[다시 붙이기].
+           390·1280 동일
+무엇을   — 창작자가 "열림 3개" 가 내가 붙인 것과 같은 말인지, 의뢰인이 "닫힘" 이 "내려 둠" 과 같은 상태인지 알기
+막힌 곳  — 위 낱말. 붙이기/내리기 로 바꾸면서 열기/닫기 짝이 전광판(열림)과 스티커(닫힘)에 남았다. 한 상세 화면 안에 "닫힘" 스티커와 "내려 두었어요" 문장이 같이 있다
+왜       — 근거 5 같은 것을 두 이름으로. 한 화면 안에 둘이 같이 있어 배우게 되므로 낮음
+대신     — 전광판 "지금 3개 붙어 있음"(또는 "메뉴 3개"), 스티커 "내려 둠" 으로 붙이기/내리기 한 짝에 맞춘다
+```
+
+#### 3. 움직임 줄임 설정에서 전광판이 첫 두어 항목에서 잘리고 나머지를 볼 길이 없다 · 낮음 · 근거 2
+```
+어디서   — 머리 아래 검정 전광판 띠, 390, 기기의 "움직임 줄이기"(prefers-reduced-motion) 를 켠 사람 (43 캡처).
+           잰 값: 띠 폭 390 안에 "지금 4개 열림 · 픽셀아트 아이콘 세트 3자리 · 수채 느낌 반신" 까지만 보이고 나머지(2194px 중 1804px)는 overflow-hidden 뒤에 있다.
+           애니메이션이 none 이라 흘러오지 않고, 가로 스크롤도 안 된다
+무엇을   — 띠가 말하는 "무엇이 몇 자리 남았는지" 읽기
+막힌 곳  — "수채 느낌 반신" 에서 뚝 끊긴 글줄. 같은 정보가 바로 아래 카드 스티커에 있고 aria-label 에는 전체 문장이 있어 잃는 것은 없다
+왜       — 근거 2 글자 잘림, 원칙 [기기] 실제 기기 조건. 정보가 중복이라 낮음
+대신     — 움직임 줄임에서는 띠를 한 줄 요약("지금 4개 열림 · 보내는 건 무료")으로 줄이거나 가로 스크롤을 허용한다
+```
+
+#### 4. 1280 머리 메뉴 "내 것" 링크 폭이 35px 다 · 낮음 · 근거 2
+```
+어디서   — 머리 노랑 줄의 메뉴 "메뉴판 · 메뉴 붙이기 · 내 것", 폭 640 이상(sm) 화면. 잰 값: "내 것" 35×56px, 모든 1280 화면 동일. 390 탭은 128~131×44 로 통과
+무엇을   — 내 페이지로 가기 (터치 태블릿·작은 노트북에서도 이 줄이 뜬다)
+막힌 곳  — 두 글자 15px 라 글자 폭만큼만 눌린다. 3회차까지는 "내 작업실" 넉 자라 44 를 넘었는데 낱말을 줄이며 폭이 줄었다
+왜       — 근거 2 손가락 닿는 곳 44px 미만 (높이 56 은 넘고 폭만 모자란다)
+대신     — 좌우 안쪽 여백(px-2 안팎)을 줘 44 를 채운다. 글자 크기는 그대로
+```
+
+### 못 본 것
+- 거절 흐름(사유 입력 → 의뢰인이 "거절됨" 과 사유를 읽는 화면). 이번 여정에 없어 누르지 않았다. "거절됨" 배지는 "취소됨" 과 같은 색이라 대비는 같을 것으로만 본다
+- 메뉴 붙이기 폼을 완전히 빈 채 냈을 때 사람이 보는 문구 — 브라우저 기본 풍선(아래 도구 한계)
+- 참고 링크·결과물 주소에 `https://` 아닌 값을 넣었을 때 (`type=url` 풍선)
+- 마감일이 지난 의뢰의 "N일 지남" 붉은 글자 — 시연 데이터에 없음
+- 검은고딕(Black Han Sans)이 실제로 실린 모습 — 이 환경은 Google Fonts 가 막혀 기기 굵은 고딕으로 찍혔다. 검은고딕은 폭이 더 좁은 편이라 발견 1 의 말줄임 폭(214 vs 193)은 실제 글꼴에서 달라질 수 있다 — 다시 재야 한다
+- 샘플 사진이 실제 사진일 때 피치 스티커의 대비 — 시연 데이터의 사진은 단색 자리표시다. 스티커는 불투명 채움이라 사진 밝기와 무관할 것으로 본다
+- 어두운 테마 — `color-scheme: only light` 로 고정돼 있어 앞 회차와 같이 따로 안 봤다
+- 느린 연결의 로딩 뼈대 화면
+- 전광판이 한 바퀴(40초) 도는 동안 실제로 읽히는지는 속도(22.8px/s)로만 판단했다. 사람이 읽는 것을 본 것은 아니다
+
+### 도구 한계
+- 헤드리스 크로미엄이 ko-KR 에서도 `required` 빈 칸 풍선을 영어("Please fill out this field.")로 낸다. 캡처에 안 찍힌다 (30 캡처는 제목 칸에 초점만 간 상태)
+- `fullPage` 캡처에서 고정 머리가 화면 중간에 한 번 더 찍힌다 (17, 18, 20, 25 캡처 등). 고정 막대도 fullPage 에서는 화면 중간에 찍힐 수 있어 막대 확인은 전부 뷰포트 844 의 `-view`·`-bottom-view` 캡처와 잰 값으로 했다
+- 전광판은 CSS 애니메이션이라 캡처마다 위치가 다르다. 정상이다
+- 마우스가 마지막으로 누른 자리에 남아 hover 가 찍힌 캡처가 있다 — 09·21·22 의 셋째 줄 노랑 채움. 실제 화면 문제가 아니다
+- 상태를 바꾸는 여정이라 DB 가 바뀌었다 — 로고에 최의뢰의 취소된 의뢰 1건, 수채에 최의뢰의 완료된 의뢰 1건(70,000원, 전달 메모), 박덕후의 "픽셀아트 아이콘 세트"(다시 붙인 상태) 가 남아 있다. 박덕후 → 로고 의뢰는 수락 대기 그대로다. 다음 회차 전 다시 심어야 한다
+- 채점 지시에 따라 커밋하지 않았다. `uiux/TASKS.md` 는 여전히 없다
+
+### 스크린샷
+경로 앞 `scratchpad/` = `/tmp/claude-0/-home-user-backpackr/94e8917a-f629-5bad-a051-8b598ca8996f/scratchpad/`. `-m390` 폭 390 전체, `-m390-view` 폭 390 보이는 화면만, `-m390-bottom-view` 폭 390 끝까지 내린 보이는 화면, `-d1280` 폭 1280. 스크립트 `scratchpad/grade4.mjs`·`grade4rm.mjs`, 측정 원자료 `scratchpad/grade4/run-A.log`·`run-B.log`.
+
+- scratchpad/grade4/01-anon-home-d1280.png
+- scratchpad/grade4/01-anon-home-m390-view.png
+- scratchpad/grade4/01-anon-home-m390.png
+- scratchpad/grade4/01b-anon-home-ticker-3s-m390-view.png
+- scratchpad/grade4/02-anon-detail-d1280.png
+- scratchpad/grade4/02-anon-detail-m390-view.png
+- scratchpad/grade4/02-anon-detail-m390.png
+- scratchpad/grade4/03-anon-me-d1280.png
+- scratchpad/grade4/03-anon-me-m390.png
+- scratchpad/grade4/04-anon-open-d1280.png
+- scratchpad/grade4/04-anon-open-m390.png
+- scratchpad/grade4/05-client-home-d1280.png
+- scratchpad/grade4/05-client-home-m390-view.png
+- scratchpad/grade4/05-client-home-m390.png
+- scratchpad/grade4/06-client-logo-detail-d1280.png
+- scratchpad/grade4/06-client-logo-detail-m390-view.png
+- scratchpad/grade4/06-client-logo-detail-m390.png
+- scratchpad/grade4/06b-client-after-bar-tap-m390-view.png
+- scratchpad/grade4/06c-client-logo-detail-m390-bottom-view.png
+- scratchpad/grade4/07-client-short-brief-error-m390-view.png
+- scratchpad/grade4/07-client-short-brief-error-m390.png
+- scratchpad/grade4/07b-client-short-brief-error-m390-bottom-view.png
+- scratchpad/grade4/08-client-request-sent-d1280.png
+- scratchpad/grade4/08-client-request-sent-m390-view.png
+- scratchpad/grade4/08-client-request-sent-m390.png
+- scratchpad/grade4/09-client-me-d1280.png
+- scratchpad/grade4/09-client-me-m390-view.png
+- scratchpad/grade4/09-client-me-m390.png
+- scratchpad/grade4/10-client-request-before-cancel-d1280.png
+- scratchpad/grade4/10-client-request-before-cancel-m390.png
+- scratchpad/grade4/11-client-request-cancelled-d1280.png
+- scratchpad/grade4/11-client-request-cancelled-m390.png
+- scratchpad/grade4/12-client-full-detail-d1280.png
+- scratchpad/grade4/12-client-full-detail-m390-view.png
+- scratchpad/grade4/12-client-full-detail-m390.png
+- scratchpad/grade4/13-client-closed-sns-detail-d1280.png
+- scratchpad/grade4/13-client-closed-sns-detail-m390-view.png
+- scratchpad/grade4/13-client-closed-sns-detail-m390.png
+- scratchpad/grade4/14-creator-me-d1280.png
+- scratchpad/grade4/14-creator-me-m390-view.png
+- scratchpad/grade4/14-creator-me-m390.png
+- scratchpad/grade4/15-creator-decision-d1280.png
+- scratchpad/grade4/15-creator-decision-m390-view.png
+- scratchpad/grade4/15-creator-decision-m390.png
+- scratchpad/grade4/16-creator-accept-confirm-d1280.png
+- scratchpad/grade4/16-creator-accept-confirm-m390-view.png
+- scratchpad/grade4/16-creator-accept-confirm-m390.png
+- scratchpad/grade4/17-creator-after-no-m390.png
+- scratchpad/grade4/18-creator-accepted-d1280.png
+- scratchpad/grade4/18-creator-accepted-m390-view.png
+- scratchpad/grade4/18-creator-accepted-m390.png
+- scratchpad/grade4/19-creator-deliver-empty-error-m390-view.png
+- scratchpad/grade4/19-creator-deliver-empty-error-m390.png
+- scratchpad/grade4/20-creator-delivered-d1280.png
+- scratchpad/grade4/20-creator-delivered-m390.png
+- scratchpad/grade4/21-creator-me-after-d1280.png
+- scratchpad/grade4/21-creator-me-after-m390.png
+- scratchpad/grade4/22-client-me-delivered-d1280.png
+- scratchpad/grade4/22-client-me-delivered-m390-view.png
+- scratchpad/grade4/22-client-me-delivered-m390.png
+- scratchpad/grade4/23-client-request-delivered-d1280.png
+- scratchpad/grade4/23-client-request-delivered-m390-view.png
+- scratchpad/grade4/23-client-request-delivered-m390.png
+- scratchpad/grade4/24-client-complete-confirm-d1280.png
+- scratchpad/grade4/24-client-complete-confirm-m390-view.png
+- scratchpad/grade4/24-client-complete-confirm-m390.png
+- scratchpad/grade4/25-client-request-completed-d1280.png
+- scratchpad/grade4/25-client-request-completed-m390.png
+- scratchpad/grade4/26-client-me-completed-m390.png
+- scratchpad/grade4/27-creator-me-completed-m390.png
+- scratchpad/grade4/28-client2-me-before-m390.png
+- scratchpad/grade4/29-open-form-d1280.png
+- scratchpad/grade4/29-open-form-m390.png
+- scratchpad/grade4/30-open-empty-error-m390-view.png
+- scratchpad/grade4/30-open-empty-error-m390.png
+- scratchpad/grade4/31-open-price-error-m390-view.png
+- scratchpad/grade4/31-open-price-error-m390.png
+- scratchpad/grade4/32-open-done-me-d1280.png
+- scratchpad/grade4/32-open-done-me-m390-view.png
+- scratchpad/grade4/32-open-done-me-m390.png
+- scratchpad/grade4/33-home-with-new-m390.png
+- scratchpad/grade4/34-me-closed-d1280.png
+- scratchpad/grade4/34-me-closed-m390.png
+- scratchpad/grade4/35-home-after-close-m390.png
+- scratchpad/grade4/36-closed-detail-as-owner-m390.png
+- scratchpad/grade4/37-me-reopened-m390.png
+- scratchpad/grade4/38-creator2-me-d1280.png
+- scratchpad/grade4/38-creator2-me-m390.png
+- scratchpad/grade4/39-closed-sns-detail-owner-m390.png
+- scratchpad/grade4/39b-creator2-decision-m390-view.png
+- scratchpad/grade4/39b-creator2-decision-m390.png
+- scratchpad/grade4/40-404-commission-d1280.png
+- scratchpad/grade4/40-404-commission-m390.png
+- scratchpad/grade4/41-404-request-m390.png
+- scratchpad/grade4/42-404-other-m390.png
+- scratchpad/grade4/43-ticker-reduced-motion-m390-view.png
+
+---
 
 ## 3회차 (2026-09-02)
 

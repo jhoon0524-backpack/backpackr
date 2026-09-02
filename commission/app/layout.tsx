@@ -28,7 +28,7 @@ const NAV = [
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const open = await listOpenCommissions();
   const ticker = [
-    `지금 ${open.length}개 열림`,
+    `지금 ${open.length}개 붙음`,
     ...open.map((c) => {
       const left = c.max_slots - c.active_count;
       return `${c.title} ${left > 0 ? `${left}자리` : "자리 없음"}`;
@@ -52,7 +52,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <Link href="/" className="disp flex h-14 items-center text-[28px] text-ink">커미션!</Link>
                 <nav className="hidden gap-5 text-[15px] font-bold text-ink sm:flex">
                   {NAV.map((n) => (
-                    <Link key={n.href} href={n.href} className="flex h-14 items-center hover:underline hover:decoration-[3px]">{n.label}</Link>
+                    <Link key={n.href} href={n.href} className="flex h-14 min-w-11 items-center justify-center hover:underline hover:decoration-[3px]">{n.label}</Link>
                   ))}
                 </nav>
               </div>
@@ -60,7 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </div>
           </div>
           {/* 전광판. 글자는 노랑, 바탕은 검정. 넘치면 가로로 스크롤되지만 화면은 넘치지 않는다. */}
-          <div className="overflow-hidden border-b-[3px] border-ink bg-ink py-1.5 text-[13px] font-bold tracking-wide text-yellow" aria-label={ticker.join(", ")}>
+          <div className="ticker-wrap overflow-hidden border-b-[3px] border-ink bg-ink py-1.5 text-[13px] font-bold tracking-wide text-yellow" aria-label={ticker.join(", ")}>
             <div className="ticker num" aria-hidden>
               <span>{ticker.join("  ·  ")}  ·</span>
               <span>{ticker.join("  ·  ")}  ·</span>

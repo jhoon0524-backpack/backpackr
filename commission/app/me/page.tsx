@@ -20,7 +20,7 @@ function RequestLine({ r, who }: { r: RequestRow; who: 'creator' | 'client' }) {
     <li>
       <Link href={`/requests/${r.id}`} className="flex items-center justify-between gap-4 px-3 py-4 hover:bg-yellow/40">
         <div className="min-w-0">
-          <p className="disp truncate text-[20px]">{r.commission_title}</p>
+          <p className="disp line-clamp-2 text-[20px] leading-tight">{r.commission_title}</p>
           <p className="mt-1 truncate text-sm font-medium text-muted">
             {who === 'creator' ? r.client_nickname : r.creator_nickname}
             <span className="num"> · {won(price)}</span>

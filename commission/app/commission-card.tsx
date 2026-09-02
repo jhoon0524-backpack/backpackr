@@ -9,7 +9,7 @@ import { Photo } from './photo'
  */
 export function SlotText({ active, max, status, size = 'sm' }: { active: number; max: number; status: string; size?: 'sm' | 'md' }) {
   const cls = size === 'md' ? 'stamp text-[20px]' : 'stamp text-[18px]'
-  if (status === 'closed') return <span className={`${cls} bg-white text-ink`}>닫힘</span>
+  if (status === 'closed') return <span className={`${cls} bg-white text-ink`}>내려 둠</span>
   const left = max - active
   if (left <= 0) return <span className={`${cls} bg-white text-ink`}>자리 없음</span>
   return <span className={`${cls} num bg-accent text-white`}>{left}자리 남음</span>
