@@ -31,7 +31,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
         <Link href="/me" className={BACK}>← 마이페이지</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-[26px] font-bold leading-tight tracking-tight">
-            <Link href={`/commissions/${r.commission_id}`} className="hover:underline">{r.commission_title}</Link>
+            <Link href={`/commissions/${r.commission_id}`} className="inline-flex min-h-11 items-center hover:underline">{r.commission_title}</Link>
           </h1>
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${s.tone}`}>{s.text}</span>
         </div>

@@ -121,7 +121,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
             {myCommissions.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-4 py-4">
                 <div className="min-w-0">
-                  <Link href={`/commissions/${c.id}`} className="block truncate text-[15px] font-semibold hover:underline">{c.title}</Link>
+                  <Link href={`/commissions/${c.id}`} className="flex min-h-11 items-center truncate text-[15px] font-semibold hover:underline">{c.title}</Link>
                   <p className="mt-1 text-sm text-muted">
                     <SlotText active={c.active_count} max={c.max_slots} status={c.status} />
                     <span className="num"> · {won(c.price)}~ · 동시 진행 {c.active_count}/{c.max_slots}</span>

@@ -74,6 +74,9 @@ body {
   font-family: var(--font-sans);
   /* 텀블벅 본문 글자 간격. Pretendard 는 살짝 조여야 그들 화면과 같아 보인다. */
   letter-spacing: -0.01em;
+  /* 한글은 낱말 중간에서 줄이 갈라지면 "9월 17 / 일" 처럼 읽힌다 (UI/UX 2회차 발견 3). 낱말 단위로만 접는다. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 /* 텀블벅 본문 숫자(모인 금액·달성률)는 표 숫자다. 금액이 바뀌어도 자리가 안 흔들린다. */

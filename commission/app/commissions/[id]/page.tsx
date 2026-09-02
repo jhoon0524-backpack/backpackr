@@ -108,7 +108,10 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
                   <Link href="/me" className={BTN_SECONDARY + ' mt-4'}>마이페이지로</Link>
                 </>
               ) : c.status !== 'open' ? (
-                <p className="text-sm text-muted">지금은 의뢰를 받지 않습니다.</p>
+                <>
+                  <p className="text-sm leading-relaxed text-strong">창작자가 이 커미션을 닫아 두었습니다. 다시 열리면 여기서 의뢰할 수 있습니다.</p>
+                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>다른 커미션 둘러보기</Link>
+                </>
               ) : left <= 0 ? (
                 <>
                   {/* "왜" 만 있고 "언제·그럼 뭘" 이 없어 막다른 곳이었다 (UI/UX 1회차 발견 8). */}
