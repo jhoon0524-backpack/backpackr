@@ -5,8 +5,8 @@
 #  예: MAX_LOOPS=2 bash loop/loop.sh)
 # =========================================
 
-# 사용할 모델
-MODEL="${MODEL:-claude-sonnet-5}"
+# 사용할 모델 (작업자. 채점자는 .claude/agents/design-critic.md 에서 fable 로 지정)
+MODEL="${MODEL:-claude-opus-5}"
 
 # 한 바퀴(세션 하나)에서 허용하는 최대 턴 수
 MAX_TURNS="${MAX_TURNS:-40}"
