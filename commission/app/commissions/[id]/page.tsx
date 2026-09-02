@@ -61,7 +61,7 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
           <dl className="num mt-6 grid grid-cols-3 border-b border-ink">
             <div className="flex flex-col gap-1 border-r border-line py-4 pr-3">
               <dt className={EYEBROW}>기본 가격</dt>
-              <dd className="serif text-xl font-bold sm:text-2xl">{won(c.price)}<span className="text-xs font-normal text-muted">부터</span></dd>
+              <dd className="serif whitespace-nowrap text-xl font-bold sm:text-2xl">{won(c.price)}<span className="text-xs font-normal text-muted">부터</span></dd>
             </div>
             <div className="flex flex-col gap-1 border-r border-line px-3 py-4">
               <dt className={EYEBROW}>작업 기간</dt>
@@ -95,7 +95,7 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
           </section>
         </div>
 
-        <aside id="request" className="scroll-mt-24 lg:sticky lg:top-24 lg:self-start">
+        <aside id="request" className="scroll-mt-32 lg:sticky lg:top-24 lg:self-start">
           <div className="border border-ink p-6">
             <h2 className={H2}>의뢰하기</h2>
             <div className="pt-5">
@@ -103,13 +103,13 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
                 <p className="text-sm leading-relaxed text-strong">의뢰하려면 먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
               ) : isMine ? (
                 <>
-                  <p className="text-sm leading-relaxed text-strong">내 작업실입니다. 들어온 의뢰는 내 작업실에서 봅니다.</p>
-                  <Link href="/me" className={BTN_SECONDARY + ' mt-4'}>내 작업실로</Link>
+                  <p className="text-sm leading-relaxed text-strong">내가 연 작업실입니다. 들어온 의뢰는 내 페이지에서 봅니다.</p>
+                  <Link href="/me" className={BTN_SECONDARY + ' mt-4'}>내 페이지로</Link>
                 </>
               ) : c.status !== 'open' ? (
                 <>
                   <p className="text-sm leading-relaxed text-strong">창작자가 이 작업실을 닫아 두었습니다. 다시 열리면 여기서 의뢰할 수 있습니다.</p>
-                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>다른 작업실 둘러보기</Link>
+                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>작업실 둘러보기</Link>
                 </>
               ) : left <= 0 ? (
                 <>
@@ -117,7 +117,7 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
                     진행 가능한 자리가 모두 찼습니다. 작업이 하나 끝나면 다시 열립니다.
                     {c.next_free_at && <> 가장 이른 마감은 <span className="num font-semibold">{kstDate(c.next_free_at)}</span>입니다.</>}
                   </p>
-                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>다른 작업실 둘러보기</Link>
+                  <Link href="/" className={BTN_SECONDARY + ' mt-4'}>작업실 둘러보기</Link>
                 </>
               ) : (
                 <RequestForm commissionId={c.id} />

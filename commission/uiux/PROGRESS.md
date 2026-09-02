@@ -1,4 +1,227 @@
-**판정: 통과** (2회차 — 높음 0, 중간 0, 낮음 3)
+**판정: 통과** (3회차 — 높음 0, 중간 0, 낮음 5)
+
+## 3회차 (2026-09-02)
+
+- **대상:** http://localhost:3100 프로덕션 빌드, 새로 심은 시연 데이터. 2회차 통과 뒤 디자인을 "작업실" 방향(종이색 바탕·명조 제목·괘선·기울인 도장·좁은 화면 아래 고정 [의뢰하기] 막대·"내 작업실 / 작업실 열기")으로 통째로 갈아입힌 상태. 사람 전환은 오른쪽 위 선택기(채점 제외). 앞 회차와 다른 눈으로 처음부터 다시 봄
+- **방법:** Playwright(chromium, ko-KR) 폭 390(높이 844)·1280. 화면마다 제목 요소를 기다린 뒤 `fullPage` 캡처, 확인 상자·오류·고정 막대가 있는 순간은 보이는 화면(`-view`)도 따로. 그림을 전부 직접 열어 봄. DOM 에서 종이색 #f4efe7 기준 대비(작은 글자 4.5 / 굵은 18px+ 3.0)·누르는 요소 44px·가로 넘침·말줄임·**도장이 글자·사진과 겹치는 넓이**·**고정 막대가 폼 마지막 요소를 덮는지**(끝까지 내린 뒤 막대 윗변과 버튼 아랫변)·막대 [의뢰하기] 를 누른 뒤 패널이 머리에 가리는지를 잼. 홈 카드는 글자가 아니라 주소로 눌렀다. 스크립트 `scratchpad/grade3.mjs`(여정 1~4)·`grade3c.mjs`(여정 4'~7), 원자료 `scratchpad/grade3/report-1to4.txt`·`report-4to7.txt`
+- **한 줄 결론:** 디자인을 갈아입혔는데도 2회차까지 고친 것(확인 상자, 마감 셋째 줄, 390 머리 탭, 닫힘/마감 구분, 자리 없음·닫힘 상세의 나가는 길)은 전부 살아 있고, 2회차 낮음 3건 중 2건은 고쳐졌다. 새로 찾은 것은 낮음 5건 — 390 상세의 "부터" 가 "부 / 터" 로 갈라지는 것, 회색 글자를 회색 바탕에 얹어 4.4 로 떨어진 것, 404 에 남은 옛말과 홈으로 가는 버튼의 이름 다섯, "작업실" 이 메뉴·창작자·내 페이지 셋을 가리키는 것, 390 고정 막대로 내려간 뒤 상자 윗변이 머리에 13px 가리는 것. 처음 온 사람이 멈추거나 헤매는 곳은 없었다.
+
+### 2회차 발견 재확인
+
+| # | 2회차 발견 | 결과 | 확인한 곳 |
+|---|---|---|---|
+| 1 | 닫힌 상세가 "지금은 의뢰를 받지 않습니다" 로 끝남 | **고쳐짐** | 의뢰인이 본 닫힌 SNS 로고 상세: "창작자가 이 작업실을 닫아 두었습니다. 다시 열리면 여기서 의뢰할 수 있습니다." + [다른 작업실 둘러보기]. 자리 없음 상세와 같은 짝 (12·13 캡처) |
+| 2 | 제목 링크 두 곳 44px 미만 | **고쳐짐** | 의뢰 상세 h1 안 링크, 내 작업실 "내가 연 작업실" 제목 링크 모두 `min-h-11`. 390·1280 전 화면에서 44 미만은 임시 전환기(36px)뿐 |
+| 3 | 390 에서 "17 / 일", "오 / 전" 갈라짐 | **부분** | `word-break: keep-all` 이 들어가 낱말 안에서는 안 갈라진다 — 수락 상자 "2026년 9월 / 17일 (14일 뒤)", 의뢰 상세 머리 "2026년 9월 3일 / 오전 7:29" (15·08 캡처). 다만 상세의 기본 가격 칸에서 "부터" 가 "부 / 터" 로 갈라지는 새 자리가 생겼다 → 아래 발견 1 |
+
+### 본 것
+
+여정 7개 전부, 각 화면 390 과 1280. 확인 상자·오류·고정 막대는 390 보이는 화면도 따로.
+
+| 여정 | 사람 | 화면 |
+|---|---|---|
+| 1 | 아무도 안 고름 | 홈 → 로고 상세 → 내 작업실 → 작업실 열기. 390 머리 탭 "둘러보기 · 작업실 열기 · 내 작업실"(각 117×44) 로 /, /open, /me 이동. 홈 카드를 주소로 눌러 상세 이동 |
+| 2 | 최의뢰 | 홈 → 로고 상세 → 390 고정 막대 [의뢰하기] 로 폼까지 → 끝까지 내려 막대가 폼을 덮는지 → 3글자 오류 → 정상 제출 → 보낸 뒤 → 내 작업실 → 의뢰 상세 → 취소. 전신(자리 없음)·SNS(닫힘) 상세 |
+| 3 | 김창작 | 내 작업실(390 마감 줄) → 수채에 온 최의뢰 대기 의뢰 → 수락 상자 숫자 → 70,000 → 확인 상자 → 아니오 → 다시 → 수락 확정 → 빈 전달 오류 → 메모 전달 → 내 작업실 |
+| 4 | 최의뢰 | 내 작업실(전달됨) → 의뢰 상세 → 확인 상자 → 아니오 → 완료 → 내 작업실. 김창작 내 작업실에서 자리 돌아온 것 |
+| 4' | 이글꼴·박덕후 | 4번의 22·23 캡처가 뒤 실행에 덮여서(도구 한계) 이글꼴이 박덕후의 로고 의뢰를 기본가로 수락·주소로 전달 → 박덕후가 전달됨 알아채기 → 확인 상자 → 아니오 → 완료 → 양쪽 내 작업실 |
+| 5 | 박덕후 | 열기 빈 제출 → 가격 500 → 정상 → 내 작업실 → 홈 → 닫기 → 홈 → 닫힌 상세(주인) → 다시 열기. 이글꼴 내 작업실(열린 것 + 닫힌 SNS), 닫힌 SNS 상세(주인) |
+| 6 | 최의뢰 | `/commissions/abc`, `/requests/0000…` |
+| 7 | — | 모든 화면의 본문·머리·바닥글 글자를 모아 "커미션 / 마이페이지 / 작업실 / 둘러보기" 가 쓰인 문장을 대조 |
+
+**잘 되어 있던 것**
+- 잰 것: 가로 넘침 0, 말줄임 0(390 내 작업실 마감 줄 "마감 9월 17일 · 14일 남음" 181/181px 로 끝까지 보임), 44px 미만 0(전환기 제외), 확인 상자 둘 다 390 화면 안(수락 401~656, 완료 619~828 / 844), 오류 문구 셋 다 버튼 위 화면 안(515~579, 717~781, 695~739). 한국어만 나온다.
+- **고정 막대가 본문을 덮지 않는다.** 390 로고 상세에서 끝까지 내리면 폼 마지막 요소 "보내는 것은 무료입니다…" 아랫변 626 < 막대 윗변 767. 오류 문구가 떠서 폼이 길어져도 같다(07b 캡처). 막대는 자리 없음·닫힘·주인·미선택 상세에는 아예 안 뜬다(12·13 캡처). 막대 [의뢰하기] 를 누르면 "의뢰하기" 상자로 내려가고(scrollY 0 → 1331) 제목이 머리 바로 아래 보인다(06b 캡처).
+- **도장이 글자를 가리지 않는다.** 홈 카드·상세의 도장은 사진 왼쪽 위/오른쪽 위 빈 자리에만 찍히고(카드 제목·가격·"분류 · 창작자" 와 겹침 0), 내 작업실의 도장은 줄 안에 인라인이라 제목·금액과 겹치지 않는다(측정된 겹침 14~16px² 은 기울인 상자의 바깥 사각형과 옆 " · " 사이 여백이고 그림에서는 안 닿는다 — 14·21·38 캡처).
+- 2회차에서 통과한 것이 새 디자인에서도 그대로다 — 수락 상자에 "마감일 2026년 9월 17일 (14일 뒤) / 남은 자리 2 → 1 / 3", 확인 문구가 같은 날짜를 다시 말하고 "아니오" 뒤 70,000 이 남는다. 완료 확인 상자, 전달 뒤 "의뢰인이 확인하면 완료됩니다", 의뢰인 "결과물 확인 · 완료" + "자리가 하나 빕니다". 완료 뒤 김창작 "1자리 남음 · 동시 진행 2/3" 로 돌아온다.
+- 홈이 잡지 머리처럼 "지금 열려 있는 작업실 3" 으로 열린 수를 말하고, 카드에 "2자리 남음 / 자리 없음" 도장·가격·작업 일수가 다 있다. 닫으면 홈에서 즉시 빠지고 숫자가 4 → 3 이 된다(33·35 캡처).
+- 사람을 안 고른 세 화면이 같은 문장 "먼저 오른쪽 위에서 사용자를 골라 주세요." 390 에서도 선택기가 오른쪽 위다.
+- 흐름의 각 단계가 다음 할 일을 말한다 — 보낸 뒤 "창작자가 수락하면 여기서 최종가와 마감일을…", 열고 나면 "작업실을 열었습니다. 둘러보기 목록에 바로 보입니다", 주인이 자기 상세를 열면 "내 작업실입니다 … [내 작업실로]".
+- 새로 온 "박덕후 → 로고" 의뢰도 같은 화면에서 같은 말로 흘러간다(21b~27 캡처). 박덕후 내 작업실에 "전달됨 · 확인 대기" 파란 배지 + "마감 9월 13일 · 10일 남음" 이 셋째 줄에 있어 알아챌 수 있다.
+
+**본 것 중 발견으로는 안 세운 것 (4장 근거에 안 걸림 — 기록만)**
+- 390 로고 상세에서 폼까지 내려가면 붉은 버튼이 둘 보인다 — 폼의 [이 작업실에 의뢰하기] 와 막대의 [의뢰하기]. 막대 것은 이미 폼에 와 있으면 눌러도 아무 일도 안 일어난다(닻 이동). 이름이 달라 근거 5 는 아니고, 폼 버튼이 바로 위에 있어 멈추지는 않는다 (06b·07 캡처)
+- 390 고정 막대가 화면 맨 아래 바닥글 한 줄("커미션 — 창작자 맞춤 작업 의뢰") 을 덮는다. 정보가 아니라 세지 않았다
+- 사진 없는 카드·상세의 "Aa" 자리표시가 옅은 색(#a59c90 / #ebe4d9, 2.14) 이다. 읽어야 하는 글자가 아니라 세지 않았다
+- 의뢰도 넣고 작업실도 연 사람(박덕후)은 작업실을 여는 순간 "내가 넣은 의뢰" 가 맨 위에서 맨 아래로 내려간다 (2회차와 같음, 28 → 32 캡처)
+- 390 수락 상자의 마감일 칸이 "2026년 9월 / 17일 (14일 뒤)" 두 줄이다. 낱말은 안 갈라져 읽힌다
+- "의뢰 취소" 는 확인 없이 한 번에 된다 (2회차와 같은 판단 — SPEC 5장 밖)
+
+### 발견 (세기순)
+
+#### 1. 390 상세의 기본 가격 칸에서 "부터" 가 "부 / 터" 로 갈라진다 · 낮음 · 근거 2
+```
+어디서   — 커미션 상세, 사진 아래 세 칸 표의 "기본 가격" 칸, 390. "독립출판 표지 로고·타이틀"(150,000원) 과 "전신 일러스트 + 간단 배경"(120,000원) 에서 (02·06·12 캡처).
+           60,000원·40,000원·30,000원은 한 줄에 들어간다. 1280 은 모두 한 줄
+무엇을   — 이 작업이 얼마부터인지 읽기
+막힌 곳  — "150,000원부" 한 줄, 그 아래 "터" 한 글자. 칸 폭 117px 에 굵은 명조 20px 금액 + 12px "부터" 가 못 들어가 마지막 글자만 다음 줄로 밀린다.
+           본문에 word-break: keep-all 을 줬지만 overflow-wrap: anywhere 가 함께 있어 넘치면 아무 데서나 꺾는다. 홈 카드의 "150,000원~" 은 한 줄이다
+왜       — 근거 2 글자 잘림에 준함 — 한 낱말("부터")이 두 줄로 갈라진다. 이 칸은 화면에서 가장 큰 돈 숫자다 (원칙 [금액])
+대신     — "부터" 를 금액 아래 줄로 내리거나(홈 카드처럼 "150,000원~"), 금액 글자를 390 에서 한 단계 줄여 한 줄에 넣는다
+```
+
+#### 2. 회색 글자를 회색 바탕에 얹은 곳이 4.4 로 정한 하한 아래다 · 낮음 · 근거 1, 2
+```
+어디서   — 잰 값(글자 #6f675f / 바탕 #ebe4d9 = 4.40, 필요 4.5). 390·1280 동일
+           · 수락 상자의 회색 표: "마감일", "(14일 뒤)", "남은 자리", "/ 3" — 14px (15·16·21c 캡처)
+           · 상태 배지 "취소됨"(내 작업실·의뢰 상세, 12px 굵게) — 같은 색인 "거절됨" 도 같을 것 (11·22·38 캡처)
+           · 내 작업실 목록 줄에 손을 올렸을 때(hover) 둘째 줄 "김창작 · 160,000원" — 14px (09·32 캡처)
+무엇을   — 수락하기 전에 마감일·남은 자리 읽기, 끝난 의뢰의 상태 읽기
+막힌 곳  — 위 요소들. 종이색 #f4efe7 위에서는 4.85 로 통과하는 색인데, 그보다 어두운 채움색 #ebe4d9 위에 그대로 얹었다
+왜       — 근거 1: app/globals.css 가 "muted #6f675f / paper → 4.85 (작은 글자 하한)" 이라고 정해 두고 종이색 기준으로만 쟀다. 채움색 위에서는 하한 아래다.
+           근거 2: 작은 글자 4.5 미만. 차이가 0.1 이고 옆의 굵은 값(날짜·2 → 1·상태 이름)은 먹색이라 낮음으로 둔다
+대신     — 채움색 위의 작은 글자는 --color-strong(#4a433c) 을 쓰거나, 배지·표의 바탕을 종이색으로 둔다
+```
+
+#### 3. 404 에 옛말이 남았고, 홈으로 가는 버튼이 화면마다 이름이 다르다 · 낮음 · 근거 5
+```
+어디서   — 없는 주소 화면 /commissions/abc, /requests/0000…: "주소가 잘못되었거나, 창작자가 닫은 커미션일 수 있습니다." + [커미션 둘러보기] (40·41 캡처).
+           같은 홈으로 가는 길이 머리 탭 "둘러보기", 상세 "← 둘러보기", 자리 없음·닫힘 상세 [다른 작업실 둘러보기], 내 작업실 [작업실 둘러보기], 404 [커미션 둘러보기] 다섯 이름이다
+무엇을   — 없는 주소에서 목록으로 돌아가기, "커미션" 이 방금까지 보던 "작업실" 과 같은 것인지 알기
+막힌 곳  — 404 두 줄. 다른 모든 화면이 "작업실" 인데 여기만 "커미션". 게다가 닫힌 작업실은 이제 404 가 아니라 상세가 열리므로(13·39 캡처) "창작자가 닫은 커미션일 수 있습니다" 는 지금 일어나지 않는 이유를 댄다
+왜       — 근거 5 같은 것을 두 이름으로(작업실·커미션). 머리 로고·바닥글의 "커미션" 은 서비스 이름이라 세지 않았다
+대신     — "창작자가 지운 작업실일 수 있습니다" 처럼 지금 맞는 이유로 바꾸고 버튼은 [작업실 둘러보기]. 홈으로 가는 버튼 이름을 "작업실 둘러보기" 하나로 맞춘다
+```
+
+#### 4. "작업실" 한 낱말이 메뉴 하나·창작자의 가게·내 페이지 셋을 가리킨다 · 낮음 · 근거 5
+```
+어디서   — 홈 "지금 열려 있는 작업실 3"(메뉴 수), 열기 "여러 개를 열 수 있습니다", 내 작업실 "내가 연 작업실"(메뉴 목록) ↔ 상세 꼬리표 "이글꼴의 작업실"(창작자) ↔ 머리 탭·뒤로 링크 "내 작업실"(내 페이지).
+           한 문장에 둘이 같이 나온다 — 주인이 자기 상세를 열면 "내 작업실입니다. 들어온 의뢰는 내 작업실에서 봅니다." (36·39 캡처).
+           의뢰인 최의뢰·박덕후의 "내 작업실" 페이지 안에 "연 작업실이 없습니다." (09·22·26 캡처)
+무엇을   — 의뢰인이 내가 넣은 의뢰를 보러 갈 곳 고르기, "작업실 3" 이 창작자 3명인지 메뉴 3개인지 알기 (김창작 것이 둘이라 후자다)
+막힌 곳  — 위 낱말. 특히 작업실을 열 일이 없는 의뢰인에게 머리의 "내 작업실" 이 자기 것인지 애매하다
+왜       — 근거 5 다른 것을 한 이름으로. 다만 의뢰를 보낸 화면 맨 위에 "← 내 작업실" 이 있고, 그 페이지 첫 칸이 "내가 넣은 의뢰" 라 흐름 안에서는 배운다 → 낮음
+대신     — 메뉴 하나는 "작업"(지금 열려 있는 작업 3, 내가 연 작업, 작업 열기), 페이지는 "내 작업실" 로 갈라 쓰거나, 의뢰인의 페이지 꼬리표를 "내 의뢰" 로 둔다
+```
+
+#### 5. 390 고정 막대의 [의뢰하기] 로 내려가면 "의뢰하기" 상자 윗변 13px 이 머리에 가린다 · 낮음 · 근거 2
+```
+어디서   — 커미션 상세(로고, 의뢰인 최의뢰), 390. 막대 [의뢰하기] 를 누른 직후 (06b 캡처)
+무엇을   — 막대를 눌러 폼으로 가기
+막힌 곳  — 잰 값: 패널 윗변 96px, 머리(로고 줄 64 + 탭 줄 44 + 괘선) 아랫변 109px. 상자의 검은 윗변이 탭 줄 뒤에 숨어 상자가 위로 뚫린 것처럼 보인다.
+           제목 "의뢰하기" 글자(121px 부터)는 보인다
+왜       — 근거 2 가려짐. 닻 이동 여백(scroll-mt-24 = 96) 이 1280 머리(64) 기준이라 390 의 탭 줄 44 를 안 셌다
+대신     — 390 에서는 여백을 머리 높이만큼(112 안팎) 준다
+```
+
+### 못 본 것
+- 거절 흐름(사유 입력 → 의뢰인이 "거절됨" 과 사유를 읽는 화면). 이번 여정에 없어 누르지 않았다. "거절됨" 배지는 "취소됨" 과 같은 색이라 발견 2 와 같을 것으로만 적었다
+- 작업실 열기 폼을 완전히 빈 채 냈을 때 사람이 보는 문구 — 브라우저 기본 풍선(아래 도구 한계)
+- 참고 링크·결과물 주소에 `https://` 아닌 값을 넣었을 때 (`type=url` 풍선)
+- 마감일이 지난 의뢰의 "N일 지남" 붉은 글자 — 시연 데이터에 없음
+- 명조 글꼴(고운바탕)이 실제로 실린 모습 — 이 환경은 Google Fonts 가 막혀 기기 명조로 찍혔다. 글꼴이 바뀌면 발견 1 의 칸 폭 계산이 달라질 수 있다
+- 샘플 사진이 실제 사진일 때 도장의 대비(도장 바탕이 종이색 88% 라 사진 위에서는 사진 밝기에 따라 달라진다). 시연 데이터의 사진은 단색 자리표시다
+- 어두운 테마 — `color-scheme: only light` 로 고정돼 있어 앞 회차와 같이 따로 안 봤다
+- 느린 연결의 로딩 뼈대 화면
+
+### 도구 한계
+- 첫 실행이 Google Fonts 요청이 끝나지 않아 `networkidle` 대기가 길어져 10분 제한에 걸렸다. 화면은 여정 4(25 캡처) 까지 다 찍혔고 측정 원자료도 남았지만(`report-1to4.txt`), 이어 돌린 실행이 22·23 캡처를 완료 뒤 상태로 덮어 버렸다. 그래서 여정 4 를 박덕후 → 로고 의뢰로 한 번 더 밟아(21b~27 캡처) 전달됨 화면을 다시 찍었다. 두 번째 실행부터는 외부 요청을 막았다
+- 헤드리스 크로미엄이 ko-KR 에서도 `required` 빈 칸 풍선을 영어("Please fill out this field.")로 낸다. 캡처에 안 찍힌다 (30 캡처는 제목 칸에 초점만 간 상태)
+- `fullPage` 캡처에서 고정 머리가 화면 중간에 한 번 더 찍힌다 (17, 18, 20, 21d 캡처 등). 고정 막대도 fullPage 에서는 화면 중간에 찍힐 수 있어 막대 확인은 전부 뷰포트 844 의 `-view`·`-bottom-view` 캡처로 했다
+- 마우스가 마지막으로 누른 자리에 남아 hover 가 찍힌 캡처가 있다 — 09·32 의 셋째 줄 채움색, 33·35 의 첫 카드 제목 밑줄, 35 의 "clip" 측정(사진이 1.02 배 커진 순간). 실제 화면 문제가 아니다
+- 상태를 바꾸는 여정이라 DB 가 바뀌었다 — 로고에 최의뢰의 취소된 의뢰 1건, 수채에 최의뢰의 완료된 의뢰 1건(70,000원), 로고에 박덕후의 완료된 의뢰 1건(150,000원, 결과물 주소 example.com/logo-final.zip), 박덕후의 "픽셀아트 아이콘 세트"(다시 열린 상태) 가 남아 있다. 다음 회차 전 다시 심어야 한다
+- 채점 지시에 따라 커밋하지 않았다. `uiux/TASKS.md` 는 여전히 없다
+
+### 스크린샷
+경로 앞 `scratchpad/` = `/tmp/claude-0/-home-user-backpackr/94e8917a-f629-5bad-a051-8b598ca8996f/scratchpad/`. `-m390` 폭 390 전체, `-m390-view` 폭 390 보이는 화면만, `-m390-bottom-view` 폭 390 끝까지 내린 보이는 화면, `-d1280` 폭 1280. 스크립트 `scratchpad/grade3.mjs`·`grade3c.mjs`, 측정 원자료 `scratchpad/grade3/report-1to4.txt`·`report-4to7.txt`.
+
+- scratchpad/grade3/01-anon-home-d1280.png
+- scratchpad/grade3/01-anon-home-m390-view.png
+- scratchpad/grade3/01-anon-home-m390.png
+- scratchpad/grade3/02-anon-detail-d1280.png
+- scratchpad/grade3/02-anon-detail-m390-view.png
+- scratchpad/grade3/02-anon-detail-m390.png
+- scratchpad/grade3/03-anon-me-d1280.png
+- scratchpad/grade3/03-anon-me-m390.png
+- scratchpad/grade3/04-anon-open-d1280.png
+- scratchpad/grade3/04-anon-open-m390.png
+- scratchpad/grade3/05-client-home-d1280.png
+- scratchpad/grade3/05-client-home-m390-view.png
+- scratchpad/grade3/05-client-home-m390.png
+- scratchpad/grade3/06-client-logo-detail-d1280.png
+- scratchpad/grade3/06-client-logo-detail-m390-view.png
+- scratchpad/grade3/06-client-logo-detail-m390.png
+- scratchpad/grade3/06b-client-after-bar-tap-m390-view.png
+- scratchpad/grade3/06c-client-logo-detail-m390-bottom-view.png
+- scratchpad/grade3/07-client-short-brief-error-m390-view.png
+- scratchpad/grade3/07-client-short-brief-error-m390.png
+- scratchpad/grade3/07b-client-short-brief-error-m390-bottom-view.png
+- scratchpad/grade3/08-client-request-sent-d1280.png
+- scratchpad/grade3/08-client-request-sent-m390-view.png
+- scratchpad/grade3/08-client-request-sent-m390.png
+- scratchpad/grade3/09-client-me-d1280.png
+- scratchpad/grade3/09-client-me-m390-view.png
+- scratchpad/grade3/09-client-me-m390.png
+- scratchpad/grade3/10-client-request-before-cancel-d1280.png
+- scratchpad/grade3/10-client-request-before-cancel-m390.png
+- scratchpad/grade3/11-client-request-cancelled-d1280.png
+- scratchpad/grade3/11-client-request-cancelled-m390.png
+- scratchpad/grade3/12-client-full-detail-d1280.png
+- scratchpad/grade3/12-client-full-detail-m390-view.png
+- scratchpad/grade3/12-client-full-detail-m390.png
+- scratchpad/grade3/13-client-closed-sns-detail-d1280.png
+- scratchpad/grade3/13-client-closed-sns-detail-m390-view.png
+- scratchpad/grade3/13-client-closed-sns-detail-m390.png
+- scratchpad/grade3/14-creator-me-d1280.png
+- scratchpad/grade3/14-creator-me-m390-view.png
+- scratchpad/grade3/14-creator-me-m390.png
+- scratchpad/grade3/15-creator-decision-d1280.png
+- scratchpad/grade3/15-creator-decision-m390-view.png
+- scratchpad/grade3/15-creator-decision-m390.png
+- scratchpad/grade3/16-creator-accept-confirm-d1280.png
+- scratchpad/grade3/16-creator-accept-confirm-m390-view.png
+- scratchpad/grade3/16-creator-accept-confirm-m390.png
+- scratchpad/grade3/17-creator-after-no-m390.png
+- scratchpad/grade3/18-creator-accepted-d1280.png
+- scratchpad/grade3/18-creator-accepted-m390-view.png
+- scratchpad/grade3/18-creator-accepted-m390.png
+- scratchpad/grade3/19-creator-deliver-empty-error-m390-view.png
+- scratchpad/grade3/19-creator-deliver-empty-error-m390.png
+- scratchpad/grade3/20-creator-delivered-d1280.png
+- scratchpad/grade3/20-creator-delivered-m390.png
+- scratchpad/grade3/21-creator-me-after-d1280.png
+- scratchpad/grade3/21-creator-me-after-m390.png
+- scratchpad/grade3/21b-creator2-me-before-m390.png
+- scratchpad/grade3/21c-creator2-decision-m390-view.png
+- scratchpad/grade3/21c-creator2-decision-m390.png
+- scratchpad/grade3/21d-creator2-delivered-m390.png
+- scratchpad/grade3/22-client-me-delivered-d1280.png
+- scratchpad/grade3/22-client-me-delivered-m390-view.png
+- scratchpad/grade3/22-client-me-delivered-m390.png
+- scratchpad/grade3/23-client-request-delivered-d1280.png
+- scratchpad/grade3/23-client-request-delivered-m390-view.png
+- scratchpad/grade3/23-client-request-delivered-m390.png
+- scratchpad/grade3/24-client-complete-confirm-d1280.png
+- scratchpad/grade3/24-client-complete-confirm-m390-view.png
+- scratchpad/grade3/24-client-complete-confirm-m390.png
+- scratchpad/grade3/25-client-request-completed-d1280.png
+- scratchpad/grade3/25-client-request-completed-m390.png
+- scratchpad/grade3/26-client-me-completed-m390.png
+- scratchpad/grade3/27-creator-me-completed-m390.png
+- scratchpad/grade3/28-client2-me-before-m390.png
+- scratchpad/grade3/29-open-form-d1280.png
+- scratchpad/grade3/29-open-form-m390.png
+- scratchpad/grade3/30-open-empty-error-m390-view.png
+- scratchpad/grade3/30-open-empty-error-m390.png
+- scratchpad/grade3/31-open-price-error-m390-view.png
+- scratchpad/grade3/31-open-price-error-m390.png
+- scratchpad/grade3/32-open-done-me-d1280.png
+- scratchpad/grade3/32-open-done-me-m390-view.png
+- scratchpad/grade3/32-open-done-me-m390.png
+- scratchpad/grade3/33-home-with-new-m390.png
+- scratchpad/grade3/34-me-closed-d1280.png
+- scratchpad/grade3/34-me-closed-m390.png
+- scratchpad/grade3/35-home-after-close-m390.png
+- scratchpad/grade3/36-closed-detail-as-owner-m390.png
+- scratchpad/grade3/37-me-reopened-m390.png
+- scratchpad/grade3/38-creator2-me-d1280.png
+- scratchpad/grade3/38-creator2-me-m390.png
+- scratchpad/grade3/39-closed-sns-detail-owner-m390.png
+- scratchpad/grade3/40-404-commission-d1280.png
+- scratchpad/grade3/40-404-commission-m390.png
+- scratchpad/grade3/41-404-request-m390.png
+
+---
 
 ## 2회차 (2026-09-02)
 

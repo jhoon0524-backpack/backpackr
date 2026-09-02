@@ -21,14 +21,14 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
   // 의뢰는 당사자만 본다. 남의 의뢰 주소를 알아도 내용이 보이면 안 된다.
   if (!isCreator && !isClient) notFound()
 
-  const s = REQUEST_STATUS[r.status] ?? { text: r.status, tone: 'bg-fill text-muted' }
+  const s = REQUEST_STATUS[r.status] ?? { text: r.status, tone: 'bg-fill text-strong' }
   const price = r.final_price ?? r.quoted_price
   const active = r.status === 'accepted' || r.status === 'delivered'
 
   return (
     <div>
       <div className="mb-6">
-        <Link href="/me" className={BACK}>← 내 작업실</Link>
+        <Link href="/me" className={BACK}>← 내 페이지</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="serif text-[30px] font-bold leading-tight tracking-tight sm:text-[36px]">
             <Link href={`/commissions/${r.commission_id}`} className="inline-flex min-h-11 items-center hover:underline">{r.commission_title}</Link>

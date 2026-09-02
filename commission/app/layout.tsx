@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 const NAV = [
   { href: "/", label: "둘러보기" },
   { href: "/open", label: "작업실 열기" },
-  { href: "/me", label: "내 작업실" },
+  { href: "/me", label: "내 페이지" },
 ] as const;
 
 /**

@@ -59,8 +59,8 @@ export const REQUEST_STATUS: Record<string, { text: string; tone: string }> = {
   accepted: { text: '작업 중', tone: 'bg-urgent-wash text-urgent-text' },
   delivered: { text: '전달됨 · 확인 대기', tone: 'bg-good-wash text-good' },
   completed: { text: '완료', tone: 'bg-emerald-50 text-emerald-700' },
-  declined: { text: '거절됨', tone: 'bg-fill text-muted' },
-  cancelled: { text: '취소됨', tone: 'bg-fill text-muted' },
+  declined: { text: '거절됨', tone: 'bg-fill text-strong' },
+  cancelled: { text: '취소됨', tone: 'bg-fill text-strong' },
 }
 
 /** DB 함수가 돌려주는 거부 사유를 사람 말로. */

@@ -50,7 +50,7 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
           <span className={HELP}>기본 가격에서 조정할 수 있습니다.</span>
         </label>
         {/* 결정에 필요한 숫자를 실제 값으로. "작업 기간만큼" 이라고만 적혀 있어 며칠인지 알 수 없었다 (UI/UX 1회차 발견 1). */}
-        <dl className="num grid grid-cols-2 gap-y-1 bg-fill px-4 py-3 text-sm">
+        <dl className="num grid grid-cols-2 gap-y-1 border border-line bg-white px-4 py-3 text-sm">
           <dt className="text-muted">마감일</dt>
           <dd className="font-semibold">{kstDate(dueAt)} <span className="font-normal text-muted">({daysLeft(dueAt)}일 뒤)</span></dd>
           <dt className="text-muted">남은 자리</dt>

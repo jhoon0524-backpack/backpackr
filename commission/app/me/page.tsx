@@ -9,7 +9,7 @@ import { toggleCommission } from './actions'
 export const dynamic = 'force-dynamic'
 
 export function StatusBadge({ status }: { status: string }) {
-  const s = REQUEST_STATUS[status] ?? { text: status, tone: 'bg-fill text-muted' }
+  const s = REQUEST_STATUS[status] ?? { text: status, tone: 'bg-fill text-strong' }
   return <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${s.tone}`}>{s.text}</span>
 }
 
@@ -19,7 +19,7 @@ function RequestLine({ r, who }: { r: RequestRow; who: 'creator' | 'client' }) {
   const active = r.status === 'accepted' || r.status === 'delivered'
   return (
     <li>
-      <Link href={`/requests/${r.id}`} className="flex items-center justify-between gap-4 py-4 -mx-2 rounded-sm px-2 hover:bg-fill">
+      <Link href={`/requests/${r.id}`} className="flex items-center justify-between gap-4 py-4 -mx-2 rounded-sm px-2 hover:bg-white">
         <div className="min-w-0">
           <p className="serif truncate text-[17px] font-bold">{r.commission_title}</p>
           <p className="mt-1 truncate text-sm text-muted">
@@ -85,7 +85,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <div className="flex flex-col gap-2">
-        <p className={EYEBROW}>내 작업실</p>
+        <p className={EYEBROW}>내 페이지</p>
         <h1 className="serif text-[36px] font-bold leading-tight tracking-tight">{me.nickname}</h1>
         {me.bio && <p className="text-[15px] leading-relaxed text-strong">{me.bio}</p>}
       </div>
