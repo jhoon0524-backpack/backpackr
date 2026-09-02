@@ -8,10 +8,11 @@ import { Photo } from './photo'
  * 자리가 없거나 닫혔으면 회색으로 물러난다.
  */
 export function SlotText({ active, max, status }: { active: number; max: number; status: string }) {
-  if (status === 'closed') return <span className="font-semibold text-muted">마감</span>
+  // "마감" 이라고 하면 마감일과 헷갈린다 (UI/UX 1회차 발견 5). 닫은 것은 "닫힘", 마감은 날짜에만 쓴다.
+  if (status === 'closed') return <span className="font-semibold text-muted">닫힘</span>
   const left = max - active
   if (left <= 0) return <span className="font-semibold text-muted">자리 없음</span>
-  return <span className="num font-bold text-accent-deep">{left}자리 남음</span>
+  return <span className="num font-bold text-urgent-text">{left}자리 남음</span>
 }
 
 /**

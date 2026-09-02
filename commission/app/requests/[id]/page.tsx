@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getRequest } from '@/lib/db'
 import { REQUEST_STATUS, daysLeft, kst, kstDate, won } from '@/lib/format'
 import { getCurrentUser } from '@/lib/session'
+import { BACK, LINK, NOTICE } from '@/app/ui'
 import { CreatorDecision, DeliverForm, OneButton } from './forms'
 
 export const dynamic = 'force-dynamic'
@@ -27,8 +28,8 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
   return (
     <div>
       <div className="mb-6">
-        <Link href="/me" className="text-sm text-muted hover:text-ink">← 마이페이지</Link>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Link href="/me" className={BACK}>← 마이페이지</Link>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-[26px] font-bold leading-tight tracking-tight">
             <Link href={`/commissions/${r.commission_id}`} className="hover:underline">{r.commission_title}</Link>
           </h1>
@@ -40,7 +41,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
       </div>
 
       {sp.sent && (
-        <p className="mb-6 rounded-lg bg-sky-wash px-4 py-3 text-sm text-sky">
+        <p className={NOTICE + ' mb-6'}>
           의뢰를 보냈습니다. 창작자가 수락하면 여기서 최종가와 마감일을 볼 수 있습니다.
         </p>
       )}
@@ -52,7 +53,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
             <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-strong">{r.brief}</p>
             {r.reference_url && (
               <p className="mt-3 text-sm">
-                참고 링크 <a href={r.reference_url} target="_blank" rel="noreferrer" className="break-all font-medium text-sky underline">{r.reference_url}</a>
+                참고 링크 <a href={r.reference_url} target="_blank" rel="noreferrer" className={LINK}>{r.reference_url}</a>
               </p>
             )}
           </section>
@@ -68,7 +69,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
             <section className="mt-8 border-t border-line pt-6">
               <h2 className="text-lg font-bold">전달된 결과물</h2>
               {r.delivery_url && (
-                <a href={r.delivery_url} target="_blank" rel="noreferrer" className="mt-3 block break-all font-medium text-sky underline">{r.delivery_url}</a>
+                <a href={r.delivery_url} target="_blank" rel="noreferrer" className={LINK + ' mt-2'}>{r.delivery_url}</a>
               )}
               {r.delivery_note && <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-strong">{r.delivery_note}</p>}
             </section>
@@ -89,8 +90,12 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
           <div className="rounded-lg border border-line p-6">
             <dl className="space-y-4">
               <div>
-                <dt className="text-sm text-muted">{r.final_price === null ? '기본가' : '최종가'}</dt>
+                {/* 커미션 상세와 같은 말 "기본 가격". 수락 전 금액이 확정가처럼 읽히지 않게 한 줄 덧붙인다 (UI/UX 1회차 발견 7). */}
+                <dt className="text-sm text-muted">{r.final_price === null ? '기본 가격' : '최종가'}</dt>
                 <dd className="num mt-1 text-[28px] font-bold leading-none">{won(price)}</dd>
+                {r.final_price === null && r.status === 'requested' && (
+                  <dd className="mt-2 text-[13px] text-muted">창작자가 수락하며 최종가를 정합니다.</dd>
+                )}
               </div>
               {r.due_at && (
                 <div>
@@ -98,7 +103,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
                   <dd className="num mt-1 text-xl font-bold">
                     {kstDate(r.due_at)}
                     {active && (
-                      <span className={`ml-2 text-sm font-semibold ${daysLeft(r.due_at) < 0 ? 'text-urgent' : 'text-muted'}`}>
+                      <span className={`ml-2 text-sm font-semibold ${daysLeft(r.due_at) < 0 ? 'text-urgent-text' : 'text-muted'}`}>
                         {daysLeft(r.due_at) < 0 ? `${-daysLeft(r.due_at)}일 지남` : `${daysLeft(r.due_at)}일 남음`}
                       </span>
                     )}
@@ -108,7 +113,10 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
             </dl>
 
             <div className="mt-6 border-t border-line pt-6">
-              {isCreator && r.status === 'requested' && <CreatorDecision id={r.id} quotedPrice={r.quoted_price} />}
+              {isCreator && r.status === 'requested' && (
+                <CreatorDecision id={r.id} quotedPrice={r.quoted_price} maxSlots={r.max_slots} activeCount={r.active_count}
+                  dueAtIfNow={r.due_at_if_now.toISOString()} />
+              )}
               {isCreator && r.status === 'accepted' && <DeliverForm id={r.id} />}
               {isCreator && r.status === 'delivered' && <p className="text-sm text-muted">의뢰인이 확인하면 완료됩니다.</p>}
               {isClient && r.status === 'requested' && (
@@ -117,7 +125,8 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
               {isClient && r.status === 'accepted' && <p className="text-sm text-muted">창작자가 작업 중입니다. 전달되면 여기서 확인합니다.</p>}
               {isClient && r.status === 'delivered' && (
                 <OneButton id={r.id} kind="complete" label="결과물 확인 · 완료" tone="primary"
-                  help="확인을 누르면 의뢰가 끝나고 창작자의 자리가 하나 빕니다. 되돌릴 수 없습니다." />
+                  help="확인을 누르면 의뢰가 끝나고 창작자의 자리가 하나 빕니다."
+                  confirm="결과물을 확인했고 이 의뢰를 끝냅니다. 끝낸 뒤에는 되돌릴 수 없습니다." />
               )}
               {['completed', 'declined', 'cancelled'].includes(r.status) && (
                 <p className="text-sm text-muted">끝난 의뢰입니다.</p>

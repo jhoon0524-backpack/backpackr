@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { listIncomingRequests, listMyCommissions, listMyRequests, type RequestRow } from '@/lib/db'
-import { REQUEST_STATUS, daysLeft, kstDate, won } from '@/lib/format'
+import { REQUEST_STATUS, daysLeft, kstMonthDay, won } from '@/lib/format'
 import { getCurrentUser } from '@/lib/session'
 import { SlotText } from '@/app/commission-card'
-import { BTN_PILL, BTN_PRIMARY } from '@/app/ui'
+import { BTN_PILL, BTN_PRIMARY, NOTICE } from '@/app/ui'
 import { toggleCommission } from './actions'
 
 export const dynamic = 'force-dynamic'
@@ -25,11 +25,14 @@ function RequestLine({ r, who }: { r: RequestRow; who: 'creator' | 'client' }) {
           <p className="mt-1 truncate text-sm text-muted">
             {who === 'creator' ? r.client_nickname : r.creator_nickname}
             <span className="num"> · {won(price)}</span>
-            {r.final_price === null && ' (기본가)'}
-            {active && r.due_at && (
-              <span className="num"> · 마감 {kstDate(r.due_at)}{daysLeft(r.due_at) < 0 ? ' (지남)' : ` (${daysLeft(r.due_at)}일 남음)`}</span>
-            )}
+            {r.final_price === null && ' (기본 가격)'}
           </p>
+          {/* 마감은 셋째 줄에 따로. 둘째 줄에 붙이면 390 에서 말줄임표로 사라졌다 (UI/UX 1회차 발견 3). 놓치면 손해 보는 숫자다. */}
+          {active && r.due_at && (
+            <p className={`num mt-1 text-sm ${daysLeft(r.due_at) < 0 ? 'font-semibold text-urgent-text' : 'text-strong'}`}>
+              마감 {kstMonthDay(r.due_at)}{daysLeft(r.due_at) < 0 ? ` · ${-daysLeft(r.due_at)}일 지남` : ` · ${daysLeft(r.due_at)}일 남음`}
+            </p>
+          )}
         </div>
         <StatusBadge status={r.status} />
       </Link>
@@ -43,7 +46,7 @@ function Section({ title, count, children }: { title: string; count?: number; ch
       <h2 className="flex items-center gap-2 border-b border-ink pb-3 text-lg font-bold">
         {title}
         {count !== undefined && count > 0 && (
-          <span className="num rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-white">{count}</span>
+          <span className="num rounded-full bg-ink px-2 py-0.5 text-xs font-bold text-white">{count}</span>
         )}
       </h2>
       {children}
@@ -67,6 +70,18 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
   ])
   const pendingCount = incoming.filter((r) => r.status === 'requested').length
 
+  const myRequestsSection = (
+    <Section title="내가 넣은 의뢰">
+      {mine.length === 0 ? (
+        <p className="py-8 text-center text-sm text-muted">
+          넣은 의뢰가 없습니다. <Link href="/" className="inline-flex min-h-11 items-center font-semibold text-ink underline">커미션 둘러보기</Link>
+        </p>
+      ) : (
+        <ul className="divide-y divide-line">{mine.map((r) => <RequestLine key={r.id} r={r} who="client" />)}</ul>
+      )}
+    </Section>
+  )
+
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <div>
@@ -75,12 +90,21 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
       </div>
 
       {sp.opened && (
-        <p className="rounded-lg bg-sky-wash px-4 py-3 text-sm text-sky">커미션을 열었습니다. 둘러보기 목록에 바로 보입니다.</p>
+        <p className={NOTICE}>커미션을 열었습니다. 둘러보기 목록에 바로 보입니다.</p>
       )}
+
+      {/*
+        의뢰인에게는 빈 "들어온 의뢰" 두 칸을 지나야 자기 의뢰가 보였다 (UI/UX 1회차 발견 9).
+        연 커미션이 없고 넣은 의뢰가 있으면 "내가 넣은 의뢰" 를 먼저 보여 준다.
+      */}
+      {myCommissions.length === 0 && mine.length > 0 && myRequestsSection}
 
       <Section title="들어온 의뢰" count={pendingCount}>
         {incoming.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted">아직 들어온 의뢰가 없습니다.</p>
+          <p className="py-8 text-center text-sm text-muted">
+            아직 들어온 의뢰가 없습니다.
+            {myCommissions.length === 0 && <><br />커미션을 열면 의뢰가 여기로 들어옵니다.</>}
+          </p>
         ) : (
           <ul className="divide-y divide-line">{incoming.map((r) => <RequestLine key={r.id} r={r} who="creator" />)}</ul>
         )}
@@ -100,7 +124,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
                   <Link href={`/commissions/${c.id}`} className="block truncate text-[15px] font-semibold hover:underline">{c.title}</Link>
                   <p className="mt-1 text-sm text-muted">
                     <SlotText active={c.active_count} max={c.max_slots} status={c.status} />
-                    <span className="num"> · {won(c.price)}~ · 진행 {c.active_count}/{c.max_slots}</span>
+                    <span className="num"> · {won(c.price)}~ · 동시 진행 {c.active_count}/{c.max_slots}</span>
                   </p>
                 </div>
                 <form action={toggleCommission}>
@@ -114,15 +138,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
         )}
       </Section>
 
-      <Section title="내가 넣은 의뢰">
-        {mine.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted">
-            넣은 의뢰가 없습니다. <Link href="/" className="font-semibold text-ink underline">커미션 둘러보기</Link>
-          </p>
-        ) : (
-          <ul className="divide-y divide-line">{mine.map((r) => <RequestLine key={r.id} r={r} who="client" />)}</ul>
-        )}
-      </Section>
+      {!(myCommissions.length === 0 && mine.length > 0) && myRequestsSection}
     </div>
   )
 }

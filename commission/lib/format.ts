@@ -38,6 +38,12 @@ export function kstDate(d: Date | string) {
   return `${p.year}년 ${Number(p.month)}월 ${Number(p.day)}일`
 }
 
+/** 월·일만. 좁은 화면 목록에서. 예: 9월 17일 */
+export function kstMonthDay(d: Date | string) {
+  const p = parts(d)
+  return `${Number(p.month)}월 ${Number(p.day)}일`
+}
+
 /** 마감일까지 남은 날. 지났으면 음수. 한국 시간 기준 날짜 차이다. */
 export function daysLeft(due: Date | string, now: Date = new Date()) {
   const day = (d: Date | string) => {
@@ -49,8 +55,8 @@ export function daysLeft(due: Date | string, now: Date = new Date()) {
 
 /** 의뢰 상태 문구. 화면마다 다르게 쓰지 않도록 한 곳에 둔다. */
 export const REQUEST_STATUS: Record<string, { text: string; tone: string }> = {
-  requested: { text: '수락 대기', tone: 'bg-sky-wash text-sky' },
-  accepted: { text: '작업 중', tone: 'bg-urgent-wash text-accent-deep' },
+  requested: { text: '수락 대기', tone: 'bg-good-wash text-good' },
+  accepted: { text: '작업 중', tone: 'bg-urgent-wash text-urgent-text' },
   delivered: { text: '전달됨 · 확인 대기', tone: 'bg-good-wash text-good' },
   completed: { text: '완료', tone: 'bg-emerald-50 text-emerald-700' },
   declined: { text: '거절됨', tone: 'bg-fill text-muted' },

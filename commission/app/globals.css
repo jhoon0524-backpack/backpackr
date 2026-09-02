@@ -40,6 +40,8 @@
   /* Background/Accent — 텀블벅의 "후원하기" 버튼색. 흰 글자는 굵은 16px 이상에서만 얹는다 (대비 3.4). */
   --color-accent: #f86453;
   --color-accent-deep: #eb4b38;
+  /* 작은 피치색 글자용. #EB4B38 은 흰 바탕에서 3.75 라 14px 글자에 못 쓴다 (UI/UX 1회차 발견 6). 이 값은 5.5. */
+  --color-urgent-text: #c0361f;
   --color-sky: #1593f3;
   --color-sky-wash: #f3faff;
   --color-card: #ffffff;

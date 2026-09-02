@@ -1,7 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { MoneyInput } from '@/app/money-input'
+import { daysLeft, kstDate } from '@/lib/format'
 import { ALERT, BTN_PRIMARY, BTN_SECONDARY, HELP, INPUT, LABEL } from '@/app/ui'
 import { actOnRequest, type ActionState } from './actions'
 
@@ -10,9 +11,33 @@ function Alert({ state }: { state: ActionState }) {
   return <p role="alert" className={ALERT}>{state.message}</p>
 }
 
+/**
+ * 되돌릴 수 없는 버튼은 한 번 더 묻는다 (UI/UX 1회차 발견 1·2, SPEC 5장).
+ * 브라우저의 confirm() 은 버튼 글자가 브라우저 언어라 쓰지 않는다. 화면 안에서 묻는다.
+ * 첫 버튼은 제출이 아니라 "묻기" 이고, 확인 상자 안의 버튼이 진짜 제출이다.
+ */
+function Confirm({ message, submitLabel, pending, onCancel }: {
+  message: React.ReactNode; submitLabel: string; pending: boolean; onCancel: () => void
+}) {
+  return (
+    <div role="alertdialog" className="space-y-3 rounded-lg border-2 border-ink p-4">
+      <p className="text-sm leading-relaxed text-ink">{message}</p>
+      <button type="submit" disabled={pending} className={BTN_PRIMARY}>{pending ? '처리 중…' : submitLabel}</button>
+      <button type="button" disabled={pending} onClick={onCancel} className={BTN_SECONDARY}>아니오, 돌아가기</button>
+    </div>
+  )
+}
+
 /** 창작자: 수락(최종가 입력) 또는 거절(사유 입력). 텀블벅 리워드 카드처럼 테두리 상자 둘이다. */
-export function CreatorDecision({ id, quotedPrice }: { id: string; quotedPrice: number }) {
+export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeCount }: {
+  id: string; quotedPrice: number; dueAtIfNow: string; maxSlots: number; activeCount: number
+}) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
+  const [arming, setArming] = useState(false)
+  // 서버가 수락 시각 + 작업 기간으로 박는다. 여기서는 서버가 미리 계산해 준 값을 보여 줄 뿐이다.
+  const dueAt = dueAtIfNow
+  const left = maxSlots - activeCount
+
   return (
     <div className="space-y-4">
       <form action={action} className="space-y-4 rounded-lg border border-line p-5">
@@ -22,9 +47,21 @@ export function CreatorDecision({ id, quotedPrice }: { id: string; quotedPrice: 
         <label className="block">
           <span className={LABEL}>최종가</span>
           <MoneyInput name="finalPrice" defaultValue={quotedPrice} className={INPUT + ' pr-9'} />
-          <span className={HELP}>기본가에서 조정할 수 있습니다. 수락하면 오늘부터 작업 기간만큼의 마감일이 정해지고 자리 하나를 차지합니다.</span>
+          <span className={HELP}>기본 가격에서 조정할 수 있습니다.</span>
         </label>
-        <button type="submit" disabled={pending} className={BTN_PRIMARY}>{pending ? '처리 중…' : '이 가격으로 수락'}</button>
+        {/* 결정에 필요한 숫자를 실제 값으로. "작업 기간만큼" 이라고만 적혀 있어 며칠인지 알 수 없었다 (UI/UX 1회차 발견 1). */}
+        <dl className="num grid grid-cols-2 gap-y-1 rounded-lg bg-paper px-4 py-3 text-sm">
+          <dt className="text-muted">마감일</dt>
+          <dd className="font-semibold">{kstDate(dueAt)} <span className="font-normal text-muted">({daysLeft(dueAt)}일 뒤)</span></dd>
+          <dt className="text-muted">남은 자리</dt>
+          <dd className="font-semibold">{left} → {left - 1} <span className="font-normal text-muted">/ {maxSlots}</span></dd>
+        </dl>
+        {arming ? (
+          <Confirm pending={pending} submitLabel="수락 확정" onCancel={() => setArming(false)}
+            message={<>이 가격으로 수락하면 마감일이 <b className="num">{kstDate(dueAt)}</b>로 정해지고 자리 하나를 차지합니다. 수락한 뒤에는 되돌릴 수 없습니다.</>} />
+        ) : (
+          <button type="button" onClick={() => setArming(true)} className={BTN_PRIMARY}>이 가격으로 수락</button>
+        )}
       </form>
       <form action={action} className="space-y-4 rounded-lg border border-line p-5">
         <input type="hidden" name="id" value={id} />
@@ -61,18 +98,24 @@ export function DeliverForm({ id }: { id: string }) {
   )
 }
 
-/** 버튼 하나짜리 동작: 의뢰인의 취소, 의뢰인의 완료 확정. */
-export function OneButton({ id, kind, label, help, tone = 'secondary' }: {
-  id: string; kind: 'cancel' | 'complete'; label: string; help: string; tone?: 'primary' | 'secondary'
+/** 버튼 하나짜리 동작: 의뢰인의 취소, 의뢰인의 완료 확정. `confirm` 이 있으면 한 번 더 묻는다. */
+export function OneButton({ id, kind, label, help, tone = 'secondary', confirm }: {
+  id: string; kind: 'cancel' | 'complete'; label: string; help: string; tone?: 'primary' | 'secondary'; confirm?: string
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
+  const [arming, setArming] = useState(false)
+  const cls = tone === 'primary' ? BTN_PRIMARY : BTN_SECONDARY
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="kind" value={kind} />
-      <button type="submit" disabled={pending} className={tone === 'primary' ? BTN_PRIMARY : BTN_SECONDARY}>
-        {pending ? '처리 중…' : label}
-      </button>
+      {confirm && arming ? (
+        <Confirm pending={pending} submitLabel={label} onCancel={() => setArming(false)} message={confirm} />
+      ) : confirm ? (
+        <button type="button" onClick={() => setArming(true)} className={cls}>{label}</button>
+      ) : (
+        <button type="submit" disabled={pending} className={cls}>{pending ? '처리 중…' : label}</button>
+      )}
       <p className="text-center text-[13px] text-muted">{help}</p>
       <Alert state={state} />
     </form>

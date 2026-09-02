@@ -53,6 +53,8 @@ export type CommissionDetail = CommissionCard & {
   description: string
   sample_urls: string[]
   creator_bio: string | null
+  /** 자리가 꽉 찼을 때 가장 먼저 비는 시점(진행 중 의뢰의 가장 이른 마감일). 진행 중이 없으면 null. */
+  next_free_at: Date | null
 }
 
 export async function getCommission(id: string): Promise<CommissionDetail | null> {
@@ -61,6 +63,8 @@ export async function getCommission(id: string): Promise<CommissionDetail | null
     `select c.id, c.creator_id, c.title, c.description, c.category, c.price, c.turnaround_days,
             c.max_slots, c.status, c.sample_urls, c.sample_urls[1] as cover_url,
             active_request_count(c.id) as active_count,
+            (select min(r.due_at) from requests r
+              where r.commission_id = c.id and r.status in ('accepted', 'delivered')) as next_free_at,
             p.nickname as creator_nickname, p.bio as creator_bio
        from commissions c join profiles p on p.id = c.creator_id
       where c.id = $1`,
@@ -139,6 +143,12 @@ export type RequestRow = {
   delivery_note: string | null
   completed_at: Date | null
   created_at: Date
+  /** 수락 화면이 마감일과 자리를 실제 값으로 보여 주려고 커미션 쪽 숫자를 함께 읽는다 (UI/UX 1회차 발견 1). */
+  turnaround_days: number
+  max_slots: number
+  active_count: number
+  /** 지금 수락하면 박힐 마감일. 화면이 시계를 직접 읽지 않도록 DB 가 계산한다. */
+  due_at_if_now: Date
 }
 
 const REQUEST_SELECT = `
@@ -146,7 +156,9 @@ const REQUEST_SELECT = `
          creator.nickname as creator_nickname, r.client_id, client.nickname as client_nickname,
          r.brief, r.reference_url, r.status, r.quoted_price, r.final_price, r.decline_reason,
          r.accepted_at, r.due_at, r.delivered_at, r.delivery_url, r.delivery_note, r.completed_at,
-         r.created_at
+         r.created_at,
+         c.turnaround_days, c.max_slots, active_request_count(c.id) as active_count,
+         now() + make_interval(days => c.turnaround_days) as due_at_if_now
     from requests r
     join commissions c on c.id = r.commission_id
     join profiles creator on creator.id = c.creator_id
