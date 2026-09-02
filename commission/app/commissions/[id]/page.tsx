@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCommission } from '@/lib/db'
-import { kstDate, won } from '@/lib/format'
+import { comma, kstDate, trustFromFunding, won } from '@/lib/format'
 import { getCurrentUser } from '@/lib/session'
 import { Photo } from '@/app/photo'
 import { SlotText } from '@/app/commission-card'
@@ -19,6 +19,11 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
   const [c, me] = await Promise.all([getCommission(id), getCurrentUser()])
   if (!c) notFound()
 
+  const trust = trustFromFunding({
+    backer_count: c.creator_backer_count,
+    satisfaction: c.creator_satisfaction,
+    satisfaction_count: c.creator_satisfaction_count,
+  })
   const isMine = me?.id === c.creator_id
   const left = c.max_slots - c.active_count
   const canRequest = !!me && !isMine && c.status === 'open' && left > 0
@@ -55,6 +60,18 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
             <p className={EYEBROW}>{c.category} · {c.creator_nickname}</p>
             <h1 className="disp text-[38px] leading-[1.05] text-ink sm:text-[52px]">{c.title}</h1>
             {c.creator_bio && <p className="text-[15px] font-medium leading-relaxed text-strong">{c.creator_bio}</p>}
+            {/*
+              텀블벅 펀딩 이력. 이 서비스의 차별점이 여기 한 줄에 걸려 있다 —
+              신규 커미션 플랫폼은 후기 0에서 시작하지만 여기는 첫날부터 차 있다.
+              목록 카드에는 일부러 넣지 않았다. 카드마다 숫자를 박으면 상위 몇 명에게 의뢰가 쏠리는데,
+              커미션은 오히려 작은 창작자에게 더 필요한 수입원이다. 결정 직전인 상세에서만 보여준다.
+            */}
+            {trust && (
+              <p className="num mt-1 inline-flex flex-wrap items-center gap-x-2 self-start border-2 border-ink bg-yellow px-3 py-1.5 text-sm font-bold text-ink">
+                <span>텀블벅 후원자 {comma(trust.backers)}명</span>
+                {trust.satisfaction !== null && <span>· 만족도 {trust.satisfaction.toFixed(1)}</span>}
+              </p>
+            )}
           </div>
 
           <dl className="num mt-6 grid grid-cols-3 border-[3px] border-ink bg-white shadow-hard">

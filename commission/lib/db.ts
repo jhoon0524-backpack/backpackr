@@ -53,6 +53,10 @@ export type CommissionDetail = CommissionCard & {
   description: string
   sample_urls: string[]
   creator_bio: string | null
+  /** 텀블벅 펀딩 이력. 지금은 시연용 더미다 — 본 서비스와 연결되어 있지 않다. */
+  creator_backer_count: number
+  creator_satisfaction: number | null
+  creator_satisfaction_count: number
   /** 자리가 꽉 찼을 때 가장 먼저 비는 시점(진행 중 의뢰의 가장 이른 마감일). 진행 중이 없으면 null. */
   next_free_at: Date | null
 }
@@ -65,7 +69,11 @@ export async function getCommission(id: string): Promise<CommissionDetail | null
             active_request_count(c.id) as active_count,
             (select min(r.due_at) from requests r
               where r.commission_id = c.id and r.status in ('accepted', 'delivered')) as next_free_at,
-            p.nickname as creator_nickname, p.bio as creator_bio
+            p.nickname as creator_nickname, p.bio as creator_bio,
+            p.backer_count as creator_backer_count,
+            -- numeric 은 pg 드라이버가 문자열로 준다. 화면이 숫자로 받게 여기서 캐스팅한다.
+            p.satisfaction::float8 as creator_satisfaction,
+            p.satisfaction_count as creator_satisfaction_count
        from commissions c join profiles p on p.id = c.creator_id
       where c.id = $1`,
     [id],

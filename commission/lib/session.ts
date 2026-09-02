@@ -12,11 +12,25 @@ export async function getCurrentUserId() {
   return jar.get('demo_user')?.value ?? null
 }
 
-export type CurrentUser = { id: string; nickname: string; bio: string | null }
+export type CurrentUser = {
+  id: string
+  nickname: string
+  bio: string | null
+  /** 텀블벅 펀딩 이력. 지금은 시연용 더미다 — 본 서비스와 연결되어 있지 않다. */
+  backer_count: number
+  satisfaction: number | null
+  satisfaction_count: number
+  follower_count: number
+}
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const id = await getCurrentUserId()
   if (!id) return null
-  const { rows } = await pool.query<CurrentUser>(`select id, nickname, bio from profiles where id = $1`, [id])
+  const { rows } = await pool.query<CurrentUser>(
+    `select id, nickname, bio, backer_count, satisfaction::float8 as satisfaction,
+            satisfaction_count, follower_count
+       from profiles where id = $1`,
+    [id],
+  )
   return rows[0] ?? null
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { listIncomingRequests, listMyCommissions, listMyRequests, type RequestRow } from '@/lib/db'
-import { REQUEST_STATUS, daysLeft, kstMonthDay, won } from '@/lib/format'
+import { REQUEST_STATUS, comma, daysLeft, kstMonthDay, trustFromFunding, won } from '@/lib/format'
 import { getCurrentUser } from '@/lib/session'
 import { BTN_INK, BTN_PILL, EYEBROW, H2, NOTICE } from '@/app/ui'
 import { toggleCommission } from './actions'
@@ -66,6 +66,10 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
     )
   }
 
+  // 본인이 보는 화면이라 팔로워까지 함께 낸다. 팔로워는 신뢰 지표로는 약해서 의뢰인에게는 안 보여준다.
+  // (메뉴를 붙이면 팔로워에게 알림이 가는 것은 아직 아니다 — 알림 기능이 붙어야 참이 된다. TASKS.md)
+  const trust = trustFromFunding(me)
+
   const [mine, incoming, myCommissions] = await Promise.all([
     listMyRequests(me.id), listIncomingRequests(me.id), listMyCommissions(me.id),
   ])
@@ -89,6 +93,13 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
         <p className={EYEBROW}>내 것</p>
         <h1 className="disp text-[44px] leading-none">{me.nickname}</h1>
         {me.bio && <p className="text-[15px] font-medium leading-relaxed text-strong">{me.bio}</p>}
+        {trust && (
+          <p className="num mt-1 inline-flex flex-wrap items-center gap-x-2 self-start border-2 border-ink bg-yellow px-3 py-1.5 text-sm font-bold text-ink">
+            <span>텀블벅 후원자 {comma(trust.backers)}명</span>
+            {trust.satisfaction !== null && <span>· 만족도 {trust.satisfaction.toFixed(1)}</span>}
+            <span>· 팔로워 {comma(me.follower_count)}명</span>
+          </p>
+        )}
       </div>
 
       {sp.opened && <p className={NOTICE}>메뉴를 붙였어요. 메뉴판에 바로 보여요.</p>}

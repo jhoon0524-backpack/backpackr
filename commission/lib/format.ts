@@ -53,6 +53,28 @@ export function daysLeft(due: Date | string, now: Date = new Date()) {
   return Math.round((day(due) - day(now)) / 86_400_000)
 }
 
+/**
+ * 텀블벅 펀딩 이력을 의뢰인에게 얼마나 보여줄지.
+ *
+ * 규칙 두 가지 —
+ * 1. 이력이 없으면 **아무것도 그리지 않는다.** "펀딩 이력 없음" 은 갓 시작한 창작자에게 낙인이 된다.
+ *    커미션은 오히려 작은 창작자에게 더 필요한 수입원이라, 없는 것을 굳이 말하지 않는다.
+ * 2. 만족도는 응답이 충분할 때만 낸다. 5명이 매긴 4.9 와 300명이 매긴 4.5 는 다른 숫자다.
+ */
+export const MIN_SATISFACTION_RESPONSES = 30
+
+export type FundingTrust = { backers: number; satisfaction: number | null }
+
+export function trustFromFunding(p: {
+  backer_count: number
+  satisfaction: number | null
+  satisfaction_count: number
+}): FundingTrust | null {
+  if (!p.backer_count) return null
+  const enough = p.satisfaction !== null && p.satisfaction_count >= MIN_SATISFACTION_RESPONSES
+  return { backers: p.backer_count, satisfaction: enough ? p.satisfaction : null }
+}
+
 /** 의뢰 상태 문구. 화면마다 다르게 쓰지 않도록 한 곳에 둔다. */
 export const REQUEST_STATUS: Record<string, { text: string; tone: string }> = {
   requested: { text: '수락 대기', tone: 'bg-white text-ink' },
