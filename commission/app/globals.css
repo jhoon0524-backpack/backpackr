@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+/*
+ * 이 서비스는 **밝은 화면 한 벌만** 쓴다.
+ *
+ * 왜 이걸 명시하나 —
+ * create-next-app 이 만들어 준 기본 globals.css 가 그대로 남아 있었고, 거기
+ * `@media (prefers-color-scheme: dark)` 가 배경을 #0a0a0a, 글자를 #ededed 로
+ * 바꿨다. 그런데 카드·헤더는 Tailwind 의 `bg-white` 라 흰색 그대로였다.
+ * 결과는 **흰 카드 위의 흰 글자** — 휴대폰을 어두운 테마로 쓰는 사람에게는
+ * 목록이 통째로 안 읽혔다 (실제 기기에서 발견).
+ *
+ * 게다가 그 `body { }` 규칙은 레이어 밖에 있어서, 레이어 안에 있는 Tailwind
+ * 유틸리티(`bg-zinc-50` `text-zinc-900`)를 **specificity 와 무관하게 항상 이긴다.**
+ * 그래서 레이아웃에 색을 적어 둔 것이 아무 소용이 없었다.
+ *
+ * 어두운 화면을 제대로 지원하려면 색을 한 벌 더 설계해야 한다. 지금 브랜드
+ * 색은 밝은 쪽 한 벌뿐이므로, 밝은 쪽만 쓴다고 브라우저에 알리는 쪽을 택했다.
+ * `only` 를 붙여야 브라우저가 제 마음대로 어둡게 뒤집지 않는다.
+ */
+:root {
+  color-scheme: only light;
+}
+
+/*
+ * 텀블벅 팀 라이브러리 "[Tumblbug] NEW Colors + Icons" 에서 읽은 실제 값.
+ * `design/_head.part` 의 토큰을 앱으로 옮긴 것이다 — 시안에만 있고 앱에는
+ * 한 번도 안 들어와 있었다. 앱은 Tailwind 기본 zinc 를 133번 쓰고 브랜드색은
+ * 0번 썼다. 그래서 상점이 아니라 관리자 화면처럼 보였다.
+ *
+ * 대비를 재 보고 쓰임을 갈랐다 (흰 바탕 기준) —
+ *   urgent #EB4B38 → 3.75. **큰 글자와 테두리·배경에만.** 작은 흰 글자를 얹으면 안 된다
+ *   good   #0152CC → 6.8.  작은 글자·흰 글자 배지 모두 안전하다
+ *   muted  #6D6D6D → 5.2.  본문 보조 글자로 안전
+ *   faint  #9E9E9E → 2.65. 그들 체계에서도 "Disabled" 다. 읽어야 하는 글자에 쓰지 않는다
+ */
+@theme {
+  --color-paper: #f8f8f8;
+  --color-card: #ffffff;
+  --color-ink: #0d0d0d;
+  --color-strong: #3d3d3d;
+  --color-muted: #6d6d6d;
+  --color-faint: #9e9e9e;
+  --color-line: #e4e4e4;
+  --color-fill: #f0f0f0;
+  --color-ash: #1c1c1c;
+  --color-urgent: #eb4b38;
+  --color-urgent-wash: #fff4f2;
+  --color-urgent-line: #ffdad5;
+  --color-good: #0152cc;
+  --color-good-wash: #f2f3ff;
+  --shadow-card: 0 0.8px 0 rgba(0, 0, 0, 0.031), 0 4px 12px rgba(0, 0, 0, 0.039);
+}
+
+@theme inline {
+  /*
+   * 전에는 `var(--font-geist-sans)` 를 가리켰는데 그 변수는 어디에도 정의된
+   * 적이 없다. 값이 비어 본문이 Arial 로 떨어졌고, 한글은 Arial 에 없으니
+   * 기기마다 제각각인 글꼴로 나왔다.
+   */
+  --font-sans: "Pretendard", "Pretendard Variable", "Apple SD Gothic Neo",
+    "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
