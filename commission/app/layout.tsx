@@ -60,7 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             ))}
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-24 pt-0">{children}</main>
+        <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-12 pt-0">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
         <footer className="border-t-[3px] border-white bg-ink text-white">
           {/*
@@ -69,7 +69,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             판권면으로 내린다 — 인쇄물에서 발행 정보가 있는 자리다.
           */}
           <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-8 py-9">
-            <p className="num text-[13px] font-bold text-white/70">
+            <p className="num text-[13px] font-bold text-white/80">
               커미션! · 2026년 9월호 · 창작자에게 맞춤 작업을 의뢰하는 곳 · © 2026
             </p>
             <UserSwitcher />
