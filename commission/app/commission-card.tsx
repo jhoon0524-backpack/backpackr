@@ -79,22 +79,29 @@ export function CommissionCard({ c }: { c: Card }) {
       href={`/commissions/${c.id}`}
       className="block border-b-[3px] border-ink py-6 transition hover:bg-yellow/25"
     >
-      <span className="block text-[11px] font-bold leading-none tracking-[0.14em] text-muted">{c.category}</span>
+      <span className="block text-[12px] font-bold leading-none tracking-[0.12em] text-strong">{c.category}</span>
 
       {/*
         메뉴판의 한 줄 — 이름과 값을 점선이 잇는다.
         표 머리를 두고 칸을 나눠 두면 그건 메뉴판이 아니라 표다. 인쇄된 메뉴판은 칸을 긋지 않는다.
         이름 다음에 바로 상태 딱지를 두고, 남은 자리는 점선이 채우고, 끝에 값이 선다.
       */}
-      <span className="mt-2 flex items-baseline gap-3">
-        <span className="disp shrink-0 text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
-          {c.title}
+      {/*
+        점선은 **정해진 칸에서 시작해 정해진 칸에서 끝난다.** 딱지가 끝나는 자리에서 시작하게 두면
+        줄마다 점선의 시작이 달라지고, 그러면 그건 구조가 아니라 그려 넣은 장식이다.
+      */}
+      <span className="mt-2 grid grid-cols-12 items-baseline gap-x-4 gap-y-2">
+        <span className="col-span-12 flex flex-wrap items-baseline gap-x-3 gap-y-2 lg:col-span-10">
+          <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
+            {c.title}
+          </span>
+          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
+          {/* 점은 이름 바로 뒤에서 시작해 값 칸 앞에서 끝난다. 끝나는 자리가 고정이라 줄마다 나란하다. */}
+          <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line lg:block" />
         </span>
-        {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
-        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        <span className="disp num ml-auto flex shrink-0 items-baseline text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
-          {comma(c.price)}
-          <span className="ml-1 text-[14px]">원부터</span>
+        <span className="disp num col-span-12 flex items-baseline justify-end text-[min(3.2vw,30px)] leading-none text-ink lg:col-span-2">
+          <span className={closed ? 'line-through decoration-[2px]' : ''}>{comma(c.price)}</span>
+          <span className="ml-1 w-[46px] shrink-0 text-left text-[15px]">원부터</span>
         </span>
       </span>
 

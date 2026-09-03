@@ -28,14 +28,14 @@ export default async function CommissionList() {
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
         <div className="mx-auto max-w-[1200px] px-8 pb-11 pt-6">
-          <p className="num text-[13px] font-bold text-white/60">
-            {MONTH.format(new Date())} 메뉴판 <span className="text-white/40">·</span> 메뉴 {commissions.length}개
+          <p className="num text-[13px] font-bold tracking-[0.06em] text-white/80">
+            {MONTH.format(new Date())} 메뉴판 <span className="text-white/50">·</span> 메뉴 {commissions.length}개
           </p>
           {/*
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster mt-4 whitespace-nowrap text-[min(10.6vw,152px)] leading-[0.9] text-white">
+          <h1 className="poster mt-4 whitespace-nowrap text-[min(11.2vw,160px)] leading-[0.9] text-white">
             자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
@@ -78,20 +78,18 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section className="relative left-1/2 -mx-[50vw] mt-16 w-screen border-t-[3px] border-ink bg-ink">
-      <div className="mx-auto max-w-[1200px] px-8 py-16">
-        <ol className="grid grid-cols-1 gap-x-8 gap-y-8 border-t-[3px] border-white pt-8 sm:grid-cols-2 lg:grid-cols-12">
-          {STEPS.map((s, i) => (
-            <li key={s.t} className="lg:col-span-3">
-              <span className="disp block text-[24px] leading-none text-white">
-                <span className="num mr-2 text-white/45">{i + 1}</span>
-                {s.t}
-              </span>
-              <span className="mt-3 block text-[15px] font-medium leading-relaxed text-white/70">{s.d}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
+    <section className="mt-16">
+      <ol className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-12">
+        {STEPS.map((s, i) => (
+          <li key={s.t} className="lg:col-span-3">
+            <span className="disp block text-[24px] leading-none text-ink">
+              <span className="num mr-2 text-muted">{i + 1}</span>
+              {s.t}
+            </span>
+            <span className="mt-3 block text-[15px] font-medium leading-relaxed text-muted">{s.d}</span>
+          </li>
+        ))}
+      </ol>
     </section>
   )
 }
@@ -108,7 +106,7 @@ function HowItWorks() {
  */
 function EmptyRow() {
   return (
-    <p className="border-b border-dashed border-ink/40 py-5 text-[15px] font-medium text-muted">
+    <p className="border-b-[3px] border-ink py-5 text-[15px] font-medium text-muted">
       그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.{' '}
       <Link href="/open" className="font-bold text-ink underline decoration-[2px] underline-offset-4">
         메뉴 붙이기
@@ -127,10 +125,10 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-flex items-end bg-yellow px-[0.09em] pb-[0.02em] text-[1.14em] leading-[0.78] text-ink">
+    <span className="num inline-flex items-end bg-yellow px-[0.08em] py-[0.05em] text-[1.1em] leading-[0.76] text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
-      <span aria-hidden className="mx-[0.05em] mb-[0.055em] block h-[0.66em] w-[0.1em] -skew-x-[13deg] bg-ink" />
+      <span aria-hidden className="mx-[0.08em] mb-[0.05em] block h-[0.66em] w-[0.1em] -skew-x-[13deg] bg-ink" />
       <span>{all}</span>
     </span>
   )
