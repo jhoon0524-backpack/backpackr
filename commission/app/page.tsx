@@ -30,25 +30,27 @@ export default async function CommissionList() {
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster whitespace-nowrap text-[min(11.2vw,161px)] leading-[0.9] tracking-[0.015em] text-white">
-            자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
+          <h1 className="poster flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.2vw,161px)] leading-[0.9] tracking-[0.015em] text-white">
+            <span>자리</span>
+            <Fraction open={openSlots} all={allSlots} />
+            <span>남았어요</span>
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <p className="disp mt-5 border-t border-white/60 pt-5 text-[min(2.7vw,24px)] leading-snug text-white">
+          <p className="mt-5 border-t border-white pt-5 text-[min(2.4vw,21px)] font-medium leading-snug text-white/85">
             고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
           </p>
         </div>
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-16 border-t-[3px] border-ink"><li><EmptyRow /></li></ul>
+        <ul className="mt-16 border-t-[3px] border-ink"><li><EmptyRow n={1} /></li></ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
         <ul className="mt-16 border-t-[3px] border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
-          <li><EmptyRow /></li>
+          <li><EmptyRow n={commissions.length + 1} /></li>
         </ul>
       )}
 
@@ -66,15 +68,25 @@ export default async function CommissionList() {
  * 노랑을 여기에 두지 않는다. 이 화면에서 노랑은 "사러 온 사람이 누를 곳" 하나이고,
  * 창작자를 부르는 이 줄은 그다음 일이다. 색이 중요도를 뒤집으면 안 된다.
  */
-function EmptyRow() {
+function EmptyRow({ n }: { n: number }) {
   return (
-    <p className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-ink py-8 text-[16px] font-medium text-muted">
-      그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
-      {/* 이 화면에서 창작자가 눌러야 할 곳은 여기 하나다. 문장 속 밑줄로는 눌러야 할 곳으로 안 보인다. */}
-      <Link href="/open" className="disp inline-flex items-center bg-yellow px-4 py-2.5 text-[16px] leading-none text-ink hover:bg-ink hover:text-white">
-        메뉴 붙이기
-      </Link>
-    </p>
+    <Link href="/open" className="group block border-b border-ink py-8 transition hover:bg-yellow/25">
+      <span className="flex items-baseline gap-4">
+        <span className="disp num w-[46px] shrink-0 text-[min(3.6vw,34px)] leading-none text-line">
+          {String(n).padStart(2, '0')}
+        </span>
+        <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-line">
+          여기에 메뉴 한 장을 붙이세요
+        </span>
+        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        <span className="disp ml-auto w-[196px] shrink-0 text-right text-[min(3.2vw,30px)] leading-none sm:ml-0">
+          <span className="bg-yellow px-3 py-1.5 text-[18px] text-ink">메뉴 붙이기</span>
+        </span>
+      </span>
+      <span className="mt-4 block text-[14px] font-medium text-muted sm:pl-[62px]">
+        그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어옵니다.
+      </span>
+    </Link>
   )
 }
 
@@ -88,7 +100,7 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="disp num inline-block bg-yellow px-[0.11em] py-[0.04em] align-baseline text-[0.95em] leading-[0.9] text-ink">
+    <span className="disp num inline-block bg-yellow px-[0.1em] py-[0.03em] align-baseline text-[0.95em] leading-[0.88] text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
       <span aria-hidden className="mx-[0.09em] inline-block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-ink align-baseline" />

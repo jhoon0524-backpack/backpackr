@@ -23,7 +23,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 같은 자리, 같은 크기. 칠이 없다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}>
+    <span className={`disp shrink-0 whitespace-nowrap bg-ink px-3 py-1.5 leading-none tracking-[0.1em] text-white ${size === 'md' ? 'text-[17px]' : 'text-[15px]'}`}>
       {label}
     </span>
   )
@@ -79,7 +79,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className={`block border-b border-ink py-8 transition hover:bg-yellow/25 ${closed ? 'opacity-40' : ''}`}
+      className="block border-b border-ink py-8 transition hover:bg-yellow/25"
     >
       {/*
         한 줄은 하나의 밑선 위에 있다 — 번호, 이름, 점선, 값.
@@ -94,7 +94,13 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
           {c.title}
         </span>
-        <span aria-hidden className={`hidden h-[1em] min-w-8 flex-1 sm:block ${closed ? '' : 'leader text-line'}`} />
+        {closed ? (
+          <span className="flex flex-1 items-center justify-center">
+            <ClosedStamp label={closed} />
+          </span>
+        ) : (
+          <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        )}
         <span className="disp num ml-auto w-[196px] shrink-0 text-right text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
           {comma(c.price)}
           <span className="ml-1.5 inline-block w-[44px] text-left text-[13px] tracking-[0.04em]">원부터</span>
@@ -104,9 +110,9 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
       {/* 곁줄은 물러나야 한다. 작기만 하고 똑같이 굵으면 물러나는 게 아니라 작게 외치는 것이다. */}
       <span className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 sm:pl-[62px]">
         <span className="text-[14px] font-medium text-muted">
-          {c.category} · <span className="font-bold text-strong">{c.creator_nickname}</span> · {c.turnaround_days}일 걸려요
+          {c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요
         </span>
-        {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
+        {!closed && <SlotStamp left={left} max={c.max_slots} />}
       </span>
     </Link>
   )
