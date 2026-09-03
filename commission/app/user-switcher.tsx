@@ -16,21 +16,21 @@ export async function UserSwitcher() {
       회색 글자 둘이 나란히 떠 있으니 길이 하나 더 난 것처럼 보였다. 선 하나로 묶어
       "이건 임시 장치" 라고 한 덩어리로 말하게 한다.
     */
-    <form action={switchUser} className="flex h-8 items-center gap-1 border-[3px] border-white/40 px-1">
+    <form action={switchUser} className="flex h-9 items-center gap-1 border-[3px] border-white bg-ink px-2">
       <select
         name="userId"
         // 전환 뒤 서버가 새 값을 그려도 브라우저가 기존 select 를 재사용해 빈 칸으로 보인다.
         key={current ?? 'none'}
         defaultValue={current ?? ''}
         aria-label="사용자 고르기"
-        className="h-full appearance-none bg-ink px-1 text-[14px] font-extrabold text-white/70 focus:text-white focus:outline-none"
+        className="h-full appearance-none bg-ink px-1 text-[13px] font-bold text-white focus:outline-none"
       >
         <option value="">누구로 볼까요</option>
         {users.map((u) => (
           <option key={u.id} value={u.id}>{u.nickname}</option>
         ))}
       </select>
-      <button type="submit" className="h-full px-1 text-[14px] font-extrabold text-white/70 hover:text-white">
+      <button type="submit" className="h-full px-1 text-[13px] font-bold text-white hover:text-yellow">
         바꾸기
       </button>
     </form>
