@@ -119,8 +119,8 @@ export function CommissionCard({ c }: { c: Card }) {
           <span className="text-muted"> · {c.turnaround_days}일</span>
         </span>
         {/* 값. 끝을 맞춰 두면 넉 장의 값이 한 열로 읽힌다. */}
-        <span className="disp num flex shrink-0 items-baseline text-[24px] leading-none">
-          {comma(c.price)}<span className="ml-1 text-[14px]">원부터</span>
+        <span className="disp num flex w-[150px] shrink-0 items-baseline justify-end text-[24px] leading-none">
+          {comma(c.price)}<span className="ml-1 w-[42px] text-left text-[14px]">원부터</span>
         </span>
       </div>
 
@@ -130,16 +130,14 @@ export function CommissionCard({ c }: { c: Card }) {
         색 체계가 있어도 아무 일도 하지 않는 것이다.
       */}
       <span
-        className={`disp flex items-center justify-between border-t px-4 py-3 text-[17px] ${
-          closed ? 'border-ink/25 text-ink' : 'border-ink bg-yellow text-ink'
+        className={`disp flex items-center justify-between border-t border-ink px-4 py-3.5 text-[19px] ${
+          closed ? 'bg-ink text-white' : 'bg-yellow text-ink'
         }`}
       >
         {/* 분류 줄이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
-        {closed ? '다음 자리가 나면 열려요' : '의뢰하기'}
+        {closed ? '마감' : '의뢰하기'}
       </span>
 
-      {/* 다 팔린 줄에 긋는 줄 하나. 카드 전체를 덮되 글자는 그대로 읽힌다. */}
-      {closed && <span aria-hidden className="canceled pointer-events-none absolute inset-0" />}
     </Link>
   )
 }

@@ -27,20 +27,17 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-8 pt-6">
+        <div className="mx-auto max-w-[1200px] px-8 pb-9 pt-5">
           <p className="num text-[13px] font-bold text-white/60">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/40">·</span> 메뉴 {commissions.length}개
           </p>
-        </div>
-        {/*
-          제호만 판 밖으로 흘려보낸다. 오른쪽 끝에서 마지막 글자가 잘리는 것은 사고가 아니라
-          **인쇄물이 판형보다 큰 글자를 앉힐 때 하는 일**이다. 같은 말이 바로 아래 줄에 다시 적혀 있어
-          잘린 글자를 못 읽어도 뜻은 남는다.
-        */}
-        <h1 className="poster mt-3 overflow-hidden whitespace-nowrap pl-[max(2rem,calc((100vw-1200px)/2+2rem))] text-[min(13vw,186px)] leading-[0.9] text-white">
-          자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
-        </h1>
-        <div className="mx-auto max-w-[1200px] px-8 pb-8">
+          {/*
+            제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
+            그건 판형이 아니라 사고로 읽힌다.
+          */}
+          <h1 className="poster mt-4 whitespace-nowrap text-[min(10.6vw,152px)] leading-[0.9] text-white">
+            자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
+          </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
           <p className="disp mt-6 border-t-[3px] border-white pt-5 text-[min(3.4vw,28px)] leading-tight text-white">
             고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
@@ -49,19 +46,17 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-14 grid grid-cols-1 gap-6">
-          <li><EmptySlot /></li>
-        </ul>
+        <p className="mt-16 text-[15px] font-bold text-muted">아직 붙은 메뉴가 없습니다.</p>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-12">
           {commissions.map((c) => (
-            <li key={c.id}><CommissionCard c={c} /></li>
+            <li key={c.id} className="lg:col-span-4"><CommissionCard c={c} /></li>
           ))}
-          <li className="sm:col-span-2 lg:col-span-3"><EmptySlot /></li>
         </ul>
       )}
 
+      <EmptySlot />
       <HowItWorks />
     </div>
   )
@@ -74,23 +69,25 @@ export default async function CommissionList() {
  * 네 번 반복되면 읽는 사람은 넷 다 안 읽는다. 그래서 **동사 넉 개를 한 줄로 세우고**,
  * 설명은 그 아래 한 문단으로 몰아 준다. 볼 것은 한 줄, 읽을 것은 한 문단.
  */
-const STEPS = ['고른다', '수락한다', '작업한다', '받는다']
+const STEPS = [
+  { t: '고른다', d: '자리가 남은 메뉴에 원하는 것을 적어 보냅니다.' },
+  { t: '수락한다', d: '창작자가 값을 정해 수락하면 자리 하나가 찹니다.' },
+  { t: '작업한다', d: '메뉴에 적힌 기간 안에 작업이 끝납니다.' },
+  { t: '받는다', d: '받고 확인을 누르면 그 자리가 다시 빕니다.' },
+]
 
 function HowItWorks() {
   return (
     <section className="relative left-1/2 -mx-[50vw] mt-16 w-screen border-t-[3px] border-ink bg-ink">
       <div className="mx-auto max-w-[1200px] px-8 py-20">
-        <ol className="flex flex-wrap items-baseline gap-x-14 gap-y-3">
-          {STEPS.map((t) => (
-            <li key={t} className="poster text-[min(5vw,58px)] leading-none text-white">
-              {t}
+        <ol className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-12">
+          {STEPS.map((s) => (
+            <li key={s.t} className="lg:col-span-3">
+              <span className="poster block text-[min(4.4vw,48px)] leading-none text-white">{s.t}</span>
+              <span className="mt-4 block text-[15px] font-medium leading-relaxed text-white/70">{s.d}</span>
             </li>
           ))}
         </ol>
-        <div className="mt-10 grid gap-x-14 gap-y-4 text-[17px] font-medium leading-relaxed text-white/70 sm:grid-cols-2">
-          <p>자리가 남은 메뉴에 원하는 것을 적어 보내면, 창작자가 값을 정해 수락합니다. 그때 자리 하나가 찹니다.</p>
-          <p>메뉴에 적힌 기간 안에 작업이 끝나고, 결과물을 받아 확인을 누르면 그 자리가 다시 빕니다.</p>
-        </div>
       </div>
     </section>
   )
@@ -110,7 +107,7 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="disp flex items-baseline gap-4 bg-ink px-6 py-5 text-[min(2.6vw,24px)] leading-tight text-white hover:text-yellow"
+      className="disp mt-16 flex items-baseline gap-4 bg-ink px-6 py-5 text-[min(2.6vw,24px)] leading-tight text-white hover:text-yellow"
     >
       그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
       <span className="num shrink-0 text-[13px] font-bold text-white/60">메뉴 붙이기 →</span>

@@ -191,20 +191,3 @@ body {
   background-color: var(--hatch-bg, #f2f2f2);
   background-image: repeating-linear-gradient(45deg, rgba(17, 17, 17, 0.09) 0 3px, transparent 3px 14px);
 }
-
-/*
- * 취소선 한 줄 — 마감한 메뉴.
- *
- * 카드를 검정으로 뒤집어 보았더니 **마감한 것이 열려 있는 것보다 눈에 먼저 들었다.** 뜻이 뒤집힌 것이다.
- * 인쇄된 메뉴판에서 다 팔린 줄에 하는 일은 하나다 — 그 위에 줄을 하나 긋는다.
- * 카드는 다른 것들과 같은 흰 판으로 두고, 대각선 한 줄만 얹는다.
- */
-.canceled {
-  background-image: linear-gradient(
-    to top right,
-    transparent calc(50% - 1.5px),
-    #111111 calc(50% - 1.5px),
-    #111111 calc(50% + 1.5px),
-    transparent calc(50% + 1.5px)
-  );
-}
