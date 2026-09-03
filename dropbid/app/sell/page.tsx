@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { SellForm } from './form'
+import { isConfigured } from '@/lib/storage'
 import { getCurrentUser } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
@@ -30,7 +31,7 @@ export default async function SellPage() {
           </Link>
         </div>
       ) : (
-        <SellForm />
+        <SellForm canUpload={isConfigured()} />
       )}
     </div>
   )

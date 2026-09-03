@@ -15,6 +15,7 @@
     "db:setup": "node scripts/db.mjs setup"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.114.0",
     "next": "16.3.3",
     "pg": "^8.23.0",
     "react": "19.2.8",
