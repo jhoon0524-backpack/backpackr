@@ -13,7 +13,7 @@ import { comma } from '@/lib/format'
 export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: number; size?: 'sm' | 'md' }) {
   return (
     <span
-      className={`num inline-flex shrink-0 items-center whitespace-nowrap border-[2px] border-ink bg-white px-2.5 py-1 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}
+      className={`num inline-flex shrink-0 items-center whitespace-nowrap min-w-[92px] justify-center border-[2px] border-ink bg-white px-2.5 py-1 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
       빈자리 {left}/{max}
@@ -24,7 +24,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 칠만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`inline-flex shrink-0 items-center whitespace-nowrap border-[2px] border-ink bg-ink px-2.5 py-1 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}>
+    <span className={`inline-flex shrink-0 items-center whitespace-nowrap min-w-[92px] justify-center border-[2px] border-ink bg-ink px-2.5 py-1 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}>
       {label}
     </span>
   )
@@ -92,13 +92,13 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         <span className="poster w-[56px] shrink-0 text-[min(4.4vw,44px)] leading-none text-ink">
           {String(n).padStart(2, '0')}
         </span>
-        <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
+        <span className={`disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight ${closed ? 'text-faint' : 'text-ink'}`}>
           {c.title}
         </span>
         <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
         <span className="disp num ml-auto shrink-0 text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
-          {comma(c.price)}
-          <span className="ml-1 text-[14px]">원부터</span>
+          <span className={closed ? 'line-through decoration-[2px]' : ''}>{comma(c.price)}</span>
+          <span className="ml-1 inline-block w-[46px] text-left text-[14px]">원부터</span>
         </span>
       </span>
 

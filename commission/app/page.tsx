@@ -4,8 +4,6 @@ import { CommissionCard } from './commission-card'
 
 export const dynamic = 'force-dynamic'
 
-const MONTH = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long' })
-
 /**
  * 메뉴판.
  *
@@ -28,22 +26,19 @@ export default async function CommissionList() {
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
         <div className="mx-auto max-w-[1200px] px-8 pb-12 pt-6">
-          <p className="num text-[15px] font-bold tracking-[0.04em] text-white/80">
-            {MONTH.format(new Date())} 메뉴판
-          </p>
           {/*
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster mt-4 whitespace-nowrap text-[min(11.2vw,160px)] leading-[0.9] tracking-[0.015em] text-white">
+          <h1 className="poster whitespace-nowrap text-[min(11.5vw,164px)] leading-[0.9] tracking-[0.015em] text-white">
             자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <div className="mt-6 border-t-[3px] border-white pt-5">
-            <ol className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[min(3.2vw,28px)] leading-tight">
+          <div className="mt-7 border-t border-white/60 pt-5">
+            <ol className="flex flex-wrap items-baseline gap-x-8 gap-y-2 text-[min(3.2vw,28px)] leading-tight">
               {STEPS.map((t, i) => (
                 <li key={t} className="disp text-white">
-                  {i > 0 && <span className="mr-3 font-medium text-white/45">→</span>}
+                  <span className="num mr-2 text-[0.6em] text-white/45">{String(i + 1).padStart(2, '0')}</span>
                   {t}
                 </li>
               ))}
@@ -56,7 +51,7 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-16 border-t-[3px] border-ink"><li><EmptyRow /></li></ul>
+        <ul className="mt-10 border-t-[3px] border-ink"><li><EmptyRow /></li></ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
         <ul className="mt-16 border-t-[3px] border-ink">
@@ -109,7 +104,7 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-flex items-end bg-yellow px-[0.14em] py-[0.01em] text-[1.1em] leading-[0.8] text-ink">
+    <span className="num inline-flex h-[1.02em] items-end bg-yellow px-[0.12em] pb-[0.05em] align-baseline text-[1.1em] leading-none text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
       <span aria-hidden className="mx-[0.08em] mb-[0.05em] block h-[0.66em] w-[0.1em] -skew-x-[13deg] bg-ink" />
