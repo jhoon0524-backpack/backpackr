@@ -20,7 +20,7 @@ export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | '
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-b-[3px] border-l-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-b-[3px] border-l-[3px] border-ink bg-ink px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {label}
     </span>
   )
@@ -44,10 +44,29 @@ export function TitleField({ title, closed = false, big = false }: { title: stri
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`text-balance break-keep font-bold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[52px] text-[21px]'}`}>
+      <span className={`text-balance break-keep font-semibold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[52px] text-[21px]'}`}>
         {title}
       </span>
     </div>
+  )
+}
+
+/**
+ * 이 메뉴의 자리.
+ *
+ * "2자리 남음" 이라고 **쓰는 것**보다, 세 칸 중 하나가 칠해진 것을 **보는 것**이 빠르다.
+ * 자리는 이 서비스가 파는 물건이므로, 파는 물건은 글자가 아니라 형태로 보여야 한다.
+ */
+export function Seats({ max, active }: { max: number; active: number }) {
+  return (
+    <span className="flex shrink-0 gap-1" aria-label={`${max}자리 가운데 ${max - active}자리 비어 있음`}>
+      {Array.from({ length: max }, (_, i) => (
+        <span
+          key={i}
+          className={`h-3.5 w-3.5 border-2 border-ink ${i < active ? 'bg-ink' : 'bg-yellow'}`}
+        />
+      ))}
+    </span>
   )
 }
 
@@ -111,7 +130,7 @@ export function CommissionCard({ c }: { c: Card }) {
           값에 줄을 긋지 않는다 — 마감은 싸진 게 아니라 못 받는 것이다.
         */}
         <span className="flex items-baseline">
-          <span className={`min-w-0 max-w-[6rem] shrink truncate text-[13px] font-bold ${closed ? '' : 'text-strong'}`}>
+          <span className={`min-w-0 max-w-[6rem] shrink truncate text-[13px] font-medium ${closed ? '' : 'text-strong'}`}>
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
@@ -119,10 +138,10 @@ export function CommissionCard({ c }: { c: Card }) {
             {comma(c.price)}원~
           </span>
         </span>
-        <span className={`mt-2 flex flex-wrap items-baseline justify-between gap-x-3 text-[13px] font-bold ${closed ? '' : 'text-ink'}`}>
-          <span>{c.category} · 작업 {c.turnaround_days}일</span>
-          {/* 빨강은 마감 하나에만. 두 빨강이 서로 다른 뜻을 나르면 그건 신호가 아니다. */}
-          {!closed && <span>{left}자리 남음</span>}
+        <span className={`mt-2 flex items-center justify-between gap-x-3 text-[13px] font-medium tracking-[0.01em] ${closed ? '' : 'text-muted'}`}>
+          <span className="truncate">{c.category} · 작업 {c.turnaround_days}일</span>
+          {/* 자리는 글자가 아니라 칸으로. 마감된 메뉴도 같은 자리에 같은 모양이 선다 — 다 칠해져 있을 뿐이다. */}
+          <Seats max={c.max_slots} active={c.active_count} />
         </span>
       </div>
 

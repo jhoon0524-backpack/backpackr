@@ -32,17 +32,13 @@ export default async function CommissionList() {
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
           {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
-          <div className="mt-4 flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
-            <div>
-              <h1 className="poster whitespace-nowrap text-[min(9.3vw,133px)] tracking-[-0.035em] text-white">
-                <span className="num text-yellow">{openSlots}</span>자리 남았어요
-              </h1>
-              <p className="mt-5 max-w-2xl text-[19px] font-medium leading-relaxed text-white/80">
-                고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
-              </p>
-            </div>
-            <SeatBoard open={openSlots} all={allSlots} />
-          </div>
+          <h1 className="poster mt-6 whitespace-nowrap text-[min(8.6vw,123px)] tracking-[-0.035em] text-white">
+            <span className="num text-yellow">{openSlots}</span>자리 남았어요
+          </h1>
+          <p className="mt-7 max-w-2xl text-[18px] font-normal leading-relaxed text-white/70">
+            이번 달 열린 자리 {allSlots}개 가운데 {openSlots}개가 비어 있어요.
+            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+          </p>
           {/*
             큰 숫자를 오른쪽에 세워 두었더니 화면에 크게 말하는 것이 둘이 되어 서로를 깎아먹었다.
             숫자는 제목 아래 한 줄로 물러난다 — 큰 것은 제목 하나뿐이다.
@@ -84,21 +80,21 @@ const STEPS = [
 function HowItWorks() {
   return (
     <section className="mt-14">
-      <h2 className="disp text-[30px] text-ink">보내면 이렇게 됩니다</h2>
+      <h2 className="disp text-[30px] text-ink">보내면 이렇게 됩니다<span className="text-yellow">.</span></h2>
       {/*
         네모 넷을 나란히 놓고 큰 숫자를 얹는 것은 어느 소개 페이지에나 있는 모양이다.
         상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
         숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
       */}
-      <ol className="mt-6 border-[3px] border-ink bg-white shadow-hard">
+      <ol className="mt-8 space-y-7">
         {STEPS.map((s) => (
           <li
             key={s.n}
-            className="flex flex-wrap items-center gap-x-6 gap-y-1 px-6 py-3 not-last:border-b-[3px] not-last:border-ink"
+            className="flex flex-wrap items-center gap-x-6 gap-y-1"
           >
             <span className="poster num w-12 shrink-0 text-[40px] leading-none text-ink">{s.n}</span>
-            <span className="w-28 shrink-0 text-[17px] font-bold text-ink">{s.t}</span>
-            <span className="text-[14px] font-medium leading-relaxed text-muted">{s.d}</span>
+            <span className="w-28 shrink-0 text-[17px] font-semibold text-ink">{s.t}</span>
+            <span className="text-[14px] font-normal leading-relaxed text-muted">{s.d}</span>
           </li>
         ))}
       </ol>
@@ -120,15 +116,16 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex h-full flex-col border-[3px] border-dashed border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
+      className="group flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
     >
-      <span className="flex h-[52px] items-start px-4 pb-3 pt-8 text-[21px] font-bold leading-tight text-ink">
-        여기 붙이기
+      {/* 진짜 카드의 제목 칸과 정확히 같은 구조 — 그래야 넉 장의 가름선이 같은 높이에 선다. */}
+      <span className="flex w-full items-start px-4 pb-3 pt-8">
+        <span className="h-[52px] text-[21px] font-semibold leading-tight text-strong">여기 붙이기</span>
       </span>
-      <span className="flex flex-1 flex-col border-t-[3px] border-ink px-4 py-4 text-[13px] font-bold leading-relaxed text-strong">
+      <span className="flex flex-1 flex-col justify-end border-t-[3px] border-dashed border-line p-4 text-[13px] font-normal leading-relaxed text-muted">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
       </span>
-      <span className="disp flex items-center justify-between border-t-[3px] border-ink bg-white px-4 py-3 text-[17px] text-ink">
+      <span className="disp flex items-center justify-between border-t-[3px] border-dashed border-line px-4 py-3 text-[17px] text-strong">
         메뉴 붙이기
         <span aria-hidden className="text-[19px] leading-none">→</span>
       </span>
@@ -137,29 +134,3 @@ function EmptySlot() {
   )
 }
 
-/**
- * 이번 달 자리판.
- *
- * 제호는 "4자리 남았어요" 라고 **말한다.** 이건 그걸 **보여 준다** —
- * 이번 달 열린 자리를 네모 하나씩 그려, 찬 것은 칠하고 빈 것은 비운다.
- * 문장으로 듣는 것과 여섯 칸 중 둘이 칠해진 것을 보는 것은 다른 일이다.
- */
-function SeatBoard({ open, all }: { open: number; all: number }) {
-  const taken = Math.max(0, all - open)
-  return (
-    <div className="shrink-0">
-      <p className="num text-[13px] font-bold text-white/70">이번 달 자리 {all}개</p>
-      <ul className="mt-3 flex flex-wrap gap-2" aria-label={`전체 ${all}자리 중 ${open}자리 비어 있음`}>
-        {Array.from({ length: all }, (_, i) => (
-          <li
-            key={i}
-            className={`h-9 w-9 border-[3px] ${i < taken ? 'border-white/40 bg-white/40' : 'border-yellow'}`}
-          />
-        ))}
-      </ul>
-      <p className="mt-3 text-[13px] font-bold text-white/70">
-        <span className="text-yellow">■</span> 빈 자리 <span className="text-white/40">■</span> 찬 자리
-      </p>
-    </div>
-  )
-}
