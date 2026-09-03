@@ -5,7 +5,7 @@ import { kstDate, trustFromFunding, won } from '@/lib/format'
 import { FundingRecord } from '@/app/funding-record'
 import { getCurrentUser } from '@/lib/session'
 import { Photo } from '@/app/photo'
-import { SlotText } from '@/app/commission-card'
+import { SamplePlaceholder, SlotOverlay } from '@/app/commission-card'
 import { BACK, BTN_INK, BTN_PRIMARY, BTN_SECONDARY, EYEBROW, H2, NOTICE } from '@/app/ui'
 import { RequestForm } from './request-form'
 
@@ -42,16 +42,14 @@ export default async function CommissionPage({ params, searchParams }: PageProps
                 <Photo src={c.sample_urls[0]} alt="샘플 1" className="h-full w-full object-cover" />
               </div>
             ) : (
-              <div className="disp flex aspect-square items-center justify-center bg-sky-wash text-8xl text-ink">가</div>
+              <div className="aspect-square"><SamplePlaceholder category={c.category} /></div>
             )}
-            <div className="absolute -bottom-4 left-4">
-              <SlotText active={c.active_count} max={c.max_slots} status={c.status} size="md" />
-            </div>
+            <SlotOverlay active={c.active_count} max={c.max_slots} status={c.status} size="md" />
           </div>
           {c.sample_urls.length > 1 && (
             <ul className="mt-8 grid grid-cols-4 gap-3 sm:grid-cols-6">
               {c.sample_urls.slice(1).map((u, i) => (
-                <li key={i} className="aspect-square overflow-hidden border-2 border-ink bg-fill">
+                <li key={i} className="aspect-square overflow-hidden border-[3px] border-ink bg-fill">
                   <Photo src={u} alt={`샘플 ${i + 2}`} className="h-full w-full object-cover" />
                 </li>
               ))}
@@ -100,7 +98,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
                 '결과물을 받고 확인하면 끝.',
               ].map((t, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="disp num flex h-9 w-9 shrink-0 items-center justify-center border-[3px] border-ink bg-white text-lg shadow-hard-sm">{i + 1}</span>
+                  <span className="disp num flex h-9 w-9 shrink-0 items-center justify-center border-[3px] border-ink bg-white text-lg">{i + 1}</span>
                   <span className="pt-1.5">{t}</span>
                 </li>
               ))}

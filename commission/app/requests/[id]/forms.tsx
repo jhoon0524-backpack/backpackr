@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { MoneyInput } from '@/app/money-input'
 import { daysLeft, kstDate } from '@/lib/format'
 import { ALERT, BTN_PRIMARY, BTN_SECONDARY, HELP, INPUT, LABEL } from '@/app/ui'
@@ -20,7 +20,7 @@ function Confirm({ message, submitLabel, pending, onCancel }: {
   message: React.ReactNode; submitLabel: string; pending: boolean; onCancel: () => void
 }) {
   return (
-    <div role="alertdialog" className="space-y-3 border-[3px] border-ink bg-yellow p-4 shadow-hard-sm">
+    <div role="alertdialog" className="space-y-3 border-[3px] border-ink bg-yellow p-4">
       <p className="text-sm font-bold leading-relaxed text-ink">{message}</p>
       <button type="submit" disabled={pending} className={BTN_PRIMARY}>{pending ? '처리 중…' : submitLabel}</button>
       <button type="button" disabled={pending} onClick={onCancel} className={BTN_SECONDARY}>아니오, 돌아가기</button>
@@ -34,6 +34,12 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
   const [arming, setArming] = useState(false)
+  /*
+    실패하면 확인 상자를 접는다. 상자를 열어 둔 채 문구만 저 아래에 뜨면
+    "확정" 을 눌렀는데 화면이 하나도 안 바뀐 것처럼 보인다 (UI/UX 6회차 발견 1).
+    문구는 상자가 있던 자리, 곧 방금 누른 버튼 자리에 나타난다.
+  */
+  useEffect(() => { if (state?.message) setArming(false) }, [state])
   // 서버가 수락 시각 + 작업 기간으로 박는다. 여기서는 서버가 미리 계산해 준 값을 보여 줄 뿐이다.
   const dueAt = dueAtIfNow
   const left = maxSlots - activeCount
@@ -44,13 +50,14 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
         <input type="hidden" name="id" value={id} />
         <input type="hidden" name="kind" value="accept" />
         <p className="disp text-[22px]">수락하기</p>
+        <Alert state={state} />
         <label className="block">
           <span className={LABEL}>최종가</span>
           <MoneyInput name="finalPrice" defaultValue={quotedPrice} className={INPUT + ' pr-9'} />
           <span className={HELP}>기본 가격에서 조정할 수 있습니다.</span>
         </label>
         {/* 결정에 필요한 숫자를 실제 값으로. "작업 기간만큼" 이라고만 적혀 있어 며칠인지 알 수 없었다 (UI/UX 1회차 발견 1). */}
-        <dl className="num grid grid-cols-2 gap-y-1 border-2 border-ink bg-white px-4 py-3 text-sm font-medium">
+        <dl className="num grid grid-cols-2 gap-y-1 border-[3px] border-ink bg-white px-4 py-3 text-sm font-medium">
           <dt className="text-muted">마감일</dt>
           <dd className="font-semibold">{kstDate(dueAt)} <span className="font-normal text-muted">({daysLeft(dueAt)}일 뒤)</span></dd>
           <dt className="text-muted">남은 자리</dt>
@@ -70,7 +77,6 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
         <textarea name="reason" rows={2} required placeholder="사유는 의뢰인에게 그대로 전달됩니다." className={INPUT} />
         <button type="submit" disabled={pending} className={BTN_SECONDARY}>{pending ? '처리 중…' : '거절'}</button>
       </form>
-      <Alert state={state} />
     </div>
   )
 }
@@ -104,11 +110,13 @@ export function OneButton({ id, kind, label, help, tone = 'secondary', confirm }
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
   const [arming, setArming] = useState(false)
+  useEffect(() => { if (state?.message) setArming(false) }, [state])
   const cls = tone === 'primary' ? BTN_PRIMARY : BTN_SECONDARY
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="kind" value={kind} />
+      <Alert state={state} />
       {confirm && arming ? (
         <Confirm pending={pending} submitLabel={label} onCancel={() => setArming(false)} message={confirm} />
       ) : confirm ? (
@@ -117,7 +125,6 @@ export function OneButton({ id, kind, label, help, tone = 'secondary', confirm }
         <button type="submit" disabled={pending} className={cls}>{pending ? '처리 중…' : label}</button>
       )}
       <p className="text-center text-[13px] font-medium text-muted">{help}</p>
-      <Alert state={state} />
     </form>
   )
 }

@@ -31,7 +31,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
           <h1 className="disp text-[34px] leading-[1.05] sm:text-[44px]">
             <Link href={`/commissions/${r.commission_id}`} className="hover:underline hover:decoration-[3px]">{r.commission_title}</Link>
           </h1>
-          <span className={`border-2 border-ink px-2 py-1 text-xs font-bold ${s.tone}`}>{s.text}</span>
+          <span className={`border-[3px] border-ink px-2 py-1 text-xs font-bold ${s.tone}`}>{s.text}</span>
         </div>
         <p className={EYEBROW + ' mt-2'}>
           창작자 {r.creator_nickname} · 의뢰인 {r.client_nickname} · {kst(r.created_at)} 의뢰

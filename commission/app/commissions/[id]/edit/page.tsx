@@ -16,8 +16,20 @@ export const dynamic = 'force-dynamic'
 export default async function EditCommissionPage({ params }: PageProps<'/commissions/[id]/edit'>) {
   const { id } = await params
   const [c, me] = await Promise.all([getCommission(id), getCurrentUser()])
-  // 남의 메뉴 고치는 화면은 존재를 알리지 않는다.
-  if (!c || !me || me.id !== c.creator_id) notFound()
+  if (!c) notFound()
+  /*
+    아직 아무도 고르지 않았을 때 "없어진 페이지" 라고 하면 막다른 곳이 된다 (UI/UX 6회차 발견 2).
+    주인이 아닌 사람에게는 여전히 존재를 알리지 않는다 — 그건 남의 메뉴이기 때문이다.
+  */
+  if (!me) {
+    return (
+      <div className="mx-auto max-w-2xl border-[3px] border-ink bg-white p-8 text-center">
+        <p className="disp text-2xl text-ink">먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
+        <p className="mt-3 text-sm font-medium text-muted">내가 붙인 메뉴만 고칠 수 있어요.</p>
+      </div>
+    )
+  }
+  if (me.id !== c.creator_id) notFound()
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -31,8 +43,12 @@ export default async function EditCommissionPage({ params }: PageProps<'/commiss
             <> 지금 <span className="num font-bold">{c.active_count}건</span>이 진행 중이라, 동시 진행 건수를 그보다 작게는 줄일 수 없어요.</>
           )}
         </p>
-        <p className="text-[13px] font-medium text-muted">
-          이미 들어온 의뢰는 이 수정에 영향받지 않아요. 각자 의뢰할 때의 금액과 마감일을 그대로 갖고 갑니다.
+        <p className="text-[13px] font-medium leading-relaxed text-muted">
+          이미 들어온 의뢰의 금액과 마감일은 그대로예요. 각자 의뢰할 때의 값을 갖고 갑니다.
+          {c.active_count > 0 && c.active_count >= c.max_slots - 1 && (
+            <> 다만 동시 진행 건수를 지금 진행 중인 수(<span className="num">{c.active_count}건</span>)까지 줄이면
+            자리가 꽉 차서, 기다리는 의뢰를 이번에는 수락할 수 없게 됩니다.</>
+          )}
         </p>
       </div>
       <CommissionForm

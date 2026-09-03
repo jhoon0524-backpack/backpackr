@@ -16,7 +16,7 @@ import { MIN_SATISFACTION_RESPONSES, comma, type FundingTrust } from '@/lib/form
  */
 export function FundingRecord({ trust, followers }: { trust: FundingTrust; followers?: number }) {
   return (
-    <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+    <div className="border-[3px] border-ink bg-white p-4">
       <p className="text-xs font-bold tracking-wide text-muted">텀블벅 펀딩 기록</p>
       {/*
         가운뎃점 대신 gap 으로 띄운다. 점을 글자에 붙여 두면 좁은 화면에서 줄이 접힐 때

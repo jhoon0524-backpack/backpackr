@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export function StatusBadge({ status }: { status: string }) {
   const s = REQUEST_STATUS[status] ?? { text: status, tone: 'bg-fill text-strong' }
-  return <span className={`shrink-0 border-2 border-ink px-2 py-1 text-xs font-bold ${s.tone}`}>{s.text}</span>
+  return <span className={`shrink-0 border-[3px] border-ink px-2 py-1 text-xs font-bold ${s.tone}`}>{s.text}</span>
 }
 
 /** 의뢰 한 줄. 검정 테두리 상자 안에 2px 줄로 나눈 목록이다. */
