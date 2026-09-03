@@ -27,17 +27,16 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-10 pt-5">
+        <div className="mx-auto max-w-[1200px] px-8 pb-7 pt-4">
           <p className="num text-[13px] font-bold text-white/60">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
           {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
-          <h1 className="poster mt-6 whitespace-nowrap text-[min(8.6vw,123px)] tracking-[-0.035em] text-white">
+          <h1 className="poster mt-5 whitespace-nowrap text-[min(6.8vw,97px)] tracking-[-0.035em] text-white">
             <span className="num text-yellow">{openSlots}</span>자리 남았어요
           </h1>
-          <p className="mt-7 max-w-2xl text-[18px] font-normal leading-relaxed text-white/70">
-            이번 달 열린 자리 {allSlots}개 가운데 {openSlots}개가 비어 있어요.
-            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+          <p className="mt-4 text-[18px] font-normal text-white/70">
+            열린 자리 {allSlots}개 가운데 {openSlots}개가 비어 있어요. 고르고 보내면 자리 하나가 찹니다.
           </p>
           {/*
             큰 숫자를 오른쪽에 세워 두었더니 화면에 크게 말하는 것이 둘이 되어 서로를 깎아먹었다.
@@ -80,20 +79,20 @@ const STEPS = [
 function HowItWorks() {
   return (
     <section className="mt-14">
-      <h2 className="disp text-[30px] text-ink">보내면 이렇게 됩니다<span className="text-yellow">.</span></h2>
+      <h2 className="disp text-[40px] text-ink">보내면 이렇게 됩니다</h2>
       {/*
         네모 넷을 나란히 놓고 큰 숫자를 얹는 것은 어느 소개 페이지에나 있는 모양이다.
         상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
         숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
       */}
-      <ol className="mt-8 space-y-7">
+      <ol className="mt-7">
         {STEPS.map((s) => (
           <li
             key={s.n}
-            className="flex flex-wrap items-center gap-x-6 gap-y-1"
+            className="flex flex-wrap items-center gap-x-6 gap-y-1 border-t-[3px] border-ink py-3.5 last:border-b-[3px]"
           >
-            <span className="poster num w-12 shrink-0 text-[40px] leading-none text-ink">{s.n}</span>
-            <span className="w-28 shrink-0 text-[17px] font-semibold text-ink">{s.t}</span>
+            <span className="poster num w-8 shrink-0 text-[22px] leading-none text-ink">{s.n}</span>
+            <span className="w-28 shrink-0 text-[19px] font-bold text-ink">{s.t}</span>
             <span className="text-[14px] font-normal leading-relaxed text-muted">{s.d}</span>
           </li>
         ))}
@@ -119,7 +118,8 @@ function EmptySlot() {
       className="group flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
     >
       {/* 진짜 카드의 제목 칸과 정확히 같은 구조 — 그래야 넉 장의 가름선이 같은 높이에 선다. */}
-      <span className="flex w-full items-start px-4 pb-3 pt-8">
+      <span className="flex w-full flex-col gap-1.5 px-4 pb-3 pt-7">
+        <span className="text-[12px] font-bold tracking-[0.06em] text-muted">빈 자리</span>
         <span className="h-[52px] text-[21px] font-semibold leading-tight text-strong">여기 붙이기</span>
       </span>
       <span className="flex flex-1 flex-col justify-end border-t-[3px] border-dashed border-line p-4 text-[13px] font-normal leading-relaxed text-muted">
@@ -127,7 +127,6 @@ function EmptySlot() {
       </span>
       <span className="disp flex items-center justify-between border-t-[3px] border-dashed border-line px-4 py-3 text-[17px] text-strong">
         메뉴 붙이기
-        <span aria-hidden className="text-[19px] leading-none">→</span>
       </span>
 
     </Link>

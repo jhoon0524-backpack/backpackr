@@ -36,16 +36,23 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  * 그래서 없으면 없는 대로 둔다 — 대신 **제목을 크게 앉힌다.**
  * 메뉴판에서 사진이 없는 칸이 하는 일과 같다. 요리 이름을 큼직하게 쓰는 것.
  */
-export function TitleField({ title, closed = false, big = false }: { title: string; closed?: boolean; big?: boolean }) {
+export function TitleField({ title, category, closed = false, big = false }: { title: string; category?: string; closed?: boolean; big?: boolean }) {
   return (
-    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-8'}`}>
+    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-7'}`}>
       {/*
         `break-keep` — 한글은 어절 단위로 끊어야 한다. 아무 데서나 끊으면 "로고·/타이틀" 처럼 가운뎃점이 줄 끝에 남는다.
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`text-balance break-keep font-semibold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[52px] text-[21px]'}`}>
-        {title}
+      <span className="flex w-full flex-col gap-1.5">
+        {category && (
+          <span className={`text-[12px] font-bold tracking-[0.06em] ${closed ? 'text-line' : 'text-muted'}`}>
+            {category}
+          </span>
+        )}
+        <span className={`text-balance break-keep font-semibold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[52px] text-[21px]'}`}>
+          {title}
+        </span>
       </span>
     </div>
   )
@@ -59,13 +66,16 @@ export function TitleField({ title, closed = false, big = false }: { title: stri
  */
 export function Seats({ max, active }: { max: number; active: number }) {
   return (
-    <span className="flex shrink-0 gap-1" aria-label={`${max}자리 가운데 ${max - active}자리 비어 있음`}>
-      {Array.from({ length: max }, (_, i) => (
-        <span
-          key={i}
-          className={`h-3.5 w-3.5 border-2 border-ink ${i < active ? 'bg-ink' : 'bg-yellow'}`}
-        />
-      ))}
+    <span className="flex shrink-0 items-center gap-1.5" aria-label={`${max}자리 가운데 ${max - active}자리 비어 있음`}>
+      <span className="num whitespace-nowrap text-[13px] font-medium text-ink">자리 {max - active}/{max}</span>
+      <span className="flex gap-1">
+        {Array.from({ length: max }, (_, i) => (
+          <span
+            key={i}
+            className={`h-3.5 w-3.5 border-2 border-ink ${i < active ? 'bg-ink' : 'bg-yellow'}`}
+          />
+        ))}
+      </span>
     </span>
   )
 }
@@ -108,7 +118,7 @@ export function CommissionCard({ c }: { c: Card }) {
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
           {c.cover_url
             ? <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
-            : <TitleField title={c.title} closed={!!closed} />}
+            : <TitleField title={c.title} category={c.category} closed={!!closed} />}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
         {/*
@@ -129,17 +139,22 @@ export function CommissionCard({ c }: { c: Card }) {
           메뉴판 흉내만 내고 아무 일도 하지 않았다.
           값에 줄을 긋지 않는다 — 마감은 싸진 게 아니라 못 받는 것이다.
         */}
-        <span className="flex items-baseline">
-          <span className={`min-w-0 max-w-[6rem] shrink truncate text-[13px] font-medium ${closed ? '' : 'text-strong'}`}>
-            {c.creator_nickname}
+        <span className="flex items-center justify-between gap-3">
+          {/* 만드는 사람의 이름표. 이 장터가 파는 것은 결국 사람이라, 이름이 값과 같은 줄에 선다. */}
+          <span className="flex min-w-0 items-center gap-2">
+            <span className={`disp flex h-6 w-6 shrink-0 items-center justify-center text-[13px] leading-none ${closed ? 'bg-line text-white' : 'bg-ink text-white'}`}>
+              {c.creator_nickname.slice(0, 1)}
+            </span>
+            <span className={`truncate text-[13px] font-medium ${closed ? '' : 'text-strong'}`}>
+              {c.creator_nickname}
+            </span>
           </span>
-          <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`poster num shrink-0 text-[28px] leading-none ${closed ? '' : 'text-ink'}`}>
+          <span className={`poster num shrink-0 text-[26px] leading-none ${closed ? '' : 'text-ink'}`}>
             {comma(c.price)}원~
           </span>
         </span>
-        <span className={`mt-2 flex items-center justify-between gap-x-3 text-[13px] font-medium tracking-[0.01em] ${closed ? '' : 'text-muted'}`}>
-          <span className="truncate">{c.category} · 작업 {c.turnaround_days}일</span>
+        <span className={`mt-3 flex items-center justify-between gap-x-2 text-[13px] font-medium tracking-[0.01em] ${closed ? '' : 'text-muted'}`}>
+          <span className="truncate">{c.turnaround_days}일 걸려요</span>
           {/* 자리는 글자가 아니라 칸으로. 마감된 메뉴도 같은 자리에 같은 모양이 선다 — 다 칠해져 있을 뿐이다. */}
           <Seats max={c.max_slots} active={c.active_count} />
         </span>
@@ -152,12 +167,11 @@ export function CommissionCard({ c }: { c: Card }) {
       */}
       <span
         className={`disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] ${
-          closed ? 'bg-fill text-strong' : 'bg-yellow text-ink'
+          closed ? 'border-line bg-white text-faint' : 'bg-yellow text-ink'
         }`}
       >
         {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
         {closed ? '다음 자리가 나면 열려요' : '의뢰하기'}
-        {!closed && <span aria-hidden className="disp text-[19px] leading-none">→</span>}
       </span>
     </Link>
   )

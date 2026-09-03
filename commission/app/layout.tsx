@@ -65,10 +65,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
         <footer className="mt-10 border-t-[3px] border-ink bg-white text-ink">
           <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-8 py-5">
-            <p className="text-[13px] font-bold text-strong">
-              <span className="poster mr-2 text-[20px] leading-none text-ink">커미션!</span>
-              창작자 맞춤 작업 의뢰
-            </p>
+            <p className="poster text-[20px] leading-none text-ink">커미션<span className="text-yellow">!</span></p>
             <p className="num text-xs font-bold text-muted">© 2026 커미션</p>
           </div>
         </footer>
