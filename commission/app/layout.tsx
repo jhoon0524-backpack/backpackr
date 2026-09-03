@@ -43,8 +43,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col overflow-x-hidden bg-white text-ink">
         <header className="sticky top-0 z-10 bg-ink text-white">
           <div className="mx-auto flex max-w-[1200px] items-baseline justify-between gap-4 px-8 pb-5 pt-7">
-            <div className="flex items-baseline gap-10">
-              <Link href="/" className="poster text-[48px] leading-none">
+            <div className="flex items-baseline gap-12">
+              <Link href="/" className="poster text-[42px] leading-none">
                 커미션!
               </Link>
               <HeaderNav items={NAV} />
@@ -72,7 +72,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto max-w-[1200px] px-8 py-9">
             {/* 판권면. 발행 정보는 한 줄로 흘려 쓰는 것이 아니라 층을 갖는다. */}
             <div>
-              <p className="poster text-[36px] leading-none">커미션!</p>
+              <p className="poster text-[42px] leading-none">커미션!</p>
               <p className="num mt-3 text-[13px] font-bold text-white/80">
                 창작자에게 맞춤 작업을 의뢰하는 곳
               </p>

@@ -4,6 +4,12 @@ import { CommissionCard } from './commission-card'
 
 export const dynamic = 'force-dynamic'
 
+/** 한글 수사. 열 넘으면 그냥 숫자로 적는다 — "열하나" 는 제호에서 길다. */
+const KO_NUM: Record<number, string> = {
+  1: '하나', 2: '둘', 3: '셋', 4: '넷', 5: '다섯',
+  6: '여섯', 7: '일곱', 8: '여덟', 9: '아홉', 10: '열',
+}
+
 /**
  * 메뉴판.
  *
@@ -30,15 +36,28 @@ export default async function CommissionList() {
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(10.4vw,150px)] leading-[0.9] tracking-[-0.005em] text-white">
-            <span>자리</span>
-            <Fraction open={openSlots} all={allSlots} />
-            <span>남았어요</span>
+          {/*
+            숫자를 한글로 적는다.
+            제호는 명조인데 명조의 아라비아 숫자는 한글보다 획이 가늘고 폭이 달라, 아무리 손을 봐도
+            "숫자만 다른 활자를 붙여 넣은 것" 으로 읽혔다. 여덟 번 지적받은 자리다.
+            한글 수사로 적으면 애초에 섞일 얼굴이 없다 — 제호는 한 얼굴 한 덩어리가 된다.
+            정확한 값(4/6)은 바로 아래 줄, 숫자를 적는 활자(고딕)로 적는다.
+          */}
+          <h1 className="poster -ml-[0.035em] text-[min(10.4vw,150px)] leading-[0.9] tracking-[-0.005em] text-white">
+            {openSlots === 0 ? (
+              <>지금은 자리가 없어요</>
+            ) : (
+              <>자리 <span className="text-yellow">{KO_NUM[openSlots] ?? openSlots}</span> 남았어요</>
+            )}
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <div className="mt-6 border-t border-white/60 pt-6">
-            <p className="max-w-[52ch] sm:max-w-none text-[min(2.4vw,22px)] font-normal leading-relaxed text-white/85">
+          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white/60 pt-6">
+            <p className="text-[min(2.4vw,22px)] font-normal leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
+            </p>
+            {/* 정확한 값은 숫자를 적는 활자로. 제호는 말하고, 이 줄은 센다. */}
+            <p className="num shrink-0 text-[15px] font-bold text-white/70">
+              빈자리 {openSlots}/{allSlots} · 메뉴 {commissions.length}개
             </p>
           </div>
         </div>
@@ -69,7 +88,7 @@ function EmptyRow() {
       href="/open"
       className="group mt-8 block"
     >
-      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
+      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink underline decoration-[2px] underline-offset-[7px]">
         그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
 
       </span>
@@ -80,22 +99,3 @@ function EmptyRow() {
   )
 }
 
-/**
- * 자리 분수 — 이 화면에서 가장 큰 글자.
- *
- * 그냥 "4/6" 이라고 치면 빗금은 활자에 딸려 온 기본 획이라 숫자보다 얇고 짧다.
- * 400px 로 키우면 그 차이가 그대로 흠이 된다. 그래서 **빗금을 직접 그린다** —
- * 두께는 숫자 획에 맞추고, 높이는 숫자 키에 맞추고, 기울기는 하나로 정한다.
- * 분자와 분모는 **같은 크기, 같은 굵기**다. 한쪽을 줄이면 분수가 아니라 큰 숫자와 작은 숫자 둘이 된다.
- */
-function Fraction({ open, all }: { open: number; all: number }) {
-  return (
-    <span className="num inline-block align-baseline text-[1.02em] leading-[0.76] text-yellow [-webkit-text-stroke:0.016em_currentColor]">
-      <span>{open}</span>
-      {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
-      {/* 빗금은 숫자보다 가늘다. 인쇄된 분수의 빗금이 그렇다 — 두 숫자를 가르되 셋째 글자가 되지 않는다. */}
-      <span aria-hidden className="mx-[0.07em] mb-[0.02em] inline-block h-[0.68em] w-[0.05em] -skew-x-[14deg] bg-yellow align-baseline" />
-      <span>{all}</span>
-    </span>
-  )
-}

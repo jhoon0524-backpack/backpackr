@@ -76,7 +76,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   const left = c.max_slots - c.active_count
   const closed = closedLabel(c.status, left)
   // 마감한 줄은 회색으로 내려앉는다. 메뉴판에서 다 나간 것은 지우거나 흐리게 두지, 같은 검정으로 두지 않는다.
-  const tone = 'text-ink'
+  const tone = closed ? 'text-muted' : 'text-ink'
   return (
     <Link
       href={`/commissions/${c.id}`}
@@ -94,16 +94,16 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] leading-tight text-ink ${closed ? 'line-through decoration-[2px] decoration-ink/60' : ''}`}>
           {c.title}
         </span>
-        <span className="hidden shrink-0 pr-3 sm:block">
+        <span className="hidden w-[104px] shrink-0 pr-3 text-right sm:block">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </span>
-        <span aria-hidden className="hidden min-w-8 flex-1 translate-y-[-0.28em] border-b border-ink/35 sm:block" />
+        <span aria-hidden className="leader hidden h-[0.5em] min-w-8 flex-1 text-line/70 sm:block" />
         <span className={`num ml-auto shrink-0 pl-3 text-right text-[min(2.4vw,23px)] font-extrabold leading-none sm:ml-0 ${tone}`}>
           {comma(c.price)}<span className="font-medium">원부터</span>
         </span>
       </span>
 
-      <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[62px] text-strong`}>
+      <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[62px] ${closed ? 'text-muted' : 'text-strong'}`}>
         <span>{c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요</span>
         <span className="sm:hidden">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
