@@ -65,7 +65,7 @@ export default async function CommissionList() {
 
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
-        <ul className="mt-10 border-b border-t border-ink">
+        <ul className="mt-10 max-w-[940px] border-b border-t border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
@@ -86,10 +86,10 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="group mt-12 block"
+      className="group mt-12 block sm:max-w-[940px] sm:pl-[86px]"
     >
       {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
-      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink underline decoration-yellow decoration-[3px] underline-offset-[8px]">
+      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink underline decoration-[2px] underline-offset-[8px]">
         그리는 분이라면, 여기에 메뉴 한 장을 붙이세요. <span aria-hidden>→</span>
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">

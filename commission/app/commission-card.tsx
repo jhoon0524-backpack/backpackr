@@ -22,7 +22,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 같은 자리, 같은 크기. 칠이 없다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`shrink-0 whitespace-nowrap bg-ink px-2 py-0.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
+    <span className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[15px]'}`}>
       {label}
     </span>
   )
@@ -88,19 +88,20 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         그래서 간격을 gap 이 아니라 각 칸의 안쪽 여백으로 준다.
       */}
       <span className="flex items-baseline">
-        <span className={`num w-[62px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none text-muted`}>
+        <span className="poster w-[62px] shrink-0 text-[min(5.4vw,54px)] leading-[0.8] text-line/30 sm:w-[86px]">
           {String(n).padStart(2, '0')}
         </span>
         <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] leading-tight text-ink ${closed ? 'line-through decoration-[2px] decoration-ink/60' : ''}`}>
           {c.title}
         </span>
         <span aria-hidden className="leader hidden h-[0.5em] min-w-8 flex-1 text-line/70 sm:block" />
-        <span className={`num ml-auto shrink-0 pl-3 text-right text-[min(2.4vw,23px)] font-extrabold leading-none sm:ml-0 ${tone}`}>
-          {comma(c.price)}<span className="font-medium">원부터</span>
+        <span className={`num ml-auto flex shrink-0 items-baseline pl-3 text-[min(2.4vw,23px)] font-extrabold leading-none sm:ml-0 ${tone}`}>
+          <span className="min-w-[104px] text-right">{comma(c.price)}</span>
+          <span className="w-[62px] whitespace-nowrap text-left font-medium">원부터</span>
         </span>
       </span>
 
-      <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[62px] ${closed ? 'text-muted' : 'text-strong'}`}>
+      <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[86px] ${closed ? 'text-muted' : 'text-strong'}`}>
         <span>{c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요</span>
         <span aria-hidden className={closed ? 'text-muted' : 'text-line/40'}>·</span>
         {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
