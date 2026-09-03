@@ -31,6 +31,14 @@ npm run lint
 npm run typecheck
 ```
 
+**시연 중이라 로컬 DB 를 지우고 싶지 않다면** 테스트용 DB 를 따로 준다. 화면을 띄워 둔 채로 검증할 수 있다.
+(`npm test` 는 스키마를 지우고 마이그레이션을 다시 적용한다.)
+
+```
+sudo -u postgres createdb -O commission commission_test
+DATABASE_URL=postgresql://commission:commission@127.0.0.1:5432/commission_test npx vitest run
+```
+
 ### 데이터베이스
 
 로컬 Postgres 를 쓴다 (dropbid 와 같은 방식). 슬롯 잠금 로직은 순수 Postgres 기능(행 잠금 + plpgsql)만 쓴다.
