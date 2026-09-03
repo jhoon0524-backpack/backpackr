@@ -100,7 +100,7 @@ function EmptyRow({ n }: { n: number }) {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="disp num inline-block bg-yellow px-[0.1em] py-[0.03em] align-baseline text-[0.95em] leading-[0.88] text-ink">
+    <span className="num inline-block bg-yellow px-[0.1em] py-[0.04em] align-baseline text-[0.95em] leading-[0.86] text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
       <span aria-hidden className="mx-[0.09em] inline-block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-ink align-baseline" />
