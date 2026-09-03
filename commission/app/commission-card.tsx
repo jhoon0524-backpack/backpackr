@@ -10,10 +10,9 @@ import { Photo } from './photo'
  *   검정 = 마감 (`ClosedStamp`)
  */
 export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | 'md' }) {
-  const last = left === 1
   return (
-    <span className={`stamp disp ${last ? 'bg-accent text-white' : 'bg-yellow text-ink'} ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
-      {last ? '한 자리 남음' : `${left}자리 남음`}
+    <span className={`disp -rotate-[4deg] border-[3px] border-ink bg-yellow px-3 py-1.5 leading-none text-ink shadow-hard ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+      {left === 1 ? '한 자리 남음' : `${left}자리 남음`}
     </span>
   )
 }
@@ -21,7 +20,7 @@ export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | '
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`stamp disp border-white bg-white text-ink ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`disp border-b-[3px] border-l-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {label}
     </span>
   )
@@ -45,7 +44,7 @@ export function TitleField({ title, closed = false, big = false }: { title: stri
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`line-clamp-3 text-balance break-keep font-extrabold leading-tight ${closed ? 'text-faint line-through decoration-[3px]' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[76px] text-[24px]'}`}>
+      <span className={`line-clamp-3 text-balance break-keep font-extrabold leading-tight ${closed ? 'text-faint' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[76px] text-[24px]'}`}>
         {title}
       </span>
     </div>
@@ -93,8 +92,13 @@ export function CommissionCard({ c }: { c: Card }) {
             : <TitleField title={c.title} closed={!!closed} />}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
+        {closed && (
+          <span className="disp pointer-events-none absolute -right-2 -top-3 z-10 -rotate-[4deg] border-[3px] border-accent bg-white px-3 py-1.5 text-[17px] leading-none text-accent shadow-hard">
+            {closed}
+          </span>
+        )}
         {/* 남은 자리는 살아 있는 칸에서만 센다. */}
-        {!closed && <div className="absolute right-3 top-3"><SlotStamp left={left} /></div>}
+        {!closed && <div className="absolute -right-2 -top-3 z-10"><SlotStamp left={left} /></div>}
       </div>
 
       <div className="flex flex-1 flex-col justify-end p-4">
@@ -105,15 +109,15 @@ export function CommissionCard({ c }: { c: Card }) {
           값에 줄을 긋지 않는다 — 마감은 싸진 게 아니라 못 받는 것이다.
         */}
         <span className="flex items-baseline gap-2">
-          <span className={`shrink-0 truncate text-[13px] font-bold ${closed ? 'text-faint' : 'text-strong'}`}>
+          <span className={`min-w-0 max-w-[6rem] shrink truncate text-[13px] font-bold ${closed ? 'text-muted' : 'text-strong'}`}>
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`num shrink-0 text-[26px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
-            {comma(c.price)}원~
+          <span className={`num w-[7.5rem] shrink-0 text-right text-[23px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
+            {comma(c.price)}<span className="ml-0.5 text-[15px] font-bold">원~</span>
           </span>
         </span>
-        <span className={`mt-2 text-[13px] font-bold ${closed ? 'text-faint' : 'text-strong'}`}>
+        <span className={`mt-2 text-[13px] font-bold ${closed ? 'text-muted' : 'text-strong'}`}>
           {c.category} · 작업 {c.turnaround_days}일
         </span>
       </div>
@@ -125,10 +129,11 @@ export function CommissionCard({ c }: { c: Card }) {
       */}
       <span
         className={`disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] ${
-          closed ? 'bg-ink text-white' : 'bg-yellow text-ink'
+          closed ? 'bg-fill text-faint' : 'bg-yellow text-ink'
         }`}
       >
-        {closed ?? '의뢰하기'}
+        {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
+        {closed ? '다음 자리가 나면 열려요' : '의뢰하기'}
         {!closed && <span aria-hidden>→</span>}
       </span>
     </Link>

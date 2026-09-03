@@ -26,19 +26,17 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-12 pt-4">
-          <div>
-            <p className="text-[16px] font-bold text-white/70">
-              {MONTH.format(new Date())} <span className="text-white/40">/</span> 메뉴 {commissions.length}개
-              {' '}<span className="text-white/40">/</span> {openSlots}자리 비어 있음
-            </p>
-            <h1 className="disp -ml-[0.06em] mt-3 whitespace-nowrap text-[min(12.2vw,176px)] tracking-[-0.045em] text-white">
-              이번 달 받는 작업
-            </h1>
-            <p className="mt-4 max-w-3xl text-[19px] font-medium leading-relaxed text-white/80">
-              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
-            </p>
-          </div>
+        <div className="mx-auto max-w-[1200px] px-8 pb-5 pt-5">
+          <p className="text-[15px] font-bold text-white/60">
+            {MONTH.format(new Date())} <span className="text-white/30">/</span> 메뉴 {commissions.length}개
+            {' '}<span className="text-white/30">/</span> {openSlots}자리 비어 있음
+          </p>
+          <p className="mt-4 max-w-3xl text-[19px] font-medium leading-relaxed text-white/80">
+            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+          </p>
+          <h1 className="disp mt-9 whitespace-nowrap text-[min(11.2vw,160px)] tracking-[-0.045em] text-white">
+            이번 달 받는 작업
+          </h1>
           {/*
             큰 숫자를 오른쪽에 세워 두었더니 화면에 크게 말하는 것이 둘이 되어 서로를 깎아먹었다.
             숫자는 제목 아래 한 줄로 물러난다 — 큰 것은 제목 하나뿐이다.
@@ -47,12 +45,12 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
@@ -88,11 +86,11 @@ function HowItWorks() {
         상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
         숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
       */}
-      <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((s, i) => (
-          <li key={s.n} className={`py-6 pr-6 ${i > 0 ? 'lg:border-l-[3px] lg:border-ink lg:pl-6' : ''}`}>
-            <span className="flex items-baseline gap-2 text-[19px] font-extrabold text-ink">
-              <span className="num text-[19px] text-muted">{s.n}</span>
+      <ol className="grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+        {STEPS.map((s) => (
+          <li key={s.n} className="pt-6">
+            <span className="flex items-baseline gap-3 text-[19px] font-extrabold text-ink">
+              <span className="disp num text-[30px] leading-none text-ink">{s.n}</span>
               {s.t}
             </span>
             <span className="mt-2 block text-[14px] font-medium leading-relaxed text-strong">{s.d}</span>

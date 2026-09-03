@@ -83,19 +83,14 @@
    * 적이 없다. 값이 비어 본문이 Arial 로 떨어졌고, 한글은 Arial 에 없으니
    * 기기마다 제각각인 글꼴로 나왔다.
    */
-  --font-sans: "Pretendard", "Pretendard Variable", "Apple SD Gothic Neo",
-    "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
   /*
-   * 무거운 활자는 **하나뿐이다.**
-   *
-   * 한동안 Gothic A1 900 과 검은고딕(Black Han Sans)을 같이 썼다. 제목은 검은고딕, 버튼과 절 제목은 Gothic A1.
-   * 그러면 화면에 굵은 목소리가 둘이 되어 어느 쪽이 이 서비스의 목소리인지 알 수 없다.
-   * 검은고딕 하나만 남긴다 — 굵기가 400 하나뿐이지만 그 하나가 이미 아주 굵다.
-   * (예전에 이 글꼴로 얇게 나왔던 것은 굵기 800·900 을 달라고 했기 때문이다. 없는 굵기를 부르면 브라우저가 흉내를 낸다.
-   *  400 을 그대로 쓰면 그런 일이 없다.)
+   * **글꼴은 한 벌이다.** 본문도 제목도 Noto Sans KR 하나이고, 다른 것은 굵기뿐이다.
+   * 제목용 활자를 따로 두면 화면에 굵은 목소리가 둘이 되고, 그 둘이 서로 다른 손에서 나온 것처럼 보인다.
+   * 100~900 을 다 가진 가변 글꼴이라 900 자소가 **진짜로 있다** — 없는 굵기를 부르면
+   * 브라우저가 흉내를 내고, 그러면 크게 키운 제목일수록 뭉개진다.
    */
-  --font-display: "Black Han Sans", "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo",
-    "Noto Sans KR", sans-serif;
+  --font-sans: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-display: var(--font-sans);
 }
 
 body {
@@ -129,9 +124,9 @@ body {
  */
 .disp {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 0.9;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
 }
 
  /*
@@ -148,7 +143,7 @@ body {
   border: 3px solid #111111;
   padding: 0.3em 0.6em;
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 900;
   line-height: 1;
 }
 
