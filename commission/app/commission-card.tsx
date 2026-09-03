@@ -94,10 +94,10 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] leading-tight text-ink ${closed ? 'line-through decoration-[2px] decoration-ink/60' : ''}`}>
           {c.title}
         </span>
-        <span aria-hidden className={`leader hidden h-[0.34em] min-w-8 flex-1 sm:block ${closed ? 'text-ink/20' : 'text-ink/45'}`} />
+        <span aria-hidden className={`leader hidden h-[0.18em] min-w-8 flex-1 sm:block ${closed ? 'text-ink/20' : 'text-ink/60'}`} />
         <span className={`poster num ml-auto flex shrink-0 items-baseline text-[min(2.6vw,25px)] leading-none sm:ml-0 ${tone}`}>
           <span className="pl-3">{comma(c.price)}</span>
-          <span className="w-[64px] whitespace-nowrap pl-1 text-left text-[16px]">원부터</span>
+          <span className="w-[62px] whitespace-nowrap pl-0.5 text-left text-[15px]">원부터</span>
         </span>
       </span>
 

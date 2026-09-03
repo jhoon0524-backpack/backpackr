@@ -74,7 +74,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   창작자에게 맞춤 작업을 의뢰하는 곳 · © 2026
                 </span>
               </p>
-              <p className="num text-[13px] font-medium text-white/50">다음 호 10월 1일</p>
+              <p className="num text-[13px] font-medium text-white/50">다음 호 10월 1일 · 제자와 본문 나눔명조, 표와 곁줄 노토 산스</p>
             </div>
           </div>
         </footer>
