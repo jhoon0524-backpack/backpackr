@@ -27,21 +27,22 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-10 pt-4">
+        <div className="mx-auto max-w-[1200px] px-8 pb-9 pt-4">
           <p className="num text-[13px] font-bold text-white/60">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
           {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
-          <h1 className="poster mt-4 flex items-start gap-[0.06em] text-white">
-            <span className="num text-[min(26vw,332px)] leading-[0.74] text-yellow">{openSlots}</span>
-            <span className="pt-[0.28em] text-[min(6.2vw,86px)] leading-[0.88]">
+          <h1 className="poster mt-3 flex items-baseline gap-[0.06em] text-white">
+            <span className="num text-[min(26vw,332px)] leading-[0.78]">{openSlots}</span>
+            <span className="num text-[min(9vw,116px)] leading-[0.78] text-white/35">/{allSlots}</span>
+            <span className="ml-3 text-[min(6.2vw,86px)] leading-[0.88]">
               자리
               <br />
               남았어요
             </span>
           </h1>
-          <p className="mt-7 max-w-2xl text-[19px] font-bold leading-relaxed text-white">
-            이번 달 열린 자리 {allSlots}개 가운데 {openSlots}개가 비어 있어요. 고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+          <p className="mt-6 max-w-2xl text-[18px] font-bold leading-relaxed text-white/80">
+            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
           </p>
           {/*
             큰 숫자를 오른쪽에 세워 두었더니 화면에 크게 말하는 것이 둘이 되어 서로를 깎아먹었다.
@@ -93,8 +94,7 @@ function HowItWorks() {
         <ol className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s) => (
             <li key={s.n} className="border-t-[3px] border-white/25 pt-4">
-              <span className="poster num block text-[40px] leading-none text-white/35">{s.n}</span>
-              <span className="disp mt-2 block text-[24px] leading-none text-white">{s.t}</span>
+              <span className="disp block text-[24px] leading-none text-white">{s.t}</span>
               <span className="mt-3 block text-[14px] font-normal leading-relaxed text-white/60">{s.d}</span>
             </li>
           ))}
@@ -130,7 +130,7 @@ function EmptySlot() {
           <span className="mt-1.5 block text-[19px] font-medium leading-tight text-strong">여기 붙이기</span>
         </span>
       </span>
-      <span className="flex flex-1 items-end p-4 text-[13px] font-normal leading-relaxed text-muted">
+      <span className="flex flex-1 items-start p-4 text-[13px] font-normal leading-relaxed text-muted">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
       </span>
       <span className="disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] text-ink">

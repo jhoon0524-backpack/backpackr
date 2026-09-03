@@ -53,7 +53,7 @@ export function TitleField({ title, category, closed = false, big = false }: { t
             {category}
           </span>
         )}
-        <span className={`text-balance break-keep font-semibold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 text-[22px]'}`}>
+        <span className={`text-balance break-keep font-medium leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 text-[19px]'}`}>
           {title}
         </span>
       </span>
