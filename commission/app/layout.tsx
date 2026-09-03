@@ -43,9 +43,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col overflow-x-hidden bg-white text-ink">
         <header className="sticky top-0 z-10 bg-ink text-white">
-          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-8">
-            <div className="flex items-center gap-7">
-              <Link href="/" className="poster flex h-16 items-center text-[34px] leading-none">
+          <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between gap-4 px-8">
+            <div className="flex items-center gap-8">
+              <Link href="/" className="poster flex h-[72px] items-center text-[40px] leading-none">
                 커미션!
               </Link>
               <HeaderNav items={NAV} />
@@ -64,9 +64,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-2 pt-0">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
         <footer className="border-t-[3px] border-white bg-ink text-white">
-          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-8 py-7">
-            <p className="poster text-[26px] leading-none">커미션!</p>
-            <p className="num text-[13px] font-bold text-white/70">2026년 9월호 · © 2026 커미션</p>
+          <div className="mx-auto max-w-[1200px] px-8 py-6">
+            <p className="num text-[13px] font-bold text-white/70">
+              커미션! · 2026년 9월호 · 창작자에게 맞춤 작업을 의뢰하는 곳 · © 2026
+            </p>
           </div>
         </footer>
       </body>

@@ -27,7 +27,7 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-24 pt-8">
+        <div className="mx-auto max-w-[1200px] px-8 pb-8 pt-8">
           {/*
             제호는 **한 크기, 한 얼굴, 두 줄**이다. 숫자만 크게 키워 두면 숫자와 말이 서로 다른
             물건처럼 놓이고, 그걸 붙이려고 밑선을 맞출수록 판만 길어진다.
@@ -50,12 +50,12 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="relative z-[1] -mt-16 grid grid-cols-1 gap-6">
+        <ul className="mt-14 grid grid-cols-1 gap-6">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="relative z-[1] -mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
@@ -69,40 +69,34 @@ export default async function CommissionList() {
 }
 
 /**
- * 화면 아래가 비어 있었다. 장식으로 채우지 않는다 —
- * 처음 온 사람이 실제로 모르는 것을 넣는다: **보내고 나면 그다음에 무슨 일이 일어나는가.**
- * 커미션은 결제 버튼을 누르면 끝나는 물건이 아니라 사람과 사람 사이의 일이라, 이 네 칸이 곧 안내다.
+ * 보내고 나면 무슨 일이 일어나는가.
+ *
+ * 넉 칸짜리 "이렇게 됩니다" 표는 어느 소개 페이지에나 있는 틀이다. 번호·굵은 제목·회색 한 줄이
+ * 네 번 반복되면 읽는 사람은 넷 다 안 읽는다. 그래서 **동사 넉 개를 한 줄로 세우고**,
+ * 설명은 그 아래 한 문단으로 몰아 준다. 볼 것은 한 줄, 읽을 것은 한 문단.
  */
-const STEPS = [
-  { n: '1', t: '고른다', d: '자리가 남은 메뉴를 고르고, 무엇을 원하는지 적어 보냅니다.' },
-  { n: '2', t: '수락한다', d: '창작자가 보고 최종가를 정해 수락합니다. 이때 자리 하나가 찹니다.' },
-  { n: '3', t: '작업한다', d: '수락한 날부터 메뉴에 적힌 기간 안에 작업합니다.' },
-  { n: '4', t: '받는다', d: '결과물을 받고 확인을 누르면 끝. 그때 자리가 다시 빕니다.' },
-]
+const STEPS = ['고른다', '수락한다', '작업한다', '받는다']
 
 function HowItWorks() {
   return (
-    /*
-      메뉴판에서 갑자기 소개 페이지로 바뀌던 자리다. 굵은 테두리도 검정도 여기서 끊겼다.
-      머리와 같은 검정 띠로 받아 화면을 닫는다 — 위에서 시작한 판이 아래에서 같은 판으로 끝난다.
-    */
     <section className="relative left-1/2 -mx-[50vw] mt-16 w-screen border-t-[3px] border-ink bg-ink">
       <div className="mx-auto max-w-[1200px] px-8 py-14">
-        <h2 className="disp text-[36px] text-white">보내면 이렇게 됩니다</h2>
-        <ol className="mt-8 border-t-[3px] border-white">
-          {STEPS.map((s) => (
+        <ol className="flex flex-wrap items-baseline">
+          {STEPS.map((t, i) => (
             <li
-              key={s.n}
-              className="grid grid-cols-[56px_1fr] items-baseline gap-x-6 gap-y-1 border-b-[3px] border-white py-4 sm:grid-cols-[72px_170px_1fr]"
+              key={t}
+              className={`poster text-[min(5vw,58px)] leading-none text-white ${
+                i > 0 ? 'ml-6 border-l-[3px] border-white/35 pl-6' : ''
+              }`}
             >
-              <span className="poster text-[44px] leading-[0.8] text-yellow sm:text-[54px]">{s.n}</span>
-              <span className="disp text-[24px] leading-none text-white">{s.t}</span>
-              <span className="col-span-2 text-[15px] font-medium leading-relaxed text-white/60 sm:col-span-1">
-                {s.d}
-              </span>
+              {t}
             </li>
           ))}
         </ol>
+        <p className="mt-8 max-w-3xl text-[17px] font-medium leading-relaxed text-white/70">
+          자리가 남은 메뉴에 원하는 것을 적어 보내면, 창작자가 최종가를 정해 수락합니다. 그때 자리 하나가 차고,
+          메뉴에 적힌 기간 안에 작업이 끝납니다. 결과물을 받고 확인을 누르면 자리가 다시 빕니다.
+        </p>
       </div>
     </section>
   )
@@ -144,9 +138,9 @@ function EmptySlot() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-flex items-end text-yellow">
+    <span className="num inline-flex items-end">
       <span>{open}</span>
-      <span aria-hidden className="mx-[0.03em] mb-[0.055em] block h-[0.66em] w-[0.055em] -skew-x-[13deg] bg-yellow" />
+      <span aria-hidden className="mx-[0.03em] mb-[0.055em] block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-current" />
       <span>{all}</span>
     </span>
   )
