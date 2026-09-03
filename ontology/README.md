@@ -51,8 +51,22 @@
 
 ## 어떤 채널을 보나요
 
-`config.json` 에 있습니다. 지금은 업무 채널 35개(g_, project_, svc_, tf_ 등)만 봅니다.
-바꾸려면 `enabled` 를 `true`/`false` 로 고치거나 채널을 추가하면 됩니다.
+`config.json` 에 있고, **중요도(priority)가 두 단계**입니다.
+
+**core — 텀블벅 업무의 중심 5개. 스레드까지 깊게 읽습니다.**
+
+| 채널 | 무엇이 나오나 |
+|---|---|
+| `#g_cell_tbb_outreach` | 창작자 발굴·콜라보·기획전, 주간 위키 업데이트 |
+| `#g_tbb_product` | 프로덕트 의사결정, 스펙, 법무 검토 결과 |
+| `#g_cell_tbb_operation` | 심사·CS·VOC, 운영 이슈 |
+| `#g_cell_tbb_marketing` | 광고·CRM·프로모션, 요금제 정책 |
+| `#ts_topic-data` | 데이터 문의·분석 결과 |
+
+**normal — 나머지 30개. 의사결정·이슈·새 용어만 가볍게 훑습니다.**
+
+바꾸려면 `enabled` 를 `true`/`false` 로 고치거나 `priority` 를 `core`/`normal` 로 바꾸면 됩니다.
+core 만 보고 싶으면 normal 채널을 전부 `enabled: false` 로 두면 됩니다.
 
 **비공개(private) 채널은 기본으로 꺼져 있습니다.** (`g_leader`,
 `project_bpk_growth_committee`) 슬랙 내용 요약이 이 저장소에 남기 때문입니다.

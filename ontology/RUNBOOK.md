@@ -26,17 +26,32 @@ python3 ontology/tools/ontology.py stats
 사람의 정정은 슬랙에서 추론한 내용보다 **항상 우선**합니다. 정정으로 만든 엔티티는
 델타에서 `"attributes": {"source": "human-correction"}` 을 붙입니다.
 
-## 2. 슬랙 스캔
+## 2. 슬랙 스캔 — core 먼저, 깊게
 
-`config.json` 의 `enabled: true` 채널을 모두 훑습니다.
+`config.json` 의 `enabled: true` 채널을 훑되, **`priority` 에 따라 들이는 노력을 다르게** 합니다.
+읽는 순서도 core 가 먼저입니다.
 
-- 각 채널마다 `slack_read_channel(channel_id, oldest=<state.json의 last_ts, 없으면 lookback_days 전>, limit=<max_messages_per_channel>)`
-- 의미 있는 스레드는 `slack_read_thread` 로 결론까지 확인합니다.
-  (특히 `talk_red_light`, `tbb_119`, `ts_topic-data` 는 스레드에 결론이 있습니다)
+### core 채널 (5개) — 여기가 텀블벅 업무의 중심입니다
+
+`g_cell_tbb_outreach` · `g_tbb_product` · `g_cell_tbb_operation` · `g_cell_tbb_marketing` · `ts_topic-data`
+
+- `slack_read_channel(channel_id, oldest=<state.json의 last_ts, 없으면 lookback_days 전>, limit=<max_messages_core>)`
+- **결론이 담긴 스레드는 `slack_read_thread` 로 끝까지 읽습니다.** 이 채널들은 본문보다 스레드에
+  결정이 들어 있는 경우가 많습니다. 스레드를 안 열면 "논의 중"인지 "확정"인지 구분할 수 없습니다.
+- 사람·조직·프로젝트·제품·용어·지표·의사결정·이슈를 **모두** 뽑습니다.
+- 시간이 부족하면 여기부터 채우고 normal 채널을 줄입니다. 반대로 하지 않습니다.
+
+### normal 채널 — 가볍게
+
+- `slack_read_channel(..., limit=<max_messages_normal>)`, 스레드는 결론이 필요할 때만 엽니다.
+- **의사결정 · 이슈 · 새 용어**만 뽑습니다. 사람·조직은 core 채널에서 이미 나온 대상이 아니면
+  굳이 새로 만들지 않습니다.
+
+### 공통
+
 - 봇 메시지·단순 알림·이모지 반응만 있는 메시지는 건너뜁니다.
 - 채널을 다 읽었으면 그 채널에서 **가장 최근 메시지의 ts** 를 기록해 둡니다 (다음 실행의 시작점).
-
-읽기 실패한 채널은 무시하고 넘어가되, 어떤 채널이 실패했는지 기록합니다.
+- 읽기 실패한 채널은 무시하고 넘어가되, 어떤 채널이 실패했는지 기록합니다.
 
 ## 3. 엔티티·관계 추출
 
@@ -122,5 +137,5 @@ git push -u origin claude/ontology-auto-learning-ol70ac
 
 ## 8. 마무리 보고
 
-한국어로 3줄 이내 요약: 스캔한 채널 수 / 신규 엔티티·관계 수 / 확인 필요한 질문.
+한국어로 3줄 이내 요약: 스캔한 채널 수(core/normal) / 신규 엔티티·관계 수 / 확인 필요한 질문.
 새 엔티티도 없고 결정도 없으면 "특이사항 없음" 한 줄이면 충분합니다.

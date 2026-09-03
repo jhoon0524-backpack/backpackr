@@ -1,52 +1,273 @@
 {
   "timezone": "Asia/Seoul",
   "lookback_days": 1,
-  "max_messages_per_channel": 100,
   "stale_after_days": 90,
   "confirmed_threshold": 0.75,
   "max_evidence_per_item": 5,
-  "_comment": "enabled:false 인 채널은 스캔하지 않습니다. private 채널은 슬랙 내용이 이 저장소에 남는 점을 고려해 기본 비활성입니다.",
+  "max_messages_core": 100,
+  "max_messages_normal": 30,
+  "_comment": "priority=core 채널이 텀블벅 업무의 중심이다. 깊게(스레드까지) 읽는다. normal 채널은 결정·이슈·용어만 가볍게 훑는다. enabled:false 인 채널은 스캔하지 않는다. private 채널은 슬랙 내용이 이 저장소에 남는 점을 고려해 기본 비활성이다.",
   "channels": [
-    { "id": "C06F8RAFWF7", "name": "g_leader",                  "group": "조직",   "private": true,  "enabled": false },
-    { "id": "C062QDGD4G2", "name": "project_bpk_growth_committee", "group": "프로젝트", "private": true, "enabled": false },
-
-    { "id": "C06GHJ9AR28", "name": "g_cto_product",             "group": "조직",   "enabled": true },
-    { "id": "C0AUU70CPFE", "name": "g_tbb_product",             "group": "조직",   "enabled": true },
-    { "id": "C0B9NKDLNUC", "name": "g_tbb_ai_genie",            "group": "조직",   "enabled": true },
-    { "id": "C05BX5P8AJY", "name": "g_cell_tbb_engineering",    "group": "조직",   "enabled": true },
-    { "id": "C05BX5PHG4U", "name": "g_cell_tbb_operation",      "group": "조직",   "enabled": true },
-    { "id": "C05BXDGPKUZ", "name": "g_cell_tbb_marketing",      "group": "조직",   "enabled": true },
-    { "id": "C05BN33RYUW", "name": "g_cell_tbb_outreach",       "group": "조직",   "enabled": true },
-    { "id": "C05BFRWSQLV", "name": "g_cell_tbb_design",         "group": "조직",   "enabled": true },
-    { "id": "C05C7BPDYEM", "name": "g_cell_data_strategy",      "group": "조직",   "enabled": true },
-    { "id": "C4UJK8DPD",   "name": "g_unit_growth",             "group": "조직",   "enabled": true },
-    { "id": "C03NK30RWTB", "name": "g_unit_bx",                 "group": "조직",   "enabled": true },
-    { "id": "C07G09TV8K0", "name": "g_cell_newbiz",             "group": "조직",   "enabled": true },
-    { "id": "CPAC4BVDL",   "name": "g_cell_devops",             "group": "조직",   "enabled": true },
-    { "id": "C88CBCY64",   "name": "g_cell_legal",              "group": "조직",   "enabled": true },
-    { "id": "C01MZED5N01", "name": "g_cell_account",            "group": "조직",   "enabled": true },
-    { "id": "C4U10MDEC",   "name": "g_cell_selection",          "group": "조직",   "enabled": true },
-    { "id": "C4SMYS2MN",   "name": "g_cell_idus_operation",     "group": "조직",   "enabled": true },
-    { "id": "C019EU7ABN0", "name": "g_design",                  "group": "조직",   "enabled": true },
-    { "id": "C4YL4GP2Q",   "name": "g_pr",                      "group": "조직",   "enabled": true },
-
-    { "id": "C039GLSTZCJ", "name": "project_synergy",           "group": "프로젝트", "enabled": true },
-    { "id": "C07JR7PD2AG", "name": "project_10x10_synergy",     "group": "프로젝트", "enabled": true },
-    { "id": "C05BN34FY6S", "name": "project_tbb_소상공인",       "group": "프로젝트", "enabled": true },
-    { "id": "C052V0DFGH0", "name": "tf_fashion_synergy",        "group": "프로젝트", "enabled": true },
-    { "id": "C05BN345HDL", "name": "ts_tf_합병_툰블벅",          "group": "프로젝트", "enabled": true },
-
-    { "id": "C05BN34BB1U", "name": "svc_tbb_creator",           "group": "서비스",  "enabled": true },
-    { "id": "C05BUJRQUQ3", "name": "svc_std_creator",           "group": "서비스",  "enabled": true },
-    { "id": "C05BX5QBF28", "name": "ts_topic-data",             "group": "서비스",  "enabled": true },
-    { "id": "C08EWEXFN59", "name": "tbb_119",                   "group": "서비스",  "enabled": true },
-    { "id": "C0A682UCNLT", "name": "co_tenbyten_비즈니스",       "group": "서비스",  "enabled": true },
-
-    { "id": "C09PNHBLF5Z", "name": "talk_red_light",            "group": "신호",   "enabled": true },
-    { "id": "C03C1TL831D", "name": "talk_green_light",          "group": "신호",   "enabled": true },
-    { "id": "C024MUP357E", "name": "idea_makes_creatorecosystem","group": "신호",  "enabled": true },
-    { "id": "C07916FUAN9", "name": "talk_ai_자동화",             "group": "신호",   "enabled": true },
-    { "id": "CPDTL8HU1",   "name": "_boc",                      "group": "전사",   "enabled": true },
-    { "id": "C4UJHLN2X",   "name": "_talk",                     "group": "전사",   "enabled": true }
+    {
+      "id": "C0AUU70CPFE",
+      "name": "g_tbb_product",
+      "group": "조직",
+      "enabled": true,
+      "priority": "core"
+    },
+    {
+      "id": "C05BX5PHG4U",
+      "name": "g_cell_tbb_operation",
+      "group": "조직",
+      "enabled": true,
+      "priority": "core"
+    },
+    {
+      "id": "C05BXDGPKUZ",
+      "name": "g_cell_tbb_marketing",
+      "group": "조직",
+      "enabled": true,
+      "priority": "core"
+    },
+    {
+      "id": "C05BN33RYUW",
+      "name": "g_cell_tbb_outreach",
+      "group": "조직",
+      "enabled": true,
+      "priority": "core"
+    },
+    {
+      "id": "C05BX5QBF28",
+      "name": "ts_topic-data",
+      "group": "서비스",
+      "enabled": true,
+      "priority": "core"
+    },
+    {
+      "id": "C06GHJ9AR28",
+      "name": "g_cto_product",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C0B9NKDLNUC",
+      "name": "g_tbb_ai_genie",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C05BX5P8AJY",
+      "name": "g_cell_tbb_engineering",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C05BFRWSQLV",
+      "name": "g_cell_tbb_design",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C05C7BPDYEM",
+      "name": "g_cell_data_strategy",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C4UJK8DPD",
+      "name": "g_unit_growth",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C03NK30RWTB",
+      "name": "g_unit_bx",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C07G09TV8K0",
+      "name": "g_cell_newbiz",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "CPAC4BVDL",
+      "name": "g_cell_devops",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C88CBCY64",
+      "name": "g_cell_legal",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C01MZED5N01",
+      "name": "g_cell_account",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C4U10MDEC",
+      "name": "g_cell_selection",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C4SMYS2MN",
+      "name": "g_cell_idus_operation",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C019EU7ABN0",
+      "name": "g_design",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C4YL4GP2Q",
+      "name": "g_pr",
+      "group": "조직",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C039GLSTZCJ",
+      "name": "project_synergy",
+      "group": "프로젝트",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C07JR7PD2AG",
+      "name": "project_10x10_synergy",
+      "group": "프로젝트",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C05BN34FY6S",
+      "name": "project_tbb_소상공인",
+      "group": "프로젝트",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C052V0DFGH0",
+      "name": "tf_fashion_synergy",
+      "group": "프로젝트",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C05BN345HDL",
+      "name": "ts_tf_합병_툰블벅",
+      "group": "프로젝트",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C05BN34BB1U",
+      "name": "svc_tbb_creator",
+      "group": "서비스",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C05BUJRQUQ3",
+      "name": "svc_std_creator",
+      "group": "서비스",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C08EWEXFN59",
+      "name": "tbb_119",
+      "group": "서비스",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C0A682UCNLT",
+      "name": "co_tenbyten_비즈니스",
+      "group": "서비스",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C09PNHBLF5Z",
+      "name": "talk_red_light",
+      "group": "신호",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C03C1TL831D",
+      "name": "talk_green_light",
+      "group": "신호",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C024MUP357E",
+      "name": "idea_makes_creatorecosystem",
+      "group": "신호",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C07916FUAN9",
+      "name": "talk_ai_자동화",
+      "group": "신호",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "CPDTL8HU1",
+      "name": "_boc",
+      "group": "전사",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C4UJHLN2X",
+      "name": "_talk",
+      "group": "전사",
+      "enabled": true,
+      "priority": "normal"
+    },
+    {
+      "id": "C06F8RAFWF7",
+      "name": "g_leader",
+      "group": "조직",
+      "private": true,
+      "enabled": false,
+      "priority": "normal"
+    },
+    {
+      "id": "C062QDGD4G2",
+      "name": "project_bpk_growth_committee",
+      "group": "프로젝트",
+      "private": true,
+      "enabled": false,
+      "priority": "normal"
+    }
   ]
 }
