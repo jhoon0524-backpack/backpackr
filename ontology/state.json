@@ -1,0 +1,65 @@
+{
+  "last_run": "2026-09-03",
+  "channels": {
+    "C0AUU70CPFE": {
+      "name": "g_tbb_product",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 25
+    },
+    "C05BX5PHG4U": {
+      "name": "g_cell_tbb_operation",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 45
+    },
+    "C05BXDGPKUZ": {
+      "name": "g_cell_tbb_marketing",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 40
+    },
+    "C05BN33RYUW": {
+      "name": "g_cell_tbb_outreach",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 45
+    },
+    "C05BX5P8AJY": {
+      "name": "g_cell_tbb_engineering",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 28
+    },
+    "C0B9NKDLNUC": {
+      "name": "g_tbb_ai_genie",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 25
+    },
+    "C05C7BPDYEM": {
+      "name": "g_cell_data_strategy",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 20
+    },
+    "C07G09TV8K0": {
+      "name": "g_cell_newbiz",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 18
+    },
+    "C09PNHBLF5Z": {
+      "name": "talk_red_light",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 0
+    },
+    "C08EWEXFN59": {
+      "name": "tbb_119",
+      "last_ts": "1788393600",
+      "last_run": "2026-09-03",
+      "messages": 0
+    }
+  }
+}
