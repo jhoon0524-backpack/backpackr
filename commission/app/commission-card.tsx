@@ -49,13 +49,13 @@ export function TitleField({ title, category, closed = false, big = false }: { t
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className="flex w-full flex-col gap-1.5">
+      <span className={`flex w-full flex-col gap-1.5 ${big ? '' : 'h-[76px]'}`}>
         {category && (
-          <span className={`text-[11px] font-bold tracking-[0.12em] ${closed ? 'text-line' : 'text-faint'}`}>
+          <span className={`text-[11px] font-bold leading-none tracking-[0.12em] ${closed ? 'text-line' : 'text-faint'}`}>
             {category}
           </span>
         )}
-        <span className={`text-balance break-keep font-semibold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[52px] text-[21px]'}`}>
+        <span className={`text-balance break-keep font-medium leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 text-[19px]'}`}>
           {title}
         </span>
       </span>
@@ -137,7 +137,7 @@ export function CommissionCard({ c }: { c: Card }) {
 
       <div className="body flex flex-1 flex-col justify-end p-4">
         {/* 값이 먼저다. 메뉴판에서 결정을 만드는 것은 값이다. */}
-        <span className={`num block text-[28px] font-extrabold leading-none tracking-tight ${closed ? '' : 'text-ink'}`}>
+        <span className={`num block text-[32px] font-extrabold leading-none tracking-tight ${closed ? '' : 'text-ink'}`}>
           {comma(c.price)}<span className="ml-1 text-[13px] font-medium">원부터</span>
         </span>
         {/* 만드는 사람과 걸리는 날을 한 줄로. 부품을 일곱 개 얹어 두면 어느 것도 눈에 안 든다. */}

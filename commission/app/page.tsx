@@ -35,7 +35,7 @@ export default async function CommissionList() {
           <div className="relative">
             <span
               aria-hidden
-              className="poster num pointer-events-none absolute -right-[0.08em] top-[0.02em] text-[min(34vw,436px)] leading-[0.72] text-yellow"
+              className="poster num pointer-events-none absolute -right-[0.06em] -top-[0.3em] text-[min(44vw,564px)] leading-[0.72] text-yellow"
             >
               {openSlots}
             </span>
@@ -43,13 +43,13 @@ export default async function CommissionList() {
               숫자는 이미 오른쪽에 사람 키만 하게 서 있다. 제목에서 한 번 더 쓰면 같은 말을 두 번 하는 것이다.
               눈에는 안 보이게 두되 읽어 주는 기계에는 남긴다 — 큰 숫자는 그림이라 소리로 읽히지 않는다.
             */}
-            <h1 className="poster relative pt-[min(13vw,168px)] text-[min(5.6vw,78px)] leading-[0.9] text-white">
+            <h1 className="poster relative pt-[min(16vw,206px)] text-[min(4.6vw,64px)] leading-[0.9] text-white">
               <span className="sr-only">{openSlots}</span>자리
               <br />
               남았어요
             </h1>
           </div>
-          <p className="relative mt-6 max-w-2xl text-[15px] font-normal leading-relaxed text-white/70">
+          <p className="relative mt-6 max-w-2xl text-[19px] font-bold leading-relaxed text-white">
             이번 달 열린 자리 {allSlots}개 가운데 {openSlots}개가 비어 있어요. 고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
           </p>
           {/*
@@ -92,24 +92,25 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section className="mb-20 mt-24">
-      <h2 className="disp text-[40px] text-ink">보내면 이렇게 됩니다</h2>
-      {/*
-        네모 넷을 나란히 놓고 큰 숫자를 얹는 것은 어느 소개 페이지에나 있는 모양이다.
-        상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
-        숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
-      */}
-      <ol className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((s) => (
-          <li key={s.n}>
-            <span className="disp block text-[26px] leading-none text-ink">
-              <span className="num mr-2 text-[15px] text-faint">{s.n}</span>
-              {s.t}
-            </span>
-            <span className="mt-2 block text-[14px] font-normal leading-relaxed text-muted">{s.d}</span>
-          </li>
-        ))}
-      </ol>
+    /*
+      메뉴판에서 갑자기 소개 페이지로 바뀌던 자리다. 굵은 테두리도 검정도 여기서 끊겼다.
+      머리와 같은 검정 띠로 받아 화면을 닫는다 — 위에서 시작한 판이 아래에서 같은 판으로 끝난다.
+    */
+    <section className="relative left-1/2 -mx-[50vw] mt-24 w-screen border-y-[3px] border-ink bg-ink">
+      <div className="mx-auto max-w-[1200px] px-8 py-14">
+        <h2 className="disp text-[36px] text-white">보내면 이렇게 됩니다</h2>
+        <ol className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((s) => (
+            <li key={s.n} className="border-t-[3px] border-white/25 pt-4">
+              <span className="disp block text-[24px] leading-none text-white">
+                <span className="num mr-2 text-[15px] text-white/40">{s.n}</span>
+                {s.t}
+              </span>
+              <span className="mt-3 block text-[14px] font-normal leading-relaxed text-white/60">{s.d}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   )
 }
@@ -131,12 +132,14 @@ function EmptySlot() {
       className="group relative flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
     >
       {/* 진짜 카드의 제목 칸과 정확히 같은 구조 — 그래야 넉 장의 가름선이 같은 높이에 선다. */}
-      <span className="absolute right-0 top-0 border-b-[3px] border-l-[3px] border-dashed border-line px-3 py-1.5 text-[13px] font-bold text-muted">
+      <span className="absolute right-0 top-0 border-b-[3px] border-l-[3px] border-dashed border-line bg-white px-3 py-1.5 text-[13px] font-bold text-muted">
         비어 있음
       </span>
       <span className="flex w-full flex-col gap-1.5 px-4 pb-3 pt-7">
-        <span className="text-[12px] font-bold tracking-[0.06em] text-muted">빈 자리</span>
-        <span className="h-[52px] text-[21px] font-semibold leading-tight text-strong">여기 붙이기</span>
+        <span className="h-[76px]">
+          <span className="block text-[11px] font-bold leading-none tracking-[0.12em] text-faint">빈 자리</span>
+          <span className="mt-1.5 block text-[19px] font-medium leading-tight text-strong">여기 붙이기</span>
+        </span>
       </span>
       <span className="flex flex-1 items-end p-4 text-[13px] font-normal leading-relaxed text-muted">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
