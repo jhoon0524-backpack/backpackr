@@ -6,15 +6,18 @@
  * 입력 — 흰 바탕, 검정 2px 테두리, 라운드 없음.
  */
 /*
- * **그림자는 "누를 수 있다" 는 뜻이다.** 카드와 주요 버튼만 갖는다.
- * 딱지·띠·안내 상자·구분선은 선만 두른다. 규칙이 눈에 보여야 규칙이다.
+ * **그림자는 "집어 올릴 수 있다" 는 뜻이고, 갖는 것은 둘뿐이다** — 메뉴 카드와 누르는 버튼.
+ *
+ * 한동안 테두리를 두른 상자마다 그림자를 달았다. 규칙을 눈에 보이게 하려던 것인데 반대가 됐다 —
+ * 다 떠 있으면 뜬 것과 붙어 있는 것의 차이가 사라져서, 화면이 스티커를 붙여 놓은 판처럼 보인다.
+ * 그림자는 아껴 쓰고 대신 8px 로 깊게 판다.
  *
  * **색은 둘, 역할도 둘이다.**
  *   노랑 = 누르는 것. 이 서비스의 색이다.
  *   빨강 = 자리가 걸린 것. 남은 자리, 되돌릴 수 없는 버튼, 오류.
  * 노랑을 로고에만 두면 화면의 진짜 강조색은 빨강 하나가 되고, 그러면 급한 것과 그냥 버튼이 같은 색이 된다.
  */
-const HARD = 'border-[3px] border-ink shadow-hard transition active:translate-x-[6px] active:translate-y-[6px] active:shadow-none disabled:opacity-50'
+const HARD = 'border-[3px] border-ink shadow-hard transition active:translate-x-[8px] active:translate-y-[8px] active:shadow-none disabled:opacity-50'
 export const BTN_PRIMARY = `disp inline-flex h-14 w-full items-center justify-center bg-accent px-5 text-[20px] text-white ${HARD}`
 export const BTN_INK = `disp inline-flex h-14 w-full items-center justify-center bg-yellow px-5 text-[20px] text-ink ${HARD}`
 export const BTN_SECONDARY = `inline-flex h-14 w-full items-center justify-center bg-white px-5 text-base font-bold text-ink ${HARD}`

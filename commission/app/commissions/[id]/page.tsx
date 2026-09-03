@@ -5,7 +5,7 @@ import { kstDate, trustFromFunding, won } from '@/lib/format'
 import { FundingRecord } from '@/app/funding-record'
 import { getCurrentUser } from '@/lib/session'
 import { Photo } from '@/app/photo'
-import { SamplePlaceholder, SlotOverlay } from '@/app/commission-card'
+import { SlotOverlay, TitleField } from '@/app/commission-card'
 import { BACK, BTN_INK, BTN_PRIMARY, BTN_SECONDARY, EYEBROW, H2, NOTICE } from '@/app/ui'
 import { RequestForm } from './request-form'
 
@@ -42,7 +42,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
                 <Photo src={c.sample_urls[0]} alt="샘플 1" className="h-full w-full object-cover" />
               </div>
             ) : (
-              <div className="aspect-square"><SamplePlaceholder category={c.category} /></div>
+              <div className="aspect-square"><TitleField title={c.title} closed={c.status !== 'open'} big /></div>
             )}
             <SlotOverlay active={c.active_count} max={c.max_slots} status={c.status} size="md" />
           </div>
