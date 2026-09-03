@@ -31,7 +31,7 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-8 pt-5">
+        <div className="mx-auto max-w-[1200px] px-8 pb-7 pt-4">
           {/*
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
@@ -43,7 +43,7 @@ export default async function CommissionList() {
             한글 수사로 적으면 애초에 섞일 얼굴이 없다 — 제호는 한 얼굴 한 덩어리가 된다.
             정확한 값(4/6)은 바로 아래 줄, 숫자를 적는 활자(고딕)로 적는다.
           */}
-          <h1 className="poster -ml-[0.035em] text-[min(9.6vw,138px)] leading-[0.9] tracking-[-0.005em] [word-spacing:-0.06em] text-white">
+          <h1 className="poster -ml-[0.035em] border-t border-white/30 pt-6 text-[min(9.6vw,138px)] leading-[0.9] tracking-[-0.005em] [word-spacing:-0.06em] text-white">
             {openSlots === 0 ? (
               <>지금은 자리가 없어요</>
             ) : (
@@ -88,11 +88,11 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="group mt-10 block"
+      className="group mt-14 block"
     >
       {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
-      <span className="poster block border-b border-ink pb-4 text-[min(3.1vw,29px)] leading-snug text-ink">
-        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요 <span aria-hidden>→</span>
+      <span className="poster block text-[min(3.6vw,36px)] leading-snug text-ink">
+        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">
         자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
