@@ -15,7 +15,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
       className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
-      빈자리 <span className="num bg-yellow px-1.5 py-0.5">{left}/{max}</span>
+      빈자리 <span className="num">{left}/{max}</span>
     </span>
   )
 }
@@ -86,19 +86,20 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         칸을 나눠 두면 값 칸의 남는 왼쪽이 그대로 빈 곳이 되어 점선이 값에 닿지 못한다.
         점선은 닿아야 잇는 줄이다.
       */}
-      <span className="flex items-baseline gap-4">
+      <span className="relative flex items-baseline gap-4">
         {/* 번호는 제호와 같은 얼굴. 160px 다음에 바로 20px 가 오면 두 장의 서류를 붙여 둔 것처럼 읽힌다. */}
-        <span className="poster w-[56px] shrink-0 text-[min(4.4vw,44px)] leading-none text-ink">
+        <span className="disp num w-[56px] shrink-0 text-[min(3.6vw,34px)] leading-none text-ink">
           {String(n).padStart(2, '0')}
         </span>
-        <span className={`disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight ${closed ? 'text-faint' : 'text-ink'}`}>
+        <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
           {c.title}
         </span>
         <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
         <span className="disp num ml-auto w-[196px] shrink-0 text-right text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
-          <span className={closed ? 'line-through decoration-[2px]' : ''}>{comma(c.price)}</span>
+          {comma(c.price)}
           <span className="ml-1.5 inline-block w-[44px] text-left text-[13px] tracking-[0.04em]">원부터</span>
         </span>
+        {closed && <span aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 bg-ink" />}
       </span>
 
       <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 sm:pl-[72px]">

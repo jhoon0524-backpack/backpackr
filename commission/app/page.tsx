@@ -34,16 +34,9 @@ export default async function CommissionList() {
             자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <div className="mt-5 border-t border-white/60 pt-5">
-            <ol className="flex flex-wrap items-baseline gap-x-10 gap-y-2 text-[min(3.2vw,28px)] leading-tight">
-              {STEPS.map((t) => (
-                <li key={t} className="disp text-white">{t}</li>
-              ))}
-            </ol>
-            <p className="mt-4 text-[15px] font-medium leading-relaxed text-white/70">
-              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
-            </p>
-          </div>
+          <p className="disp mt-5 border-t border-white/60 pt-5 text-[min(2.7vw,24px)] leading-snug text-white">
+            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
+          </p>
         </div>
       </section>
 
@@ -62,12 +55,6 @@ export default async function CommissionList() {
     </div>
   )
 }
-
-/**
- * 이 서비스 전체를 네 마디로. 제호 바로 아래, 검정 판 안에 둔다.
- * 흰 판 한가운데 이 네 마디만 덩그러니 두었더니 제목도 마디도 아닌 것이 되었다.
- */
-const STEPS = ['고른다', '수락한다', '작업한다', '받는다']
 
 /**
  * 아직 아무도 안 붙인 자리.
@@ -101,10 +88,10 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-flex h-[1.02em] items-end bg-yellow px-[0.12em] pb-[0.05em] align-baseline text-[1.1em] leading-none text-ink">
+    <span className="disp num inline-block bg-yellow px-[0.1em] align-baseline text-[0.95em] leading-[0.92] text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
-      <span aria-hidden className="mx-[0.08em] mb-[0.05em] block h-[0.66em] w-[0.1em] -skew-x-[13deg] bg-ink" />
+      <span aria-hidden className="mx-[0.09em] inline-block h-[0.62em] w-[0.09em] -skew-x-[13deg] bg-ink align-baseline" />
       <span>{all}</span>
     </span>
   )
