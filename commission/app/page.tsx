@@ -31,7 +31,7 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-10 pt-6">
+        <div className="mx-auto max-w-[1200px] px-8 pb-8 pt-5">
           {/*
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
@@ -43,7 +43,7 @@ export default async function CommissionList() {
             한글 수사로 적으면 애초에 섞일 얼굴이 없다 — 제호는 한 얼굴 한 덩어리가 된다.
             정확한 값(4/6)은 바로 아래 줄, 숫자를 적는 활자(고딕)로 적는다.
           */}
-          <h1 className="poster -ml-[0.035em] text-[min(10.4vw,150px)] leading-[0.9] tracking-[-0.005em] text-white">
+          <h1 className="poster -ml-[0.035em] text-[min(11.2vw,161px)] leading-[0.9] tracking-[-0.005em] [word-spacing:-0.06em] text-white">
             {openSlots === 0 ? (
               <>지금은 자리가 없어요</>
             ) : (
@@ -51,12 +51,12 @@ export default async function CommissionList() {
             )}
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white/60 pt-6">
+          <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white/60 pt-5">
             <p className="text-[min(2.4vw,22px)] font-normal leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
             {/* 정확한 값은 숫자를 적는 활자로. 제호는 말하고, 이 줄은 센다. */}
-            <p className="num shrink-0 text-[15px] font-bold text-white/70">
+            <p className="num shrink-0 text-[13px] font-medium text-white/70">
               빈자리 {openSlots}/{allSlots} · 메뉴 {commissions.length}개
             </p>
           </div>
@@ -86,7 +86,7 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="group mt-8 block"
+      className="group mt-12 block"
     >
       <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink underline decoration-[2px] underline-offset-[7px]">
         그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.

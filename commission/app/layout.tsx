@@ -50,7 +50,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <HeaderNav items={NAV} />
             </div>
             {/* 이 판은 달마다 새로 나온다. 그 사실은 판권면에 묻어 둘 것이 아니라 제호 옆에 적는 것이다. */}
-            <p className="hidden text-[13px] font-medium text-white/55 sm:block">제9호 · 2026년 9월</p>
+            <p className="num hidden text-[13px] font-medium text-white/70 sm:block">제9호 · 2026년 9월</p>
           </div>
           {/* 좁은 화면의 길. 높이 44 탭 세 개. */}
           <nav className="flex border-t-[3px] border-white/20 sm:hidden">
@@ -73,10 +73,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             {/* 판권면. 발행 정보는 한 줄로 흘려 쓰는 것이 아니라 층을 갖는다. */}
             <div>
               <p className="poster text-[42px] leading-none">커미션!</p>
-              <p className="num mt-3 text-[13px] font-bold text-white/80">
-                창작자에게 맞춤 작업을 의뢰하는 곳
+              <p className="num mt-3 text-[13px] font-medium text-white/70">
+                창작자에게 맞춤 작업을 의뢰하는 곳 · 제9호 · © 2026 커미션
               </p>
-              <p className="num mt-1 text-[13px] font-medium text-white/50">© 2026 커미션</p>
             </div>
           </div>
         </footer>

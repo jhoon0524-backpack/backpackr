@@ -13,7 +13,7 @@ import { usePathname } from 'next/navigation'
 export function HeaderNav({ items }: { items: readonly { href: string; label: string }[] }) {
   const path = usePathname()
   return (
-    <nav className="poster hidden gap-8 pb-[3px] text-[19px] sm:flex">
+    <nav className="disp hidden gap-8 pb-[3px] text-[17px] sm:flex">
       {items.map((n) => {
         const here = n.href === '/' ? path === '/' : path.startsWith(n.href)
         return (
@@ -23,7 +23,7 @@ export function HeaderNav({ items }: { items: readonly { href: string; label: st
             aria-current={here ? 'page' : undefined}
             className="flex min-w-11 items-center justify-center py-5"
           >
-            <span className={`flex items-center px-1 ${here ? 'border-b-2 border-yellow pb-1.5 text-white' : 'border-b-2 border-transparent pb-1.5 text-white/45 hover:text-white'}`}>
+            <span className={`flex items-center ${here ? 'border-b border-yellow pb-1.5 text-white' : 'border-b border-transparent pb-1.5 text-white/45 hover:text-white'}`}>
               {n.label}
             </span>
           </Link>
