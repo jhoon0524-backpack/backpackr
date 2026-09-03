@@ -22,7 +22,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 같은 자리, 같은 크기. 칠이 없다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp shrink-0 whitespace-nowrap bg-ink px-3 py-1.5 leading-none tracking-[0.1em] text-white ${size === 'md' ? 'text-[16px]' : 'text-[15px]'}`}>
+    <span className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}>
       {label}
     </span>
   )
@@ -93,12 +93,12 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
           {c.title}
         </span>
         <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        <span className="hidden w-[112px] shrink-0 text-right sm:block">
+        <span className="hidden w-[112px] shrink-0 sm:block">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </span>
         <span className="disp num ml-auto w-[186px] shrink-0 text-right text-[min(2.8vw,26px)] leading-none text-ink sm:ml-0">
           {comma(c.price)}
-          <span className="ml-1.5 inline-block w-[44px] text-left text-[13px] font-bold tracking-[0.04em]">원부터</span>
+          <span className="ml-1.5 inline-block w-[46px] text-left text-[12px] font-bold tracking-[0.1em]">원부터</span>
         </span>
       </span>
 

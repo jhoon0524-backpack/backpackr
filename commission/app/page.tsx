@@ -36,9 +36,11 @@ export default async function CommissionList() {
             <span>남았어요</span>
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <p className="mt-5 border-t border-white pt-5 text-[min(2.4vw,21px)] font-medium leading-snug text-white/85">
-            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
-          </p>
+          <div className="mt-5 border-t border-white pt-5">
+            <p className="max-w-[76ch] text-[min(2.4vw,21px)] font-medium leading-snug text-white">
+              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -65,12 +67,14 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="mt-8 flex flex-wrap items-center justify-between gap-4 transition hover:bg-yellow/25 sm:pl-[62px]"
+      className="group mt-10 block"
     >
-      <span className="py-2 text-[15px] font-medium text-muted">
-        그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어옵니다.
+      <span className="disp block text-[min(2.6vw,24px)] leading-snug text-ink">
+        그리는 분이라면, 여기에 <span className="bg-yellow px-1.5 py-0.5">메뉴 한 장</span>을 붙이세요.
       </span>
-      <span className="disp shrink-0 bg-yellow px-4 py-2.5 text-[16px] leading-none text-ink">메뉴 붙이기</span>
+      <span className="mt-3 block text-[15px] font-medium text-muted">
+        자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
+      </span>
     </Link>
   )
 }
