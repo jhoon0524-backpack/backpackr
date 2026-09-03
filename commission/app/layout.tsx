@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <link href="/fonts/fonts.css" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col overflow-x-hidden bg-white text-ink">
-        <header className="sticky top-0 z-10 bg-ink text-white">
+        <header className="sticky top-0 z-10 border-b border-white/25 bg-ink text-white">
           <div className="mx-auto flex max-w-[1200px] items-baseline justify-between gap-4 px-8 pb-5 pt-7">
             <div className="flex items-baseline gap-12">
               <Link href="/" className="poster text-[56px] leading-none">
@@ -74,7 +74,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                   창작자에게 맞춤 작업을 의뢰하는 곳 · © 2026
                 </span>
               </p>
-              <p className="num text-[13px] font-medium text-white/50">다음 호 10월 1일 · 제자와 본문 나눔명조, 표와 곁줄 노토 산스</p>
+              <p className="num text-[13px] font-medium text-white/50">다음 호 10월 1일</p>
             </div>
           </div>
         </footer>

@@ -51,7 +51,7 @@ export default async function CommissionList() {
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
           <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white pt-5">
-            <p className="poster text-[min(2.4vw,22px)] leading-relaxed text-white/85">
+            <p className="serif text-[min(2.6vw,24px)] leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
           </div>
@@ -62,7 +62,7 @@ export default async function CommissionList() {
 
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
-        <ul className="mt-8 border-b border-t border-ink">
+        <ul className="mt-8 border-b-2 border-t-2 border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
@@ -83,14 +83,14 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="group mt-16 block border-t border-ink pt-8"
+      className="group mt-12 block"
     >
       {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
       <span className="poster block text-[min(3.6vw,36px)] leading-snug text-ink">
         그리는 분이라면, 여기에 메뉴 한 장을 붙이세요
       </span>
       <span className="mt-4 flex flex-wrap items-baseline gap-x-6 gap-y-3">
-        <span className="poster inline-block border border-ink px-4 py-2 text-[18px] leading-none text-ink group-hover:bg-ink group-hover:text-white">
+        <span className="poster inline-block border border-ink px-6 py-3 text-[22px] leading-none text-ink group-hover:bg-ink group-hover:text-white">
           메뉴 붙이기 →
         </span>
         <span className="text-[15px] font-medium text-muted">

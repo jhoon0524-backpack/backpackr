@@ -111,7 +111,7 @@ body { }` 규칙은 레이어 밖에 있어서, 레이어 안에 있는 Tailwind
    * **화면의 얼굴은 둘이다.** 제호와 로고는 명조, 표와 본문은 고딕(Noto Sans KR).
    * 하나는 판의 이름을 말하고 하나는 값을 적는다 — 인쇄된 메뉴판이 원래 그렇게 짜인다.
    */
-  --font-poster: "Nanum Myeongjo", var(--font-sans);
+  --font-poster: "Hahmlet", "Nanum Myeongjo", var(--font-sans);
 }
 
 body {
@@ -145,7 +145,7 @@ body {
  */
 .poster {
   font-family: var(--font-poster);
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 0.95;
 }
@@ -155,6 +155,17 @@ body {
   font-weight: 900;
   letter-spacing: -0.03em;
   line-height: 0.95;
+}
+
+/*
+ * 제호 활자의 **가벼운 굵기**. Hahmlet 은 100~900 을 다 가진 가변 명조라,
+ * 제호(900)·제목(800)·설명(400)이 한 얼굴에서 굵기만 달리해 나온다.
+ * 굵은 얼굴 하나만 쓰면 그건 활자를 고른 것이 아니라 큰 글자를 쓴 것이다.
+ */
+.serif {
+  font-family: var(--font-poster);
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
  /*
