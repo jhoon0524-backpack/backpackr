@@ -39,7 +39,7 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  * 그래서 없으면 없는 대로 둔다 — 대신 **제목을 크게 앉힌다.**
  * 메뉴판에서 사진이 없는 칸이 하는 일과 같다. 요리 이름을 큼직하게 쓰는 것.
  */
-export function TitleField({ title, category, state, closed = false, big = false }: { title: string; category?: string; state?: string; closed?: boolean; big?: boolean }) {
+export function TitleField({ title, category, state, big = false }: { title: string; category?: string; state?: string; big?: boolean }) {
   return (
     <div className={`flex h-full w-full items-start ${big ? 'bg-white p-8 pt-20' : 'px-4 pb-4 pt-5'}`}>
       {/*
@@ -50,9 +50,9 @@ export function TitleField({ title, category, state, closed = false, big = false
       <span className={`flex w-full flex-col gap-1.5 ${big ? '' : 'min-h-[48px]'}`}>
         {/* 분류는 왼쪽, 자리 수는 오른쪽. 한 줄 안에서 "무엇" 과 "몇 자리" 가 나란히 읽힌다. */}
         {(category || state) && (
-          <span className="flex items-baseline justify-between gap-3 text-[12px] font-bold leading-none tracking-[0.08em]">
-            <span className={closed ? 'text-white/60' : 'text-strong'}>{category}</span>
-            {state && <span className="num shrink-0">{state}</span>}
+          <span className="flex items-baseline justify-between gap-3 text-[11px] font-bold leading-none tracking-[0.08em]">
+            <span className="text-muted">{category}</span>
+            {state && <span className="num shrink-0 text-[13px] text-ink">{state}</span>}
           </span>
         )}
         <span className={`text-balance break-keep leading-tight ${big ? 'disp text-[52px] text-ink' : 'line-clamp-2 text-[21px] font-bold'}`}>
@@ -96,13 +96,13 @@ export function CommissionCard({ c }: { c: Card }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className={`group relative flex h-full flex-col border-[3px] border-ink transition hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard ${closed ? 'bg-ink text-white' : 'bg-white text-ink'}`}
+      className="group relative flex h-full flex-col border-[3px] border-ink bg-white text-ink transition hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard"
     >
-      <div className={`relative border-b ${closed ? 'border-white/50' : 'border-ink/25'} ${c.cover_url ? 'aspect-[16/10]' : ''}`}>
+      <div className={`relative border-b border-ink/25 ${c.cover_url ? 'aspect-[16/10]' : ''}`}>
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
           {c.cover_url
             ? <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
-            : <TitleField title={c.title} category={c.category} state={closed ?? `자리 ${left}/${c.max_slots}`} closed={!!closed} />}
+            : <TitleField title={c.title} category={c.category} state={closed ?? `자리 ${left}/${c.max_slots}`} />}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
         {c.cover_url && <SlotOverlay active={c.active_count} max={c.max_slots} status={c.status} />}
@@ -116,13 +116,11 @@ export function CommissionCard({ c }: { c: Card }) {
         {/* 만드는 사람과 걸리는 날. 값의 왼쪽에 두 줄로 앉는다 — 메뉴판의 이름 자리다. */}
         <span className="min-w-0 flex-1 truncate text-[14px] font-bold leading-tight">
           {c.creator_nickname}
-          <span className={closed ? 'text-white/60' : 'text-muted'}> · {c.turnaround_days}일</span>
+          <span className="text-muted"> · {c.turnaround_days}일</span>
         </span>
         {/* 값. 끝을 맞춰 두면 넉 장의 값이 한 열로 읽힌다. */}
         <span className="disp num flex shrink-0 items-baseline text-[24px] leading-none">
-          {/* 줄은 숫자에만 긋는다. 단위까지 함께 그으면 줄이 글자보다 길어져 지저분해진다. */}
-          <span className={closed ? 'line-through decoration-[3px]' : ''}>{comma(c.price)}</span>
-          <span className="ml-1 text-[14px]">원부터</span>
+          {comma(c.price)}<span className="ml-1 text-[14px]">원부터</span>
         </span>
       </div>
 
@@ -133,12 +131,15 @@ export function CommissionCard({ c }: { c: Card }) {
       */}
       <span
         className={`disp flex items-center justify-between border-t px-4 py-3 text-[17px] ${
-          closed ? 'border-white/50 text-white' : 'border-ink bg-yellow text-ink'
+          closed ? 'border-ink/25 text-ink' : 'border-ink bg-yellow text-ink'
         }`}
       >
-        {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
+        {/* 분류 줄이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
         {closed ? '다음 자리가 나면 열려요' : '의뢰하기'}
       </span>
+
+      {/* 다 팔린 줄에 긋는 줄 하나. 카드 전체를 덮되 글자는 그대로 읽힌다. */}
+      {closed && <span aria-hidden className="canceled pointer-events-none absolute inset-0" />}
     </Link>
   )
 }

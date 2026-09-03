@@ -27,27 +27,24 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-8 pt-8">
-          {/*
-            제호는 **한 크기, 한 얼굴, 두 줄**이다. 숫자만 크게 키워 두면 숫자와 말이 서로 다른
-            물건처럼 놓이고, 그걸 붙이려고 밑선을 맞출수록 판만 길어진다.
-            크기는 하나로 두고 **색으로** 강조한다 — 노랑은 매 순간 바뀌는 값 하나에만.
-
-            설명 한 줄은 제호 오른쪽, 마지막 줄과 같은 밑선에 앉는다. 아래로 내려 두면
-            제호 오른쪽이 통째로 비고, 그 빈 곳은 여백이 아니라 안 채운 자리로 읽힌다.
-          */}
-          <h1 className="poster whitespace-nowrap text-[min(10.6vw,152px)] leading-[0.9] text-white">
-            자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
-          </h1>
-          {/* 판의 밑선. 설명과 발행 정보를 양 끝에 걸어 검정 판의 바닥으로 삼는다. */}
-          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t-[3px] border-white pt-5">
-            <p className="disp text-[min(3.4vw,28px)] leading-tight text-white">
-              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
-            </p>
-            <p className="num text-[13px] font-bold text-white/60">
-              {MONTH.format(new Date())} 메뉴판 <span className="text-white/40">·</span> 메뉴 {commissions.length}개
-            </p>
-          </div>
+        <div className="mx-auto max-w-[1200px] px-8 pb-8 pt-6">
+          <p className="num text-[13px] font-bold text-white/60">
+            {MONTH.format(new Date())} 메뉴판 <span className="text-white/40">·</span> 메뉴 {commissions.length}개
+          </p>
+        </div>
+        {/*
+          제호만 판 밖으로 흘려보낸다. 오른쪽 끝에서 마지막 글자가 잘리는 것은 사고가 아니라
+          **인쇄물이 판형보다 큰 글자를 앉힐 때 하는 일**이다. 같은 말이 바로 아래 줄에 다시 적혀 있어
+          잘린 글자를 못 읽어도 뜻은 남는다.
+        */}
+        <h1 className="poster mt-3 overflow-hidden whitespace-nowrap pl-[max(2rem,calc((100vw-1200px)/2+2rem))] text-[min(13vw,186px)] leading-[0.9] text-white">
+          자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
+        </h1>
+        <div className="mx-auto max-w-[1200px] px-8 pb-8">
+          {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
+          <p className="disp mt-6 border-t-[3px] border-white pt-5 text-[min(3.4vw,28px)] leading-tight text-white">
+            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+          </p>
         </div>
       </section>
 
@@ -82,23 +79,18 @@ const STEPS = ['고른다', '수락한다', '작업한다', '받는다']
 function HowItWorks() {
   return (
     <section className="relative left-1/2 -mx-[50vw] mt-16 w-screen border-t-[3px] border-ink bg-ink">
-      <div className="mx-auto max-w-[1200px] px-8 py-14">
-        <ol className="flex flex-wrap items-baseline">
-          {STEPS.map((t, i) => (
-            <li
-              key={t}
-              className={`poster text-[min(5vw,58px)] leading-none text-white ${
-                i > 0 ? 'ml-6 border-l border-white/50 pl-6' : ''
-              }`}
-            >
+      <div className="mx-auto max-w-[1200px] px-8 py-20">
+        <ol className="flex flex-wrap items-baseline gap-x-14 gap-y-3">
+          {STEPS.map((t) => (
+            <li key={t} className="poster text-[min(5vw,58px)] leading-none text-white">
               {t}
             </li>
           ))}
         </ol>
-        <p className="mt-8 text-[17px] font-medium leading-relaxed text-white/70 sm:columns-2 sm:gap-12">
-          자리가 남은 메뉴에 원하는 것을 적어 보내면, 창작자가 최종가를 정해 수락합니다. 그때 자리 하나가 차고,
-          메뉴에 적힌 기간 안에 작업이 끝납니다. 결과물을 받고 확인을 누르면 자리가 다시 빕니다.
-        </p>
+        <div className="mt-10 grid gap-x-14 gap-y-4 text-[17px] font-medium leading-relaxed text-white/70 sm:grid-cols-2">
+          <p>자리가 남은 메뉴에 원하는 것을 적어 보내면, 창작자가 값을 정해 수락합니다. 그때 자리 하나가 찹니다.</p>
+          <p>메뉴에 적힌 기간 안에 작업이 끝나고, 결과물을 받아 확인을 누르면 그 자리가 다시 빕니다.</p>
+        </div>
       </div>
     </section>
   )
@@ -118,14 +110,10 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex items-stretch border-[3px] border-ink bg-white transition hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard"
+      className="disp flex items-baseline gap-4 bg-ink px-6 py-5 text-[min(2.6vw,24px)] leading-tight text-white hover:text-yellow"
     >
-      <span className="disp flex shrink-0 items-center bg-ink px-6 text-[19px] text-white">
-        여기 붙이기
-      </span>
-      <span className="disp flex items-center px-6 py-5 text-[19px] leading-tight text-ink">
-        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
-      </span>
+      그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
+      <span className="num shrink-0 text-[13px] font-bold text-white/60">메뉴 붙이기 →</span>
     </Link>
   )
 }
@@ -140,9 +128,9 @@ function EmptySlot() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-flex items-end text-[1.2em]">
+    <span className="num inline-flex items-end text-[1.2em] text-yellow">
       <span>{open}</span>
-      <span aria-hidden className="mx-[0.03em] mb-[0.055em] block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-current" />
+      <span aria-hidden className="mx-[0.03em] mb-[0.055em] block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-yellow" />
       <span>{all}</span>
     </span>
   )
