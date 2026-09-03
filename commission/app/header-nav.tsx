@@ -21,7 +21,7 @@ export function HeaderNav({ items }: { items: readonly { href: string; label: st
             key={n.href}
             href={n.href}
             aria-current={here ? 'page' : undefined}
-            className="flex h-[72px] min-w-11 items-center justify-center"
+            className="flex min-w-11 items-center justify-center py-5"
           >
             <span className={`flex items-center px-1 ${here ? 'text-white' : 'text-white/45 hover:text-white'}`}>
               {n.label}

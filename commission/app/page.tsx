@@ -30,7 +30,7 @@ export default async function CommissionList() {
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster whitespace-nowrap text-[min(11.0vw,158px)] leading-[0.9] tracking-[0.015em] text-white">
+          <h1 className="poster whitespace-nowrap text-[min(11.2vw,161px)] leading-[0.9] tracking-[0.015em] text-white">
             자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
@@ -68,10 +68,10 @@ export default async function CommissionList() {
  */
 function EmptyRow() {
   return (
-    <p className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-ink py-8 text-[15px] font-medium text-muted">
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-ink py-8 text-[16px] font-medium text-muted">
       그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
       {/* 이 화면에서 창작자가 눌러야 할 곳은 여기 하나다. 문장 속 밑줄로는 눌러야 할 곳으로 안 보인다. */}
-      <Link href="/open" className="disp inline-flex items-center bg-ink px-4 py-2 text-[15px] leading-none text-white hover:bg-strong">
+      <Link href="/open" className="disp inline-flex items-center bg-yellow px-4 py-2.5 text-[16px] leading-none text-ink hover:bg-ink hover:text-white">
         메뉴 붙이기
       </Link>
     </p>
@@ -88,10 +88,10 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="disp num inline-block bg-yellow px-[0.1em] align-baseline text-[0.95em] leading-[0.92] text-ink">
+    <span className="disp num inline-block bg-yellow px-[0.11em] py-[0.04em] align-baseline text-[0.95em] leading-[0.9] text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
-      <span aria-hidden className="mx-[0.09em] inline-block h-[0.62em] w-[0.09em] -skew-x-[13deg] bg-ink align-baseline" />
+      <span aria-hidden className="mx-[0.09em] inline-block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-ink align-baseline" />
       <span>{all}</span>
     </span>
   )

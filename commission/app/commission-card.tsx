@@ -79,7 +79,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className="block border-b border-ink py-8 transition hover:bg-yellow/25"
+      className={`block border-b border-ink py-8 transition hover:bg-yellow/25 ${closed ? 'opacity-40' : ''}`}
     >
       {/*
         한 줄은 하나의 밑선 위에 있다 — 번호, 이름, 점선, 값.
@@ -88,26 +88,23 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
       */}
       <span className="relative flex items-baseline gap-4">
         {/* 번호는 제호와 같은 얼굴. 160px 다음에 바로 20px 가 오면 두 장의 서류를 붙여 둔 것처럼 읽힌다. */}
-        <span className="disp num w-[56px] shrink-0 text-[min(3.6vw,34px)] leading-none text-ink">
+        <span className="disp num w-[46px] shrink-0 text-[min(3.6vw,34px)] leading-none text-ink">
           {String(n).padStart(2, '0')}
         </span>
         <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
           {c.title}
         </span>
-        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        <span aria-hidden className={`hidden h-[1em] min-w-8 flex-1 sm:block ${closed ? '' : 'leader text-line'}`} />
         <span className="disp num ml-auto w-[196px] shrink-0 text-right text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
           {comma(c.price)}
           <span className="ml-1.5 inline-block w-[44px] text-left text-[13px] tracking-[0.04em]">원부터</span>
         </span>
-        {closed && <span aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 bg-ink" />}
       </span>
 
-      <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 sm:pl-[72px]">
-        <span className="text-[14px] font-bold text-strong">
-          {c.category}
-          <span className="text-muted"> · </span>
-          {c.creator_nickname}
-          <span className="font-medium text-muted"> · {c.turnaround_days}일 걸려요</span>
+      {/* 곁줄은 물러나야 한다. 작기만 하고 똑같이 굵으면 물러나는 게 아니라 작게 외치는 것이다. */}
+      <span className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 sm:pl-[62px]">
+        <span className="text-[14px] font-medium text-muted">
+          {c.category} · <span className="font-bold text-strong">{c.creator_nickname}</span> · {c.turnaround_days}일 걸려요
         </span>
         {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
       </span>
