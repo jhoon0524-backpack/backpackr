@@ -23,14 +23,14 @@ export async function UserSwitcher() {
         key={current ?? 'none'}
         defaultValue={current ?? ''}
         aria-label="사용자 고르기"
-        className="h-full appearance-none bg-ink px-1 text-[13px] font-bold text-white/60 focus:text-white focus:outline-none"
+        className="h-full appearance-none bg-ink px-1 text-[14px] font-extrabold text-white/70 focus:text-white focus:outline-none"
       >
         <option value="">누구로 볼까요</option>
         {users.map((u) => (
           <option key={u.id} value={u.id}>{u.nickname}</option>
         ))}
       </select>
-      <button type="submit" className="h-full px-1 text-[13px] font-bold text-white/60 hover:text-white">
+      <button type="submit" className="h-full px-1 text-[14px] font-extrabold text-white/70 hover:text-white">
         바꾸기
       </button>
     </form>

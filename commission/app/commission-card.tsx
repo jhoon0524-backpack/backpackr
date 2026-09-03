@@ -38,13 +38,13 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  */
 export function TitleField({ title, closed = false, big = false }: { title: string; closed?: boolean; big?: boolean }) {
   return (
-    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-9'}`}>
+    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-8'}`}>
       {/*
         `break-keep` — 한글은 어절 단위로 끊어야 한다. 아무 데서나 끊으면 "로고·/타이틀" 처럼 가운뎃점이 줄 끝에 남는다.
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`text-balance break-keep font-bold leading-tight ${closed ? 'text-faint' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[62px] text-[24px]'}`}>
+      <span className={`text-balance break-keep font-bold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[52px] text-[21px]'}`}>
         {title}
       </span>
     </div>
@@ -83,7 +83,7 @@ export function CommissionCard({ c }: { c: Card }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className={`group relative flex h-full flex-col border-[3px] border-ink bg-white ${closed ? '[&_.body]:text-faint' : 'shadow-hard transition hover:-translate-x-1 hover:-translate-y-1'}`}
+      className={`group relative flex h-full flex-col border-[3px] bg-white ${closed ? 'border-line [&_.body]:text-line' : 'border-ink shadow-hard transition hover:-translate-x-1 hover:-translate-y-1'}`}
     >
       <div className={`relative border-b-[3px] border-ink ${c.cover_url ? 'aspect-[16/10]' : ''}`}>
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
@@ -115,7 +115,7 @@ export function CommissionCard({ c }: { c: Card }) {
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`poster num w-[8.6rem] shrink-0 text-right text-[24px] leading-none ${closed ? '' : 'text-ink'}`}>
+          <span className={`poster num shrink-0 text-[28px] leading-none ${closed ? '' : 'text-ink'}`}>
             {comma(c.price)}원~
           </span>
         </span>

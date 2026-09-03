@@ -182,7 +182,7 @@ body {
  */
 .leader {
   background-image: radial-gradient(currentColor 1.4px, transparent 1.5px);
-  background-position: left bottom 3px;
+  background-position: left bottom 2px;
   background-size: 6px 6px;
   background-repeat: repeat-x;
 }

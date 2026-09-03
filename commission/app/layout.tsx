@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-8">
             <div className="flex items-center gap-7">
               <Link href="/" className="poster flex h-16 items-center text-[34px] leading-none">
-                커미션!
+                커미션<span className="text-yellow">!</span>
               </Link>
               <HeaderNav items={NAV} />
             </div>

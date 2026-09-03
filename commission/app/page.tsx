@@ -21,21 +21,28 @@ const MONTH = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: '
 export default async function CommissionList() {
   const commissions = await listOpenCommissions()
   const openSlots = commissions.reduce((n, c) => n + Math.max(0, c.max_slots - c.active_count), 0)
+  const allSlots = commissions.reduce((n, c) => n + c.max_slots, 0)
 
   return (
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-14 pt-5">
+        <div className="mx-auto max-w-[1200px] px-8 pb-10 pt-5">
           <p className="num text-[13px] font-bold text-white/60">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
-          <p className="mt-3 max-w-3xl text-[20px] font-medium leading-relaxed text-white">
-            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
-          </p>
-          <h1 className="poster mt-5 whitespace-nowrap text-[min(13.2vw,189px)] tracking-[-0.035em] text-white">
-            {openSlots}자리 남았어요
-          </h1>
+          {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
+          <div className="mt-4 flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
+            <div>
+              <h1 className="poster whitespace-nowrap text-[min(9.3vw,133px)] tracking-[-0.035em] text-white">
+                <span className="num text-yellow">{openSlots}</span>자리 남았어요
+              </h1>
+              <p className="mt-5 max-w-2xl text-[19px] font-medium leading-relaxed text-white/80">
+                고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+              </p>
+            </div>
+            <SeatBoard open={openSlots} all={allSlots} />
+          </div>
           {/*
             큰 숫자를 오른쪽에 세워 두었더니 화면에 크게 말하는 것이 둘이 되어 서로를 깎아먹었다.
             숫자는 제목 아래 한 줄로 물러난다 — 큰 것은 제목 하나뿐이다.
@@ -44,12 +51,12 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="relative z-10 -mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="relative z-10 -mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
@@ -83,13 +90,13 @@ function HowItWorks() {
         상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
         숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
       */}
-      <ol className="mt-6 border-[3px] border-ink bg-white">
+      <ol className="mt-6 border-[3px] border-ink bg-white shadow-hard">
         {STEPS.map((s) => (
           <li
             key={s.n}
-            className="flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 py-4 not-last:border-b-[3px] not-last:border-ink"
+            className="flex flex-wrap items-center gap-x-6 gap-y-1 px-6 py-3 not-last:border-b-[3px] not-last:border-ink"
           >
-            <span className="poster num w-10 shrink-0 text-[30px] leading-none text-ink">{s.n}</span>
+            <span className="poster num w-12 shrink-0 text-[40px] leading-none text-ink">{s.n}</span>
             <span className="w-28 shrink-0 text-[17px] font-bold text-ink">{s.t}</span>
             <span className="text-[14px] font-medium leading-relaxed text-muted">{s.d}</span>
           </li>
@@ -113,9 +120,9 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex h-full flex-col border-[3px] border-line bg-white transition hover:border-ink hover:bg-fill"
+      className="group flex h-full flex-col border-[3px] border-dashed border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
     >
-      <span className="flex h-[62px] items-start px-4 pb-3 pt-9 text-[24px] font-bold leading-tight text-strong">
+      <span className="flex h-[52px] items-start px-4 pb-3 pt-8 text-[21px] font-bold leading-tight text-ink">
         여기 붙이기
       </span>
       <span className="flex flex-1 flex-col border-t-[3px] border-ink px-4 py-4 text-[13px] font-bold leading-relaxed text-strong">
@@ -130,3 +137,29 @@ function EmptySlot() {
   )
 }
 
+/**
+ * 이번 달 자리판.
+ *
+ * 제호는 "4자리 남았어요" 라고 **말한다.** 이건 그걸 **보여 준다** —
+ * 이번 달 열린 자리를 네모 하나씩 그려, 찬 것은 칠하고 빈 것은 비운다.
+ * 문장으로 듣는 것과 여섯 칸 중 둘이 칠해진 것을 보는 것은 다른 일이다.
+ */
+function SeatBoard({ open, all }: { open: number; all: number }) {
+  const taken = Math.max(0, all - open)
+  return (
+    <div className="shrink-0">
+      <p className="num text-[13px] font-bold text-white/70">이번 달 자리 {all}개</p>
+      <ul className="mt-3 flex flex-wrap gap-2" aria-label={`전체 ${all}자리 중 ${open}자리 비어 있음`}>
+        {Array.from({ length: all }, (_, i) => (
+          <li
+            key={i}
+            className={`h-9 w-9 border-[3px] ${i < taken ? 'border-white/40 bg-white/40' : 'border-yellow'}`}
+          />
+        ))}
+      </ul>
+      <p className="mt-3 text-[13px] font-bold text-white/70">
+        <span className="text-yellow">■</span> 빈 자리 <span className="text-white/40">■</span> 찬 자리
+      </p>
+    </div>
+  )
+}
