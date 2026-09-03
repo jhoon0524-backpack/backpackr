@@ -11,7 +11,7 @@ import { Photo } from './photo'
  */
 export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp -rotate-[4deg] border-[3px] border-ink bg-yellow px-3 py-1.5 leading-none text-ink ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-[3px] border-ink bg-white px-3 py-1.5 leading-none text-ink ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {left === 1 ? '한 자리 남음' : `${left}자리 남음`}
     </span>
   )
@@ -20,7 +20,7 @@ export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | '
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp -rotate-[4deg] border-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {label}
     </span>
   )
@@ -38,7 +38,7 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  */
 export function TitleField({ title, closed = false, big = false }: { title: string; closed?: boolean; big?: boolean }) {
   return (
-    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-4 pt-9'}`}>
+    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-9'}`}>
       {/*
         `break-keep` — 한글은 어절 단위로 끊어야 한다. 아무 데서나 끊으면 "로고·/타이틀" 처럼 가운뎃점이 줄 끝에 남는다.
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
@@ -93,7 +93,7 @@ export function CommissionCard({ c }: { c: Card }) {
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
         {/* 상태를 말하는 자리는 오른쪽 위 탭 하나. 노랑이면 자리가 있고 빨강이면 마감이다. */}
-        <div className="absolute -right-2 -top-3 z-10">
+        <div className="absolute -right-2 -top-3 z-10 -rotate-[3deg]">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} />}
         </div>
       </div>
@@ -110,10 +110,10 @@ export function CommissionCard({ c }: { c: Card }) {
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`num w-[6.5rem] shrink-0 text-right text-[25px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
+          <span className={`poster num shrink-0 text-[27px] leading-none ${closed ? 'text-faint' : 'text-ink'}`}>
             {comma(c.price)}
           </span>
-          <span className={`num w-[1.9rem] shrink-0 text-[15px] font-bold ${closed ? 'text-faint' : 'text-ink'}`}>원~</span>
+          <span className={`poster num shrink-0 text-[27px] leading-none ${closed ? 'text-faint' : 'text-ink'}`}>원~</span>
         </span>
         <span className={`mt-2 text-[13px] font-bold ${closed ? 'text-muted' : 'text-strong'}`}>
           {c.category} · 작업 {c.turnaround_days}일
