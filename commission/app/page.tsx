@@ -28,7 +28,7 @@ export default async function CommissionList() {
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
         <div className="mx-auto max-w-[1200px] px-8 pb-11 pt-6">
-          <p className="num text-[13px] font-bold tracking-[0.06em] text-white/80">
+          <p className="num text-[15px] font-bold tracking-[0.04em] text-white/80">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/50">·</span> 메뉴 {commissions.length}개
           </p>
           {/*
@@ -50,8 +50,8 @@ export default async function CommissionList() {
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
         <ul className="mt-16 border-t-[3px] border-ink">
-          {commissions.map((c) => (
-            <li key={c.id}><CommissionCard c={c} /></li>
+          {commissions.map((c, i) => (
+            <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
           <li><EmptyRow /></li>
         </ul>
@@ -79,14 +79,11 @@ const STEPS = [
 function HowItWorks() {
   return (
     <section className="mt-16">
-      <ol className="grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-12">
+      <ol className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[min(3vw,26px)] leading-tight">
         {STEPS.map((s, i) => (
-          <li key={s.t} className="lg:col-span-3">
-            <span className="disp block text-[24px] leading-none text-ink">
-              <span className="num mr-2 text-muted">{i + 1}</span>
-              {s.t}
-            </span>
-            <span className="mt-3 block text-[15px] font-medium leading-relaxed text-muted">{s.d}</span>
+          <li key={s.t} className="disp text-ink">
+            {i > 0 && <span className="mr-3 font-medium text-muted">→</span>}
+            {s.t}
           </li>
         ))}
       </ol>
@@ -106,9 +103,10 @@ function HowItWorks() {
  */
 function EmptyRow() {
   return (
-    <p className="border-b-[3px] border-ink py-5 text-[15px] font-medium text-muted">
-      그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.{' '}
-      <Link href="/open" className="font-bold text-ink underline decoration-[2px] underline-offset-4">
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-ink py-5 text-[15px] font-medium text-muted">
+      그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
+      {/* 이 화면에서 창작자가 눌러야 할 곳은 여기 하나다. 문장 속 밑줄로는 눌러야 할 곳으로 안 보인다. */}
+      <Link href="/open" className="disp inline-flex items-center bg-ink px-4 py-2 text-[15px] leading-none text-white hover:bg-strong">
         메뉴 붙이기
       </Link>
     </p>
