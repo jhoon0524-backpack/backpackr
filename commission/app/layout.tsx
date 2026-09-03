@@ -45,7 +45,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <header className="sticky top-0 z-10 bg-ink text-white">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-8">
             <div className="flex items-center gap-7">
-              <Link href="/" className="disp flex h-16 items-center text-[26px] leading-none">
+              <Link href="/" className="poster flex h-16 items-center text-[30px] leading-none">
                 커미션!
               </Link>
               <HeaderNav items={NAV} />
@@ -65,7 +65,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
         <footer className="mt-10 border-t-[3px] border-ink bg-white text-ink">
           <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-8 py-5">
-            <p className="disp text-[24px] leading-none">커미션!</p>
+            <p className="poster text-[28px] leading-none">커미션!</p>
             <p className="num text-xs font-bold text-muted">© 2026 커미션</p>
           </div>
         </footer>

@@ -38,13 +38,13 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  */
 export function TitleField({ title, closed = false, big = false }: { title: string; closed?: boolean; big?: boolean }) {
   return (
-    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-5 pb-5 pt-14'}`}>
+    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-4 pt-9'}`}>
       {/*
         `break-keep` — 한글은 어절 단위로 끊어야 한다. 아무 데서나 끊으면 "로고·/타이틀" 처럼 가운뎃점이 줄 끝에 남는다.
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`line-clamp-3 text-balance break-keep font-bold leading-tight ${closed ? 'text-muted' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[68px] text-[22px]'}`}>
+      <span className={`line-clamp-3 text-balance break-keep font-bold leading-tight ${closed ? 'text-muted' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[58px] text-[22px]'}`}>
         {title}
       </span>
     </div>
@@ -110,9 +110,10 @@ export function CommissionCard({ c }: { c: Card }) {
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`num w-[8rem] shrink-0 text-right text-[25px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
-            {comma(c.price)}<span className="ml-0.5 text-[15px] font-bold">원~</span>
+          <span className={`num w-[6.5rem] shrink-0 text-right text-[25px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
+            {comma(c.price)}
           </span>
+          <span className={`num w-[1.9rem] shrink-0 text-[15px] font-bold ${closed ? 'text-faint' : 'text-ink'}`}>원~</span>
         </span>
         <span className={`mt-2 text-[13px] font-bold ${closed ? 'text-muted' : 'text-strong'}`}>
           {c.category} · 작업 {c.turnaround_days}일
@@ -126,12 +127,12 @@ export function CommissionCard({ c }: { c: Card }) {
       */}
       <span
         className={`disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] ${
-          closed ? 'bg-fill text-faint' : 'bg-yellow text-ink'
+          closed ? 'bg-fill text-strong' : 'bg-yellow text-ink'
         }`}
       >
         {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
         {closed ? '다음 자리가 나면 열려요' : '의뢰하기'}
-        {!closed && <span aria-hidden>→</span>}
+        {!closed && <span aria-hidden className="text-[19px] leading-none">→</span>}
       </span>
     </Link>
   )
