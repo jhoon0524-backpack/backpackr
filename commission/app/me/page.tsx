@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { listIncomingRequests, listMyCommissions, listMyRequests, type RequestRow } from '@/lib/db'
-import { REQUEST_STATUS, comma, daysLeft, kstMonthDay, trustFromFunding, won } from '@/lib/format'
+import { REQUEST_STATUS, daysLeft, kstMonthDay, trustFromFunding, won } from '@/lib/format'
+import { FundingRecord } from '@/app/funding-record'
 import { getCurrentUser } from '@/lib/session'
 import { BTN_INK, BTN_PILL, EYEBROW, H2, NOTICE } from '@/app/ui'
 import { toggleCommission } from './actions'
@@ -93,13 +94,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
         <p className={EYEBROW}>내 것</p>
         <h1 className="disp text-[44px] leading-none">{me.nickname}</h1>
         {me.bio && <p className="text-[15px] font-medium leading-relaxed text-strong">{me.bio}</p>}
-        {trust && (
-          <p className="num mt-1 inline-flex flex-wrap items-center gap-x-2 self-start border-2 border-ink bg-yellow px-3 py-1.5 text-sm font-bold text-ink">
-            <span>텀블벅 후원자 {comma(trust.backers)}명</span>
-            {trust.satisfaction !== null && <span>· 만족도 {trust.satisfaction.toFixed(1)}</span>}
-            <span>· 팔로워 {comma(me.follower_count)}명</span>
-          </p>
-        )}
+        {trust && <div className="mt-1"><FundingRecord trust={trust} followers={me.follower_count} /></div>}
       </div>
 
       {sp.opened && <p className={NOTICE}>메뉴를 붙였어요. 메뉴판에 바로 보여요.</p>}

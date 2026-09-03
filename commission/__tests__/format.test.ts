@@ -19,11 +19,14 @@ describe('format', () => {
   })
   test('만족도는 응답이 30명 이상일 때만 낸다', () => {
     const few = trustFromFunding({ backer_count: 340, satisfaction: 4.9, satisfaction_count: 12 })
-    expect(few).toEqual({ backers: 340, satisfaction: null })
+    expect(few).toEqual({ backers: 340, satisfaction: null, hidden: 'few_responses' })
     const many = trustFromFunding({ backer_count: 1240, satisfaction: 4.8, satisfaction_count: 312 })
-    expect(many).toEqual({ backers: 1240, satisfaction: 4.8 })
+    expect(many).toEqual({ backers: 1240, satisfaction: 4.8, hidden: null })
     // 경계값 — 딱 30명이면 낸다
     expect(trustFromFunding({ backer_count: 10, satisfaction: 4.0, satisfaction_count: 30 })?.satisfaction).toBe(4.0)
+    // 만족도 자체가 없는 것과 응답이 적은 것은 다른 이유다 — 화면이 다르게 말해야 한다
+    expect(trustFromFunding({ backer_count: 50, satisfaction: null, satisfaction_count: 0 }))
+      .toEqual({ backers: 50, satisfaction: null, hidden: 'no_data' })
   })
   test('모르는 거부 사유에도 문구가 있다', () => {
     expect(rejectMessage('slots_full')).toContain('자리')

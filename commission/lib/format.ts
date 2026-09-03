@@ -63,7 +63,16 @@ export function daysLeft(due: Date | string, now: Date = new Date()) {
  */
 export const MIN_SATISFACTION_RESPONSES = 30
 
-export type FundingTrust = { backers: number; satisfaction: number | null }
+export type FundingTrust = {
+  backers: number
+  satisfaction: number | null
+  /**
+   * 만족도를 왜 안 냈는지. 화면이 이유를 말해 주려고 갈라 둔다 —
+   * 'few_responses' 는 응답이 기준보다 적어서, 'no_data' 는 만족도 자체가 없어서.
+   * 이유 없이 사라지면 "낮아서 숨긴 건가" 로 읽힌다 (UI/UX 5회차 발견 3).
+   */
+  hidden: 'few_responses' | 'no_data' | null
+}
 
 export function trustFromFunding(p: {
   backer_count: number
@@ -71,8 +80,11 @@ export function trustFromFunding(p: {
   satisfaction_count: number
 }): FundingTrust | null {
   if (!p.backer_count) return null
-  const enough = p.satisfaction !== null && p.satisfaction_count >= MIN_SATISFACTION_RESPONSES
-  return { backers: p.backer_count, satisfaction: enough ? p.satisfaction : null }
+  if (p.satisfaction === null) return { backers: p.backer_count, satisfaction: null, hidden: 'no_data' }
+  if (p.satisfaction_count < MIN_SATISFACTION_RESPONSES) {
+    return { backers: p.backer_count, satisfaction: null, hidden: 'few_responses' }
+  }
+  return { backers: p.backer_count, satisfaction: p.satisfaction, hidden: null }
 }
 
 /** 의뢰 상태 문구. 화면마다 다르게 쓰지 않도록 한 곳에 둔다. */

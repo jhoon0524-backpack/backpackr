@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCommission } from '@/lib/db'
-import { comma, kstDate, trustFromFunding, won } from '@/lib/format'
+import { kstDate, trustFromFunding, won } from '@/lib/format'
+import { FundingRecord } from '@/app/funding-record'
 import { getCurrentUser } from '@/lib/session'
 import { Photo } from '@/app/photo'
 import { SlotText } from '@/app/commission-card'
@@ -67,12 +68,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
               목록 카드에는 일부러 넣지 않았다. 카드마다 숫자를 박으면 상위 몇 명에게 의뢰가 쏠리는데,
               커미션은 오히려 작은 창작자에게 더 필요한 수입원이다. 결정 직전인 상세에서만 보여준다.
             */}
-            {trust && (
-              <p className="num mt-1 inline-flex flex-wrap items-center gap-x-2 self-start border-2 border-ink bg-yellow px-3 py-1.5 text-sm font-bold text-ink">
-                <span>텀블벅 후원자 {comma(trust.backers)}명</span>
-                {trust.satisfaction !== null && <span>· 만족도 {trust.satisfaction.toFixed(1)}</span>}
-              </p>
-            )}
+            {trust && <div className="mt-2"><FundingRecord trust={trust} /></div>}
           </div>
 
           <dl className="num mt-6 grid grid-cols-3 border-[3px] border-ink bg-white shadow-hard">
