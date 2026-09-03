@@ -63,9 +63,11 @@ export default async function CommissionList() {
         </div>
       </section>
 
+      <h2 className="poster mt-14 text-[min(4.4vw,44px)] leading-none text-ink">이번 달 메뉴</h2>
+
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
-        <ul className="mt-10 max-w-[940px] border-b border-t border-ink">
+        <ul className="mt-8 border-b border-t border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
@@ -86,7 +88,7 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="group mt-12 block sm:max-w-[940px] sm:pl-[86px]"
+      className="group mt-10 block"
     >
       {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
       <span className="poster block border-b border-ink pb-4 text-[min(3.1vw,29px)] leading-snug text-ink">

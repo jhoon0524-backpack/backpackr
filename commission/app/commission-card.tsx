@@ -14,7 +14,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
       className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[15px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
-      빈자리 <span className="num bg-yellow px-1.5 py-0.5">{left}/{max}</span>
+      빈자리 <span className="num border-b-[3px] border-yellow">{left}/{max}</span>
     </span>
   )
 }
@@ -22,7 +22,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 같은 자리, 같은 크기. 칠이 없다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[15px]'}`}>
+    <span className={`shrink-0 whitespace-nowrap font-medium leading-none text-muted ${size === 'md' ? 'text-[17px]' : 'text-[15px]'}`}>
       {label}
     </span>
   )
@@ -80,7 +80,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className="block border-b border-ink py-8 transition hover:bg-yellow/25"
+      className="block border-b border-ink py-6 transition hover:bg-yellow/25"
     >
       {/*
         한 줄: 번호 · 이름 ····· 상태 · 값.

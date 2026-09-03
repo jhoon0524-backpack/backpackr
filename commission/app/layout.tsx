@@ -66,12 +66,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="bg-ink text-white">
           <div className="mx-auto max-w-[1200px] px-8 py-7">
             {/* 판권면은 한 줄이다. 머리를 그대로 되풀이하면 높이만 늘고 새로 아는 것은 없다. */}
-            <p className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-              <span className="poster text-[26px] leading-none">커미션!</span>
-              <span className="num text-[13px] font-medium text-white/70">
-                창작자에게 맞춤 작업을 의뢰하는 곳 · © 2026
-              </span>
-            </p>
+            {/* 판권면. 발행 정보 한 줄과 다음 호 예고 — 인쇄물의 마지막 페이지가 하는 일이다. */}
+            <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
+              <p className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                <span className="poster text-[26px] leading-none">커미션!</span>
+                <span className="num text-[13px] font-medium text-white/70">
+                  창작자에게 맞춤 작업을 의뢰하는 곳 · © 2026
+                </span>
+              </p>
+              <p className="num text-[13px] font-medium text-white/50">제9호 · 2026년 9월 · 다음 호 10월 1일</p>
+            </div>
           </div>
         </footer>
       </body>

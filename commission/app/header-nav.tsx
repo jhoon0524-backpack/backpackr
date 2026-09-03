@@ -23,7 +23,7 @@ export function HeaderNav({ items }: { items: readonly { href: string; label: st
             aria-current={here ? 'page' : undefined}
             className="flex min-w-11 items-center justify-center py-5"
           >
-            <span className={`flex items-center ${here ? 'border-b border-white pb-1.5 text-white' : 'border-b border-transparent pb-1.5 text-white/45 hover:text-white'}`}>
+            <span className={`flex items-center ${here ? 'border-b border-white pb-2 text-white' : 'border-b border-transparent pb-2 text-white/45 hover:text-white'}`}>
               {n.label}
             </span>
           </Link>
