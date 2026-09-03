@@ -32,16 +32,19 @@ export default async function CommissionList() {
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
           {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
-          <h1 className="poster mt-3 flex items-baseline gap-[0.06em] text-white">
-            <span className="num text-[min(26vw,332px)] leading-[0.78]">{openSlots}</span>
-            <span className="num text-[min(9vw,116px)] leading-[0.78] text-white/35">/{allSlots}</span>
-            <span className="ml-3 text-[min(6.2vw,86px)] leading-[0.88]">
-              자리
-              <br />
-              남았어요
-            </span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-[18px] font-bold leading-relaxed text-white/80">
+          <div className="relative">
+            <h1 className="poster num mt-2 text-[min(30vw,384px)] leading-[0.78] text-white">
+              {openSlots}/{allSlots}
+            </h1>
+            <p className="poster -mt-[0.06em] text-[min(6.4vw,88px)] leading-[0.9] text-yellow">
+              자리 남았어요
+            </p>
+            {/* 이 판은 달마다 새로 붙는다. 호수를 오른쪽 끝에 세워 판 전체를 쓴다. */}
+            <p className="num absolute -right-2 bottom-6 hidden rotate-90 whitespace-nowrap text-[13px] font-bold tracking-[0.3em] text-white/40 lg:block">
+              {MONTH.format(new Date())}호
+            </p>
+          </div>
+          <p className="mt-8 max-w-2xl text-[18px] font-bold leading-relaxed text-white/80">
             고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
           </p>
           {/*
@@ -52,16 +55,16 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-16 grid grid-cols-1 gap-6">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
         <ul className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {commissions.map((c) => (
-            <li key={c.id}><CommissionCard c={c} /></li>
+          {commissions.map((c, i) => (
+            <li key={c.id} className={i === 0 ? 'lg:col-span-2' : ''}><CommissionCard c={c} wide={i === 0} /></li>
           ))}
-          <li><EmptySlot /></li>
+          <li className="sm:col-span-2 lg:col-span-4"><EmptySlot /></li>
         </ul>
       )}
 
@@ -93,7 +96,10 @@ function HowItWorks() {
         <h2 className="disp text-[36px] text-white">보내면 이렇게 됩니다</h2>
         <ol className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s) => (
-            <li key={s.n} className="border-t-[3px] border-white/25 pt-4">
+            <li key={s.n} className="relative border-t-[3px] border-white/25 pt-5">
+              <span className="num absolute -top-[11px] left-0 bg-ink pr-3 text-[13px] font-bold text-white/40">
+                {s.n}
+              </span>
               <span className="disp block text-[24px] leading-none text-white">{s.t}</span>
               <span className="mt-3 block text-[14px] font-normal leading-relaxed text-white/60">{s.d}</span>
             </li>
@@ -118,25 +124,14 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group relative flex h-full flex-col border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
+      className="group flex items-stretch border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
     >
-      {/* 진짜 카드의 제목 칸과 정확히 같은 구조 — 그래야 넉 장의 가름선이 같은 높이에 선다. */}
-      <span className="absolute right-0 top-0 border-b-[3px] border-l-[3px] border-ink bg-white px-3 py-1.5 text-[13px] font-bold text-ink">
-        비어 있음
+      <span className="disp flex shrink-0 items-center border-r-[3px] border-ink px-6 text-[19px] text-ink">
+        여기 붙이기
       </span>
-      <span className="flex w-full flex-col gap-1.5 px-4 pb-3 pt-7">
-        <span className="h-[76px]">
-          <span className="block text-[11px] font-bold leading-none tracking-[0.12em] text-faint">빈 자리</span>
-          <span className="mt-1.5 block text-[19px] font-medium leading-tight text-strong">여기 붙이기</span>
-        </span>
+      <span className="flex items-center px-6 py-5 text-[14px] font-normal leading-relaxed text-muted">
+        그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어와요.
       </span>
-      <span className="flex flex-1 items-start p-4 text-[13px] font-normal leading-relaxed text-muted">
-        그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
-      </span>
-      <span className="disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] text-ink">
-        메뉴 붙이기
-      </span>
-
     </Link>
   )
 }

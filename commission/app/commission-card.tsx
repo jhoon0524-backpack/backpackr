@@ -39,7 +39,7 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  * 그래서 없으면 없는 대로 둔다 — 대신 **제목을 크게 앉힌다.**
  * 메뉴판에서 사진이 없는 칸이 하는 일과 같다. 요리 이름을 큼직하게 쓰는 것.
  */
-export function TitleField({ title, category, closed = false, big = false }: { title: string; category?: string; closed?: boolean; big?: boolean }) {
+export function TitleField({ title, category, closed = false, big = false, wide = false }: { title: string; category?: string; closed?: boolean; big?: boolean; wide?: boolean }) {
   return (
     <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-7'}`}>
       {/*
@@ -53,7 +53,7 @@ export function TitleField({ title, category, closed = false, big = false }: { t
             {category}
           </span>
         )}
-        <span className={`text-balance break-keep font-medium leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 text-[19px]'}`}>
+        <span className={`text-balance break-keep font-medium leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : `line-clamp-2 ${wide ? 'text-[26px]' : 'text-[19px]'}`}`}>
           {title}
         </span>
       </span>
@@ -88,7 +88,7 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
  *
  * 그림자는 **누를 수 있는 것**에만 있다. 카드는 링크라서 갖는다. 딱지와 번호표는 갖지 않는다.
  */
-export function CommissionCard({ c }: { c: Card }) {
+export function CommissionCard({ c, wide = false }: { c: Card; wide?: boolean }) {
   const left = c.max_slots - c.active_count
   const closed = closedLabel(c.status, left)
   return (
@@ -100,7 +100,7 @@ export function CommissionCard({ c }: { c: Card }) {
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
           {c.cover_url
             ? <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
-            : <TitleField title={c.title} category={c.category} closed={!!closed} />}
+            : <TitleField title={c.title} category={c.category} closed={!!closed} wide={wide} />}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
         {/*
@@ -115,8 +115,8 @@ export function CommissionCard({ c }: { c: Card }) {
 
       <div className="body flex flex-1 flex-col justify-end p-4">
         {/* 값이 먼저다. 메뉴판에서 결정을 만드는 것은 값이다. */}
-        <span className={`num flex items-baseline gap-1 text-[32px] font-extrabold leading-none tracking-tight ${closed ? '' : 'text-ink'}`}>
-          {comma(c.price)}<span className="text-[13px] font-medium">원부터</span>
+        <span className={`num flex items-baseline gap-1 font-extrabold leading-none tracking-tight ${wide ? 'text-[44px]' : 'text-[32px]'} ${closed ? '' : 'text-ink'}`}>
+          {comma(c.price)}<span className="text-[14px] font-medium">원부터</span>
         </span>
         {/* 만드는 사람과 걸리는 날을 한 줄로. 부품을 일곱 개 얹어 두면 어느 것도 눈에 안 든다. */}
         <span className={`mt-3 block truncate text-[13px] ${closed ? '' : 'text-ink'}`}>
@@ -132,7 +132,7 @@ export function CommissionCard({ c }: { c: Card }) {
       */}
       <span
         className={`disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] ${
-          closed ? 'border-line bg-white text-faint' : 'bg-yellow text-ink'
+          closed ? 'border-line bg-fill text-faint line-through decoration-[2px]' : 'bg-yellow text-ink'
         }`}
       >
         {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
