@@ -36,7 +36,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
 
       <div className="mt-2 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div>
-          <div className="relative border-[3px] border-ink bg-fill shadow-hard">
+          <div className="relative border-[3px] border-ink bg-fill">
             {c.sample_urls.length > 0 ? (
               <div className="aspect-square overflow-hidden">
                 <Photo src={c.sample_urls[0]} alt="샘플 1" className="h-full w-full object-cover" />
@@ -69,12 +69,12 @@ export default async function CommissionPage({ params, searchParams }: PageProps
             {trust && <div className="mt-2"><FundingRecord trust={trust} /></div>}
           </div>
 
-          <dl className="num mt-6 grid grid-cols-3 border-[3px] border-ink bg-white shadow-hard">
+          <dl className="num mt-6 grid grid-cols-3 border-[3px] border-ink bg-white">
             <div className="flex flex-col gap-1 border-r-[3px] border-ink p-3">
               <dt className={EYEBROW}>기본 가격</dt>
               <dd className="disp whitespace-nowrap text-[20px] sm:text-[24px]">{won(c.price)}<span className="text-xs">~</span></dd>
             </div>
-            <div className="flex flex-col gap-1 border-r-[3px] border-ink bg-yellow p-3">
+            <div className="flex flex-col gap-1 border-r-[3px] border-ink p-3">
               <dt className={EYEBROW}>작업 기간</dt>
               <dd className="disp text-[20px] sm:text-[24px]">{c.turnaround_days}<span className="text-xs">일</span></dd>
             </div>
@@ -107,7 +107,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
         </div>
 
         <aside id="request" className="scroll-mt-40 lg:sticky lg:top-32 lg:self-start">
-          <div className="border-[3px] border-ink bg-white p-5 shadow-hard">
+          <div className="border-[3px] border-ink bg-white p-5">
             <h2 className={H2}>의뢰하기</h2>
             <div className="pt-5">
               {!me ? (

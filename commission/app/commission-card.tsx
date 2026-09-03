@@ -3,32 +3,34 @@ import type { CommissionCard as Card } from '@/lib/db'
 import { comma } from '@/lib/format'
 import { Photo } from './photo'
 
-/** 자리가 남았을 때만 붙는 딱지. 빨강 하나뿐이고 그림자는 없다 — 카드에 얹힌 종이지 떠 있는 물체가 아니다. */
+/**
+ * 자리 딱지. **색이 뜻이다.**
+ *   노랑 = 자리 있음 (이 서비스의 색)
+ *   빨강 = 한 자리 남음 — 진짜로 급한 순간에만. 늘 빨강이면 급하다는 말이 들리지 않는다.
+ *   검정 = 마감 (`ClosedStamp`)
+ */
 export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | 'md' }) {
+  const last = left === 1
   return (
-    <span className={`stamp num bg-accent text-white ${size === 'md' ? 'text-[20px]' : 'text-[16px]'}`}>
-      {left}자리 남음
+    <span className={`stamp disp ${last ? 'bg-accent text-white' : 'bg-yellow text-ink'} ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+      {last ? '한 자리 남음' : `${left}자리 남음`}
     </span>
   )
 }
 
 /**
- * 못 받는 상태는 딱지가 아니라 **사진을 가로지르는 검정 띠**로 말한다.
- * 모서리에 네모 하나를 붙이고 글자만 바꾸면 "받는 중" 과 "끝난 것" 이 같은 무게로 읽힌다.
- * 품절 포스터가 그렇듯 모양과 검정 덩어리가 뜻을 나른다.
+ * 못 받는 상태.
+ *
+ * 자리 딱지와 **같은 모양, 같은 자리**다. 색만 빨강에서 검정으로 바뀐다 —
+ * 오른쪽 위 그 칸이 "이 메뉴의 자리 사정" 을 말하는 한 곳이고, 화면은 색으로만 답한다.
+ * (그림 한가운데에 흰 상자를 띄웠더니 닫힘이 아니라 이미지가 깨진 것처럼 보였다.
+ *  그림에서 색을 빼는 것도 같은 이유로 그만뒀다.)
  */
-export function ClosedBand({ label }: { label: string }) {
+export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/*
-        각도를 −13° 까지 밀었다. −8° 는 붙인 것이 아니라 잘못 놓인 것처럼 보인다.
-        글자는 흰색이 아니라 노랑이다 — 검정·노랑·빨강 세 색이 여기서 한 번 다 만난다.
-        끝난 칸이 살아 있는 칸보다 조용하면 안 된다. 그건 위계가 뒤집힌 것이다.
-      */}
-      <span className="disp absolute left-1/2 top-[32%] w-[170%] -translate-x-1/2 -rotate-[13deg] border-y-[3px] border-ink bg-ink py-3 text-center text-[20px] tracking-wide text-yellow">
-        {label}
-      </span>
-    </div>
+    <span className={`stamp disp bg-ink text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+      {label}
+    </span>
   )
 }
 
@@ -46,49 +48,77 @@ export function SamplePlaceholder({ category }: { category?: string }) {
   return <div className="hatch h-full w-full" style={{ ['--hatch-bg' as string]: TINT[category ?? ''] ?? '#f2f2f2' }} />
 }
 
+/** 못 받는 상태의 이름. 목록과 상세가 같은 말을 쓰게 한 곳에 둔다. */
+export function closedLabel(status: string, left: number) {
+  if (status === 'closed') return '내려 둔 메뉴'
+  return left <= 0 ? '마감' : null
+}
+
 /** 상세 화면이 사진 위에 자리 상태를 얹을 때. */
 export function SlotOverlay({ active, max, status, size = 'sm' }: {
   active: number; max: number; status: string; size?: 'sm' | 'md'
 }) {
-  if (status === 'closed') return <ClosedBand label="내려 둔 메뉴" />
-  const left = max - active
-  if (left <= 0) return <ClosedBand label="이번 자리 마감" />
-  return <div className="absolute right-3 top-3"><SlotStamp left={left} size={size} /></div>
+  const label = closedLabel(status, max - active)
+  return (
+    <div className="absolute right-4 top-4">
+      {label ? <ClosedStamp label={label} size={size} /> : <SlotStamp left={max - active} size={size} />}
+    </div>
+  )
 }
 
 /**
- * 메뉴 한 장. 카드만 3px 선과 12px 그림자를 갖는다 — 화면에서 집어 올릴 수 있는 유일한 물건이다.
- * 딱지는 테두리 안쪽에 둔다. 밖으로 걸치면 카드 그림자와 오른쪽 끝이 겹쳐 어디까지가 무엇인지 흐려진다.
+ * 메뉴 한 장. 카드만 3px 선과 6px 그림자를 갖는다 — 화면에서 집어 올릴 수 있는 유일한 물건이다.
+ *
+ * 딱지 자리는 **그림 안 오른쪽 위 16px** 한 곳뿐이다. 예전에는 사진과 글을 가르는 선에 걸터앉혔는데,
+ * 카드마다 선까지의 거리가 달라 같은 부품이 카드마다 다른 관계를 갖는 것처럼 보였다.
  */
-export function CommissionCard({ c }: { c: Card }) {
+export function CommissionCard({ c, index }: { c: Card; index?: number }) {
   const left = c.max_slots - c.active_count
-  const closed = c.status === 'closed'
+  const closed = closedLabel(c.status, left)
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className="group relative flex h-full flex-col border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
+      className={`group relative flex h-full flex-col border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1 ${closed ? '[&_.card-body]:text-faint' : ''}`}
     >
-      <div className="relative aspect-[16/10] overflow-hidden border-b-[3px] border-ink">
-        {c.cover_url
-          ? <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
-          : <SamplePlaceholder category={c.category} />}
-        {closed && <ClosedBand label="내려 둔 메뉴" />}
-        {!closed && left <= 0 && <ClosedBand label="이번 자리 마감" />}
-        {!closed && left > 0 && (
-          <div className="absolute right-3 top-3"><SlotStamp left={left} /></div>
+      <div className="relative aspect-[16/10] border-b-[3px] border-ink">
+        <div className="absolute inset-0 overflow-hidden">
+          {c.cover_url
+            ? <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
+            : <SamplePlaceholder category={c.category} />}
+          {/* 종이 한 겹. 그림은 그대로 두고 한 단 뒤로 물린다. */}
+          {closed && <div className="absolute inset-0 bg-white/55" />}
+        </div>
+        {/* 자리 사정을 말하는 칸은 오른쪽 위 하나뿐이다. 빨강이면 남았고 검정이면 없다. */}
+        <div className="absolute right-3 top-3 z-10">
+          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} />}
+        </div>
+        {/*
+          메뉴판의 번호. 게시판에 붙은 전단은 번호를 갖는다.
+          선은 2px — 카드·버튼의 3px 보다 한 단 가늘게 둔다. 다 같은 굵기면 위계가 없다.
+        */}
+        {index !== undefined && (
+          <span className="disp num absolute -left-[3px] -top-[3px] flex h-10 w-12 items-center justify-center border-[3px] border-ink bg-white pt-1 text-[20px] text-ink shadow-hard">
+            {String(index).padStart(2, '0')}
+          </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <span className="truncate text-[11px] font-bold tracking-[0.08em] text-muted">
-          {c.category} · {c.creator_nickname}
-        </span>
-        <span className="mt-2 line-clamp-2 text-[19px] font-bold leading-snug text-ink">{c.title}</span>
-        <div className="mt-auto flex items-end justify-between gap-2 pt-4">
-          <span className="num disp text-[32px] tracking-tight text-ink">
-            {comma(c.price)}<span className="ml-1 text-[17px]">원~</span>
+      <div className={`card-body flex flex-1 flex-col p-4 ${closed ? 'bg-fill' : ''}`}>
+        {/* 분류는 작은 꼬리표, 만드는 사람은 이름값. 둘을 같은 크기로 두면 어느 쪽이 이름인지 알 수 없다. */}
+        <span className="truncate text-[11px] font-bold tracking-[0.1em] text-muted">{c.category}</span>
+        <span className={`mt-1.5 line-clamp-2 text-[19px] font-extrabold leading-snug ${closed ? '' : 'text-ink'}`}>{c.title}</span>
+        <span className={`mt-1.5 text-[13px] font-bold ${closed ? '' : 'text-strong'}`}>{c.creator_nickname}</span>
+        {/*
+          금액과 작업 기간은 같은 밑선에 선다. "원부터" 는 숫자와 **같은 글자체**로 두되 크기만 낮춘다 —
+          다른 체로 두면 숫자에 붙은 오자처럼 보인다. 작업 기간은 검정 테두리 알약으로 묶어 회색 꼬리표에서 꺼낸다.
+        */}
+        <div className="mt-auto flex items-end justify-between gap-2 pt-5">
+          <span className={`disp num text-[34px] ${closed ? 'line-through' : 'text-ink'}`}>
+            {comma(c.price)}<span className="disp ml-1 text-[15px]">원부터</span>
           </span>
-          {/* 숫자만 두면 쪽 번호처럼 읽힌다. 무엇의 며칠인지 밝힌다. */}
-          <span className="num shrink-0 pb-1 text-[12px] font-bold text-muted">작업 {c.turnaround_days}일</span>
+          {/* 검정 칠. 번호표는 흰 바탕 + 테두리라 서로 다른 종류로 읽힌다. */}
+          <span className={`num shrink-0 px-2 py-1 text-[12px] font-bold leading-none text-white ${closed ? 'bg-faint' : 'bg-ink'}`}>
+            {c.turnaround_days}일
+          </span>
         </div>
       </div>
     </Link>

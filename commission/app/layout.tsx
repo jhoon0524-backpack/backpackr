@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { HeaderNav } from "./header-nav";
 import { UserSwitcher } from "./user-switcher";
 
 export const metadata: Metadata = {
@@ -32,46 +33,46 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko" className="h-full antialiased">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@800;900&display=swap" rel="stylesheet" />
+        {/*
+          글꼴은 이 서비스가 직접 들고 있다 — 이유는 public/fonts/fonts.css 머리말에.
+          Next 는 스타일시트를 손으로 넣지 말라고 하지만, 그건 번들러가 아는 CSS 를 말한다.
+          이 파일은 88개 subset 을 가리키는 @font-face 목록이라 번들에 넣을 것이 아니라 그대로 받아 가야 한다.
+        */}
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link href="/fonts/fonts.css" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-ink">
-        <header className="sticky top-0 z-10 border-b-[3px] border-ink bg-white">
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-white text-ink">
+        <header className="sticky top-0 z-10 bg-ink text-white">
           <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between gap-4 px-8">
             <div className="flex items-center gap-7">
-              <Link href="/" className="disp flex h-16 items-center text-[26px] leading-none text-ink">
-                <span className="bg-yellow px-2 pb-1 pt-1.5">커미션!</span>
+              <Link href="/" className="disp flex h-16 items-center text-[26px] leading-none">
+                <span className="bg-yellow px-2 pb-1 pt-1.5 text-ink">커미션!</span>
               </Link>
-              <nav className="hidden gap-5 text-[15px] font-bold text-ink sm:flex">
-                {NAV.map((n) => (
-                  <Link key={n.href} href={n.href} className="flex h-16 min-w-11 items-center justify-center hover:underline hover:decoration-[3px] hover:underline-offset-4">
-                    {n.label}
-                  </Link>
-                ))}
-              </nav>
+              <HeaderNav items={NAV} />
             </div>
             <UserSwitcher />
           </div>
           {/* 좁은 화면의 길. 높이 44 탭 세 개. */}
-          <nav className="flex border-t-[3px] border-ink sm:hidden">
+          <nav className="flex border-t-[3px] border-white/20 sm:hidden">
             {NAV.map((n, i) => (
-              <Link key={n.href} href={n.href} className={`flex h-11 flex-1 items-center justify-center text-sm font-bold text-ink ${i > 0 ? "border-l-[3px] border-ink" : ""}`}>
+              <Link key={n.href} href={n.href} className={`flex h-11 flex-1 items-center justify-center text-sm font-bold ${i > 0 ? "border-l-[3px] border-white/20" : ""}`}>
                 {n.label}
               </Link>
             ))}
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-[1100px] flex-1 px-8 pt-12 pb-18">{children}</main>
+        <main className="mx-auto w-full max-w-[1100px] flex-1 px-8 pb-10 pt-8">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
         <footer className="border-t-[3px] border-ink bg-white">
           <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-4 px-8 py-7">
-            <p className="flex items-baseline gap-3 text-xs font-medium text-muted">
-              <span className="disp text-base leading-none text-ink">커미션!</span>
-              창작자 맞춤 작업 의뢰
+            <p className="disp text-base leading-none text-ink">
+              <span className="border-[3px] border-ink bg-yellow px-1.5 pb-0.5 pt-1 shadow-hard">커미션!</span>
             </p>
-            <p className="text-xs font-medium text-muted">© 2026 커미션</p>
+            {/* 바닥이 로고와 저작권만 있는 빈 띠였다. 길을 한 벌 더 둔다. */}
+            <nav className="flex gap-5 text-[13px] font-bold text-ink">
+              {NAV.map((n) => <Link key={n.href} href={n.href} className="hover:underline">{n.label}</Link>)}
+            </nav>
+            <p className="num text-xs font-bold text-ink">© 2026 커미션</p>
           </div>
         </footer>
       </body>

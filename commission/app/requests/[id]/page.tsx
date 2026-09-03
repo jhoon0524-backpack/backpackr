@@ -83,7 +83,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
         </div>
 
         <aside className="lg:sticky lg:top-32 lg:self-start">
-          <div className="border-[3px] border-ink bg-white p-5 shadow-hard">
+          <div className="border-[3px] border-ink bg-white p-5">
             <dl className="space-y-4">
               <div>
                 {/* 커미션 상세와 같은 말 "기본 가격". 수락 전 금액이 확정가처럼 읽히지 않게 한 줄 덧붙인다 (UI/UX 1회차 발견 7). */}

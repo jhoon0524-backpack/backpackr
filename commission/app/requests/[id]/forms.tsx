@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useState } from 'react'
 import { MoneyInput } from '@/app/money-input'
 import { daysLeft, kstDate } from '@/lib/format'
 import { ALERT, BTN_PRIMARY, BTN_SECONDARY, HELP, INPUT, LABEL } from '@/app/ui'
@@ -20,7 +20,7 @@ function Confirm({ message, submitLabel, pending, onCancel }: {
   message: React.ReactNode; submitLabel: string; pending: boolean; onCancel: () => void
 }) {
   return (
-    <div role="alertdialog" className="space-y-3 border-[3px] border-ink bg-yellow p-4">
+    <div role="alertdialog" className="space-y-3 border-[3px] border-ink bg-white p-4">
       <p className="text-sm font-bold leading-relaxed text-ink">{message}</p>
       <button type="submit" disabled={pending} className={BTN_PRIMARY}>{pending ? '처리 중…' : submitLabel}</button>
       <button type="button" disabled={pending} onClick={onCancel} className={BTN_SECONDARY}>아니오, 돌아가기</button>
@@ -28,18 +28,32 @@ function Confirm({ message, submitLabel, pending, onCancel }: {
   )
 }
 
+/**
+ * 되돌릴 수 없는 일 앞에서 한 번 더 묻는 상자를 열고 닫는다.
+ *
+ * 제출이 **실패하면 상자를 접는다.** 상자를 열어 둔 채 문구만 저 아래에 뜨면
+ * "확정" 을 눌렀는데 화면이 하나도 안 바뀐 것처럼 보인다 (UI/UX 6회차 발견 1).
+ * 문구는 상자가 있던 자리, 곧 방금 누른 버튼 자리에 나타난다.
+ *
+ * 접는 일을 `useEffect` 로 하면 화면을 한 번 그린 뒤 다시 그리게 된다.
+ * React 가 권하는 대로 **그리는 중에** 이전 응답과 비교해 바로 고친다.
+ */
+function useConfirmBox(state: ActionState) {
+  const [arming, setArming] = useState(false)
+  const [seen, setSeen] = useState(state)
+  if (state !== seen) {
+    setSeen(state)
+    if (state?.message) setArming(false)
+  }
+  return [arming, setArming] as const
+}
+
 /** 창작자: 수락(최종가 입력) 또는 거절(사유 입력). 텀블벅 리워드 카드처럼 테두리 상자 둘이다. */
 export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeCount }: {
   id: string; quotedPrice: number; dueAtIfNow: string; maxSlots: number; activeCount: number
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
-  const [arming, setArming] = useState(false)
-  /*
-    실패하면 확인 상자를 접는다. 상자를 열어 둔 채 문구만 저 아래에 뜨면
-    "확정" 을 눌렀는데 화면이 하나도 안 바뀐 것처럼 보인다 (UI/UX 6회차 발견 1).
-    문구는 상자가 있던 자리, 곧 방금 누른 버튼 자리에 나타난다.
-  */
-  useEffect(() => { if (state?.message) setArming(false) }, [state])
+  const [arming, setArming] = useConfirmBox(state)
   // 서버가 수락 시각 + 작업 기간으로 박는다. 여기서는 서버가 미리 계산해 준 값을 보여 줄 뿐이다.
   const dueAt = dueAtIfNow
   const left = maxSlots - activeCount
@@ -109,8 +123,7 @@ export function OneButton({ id, kind, label, help, tone = 'secondary', confirm }
   id: string; kind: 'cancel' | 'complete'; label: string; help: string; tone?: 'primary' | 'secondary'; confirm?: string
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
-  const [arming, setArming] = useState(false)
-  useEffect(() => { if (state?.message) setArming(false) }, [state])
+  const [arming, setArming] = useConfirmBox(state)
   const cls = tone === 'primary' ? BTN_PRIMARY : BTN_SECONDARY
   return (
     <form action={action} className="space-y-3">

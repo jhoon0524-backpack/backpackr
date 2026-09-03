@@ -19,7 +19,7 @@ function RequestLine({ r, who }: { r: RequestRow; who: 'creator' | 'client' }) {
   const active = r.status === 'accepted' || r.status === 'delivered'
   return (
     <li>
-      <Link href={`/requests/${r.id}`} className="flex items-center justify-between gap-4 px-3 py-4 hover:bg-yellow/40">
+      <Link href={`/requests/${r.id}`} className="flex items-center justify-between gap-4 px-3 py-4 hover:bg-fill">
         <div className="min-w-0">
           <p className="disp line-clamp-2 text-[20px] leading-tight">{r.commission_title}</p>
           <p className="mt-1 truncate text-sm font-medium text-muted">
@@ -54,14 +54,14 @@ function Section({ title, count, children }: { title: string; count?: number; ch
   )
 }
 
-const BOX = 'mt-4 divide-y-2 divide-ink border-[3px] border-ink bg-white shadow-hard'
+const BOX = 'mt-4 divide-y-[3px] divide-ink border-[3px] border-ink bg-white'
 
 export default async function MyPage({ searchParams }: PageProps<'/me'>) {
   const me = await getCurrentUser()
   const sp = await searchParams
   if (!me) {
     return (
-      <div className="border-[3px] border-ink bg-white p-8 text-center shadow-hard">
+      <div className="border-[3px] border-ink bg-white p-8 text-center">
         <p className="disp text-2xl text-ink">먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
       </div>
     )
