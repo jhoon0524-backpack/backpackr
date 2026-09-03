@@ -41,13 +41,13 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  */
 export function TitleField({ title, category, closed = false, big = false }: { title: string; category?: string; closed?: boolean; big?: boolean }) {
   return (
-    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-7'}`}>
+    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-4 pt-5'}`}>
       {/*
         `break-keep` — 한글은 어절 단위로 끊어야 한다. 아무 데서나 끊으면 "로고·/타이틀" 처럼 가운뎃점이 줄 끝에 남는다.
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`flex w-full flex-col gap-1.5 ${big ? '' : 'h-[76px]'}`}>
+      <span className={`flex w-full flex-col gap-1.5 ${big ? '' : 'min-h-[48px]'}`}>
         {category && (
           <span className={`text-[12px] font-bold leading-none tracking-[0.1em] ${closed ? 'text-line' : 'text-strong'}`}>
             {category}
@@ -120,7 +120,7 @@ export function CommissionCard({ c }: { c: Card }) {
           <span className="mt-1.5 block text-[13px] text-muted">{c.turnaround_days}일 걸려요</span>
         </span>
         {/* 값. 끝을 맞춰 두면 넉 장의 값이 한 열로 읽힌다. */}
-        <span className="num flex shrink-0 items-baseline text-[30px] font-extrabold leading-none tracking-tight text-ink">
+        <span className="disp num flex shrink-0 items-baseline text-[30px] leading-none text-ink">
           {comma(c.price)}<span className="ml-0.5 text-[18px]">원~</span>
         </span>
       </div>

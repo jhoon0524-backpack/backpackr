@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="border-t-[3px] border-white bg-ink text-white">
           <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-8 py-7">
             <p className="poster text-[26px] leading-none">커미션!</p>
-            <p className="num text-[13px] font-bold text-white/50">2026년 9월호 · © 2026 커미션</p>
+            <p className="num text-[13px] font-bold text-white/70">2026년 9월호 · © 2026 커미션</p>
           </div>
         </footer>
       </body>
