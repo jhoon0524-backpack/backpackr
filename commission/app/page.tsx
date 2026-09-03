@@ -30,7 +30,7 @@ export default async function CommissionList() {
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.2vw,161px)] leading-[0.9] tracking-[0.015em] text-white">
+          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.0vw,157px)] leading-[0.9] tracking-[0.015em] text-white">
             <span>자리</span>
             <Fraction open={openSlots} all={allSlots} />
             <span>남았어요</span>
@@ -46,7 +46,7 @@ export default async function CommissionList() {
 
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
-        <ul className="mt-10 border-b-[3px] border-t-[3px] border-ink">
+        <ul className="mt-10 border-b-4 border-t-4 border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
@@ -69,9 +69,9 @@ function EmptyRow() {
       href="/open"
       className="group mt-10 block"
     >
-      <span className="disp block text-[min(2.6vw,24px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
-        그리는 분이라면, 여기에 <span className="bg-yellow px-1.5 py-0.5">메뉴 한 장을</span> 붙이세요.
-        <span className="ml-2 font-normal">→</span>
+      <span className="disp block text-[min(3.1vw,29px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
+        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
+        <span className="ml-3 font-normal">→</span>
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">
         자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
@@ -90,7 +90,7 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-block bg-yellow px-[0.08em] py-[0.055em] align-baseline text-[1.04em] leading-[0.76] text-ink [-webkit-text-stroke:0.024em_currentColor]">
+    <span className="num inline-block bg-yellow px-[0.08em] py-[0.055em] align-baseline text-[1.04em] leading-[0.76] text-ink [-webkit-text-stroke:0.026em_currentColor]">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
       <span aria-hidden className="mx-[0.06em] inline-block h-[0.7em] w-[0.08em] -skew-x-[13deg] bg-ink align-baseline" />

@@ -88,17 +88,17 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         그래서 간격을 gap 이 아니라 각 칸의 안쪽 여백으로 준다.
       */}
       <span className="flex items-baseline">
-        <span className={`num w-[62px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none ${closed ? 'text-line' : 'text-muted'}`}>
+        <span className={`num w-[62px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none text-muted ${closed ? 'line-through decoration-[2px]' : ''}`}>
           {String(n).padStart(2, '0')}
         </span>
         <span className={`disp pr-3 text-balance break-keep text-[min(3.2vw,30px)] leading-tight ${tone}`}>
           {c.title}
         </span>
-        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        <span className="hidden w-[124px] shrink-0 pl-3 sm:block">
+        <span className="hidden shrink-0 pr-3 sm:block">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </span>
-        <span className={`disp num ml-auto w-[186px] shrink-0 text-right text-[min(2.8vw,26px)] leading-none sm:ml-0 ${tone}`}>
+        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        <span className={`disp num ml-auto shrink-0 pl-3 text-right text-[min(2.8vw,26px)] leading-none sm:ml-0 ${tone}`}>
           {comma(c.price)}
           <span className="ml-2 inline-block w-[46px] text-left text-[12px] font-bold tracking-[0.1em]">원부터</span>
         </span>
