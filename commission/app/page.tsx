@@ -27,29 +27,20 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] overflow-hidden px-8 pb-8 pt-4">
+        <div className="mx-auto max-w-[1200px] px-8 pb-10 pt-4">
           <p className="num text-[13px] font-bold text-white/60">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
           {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
-          <div className="relative">
-            <span
-              aria-hidden
-              className="poster num pointer-events-none absolute -right-[0.06em] -top-[0.3em] text-[min(44vw,564px)] leading-[0.72] text-yellow"
-            >
-              {openSlots}
-            </span>
-            {/*
-              숫자는 이미 오른쪽에 사람 키만 하게 서 있다. 제목에서 한 번 더 쓰면 같은 말을 두 번 하는 것이다.
-              눈에는 안 보이게 두되 읽어 주는 기계에는 남긴다 — 큰 숫자는 그림이라 소리로 읽히지 않는다.
-            */}
-            <h1 className="poster relative pt-[min(16vw,206px)] text-[min(4.6vw,64px)] leading-[0.9] text-white">
-              <span className="sr-only">{openSlots}</span>자리
+          <h1 className="poster mt-4 flex items-start gap-[0.06em] text-white">
+            <span className="num text-[min(26vw,332px)] leading-[0.74] text-yellow">{openSlots}</span>
+            <span className="pt-[0.28em] text-[min(6.2vw,86px)] leading-[0.88]">
+              자리
               <br />
               남았어요
-            </h1>
-          </div>
-          <p className="relative mt-6 max-w-2xl text-[19px] font-bold leading-relaxed text-white">
+            </span>
+          </h1>
+          <p className="mt-7 max-w-2xl text-[19px] font-bold leading-relaxed text-white">
             이번 달 열린 자리 {allSlots}개 가운데 {openSlots}개가 비어 있어요. 고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
           </p>
           {/*
@@ -96,16 +87,14 @@ function HowItWorks() {
       메뉴판에서 갑자기 소개 페이지로 바뀌던 자리다. 굵은 테두리도 검정도 여기서 끊겼다.
       머리와 같은 검정 띠로 받아 화면을 닫는다 — 위에서 시작한 판이 아래에서 같은 판으로 끝난다.
     */
-    <section className="relative left-1/2 -mx-[50vw] mt-24 w-screen border-y-[3px] border-ink bg-ink">
+    <section className="relative left-1/2 -mx-[50vw] mt-24 w-screen border-t-[3px] border-ink bg-ink">
       <div className="mx-auto max-w-[1200px] px-8 py-14">
         <h2 className="disp text-[36px] text-white">보내면 이렇게 됩니다</h2>
         <ol className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s) => (
             <li key={s.n} className="border-t-[3px] border-white/25 pt-4">
-              <span className="disp block text-[24px] leading-none text-white">
-                <span className="num mr-2 text-[15px] text-white/40">{s.n}</span>
-                {s.t}
-              </span>
+              <span className="poster num block text-[40px] leading-none text-white/35">{s.n}</span>
+              <span className="disp mt-2 block text-[24px] leading-none text-white">{s.t}</span>
               <span className="mt-3 block text-[14px] font-normal leading-relaxed text-white/60">{s.d}</span>
             </li>
           ))}
@@ -129,10 +118,10 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group relative flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
+      className="group relative flex h-full flex-col border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
     >
       {/* 진짜 카드의 제목 칸과 정확히 같은 구조 — 그래야 넉 장의 가름선이 같은 높이에 선다. */}
-      <span className="absolute right-0 top-0 border-b-[3px] border-l-[3px] border-dashed border-line bg-white px-3 py-1.5 text-[13px] font-bold text-muted">
+      <span className="absolute right-0 top-0 border-b-[3px] border-l-[3px] border-ink bg-white px-3 py-1.5 text-[13px] font-bold text-ink">
         비어 있음
       </span>
       <span className="flex w-full flex-col gap-1.5 px-4 pb-3 pt-7">
@@ -144,7 +133,7 @@ function EmptySlot() {
       <span className="flex flex-1 items-end p-4 text-[13px] font-normal leading-relaxed text-muted">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
       </span>
-      <span className="disp flex items-center justify-between border-t-[3px] border-dashed border-line px-4 py-3 text-[17px] text-strong">
+      <span className="disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] text-ink">
         메뉴 붙이기
       </span>
 

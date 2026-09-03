@@ -9,24 +9,22 @@ import { Photo } from './photo'
  *   빨강 = 한 자리 남음 — 진짜로 급한 순간에만. 늘 빨강이면 급하다는 말이 들리지 않는다.
  *   검정 = 마감 (`ClosedStamp`)
  */
-export function SlotStamp({ left, max, active, size = 'sm' }: { left: number; max: number; active: number; size?: 'sm' | 'md' }) {
+export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: number; size?: 'sm' | 'md' }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 border-b-[3px] border-l-[3px] border-ink bg-yellow px-3 py-1.5 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}
+      className={`inline-flex items-center border-b-[3px] border-l-[3px] border-ink bg-white px-3 py-1.5 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
       자리 {left}/{max}
-      <Seats max={max} active={active} />
     </span>
   )
 }
 
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
-export function ClosedStamp({ label, max, size = 'sm' }: { label: string; max?: number; size?: 'sm' | 'md' }) {
+export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
     <span className={`inline-flex items-center gap-2 border-b-[3px] border-l-[3px] border-ink bg-ink px-3 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
       {label}
-      {max !== undefined && <Seats max={max} active={max} onDark />}
     </span>
   )
 }
@@ -51,11 +49,11 @@ export function TitleField({ title, category, closed = false, big = false }: { t
       */}
       <span className={`flex w-full flex-col gap-1.5 ${big ? '' : 'h-[76px]'}`}>
         {category && (
-          <span className={`text-[11px] font-bold leading-none tracking-[0.12em] ${closed ? 'text-line' : 'text-faint'}`}>
+          <span className={`text-[12px] font-bold leading-none tracking-[0.1em] ${closed ? 'text-line' : 'text-strong'}`}>
             {category}
           </span>
         )}
-        <span className={`text-balance break-keep font-medium leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 text-[19px]'}`}>
+        <span className={`text-balance break-keep font-semibold leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 text-[22px]'}`}>
           {title}
         </span>
       </span>
@@ -63,26 +61,6 @@ export function TitleField({ title, category, closed = false, big = false }: { t
   )
 }
 
-/**
- * 이 메뉴의 자리.
- *
- * "2자리 남음" 이라고 **쓰는 것**보다, 세 칸 중 하나가 칠해진 것을 **보는 것**이 빠르다.
- * 자리는 이 서비스가 파는 물건이므로, 파는 물건은 글자가 아니라 형태로 보여야 한다.
- */
-export function Seats({ max, active, onDark = false }: { max: number; active: number; onDark?: boolean }) {
-  return (
-    <span aria-hidden className="flex shrink-0 gap-1">
-      {Array.from({ length: max }, (_, i) => (
-        <span
-          key={i}
-          className={`h-3.5 w-3.5 border-2 ${onDark ? 'border-white' : 'border-ink'} ${
-            i < active ? (onDark ? 'bg-white' : 'bg-ink') : onDark ? '' : 'bg-white'
-          }`}
-        />
-      ))}
-    </span>
-  )
-}
 
 /** 못 받는 상태의 이름. 목록과 상세가 같은 말을 쓰게 한 곳에 둔다. */
 export function closedLabel(status: string, left: number) {
@@ -97,7 +75,7 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
   const label = closedLabel(status, max - active)
   return (
     <div className="absolute right-0 top-0">
-      {label ? <ClosedStamp label={label} max={max} size={size} /> : <SlotStamp left={max - active} max={max} active={active} size={size} />}
+      {label ? <ClosedStamp label={label} size={size} /> : <SlotStamp left={max - active} max={max} size={size} />}
     </div>
   )
 }
@@ -131,14 +109,14 @@ export function CommissionCard({ c }: { c: Card }) {
         */}
         {/* 상태 탭은 넉 장 모두 같은 자리에 있다. 하나에만 있으면 그건 상태가 아니라 얼룩이다. */}
         <div className="absolute right-0 top-0 z-10">
-          {closed ? <ClosedStamp label={closed} max={c.max_slots} /> : <SlotStamp left={left} max={c.max_slots} active={c.active_count} />}
+          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </div>
       </div>
 
       <div className="body flex flex-1 flex-col justify-end p-4">
         {/* 값이 먼저다. 메뉴판에서 결정을 만드는 것은 값이다. */}
-        <span className={`num block text-[32px] font-extrabold leading-none tracking-tight ${closed ? '' : 'text-ink'}`}>
-          {comma(c.price)}<span className="ml-1 text-[13px] font-medium">원부터</span>
+        <span className={`num flex items-baseline gap-1 text-[32px] font-extrabold leading-none tracking-tight ${closed ? '' : 'text-ink'}`}>
+          {comma(c.price)}<span className="text-[13px] font-medium">원부터</span>
         </span>
         {/* 만드는 사람과 걸리는 날을 한 줄로. 부품을 일곱 개 얹어 두면 어느 것도 눈에 안 든다. */}
         <span className={`mt-3 block truncate text-[13px] ${closed ? '' : 'text-ink'}`}>
