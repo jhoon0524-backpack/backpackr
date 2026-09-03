@@ -27,21 +27,31 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-11 pt-6">
+        <div className="mx-auto max-w-[1200px] px-8 pb-12 pt-6">
           <p className="num text-[15px] font-bold tracking-[0.04em] text-white/80">
-            {MONTH.format(new Date())} 메뉴판 <span className="text-white/50">·</span> 메뉴 {commissions.length}개
+            {MONTH.format(new Date())} 메뉴판
           </p>
           {/*
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster mt-4 whitespace-nowrap text-[min(11.2vw,160px)] leading-[0.9] text-white">
+          <h1 className="poster mt-4 whitespace-nowrap text-[min(11.2vw,160px)] leading-[0.9] tracking-[0.015em] text-white">
             자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <p className="disp mt-6 border-t-[3px] border-white pt-5 text-[min(3.4vw,28px)] leading-tight text-white">
-            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
-          </p>
+          <div className="mt-6 border-t-[3px] border-white pt-5">
+            <ol className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[min(3.2vw,28px)] leading-tight">
+              {STEPS.map((t, i) => (
+                <li key={t} className="disp text-white">
+                  {i > 0 && <span className="mr-3 font-medium text-white/45">→</span>}
+                  {t}
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 text-[15px] font-medium leading-relaxed text-white/70">
+              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -57,39 +67,15 @@ export default async function CommissionList() {
         </ul>
       )}
 
-      <HowItWorks />
     </div>
   )
 }
 
 /**
- * 보내고 나면 무슨 일이 일어나는가.
- *
- * 넉 칸짜리 "이렇게 됩니다" 표는 어느 소개 페이지에나 있는 틀이다. 번호·굵은 제목·회색 한 줄이
- * 네 번 반복되면 읽는 사람은 넷 다 안 읽는다. 그래서 **동사 넉 개를 한 줄로 세우고**,
- * 설명은 그 아래 한 문단으로 몰아 준다. 볼 것은 한 줄, 읽을 것은 한 문단.
+ * 이 서비스 전체를 네 마디로. 제호 바로 아래, 검정 판 안에 둔다.
+ * 흰 판 한가운데 이 네 마디만 덩그러니 두었더니 제목도 마디도 아닌 것이 되었다.
  */
-const STEPS = [
-  { t: '고른다', d: '자리가 남은 메뉴에 원하는 것을 적어 보냅니다.' },
-  { t: '수락한다', d: '창작자가 값을 정해 수락하면 자리 하나가 찹니다.' },
-  { t: '작업한다', d: '메뉴에 적힌 기간 안에 작업이 끝납니다.' },
-  { t: '받는다', d: '받고 확인을 누르면 그 자리가 다시 빕니다.' },
-]
-
-function HowItWorks() {
-  return (
-    <section className="mt-16">
-      <ol className="flex flex-wrap items-baseline gap-x-3 gap-y-2 text-[min(3vw,26px)] leading-tight">
-        {STEPS.map((s, i) => (
-          <li key={s.t} className="disp text-ink">
-            {i > 0 && <span className="mr-3 font-medium text-muted">→</span>}
-            {s.t}
-          </li>
-        ))}
-      </ol>
-    </section>
-  )
-}
+const STEPS = ['고른다', '수락한다', '작업한다', '받는다']
 
 /**
  * 아직 아무도 안 붙인 자리.
@@ -103,7 +89,7 @@ function HowItWorks() {
  */
 function EmptyRow() {
   return (
-    <p className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-ink py-5 text-[15px] font-medium text-muted">
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-3 border-b border-ink py-8 text-[15px] font-medium text-muted">
       그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
       {/* 이 화면에서 창작자가 눌러야 할 곳은 여기 하나다. 문장 속 밑줄로는 눌러야 할 곳으로 안 보인다. */}
       <Link href="/open" className="disp inline-flex items-center bg-ink px-4 py-2 text-[15px] leading-none text-white hover:bg-strong">
@@ -123,7 +109,7 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-flex items-end bg-yellow px-[0.08em] py-[0.05em] text-[1.1em] leading-[0.76] text-ink">
+    <span className="num inline-flex items-end bg-yellow px-[0.14em] py-[0.01em] text-[1.1em] leading-[0.8] text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
       <span aria-hidden className="mx-[0.08em] mb-[0.05em] block h-[0.66em] w-[0.1em] -skew-x-[13deg] bg-ink" />

@@ -4,13 +4,16 @@ import { comma } from '@/lib/format'
 
 /**
  * 자리 딱지. **색이 뜻이다.**
- *   노랑 = 지금 잡을 수 있는 자리
+ *   흰 바탕 = 지금 잡을 수 있는 자리
  *   검정 = 마감
+ *
+ * 노랑을 여기 쓰지 않는다. 이 화면에서 노랑은 제호의 분수 한 번뿐이고,
+ * 같은 색이 세 군데로 흩어지면 그 한 번이 터지지 않는다.
  */
 export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: number; size?: 'sm' | 'md' }) {
   return (
     <span
-      className={`num inline-flex shrink-0 items-center whitespace-nowrap bg-yellow px-2.5 py-1.5 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}
+      className={`num inline-flex shrink-0 items-center whitespace-nowrap border-[2px] border-ink bg-white px-2.5 py-1 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
       빈자리 {left}/{max}
@@ -21,7 +24,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 칠만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`inline-flex shrink-0 items-center whitespace-nowrap bg-ink px-2.5 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}>
+    <span className={`inline-flex shrink-0 items-center whitespace-nowrap border-[2px] border-ink bg-ink px-2.5 py-1 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}>
       {label}
     </span>
   )
@@ -77,34 +80,29 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className={`grid grid-cols-12 gap-x-4 gap-y-2 border-b border-ink py-6 transition hover:bg-yellow/25 ${closed ? 'opacity-45' : ''}`}
+      className="block border-b border-ink py-8 transition hover:bg-yellow/25"
     >
       {/*
-        번호는 제호와 같은 얼굴이다. 160px 로 소리친 다음 바로 20px 로 속삭이면 두 장의 서류를 붙여 둔 것처럼
-        읽힌다. 그 사이를 잇는 계단이 이 번호다.
+        한 줄은 하나의 밑선 위에 있다 — 번호, 이름, 점선, 값.
+        칸을 나눠 두면 값 칸의 남는 왼쪽이 그대로 빈 곳이 되어 점선이 값에 닿지 못한다.
+        점선은 닿아야 잇는 줄이다.
       */}
-      <span className="poster col-span-2 text-[min(4.4vw,44px)] leading-none text-ink lg:col-span-1">
-        {String(n).padStart(2, '0')}
-      </span>
-
-      {/*
-        메뉴판의 한 줄 — 이름 바로 뒤에서 점이 시작해 값 칸 앞에서 멈춘다.
-        점의 시작까지 칸에 묶어 두면 이름과 점 사이가 툭 벌어져, 잇는 줄이 아니라 따로 놓인 조각이 된다.
-      */}
-      <span className="col-span-10 flex items-baseline gap-4 lg:col-span-8">
+      <span className="flex items-baseline gap-4">
+        {/* 번호는 제호와 같은 얼굴. 160px 다음에 바로 20px 가 오면 두 장의 서류를 붙여 둔 것처럼 읽힌다. */}
+        <span className="poster w-[56px] shrink-0 text-[min(4.4vw,44px)] leading-none text-ink">
+          {String(n).padStart(2, '0')}
+        </span>
         <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
           {c.title}
         </span>
-        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 self-baseline text-line lg:block" />
+        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        <span className="disp num ml-auto shrink-0 text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
+          {comma(c.price)}
+          <span className="ml-1 text-[14px]">원부터</span>
+        </span>
       </span>
 
-      {/* 값은 두 칸짜리 표다 — 숫자는 오른쪽에, 단위는 고정폭 왼쪽에. 자릿수가 달라도 자리가 안 흔들린다. */}
-      <span className="col-span-12 grid grid-cols-[1fr_46px] items-baseline lg:col-span-3">
-        <span className="disp num text-right text-[min(3.2vw,30px)] leading-none text-ink">{comma(c.price)}</span>
-        <span className="disp pl-1 text-[15px] leading-none text-ink">원부터</span>
-      </span>
-
-      <span className="col-span-12 flex flex-wrap items-center gap-x-3 gap-y-2 lg:col-span-8 lg:col-start-2">
+      <span className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 sm:pl-[72px]">
         <span className="text-[14px] font-bold text-strong">
           {c.category}
           <span className="text-muted"> · </span>
