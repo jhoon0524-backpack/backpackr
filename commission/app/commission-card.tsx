@@ -94,7 +94,7 @@ export function CommissionCard({ c }: { c: Card }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className="group relative flex h-full flex-col border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
+      className="group relative flex h-full flex-col border-[3px] border-ink bg-white transition hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard"
     >
       <div className={`relative border-b-[3px] border-ink ${c.cover_url ? 'aspect-[16/10]' : ''}`}>
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
@@ -121,7 +121,7 @@ export function CommissionCard({ c }: { c: Card }) {
         </span>
         {/* 값. 끝을 맞춰 두면 넉 장의 값이 한 열로 읽힌다. */}
         <span className="disp num flex shrink-0 items-baseline text-[30px] leading-none text-ink">
-          {comma(c.price)}<span className="ml-0.5 text-[18px]">원~</span>
+          {comma(c.price)}<span className="ml-1 text-[15px]">원부터</span>
         </span>
       </div>
 
@@ -132,7 +132,7 @@ export function CommissionCard({ c }: { c: Card }) {
       */}
       <span
         className={`disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] ${
-          closed ? 'bg-white text-ink' : 'bg-yellow text-ink'
+          closed ? 'bg-ink text-white' : 'bg-yellow text-ink'
         }`}
       >
         {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}

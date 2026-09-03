@@ -27,7 +27,7 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pt-8">
+        <div className="mx-auto max-w-[1200px] px-8 pb-24 pt-8">
           {/*
             제호는 **한 크기, 한 얼굴, 두 줄**이다. 숫자만 크게 키워 두면 숫자와 말이 서로 다른
             물건처럼 놓이고, 그걸 붙이려고 밑선을 맞출수록 판만 길어진다.
@@ -36,33 +36,26 @@ export default async function CommissionList() {
             설명 한 줄은 제호 오른쪽, 마지막 줄과 같은 밑선에 앉는다. 아래로 내려 두면
             제호 오른쪽이 통째로 비고, 그 빈 곳은 여백이 아니라 안 채운 자리로 읽힌다.
           */}
-          <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
-            <h1 className="poster text-[min(13vw,164px)] leading-[0.88] text-white">
-              자리 <Fraction open={openSlots} all={allSlots} />
-              <br />
-              남았어요
-            </h1>
-            <p className="max-w-[300px] pb-[0.12em] text-[17px] font-bold leading-relaxed text-white">
-              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+          <h1 className="poster whitespace-nowrap text-[min(10.6vw,152px)] leading-[0.9] text-white">
+            자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
+          </h1>
+          {/* 판의 밑선. 설명과 발행 정보를 양 끝에 걸어 검정 판의 바닥으로 삼는다. */}
+          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t-[3px] border-white pt-4">
+            <p className="text-[16px] font-bold text-white">고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.</p>
+            <p className="num text-[14px] font-bold tracking-[0.02em] text-white/70">
+              {MONTH.format(new Date())} 메뉴판 <span className="text-white/40">·</span> 메뉴 {commissions.length}개
             </p>
-          </div>
-          {/* 판의 밑선. 발행 정보를 양 끝에 걸어 검정 판의 바닥으로 삼는다. */}
-          <div className="mt-8 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t-[3px] border-white py-4">
-            <p className="num text-[13px] font-bold text-white/60">
-              {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
-            </p>
-            <p className="num text-[13px] font-bold text-white/60">{MONTH.format(new Date())}호</p>
           </div>
         </div>
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-16 grid grid-cols-1 gap-6">
+        <ul className="relative z-[1] -mt-16 grid grid-cols-1 gap-6">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="relative z-[1] -mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
@@ -100,9 +93,9 @@ function HowItWorks() {
           {STEPS.map((s) => (
             <li
               key={s.n}
-              className="grid grid-cols-[64px_1fr] items-baseline gap-x-6 gap-y-1 border-b-[3px] border-white py-6 sm:grid-cols-[96px_200px_1fr]"
+              className="grid grid-cols-[56px_1fr] items-baseline gap-x-6 gap-y-1 border-b-[3px] border-white py-4 sm:grid-cols-[72px_170px_1fr]"
             >
-              <span className="poster text-[52px] leading-[0.8] text-white sm:text-[68px]">{s.n}</span>
+              <span className="poster text-[44px] leading-[0.8] text-yellow sm:text-[54px]">{s.n}</span>
               <span className="disp text-[24px] leading-none text-white">{s.t}</span>
               <span className="col-span-2 text-[15px] font-medium leading-relaxed text-white/60 sm:col-span-1">
                 {s.d}
@@ -129,7 +122,7 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex items-stretch border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
+      className="group flex items-stretch border-[3px] border-ink bg-white transition hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard"
     >
       <span className="disp flex shrink-0 items-center bg-ink px-6 text-[19px] text-white">
         여기 붙이기
@@ -153,7 +146,7 @@ function Fraction({ open, all }: { open: number; all: number }) {
   return (
     <span className="num inline-flex items-end text-yellow">
       <span>{open}</span>
-      <span aria-hidden className="mx-[0.03em] mb-[0.055em] block h-[0.66em] w-[0.07em] -skew-x-[13deg] bg-yellow" />
+      <span aria-hidden className="mx-[0.03em] mb-[0.055em] block h-[0.66em] w-[0.055em] -skew-x-[13deg] bg-yellow" />
       <span>{all}</span>
     </span>
   )
