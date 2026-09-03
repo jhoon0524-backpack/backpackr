@@ -44,7 +44,7 @@ export function TitleField({ title, closed = false, big = false }: { title: stri
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`line-clamp-3 text-balance break-keep font-bold leading-tight ${closed ? 'text-muted' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[58px] text-[22px]'}`}>
+      <span className={`text-balance break-keep font-bold leading-tight ${closed ? 'text-muted' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[62px] text-[24px]'}`}>
         {title}
       </span>
     </div>
@@ -92,10 +92,15 @@ export function CommissionCard({ c }: { c: Card }) {
             : <TitleField title={c.title} closed={!!closed} />}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
-        {/* 상태를 말하는 자리는 오른쪽 위 탭 하나. 노랑이면 자리가 있고 빨강이면 마감이다. */}
-        <div className="absolute -right-2 -top-3 z-10 -rotate-[3deg]">
-          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} />}
-        </div>
+        {/*
+          기울여 붙인 것은 **마감 하나뿐**이다. 넷이 다 기울어 있으면 그건 붙인 자국이 아니라 무늬다.
+          자리가 남았다는 말은 아래 값 줄 옆에 글자로 적는다.
+        */}
+        {closed && (
+          <div className="absolute -right-2 -top-3 z-10 -rotate-[3deg]">
+            <ClosedStamp label={closed} />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col justify-end p-4">
@@ -110,13 +115,13 @@ export function CommissionCard({ c }: { c: Card }) {
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`poster num shrink-0 text-[27px] leading-none ${closed ? 'text-faint' : 'text-ink'}`}>
-            {comma(c.price)}
+          <span className={`poster num w-[8.6rem] shrink-0 text-right text-[24px] leading-none ${closed ? 'text-faint' : 'text-ink'}`}>
+            {comma(c.price)}원~
           </span>
-          <span className={`poster num shrink-0 text-[27px] leading-none ${closed ? 'text-faint' : 'text-ink'}`}>원~</span>
         </span>
-        <span className={`mt-2 text-[13px] font-bold ${closed ? 'text-muted' : 'text-strong'}`}>
-          {c.category} · 작업 {c.turnaround_days}일
+        <span className={`mt-2 flex flex-wrap items-baseline justify-between gap-x-3 text-[13px] font-bold ${closed ? 'text-muted' : 'text-ink'}`}>
+          <span>{c.category} · 작업 {c.turnaround_days}일</span>
+          {!closed && <span className="text-accent">{left}자리 남음</span>}
         </span>
       </div>
 
@@ -132,7 +137,7 @@ export function CommissionCard({ c }: { c: Card }) {
       >
         {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
         {closed ? '다음 자리가 나면 열려요' : '의뢰하기'}
-        {!closed && <span aria-hidden className="text-[19px] leading-none">→</span>}
+        {!closed && <span aria-hidden className="disp text-[19px] leading-none">→</span>}
       </span>
     </Link>
   )

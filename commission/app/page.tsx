@@ -25,15 +25,20 @@ export default async function CommissionList() {
   return (
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
-      <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-[164px] pt-5">
-          <p className="num text-[12px] font-bold tracking-[0.08em] text-white/50">
-            {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
-          </p>
+      <section className="grain relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
+        <div className="mx-auto max-w-[1200px] px-8 pb-14 pt-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="num text-[13px] font-bold text-white/60">
+              {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
+            </p>
+            <span className="disp -rotate-[3deg] border-[3px] border-white px-3 py-1.5 text-[15px] leading-none text-white">
+              지금 받는 중
+            </span>
+          </div>
           <p className="mt-3 max-w-3xl text-[20px] font-medium leading-relaxed text-white">
             고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
           </p>
-          <h1 className="poster mt-5 whitespace-nowrap text-[min(14.1vw,202px)] tracking-[-0.035em] text-white">
+          <h1 className="poster mt-5 whitespace-nowrap text-[min(13.2vw,189px)] tracking-[-0.035em] text-white">
             {openSlots}자리 남았어요
           </h1>
           {/*
@@ -44,12 +49,12 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="relative z-10 -mt-[116px] grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="relative z-10 -mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="relative z-10 -mt-[116px] grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="relative z-10 -mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
@@ -83,7 +88,7 @@ function HowItWorks() {
         상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
         숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
       */}
-      <ol className="mt-6 border-[3px] border-ink bg-white shadow-hard">
+      <ol className="mt-6 border-[3px] border-ink bg-white">
         {STEPS.map((s) => (
           <li
             key={s.n}
@@ -113,15 +118,15 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex h-full flex-col border-[3px] border-dashed border-ink bg-white shadow-hard transition hover:bg-fill"
+      className="group flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
     >
-      <span className="flex min-h-[58px] items-start px-4 pb-4 pt-9 text-[22px] font-bold leading-tight text-ink">
+      <span className="flex h-[62px] items-start px-4 pb-3 pt-9 text-[24px] font-bold leading-tight text-strong">
         여기 붙이기
       </span>
-      <span className="flex flex-1 flex-col border-t-[3px] border-dashed border-ink px-4 py-4 text-[13px] font-bold leading-relaxed text-strong">
+      <span className="flex flex-1 flex-col border-t-[3px] border-ink px-4 py-4 text-[13px] font-bold leading-relaxed text-strong">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
       </span>
-      <span className="disp flex items-center justify-between border-t-[3px] border-dashed border-ink bg-white px-4 py-3 text-[17px] text-ink">
+      <span className="disp flex items-center justify-between border-t-[3px] border-ink bg-white px-4 py-3 text-[17px] text-ink">
         메뉴 붙이기
         <span aria-hidden className="text-[19px] leading-none">→</span>
       </span>
