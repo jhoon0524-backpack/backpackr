@@ -26,15 +26,15 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-5 pt-5">
-          <p className="text-[15px] font-bold text-white/60">
+        <div className="mx-auto max-w-[1200px] px-8 pb-14 pt-5">
+          <p className="num text-[12px] font-bold tracking-[0.08em] text-white/50">
             {MONTH.format(new Date())} <span className="text-white/30">/</span> 메뉴 {commissions.length}개
             {' '}<span className="text-white/30">/</span> {openSlots}자리 비어 있음
           </p>
-          <p className="mt-4 max-w-3xl text-[19px] font-medium leading-relaxed text-white/80">
+          <p className="mt-3 max-w-3xl text-[20px] font-medium leading-relaxed text-white">
             고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
           </p>
-          <h1 className="disp mt-9 whitespace-nowrap text-[min(11.2vw,160px)] tracking-[-0.045em] text-white">
+          <h1 className="poster -ml-[0.05em] mt-5 whitespace-nowrap text-[min(11.9vw,170px)] tracking-[-0.035em] text-white">
             이번 달 받는 작업
           </h1>
           {/*
@@ -45,12 +45,12 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="relative z-10 -mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="relative z-10 -mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
@@ -78,7 +78,7 @@ const STEPS = [
 function HowItWorks() {
   return (
     <section className="mt-20">
-      <h2 className="disp border-b-[3px] border-ink pb-3 text-[30px] text-ink">
+      <h2 className="disp inline-block border-b-[3px] border-ink pb-2 text-[30px] text-ink">
         보내면 이렇게 됩니다
       </h2>
       {/*
@@ -86,14 +86,12 @@ function HowItWorks() {
         상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
         숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
       */}
-      <ol className="grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="mt-6 max-w-3xl">
         {STEPS.map((s) => (
-          <li key={s.n} className="pt-6">
-            <span className="flex items-baseline gap-3 text-[19px] font-extrabold text-ink">
-              <span className="disp num text-[30px] leading-none text-ink">{s.n}</span>
-              {s.t}
-            </span>
-            <span className="mt-2 block text-[14px] font-medium leading-relaxed text-strong">{s.d}</span>
+          <li key={s.n} className="flex items-baseline gap-5 border-t-[3px] border-ink py-4 last:border-b-[3px]">
+            <span className="disp num w-6 shrink-0 text-[24px] leading-none text-ink">{s.n}</span>
+            <span className="w-28 shrink-0 text-[17px] font-extrabold text-ink">{s.t}</span>
+            <span className="text-[14px] font-medium leading-relaxed text-strong">{s.d}</span>
           </li>
         ))}
       </ol>
@@ -115,12 +113,13 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex h-full flex-col border-[3px] border-dashed border-ink bg-white p-4 transition hover:bg-fill"
+      className="group flex h-full flex-col border-[3px] border-dashed border-line bg-white p-4 transition hover:bg-fill"
     >
-      <span className="text-[24px] font-extrabold leading-tight text-ink">여기 붙이기</span>
+      <span className="text-[21px] font-bold leading-tight text-ink">여기 붙이기</span>
       <span className="mt-3 block text-[13px] font-bold leading-relaxed text-strong">
-        그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어와요.
+        그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요.
       </span>
+      <span aria-hidden className="disp mt-auto self-end text-[64px] leading-none text-line">+</span>
     </Link>
   )
 }

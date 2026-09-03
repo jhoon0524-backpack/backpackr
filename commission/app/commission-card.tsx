@@ -11,7 +11,7 @@ import { Photo } from './photo'
  */
 export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp -rotate-[4deg] border-[3px] border-ink bg-yellow px-3 py-1.5 leading-none text-ink shadow-hard ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`disp -rotate-[4deg] border-[3px] border-ink bg-yellow px-3 py-1.5 leading-none text-ink ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {left === 1 ? '한 자리 남음' : `${left}자리 남음`}
     </span>
   )
@@ -20,7 +20,7 @@ export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | '
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp border-b-[3px] border-l-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`disp -rotate-[4deg] border-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {label}
     </span>
   )
@@ -44,7 +44,7 @@ export function TitleField({ title, closed = false, big = false }: { title: stri
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`line-clamp-3 text-balance break-keep font-extrabold leading-tight ${closed ? 'text-faint' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[76px] text-[24px]'}`}>
+      <span className={`line-clamp-3 text-balance break-keep font-bold leading-tight ${closed ? 'text-muted' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[68px] text-[22px]'}`}>
         {title}
       </span>
     </div>
@@ -92,13 +92,10 @@ export function CommissionCard({ c }: { c: Card }) {
             : <TitleField title={c.title} closed={!!closed} />}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
-        {closed && (
-          <span className="disp pointer-events-none absolute -right-2 -top-3 z-10 -rotate-[4deg] border-[3px] border-accent bg-white px-3 py-1.5 text-[17px] leading-none text-accent shadow-hard">
-            {closed}
-          </span>
-        )}
-        {/* 남은 자리는 살아 있는 칸에서만 센다. */}
-        {!closed && <div className="absolute -right-2 -top-3 z-10"><SlotStamp left={left} /></div>}
+        {/* 상태를 말하는 자리는 오른쪽 위 탭 하나. 노랑이면 자리가 있고 빨강이면 마감이다. */}
+        <div className="absolute -right-2 -top-3 z-10">
+          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} />}
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col justify-end p-4">
@@ -108,12 +105,12 @@ export function CommissionCard({ c }: { c: Card }) {
           메뉴판 흉내만 내고 아무 일도 하지 않았다.
           값에 줄을 긋지 않는다 — 마감은 싸진 게 아니라 못 받는 것이다.
         */}
-        <span className="flex items-baseline gap-2">
+        <span className="flex items-baseline">
           <span className={`min-w-0 max-w-[6rem] shrink truncate text-[13px] font-bold ${closed ? 'text-muted' : 'text-strong'}`}>
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`num w-[7.5rem] shrink-0 text-right text-[23px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
+          <span className={`num w-[8rem] shrink-0 text-right text-[25px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
             {comma(c.price)}<span className="ml-0.5 text-[15px] font-bold">원~</span>
           </span>
         </span>

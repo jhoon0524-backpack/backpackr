@@ -91,6 +91,13 @@
    */
   --font-sans: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-display: var(--font-sans);
+  /*
+   * 화면에 딱 한 번, 가장 크게 말하는 자리에만 쓰는 활자 (`.poster`).
+   * 본문 활자를 900 으로 키워 크게 놓으면 "굵은 본문" 이지 제호가 아니다 —
+   * 자소가 부풀기만 하고 얼굴이 없다. 검은고딕은 그 크기를 위해 그려진 활자다.
+   * **작게 쓰지 않는다.** 굵기가 400 하나뿐이라 작은 자리에서는 조절할 것이 없다.
+   */
+  --font-poster: "Black Han Sans", var(--font-sans);
 }
 
 body {
@@ -122,6 +129,13 @@ body {
 /*
  * 제목·버튼·값·로고가 다 이 얼굴로 말한다. 화면에서 굵은 목소리는 이것 하나다.
  */
+.poster {
+  font-family: var(--font-poster);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+}
+
 .disp {
   font-family: var(--font-display);
   font-weight: 900;
