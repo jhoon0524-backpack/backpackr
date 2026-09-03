@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full flex flex-col overflow-x-hidden bg-white text-ink">
         <header className="sticky top-0 z-10 bg-ink text-white">
-          <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between gap-4 px-8">
+          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-4 px-8">
             <div className="flex items-center gap-7">
               <Link href="/" className="disp flex h-16 items-center text-[26px] leading-none">
                 커미션!
@@ -61,12 +61,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             ))}
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-[1100px] flex-1 px-8 pb-2 pt-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-2 pt-0">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
-        <footer className="mt-10 bg-ink text-white">
-          <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-between gap-4 px-8 py-8">
-            <p className="disp text-[44px] leading-none">커미션!</p>
-            <p className="num text-xs font-bold text-white/50">© 2026 커미션</p>
+        <footer className="mt-14 border-t-[3px] border-ink bg-white text-ink">
+          <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-8 py-5">
+            <p className="disp text-[24px] leading-none">커미션!</p>
+            <p className="num text-xs font-bold text-muted">© 2026 커미션</p>
           </div>
         </footer>
       </body>

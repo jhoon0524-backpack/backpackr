@@ -141,7 +141,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
 
       {canRequest && (
         <div className="fixed inset-x-0 bottom-0 z-10 border-t-[3px] border-ink bg-white lg:hidden">
-          <div className="mx-auto flex max-w-[1100px] items-center gap-4 px-4 py-3">
+          <div className="mx-auto flex max-w-[1200px] items-center gap-4 px-4 py-3">
             <div className="num flex min-w-0 flex-col">
               <span className="disp text-[22px] leading-none">{won(c.price)}~</span>
               <span className="text-xs font-bold text-muted">보내는 건 무료</span>

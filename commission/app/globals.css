@@ -157,6 +157,18 @@ body {
  * 세 칸을 똑같은 회색으로 두면 눈이 가장 먼저 닿는 자리에서 아무 말도 못 듣는다.
  * 분류마다 바탕색을 달리해 최소한 "서로 다른 것" 이라는 말은 하게 한다.
  */
+/*
+ * 메뉴판의 점선 — 이름과 값을 잇는 줄.
+ * `border-dotted` 로 그으면 점이 글자 가운데쯤에 뜨고 굵기도 테두리를 따라간다. 그건 잇는 줄이 아니라 그어 둔 선이다.
+ * 진짜 리더는 **글자가 앉는 밑선**에 점이 놓인다. 그래서 배경으로 그리고 아래에 붙인다.
+ */
+.leader {
+  background-image: radial-gradient(currentColor 1.4px, transparent 1.5px);
+  background-position: left bottom 3px;
+  background-size: 6px 6px;
+  background-repeat: repeat-x;
+}
+
 .hatch {
   background-color: var(--hatch-bg, #f2f2f2);
   background-image: repeating-linear-gradient(45deg, rgba(17, 17, 17, 0.09) 0 3px, transparent 3px 14px);

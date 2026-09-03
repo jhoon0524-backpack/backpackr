@@ -25,18 +25,18 @@ export default async function CommissionList() {
   return (
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
-      <section className="relative left-1/2 -mx-[50vw] -mt-8 w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1100px] px-8 pb-9 pt-4">
+      <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
+        <div className="mx-auto max-w-[1200px] px-8 pb-12 pt-4">
           <div>
-            <p className="text-[13px] font-bold text-white/50">
+            <p className="text-[16px] font-bold text-white/70">
               {MONTH.format(new Date())} <span className="text-white/40">/</span> 메뉴 {commissions.length}개
+              {' '}<span className="text-white/40">/</span> {openSlots}자리 비어 있음
             </p>
-            <h1 className="disp -ml-[0.06em] mt-3 whitespace-nowrap text-[min(11.1vw,160px)] tracking-[-0.035em] text-white">
+            <h1 className="disp -ml-[0.06em] mt-3 whitespace-nowrap text-[min(12.2vw,176px)] tracking-[-0.045em] text-white">
               이번 달 받는 작업
             </h1>
-            <p className="mt-5 max-w-xl text-[14px] font-medium leading-relaxed text-white/80">
+            <p className="mt-4 max-w-3xl text-[19px] font-medium leading-relaxed text-white/80">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
-              지금 {openSlots}자리 비어 있어요.
             </p>
           </div>
           {/*
@@ -47,16 +47,16 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <li className="sm:col-span-2 lg:col-span-3"><EmptySlot /></li>
+        <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
-          <li className="sm:col-span-2 lg:col-span-3"><EmptySlot /></li>
+          <li><EmptySlot /></li>
         </ul>
       )}
 
@@ -79,20 +79,23 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section className="mt-20 border-[3px] border-ink">
-      <h2 className="disp border-b-[3px] border-ink bg-ink px-6 py-5 text-[30px] text-white">
+    <section className="mt-20">
+      <h2 className="disp border-b-[3px] border-ink pb-3 text-[30px] text-ink">
         보내면 이렇게 됩니다
       </h2>
+      {/*
+        네모 넷을 나란히 놓고 큰 숫자를 얹는 것은 어느 소개 페이지에나 있는 모양이다.
+        상자를 걷고 **한 줄로 잇는다** — 순서는 숫자가 아니라 왼쪽에서 오른쪽으로 흐르는 것이 말한다.
+        숫자는 제목 앞에 같은 줄로 붙어 작게 앉는다. 크게 키우면 바로 위 값과 무게로 싸운다.
+      */}
       <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {STEPS.map((s, i) => (
-          <li
-            key={s.n}
-            className={`flex flex-col gap-2 p-6 ${i > 0 ? 'border-t-[3px] border-ink sm:border-t-0 lg:border-l-[3px]' : ''} ${i === 1 ? 'sm:border-l-[3px]' : ''} ${i === 2 ? 'sm:border-t-[3px] lg:border-t-0' : ''} ${i === 3 ? 'sm:border-l-[3px] sm:border-t-[3px] lg:border-t-0' : ''}`}
-          >
-            {/* 칸에서 가장 큰 것은 순서다. 작은 회색 숫자는 순서를 말하지 못한다. */}
-            <span className="disp num text-[54px] leading-none text-transparent [-webkit-text-stroke:2px_#111]">{s.n}</span>
-            <span className="disp mt-1 text-[21px] text-ink">{s.t}</span>
-            <span className="text-[14px] font-medium leading-relaxed text-strong">{s.d}</span>
+          <li key={s.n} className={`py-6 pr-6 ${i > 0 ? 'lg:border-l-[3px] lg:border-ink lg:pl-6' : ''}`}>
+            <span className="flex items-baseline gap-2 text-[19px] font-extrabold text-ink">
+              <span className="num text-[19px] text-muted">{s.n}</span>
+              {s.t}
+            </span>
+            <span className="mt-2 block text-[14px] font-medium leading-relaxed text-strong">{s.d}</span>
           </li>
         ))}
       </ol>
@@ -106,20 +109,21 @@ function HowItWorks() {
  * 점선은 "여기는 비어 있다" 는 뜻이고, 굵기와 검정은 카드와 같다.
  *
  * 점선 테두리에 플러스 기호는 파일 올리는 칸의 생김새다. 게시판에 붙이는 종이는 그렇게 생기지 않았다.
- * 왼쪽에 노랑 조각 하나, 오른쪽에 설명 한 줄. 붙이라는 말이 색으로 먼저 온다.
+ *
+ * 노랑을 여기에 두지 않는다. 이 화면에서 노랑은 "사러 온 사람이 누를 곳" 하나이고,
+ * 창작자를 부르는 이 줄은 그다음 일이다. 색이 중요도를 뒤집으면 안 된다.
  */
 function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex h-full items-stretch border-[3px] border-ink bg-white transition hover:bg-fill"
+      className="group flex h-full flex-col border-[3px] border-dashed border-ink bg-white p-4 transition hover:bg-fill"
     >
-      <span className="disp flex shrink-0 items-center border-r-[3px] border-ink bg-yellow px-6 text-[20px] text-ink">
-        여기 붙이기
-      </span>
-      <span className="flex items-center px-6 py-5 text-[13px] font-medium leading-relaxed text-muted">
+      <span className="text-[24px] font-extrabold leading-tight text-ink">여기 붙이기</span>
+      <span className="mt-3 block text-[13px] font-bold leading-relaxed text-strong">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어와요.
       </span>
     </Link>
   )
 }
+

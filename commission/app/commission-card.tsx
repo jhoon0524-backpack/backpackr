@@ -12,7 +12,7 @@ import { Photo } from './photo'
 export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | 'md' }) {
   const last = left === 1
   return (
-    <span className={`stamp disp ${last ? 'bg-accent text-white' : 'bg-white text-ink'} ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`stamp disp ${last ? 'bg-accent text-white' : 'bg-yellow text-ink'} ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {last ? '한 자리 남음' : `${left}자리 남음`}
     </span>
   )
@@ -39,13 +39,13 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  */
 export function TitleField({ title, closed = false, big = false }: { title: string; closed?: boolean; big?: boolean }) {
   return (
-    <div className={`flex h-full w-full items-start ${closed ? 'bg-ink' : 'bg-[#efece4]'} ${big ? 'p-8 pt-20' : 'px-5 pb-6 pt-16'}`}>
+    <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-5 pb-5 pt-14'}`}>
       {/*
         `break-keep` — 한글은 어절 단위로 끊어야 한다. 아무 데서나 끊으면 "로고·/타이틀" 처럼 가운뎃점이 줄 끝에 남는다.
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`disp line-clamp-3 text-balance break-keep ${closed ? 'text-white' : 'text-ink'} ${big ? 'text-[52px]' : 'min-h-[74px] text-[31px]'}`}>
+      <span className={`line-clamp-3 text-balance break-keep font-extrabold leading-tight ${closed ? 'text-faint line-through decoration-[3px]' : 'text-ink'} ${big ? 'disp text-[52px]' : 'min-h-[76px] text-[24px]'}`}>
         {title}
       </span>
     </div>
@@ -84,39 +84,53 @@ export function CommissionCard({ c }: { c: Card }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className="group relative flex h-full flex-col border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
+      className={`group relative flex h-full flex-col border-[3px] border-ink bg-white ${closed ? '' : 'shadow-hard transition hover:-translate-x-1 hover:-translate-y-1'}`}
     >
       <div className={`relative border-b-[3px] border-ink ${c.cover_url ? 'aspect-[16/10]' : ''}`}>
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
           {c.cover_url
             ? <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
             : <TitleField title={c.title} closed={!!closed} />}
-          {/* 종이 한 겹. 내용은 그대로 두고 한 단 뒤로 물린다. */}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
-        {/* 자리 사정을 말하는 칸은 오른쪽 위 하나뿐이다. */}
-        <div className="absolute right-3 top-3">
-          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} />}
-        </div>
+        {/* 남은 자리는 살아 있는 칸에서만 센다. */}
+        {!closed && <div className="absolute right-3 top-3"><SlotStamp left={left} /></div>}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <span className="truncate text-[13px] font-bold">
-          <span className="text-strong">{c.creator_nickname}</span>
-          <span className="text-muted"> · {c.category}</span>
-        </span>
-        {/* 메뉴판의 점선 — 이름과 값 사이를 잇는 줄. 실제 메뉴판이 하는 일이다. */}
-        <span className="mt-3 border-t-[3px] border-dotted border-line" />
+
+      <div className="flex flex-1 flex-col justify-end p-4">
         {/*
-          값과 기간은 **한 줄**이다. 값은 사러 온 사람이 가장 먼저 훑는 것이고 기간은 거기 딸린 조건인데,
-          기간을 떼어 오른쪽 끝에 붙여 두니 둘 사이에 아무 관계가 없어 보였다.
+          **점선이 이름과 값을 잇는다.** 종이 메뉴판이 하는 그 일이다.
+          앞 판에서는 점선이 이름 아래에 혼자 걸려 있었는데, 그건 잇는 줄이 아니라 그어 둔 선이라
+          메뉴판 흉내만 내고 아무 일도 하지 않았다.
           값에 줄을 긋지 않는다 — 마감은 싸진 게 아니라 못 받는 것이다.
         */}
-        <span className="num mt-3 flex items-baseline text-[30px] font-extrabold leading-none tracking-tight text-ink">
-          {comma(c.price)}
-          <span className="ml-1 text-[13px] font-bold">원부터</span>
-          <span className="ml-2 text-[13px] font-bold text-muted">· 작업 {c.turnaround_days}일</span>
+        <span className="flex items-baseline gap-2">
+          <span className={`shrink-0 truncate text-[13px] font-bold ${closed ? 'text-faint' : 'text-strong'}`}>
+            {c.creator_nickname}
+          </span>
+          <span className="leader min-w-4 flex-1 self-stretch text-line" />
+          <span className={`num shrink-0 text-[26px] font-extrabold leading-none tracking-tight ${closed ? 'text-faint' : 'text-ink'}`}>
+            {comma(c.price)}원~
+          </span>
+        </span>
+        <span className={`mt-2 text-[13px] font-bold ${closed ? 'text-faint' : 'text-strong'}`}>
+          {c.category} · 작업 {c.turnaround_days}일
         </span>
       </div>
+
+      {/*
+        **노랑은 여기 하나다.** 이 화면에서 돈이 오가는 문은 카드뿐인데,
+        그동안 노랑은 창작자 모집 띠에 가 있었다. 사러 온 사람이 눌러야 할 곳에 색이 없으면
+        색 체계가 있어도 아무 일도 하지 않는 것이다.
+      */}
+      <span
+        className={`disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] ${
+          closed ? 'bg-ink text-white' : 'bg-yellow text-ink'
+        }`}
+      >
+        {closed ?? '의뢰하기'}
+        {!closed && <span aria-hidden>→</span>}
+      </span>
     </Link>
   )
 }
