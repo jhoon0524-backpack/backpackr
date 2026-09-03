@@ -187,6 +187,8 @@ export type RequestRow = {
   accepted_at: Date | null
   due_at: Date | null
   delivered_at: Date | null
+  /** 취소·물림이 언제 있었는지. 기록 줄이 끝을 말하려면 필요하다. (거절 시각 열은 아직 없다) */
+  cancelled_at: Date | null
   delivery_url: string | null
   delivery_note: string | null
   completed_at: Date | null
@@ -197,6 +199,13 @@ export type RequestRow = {
   active_count: number
   /** 지금 수락하면 박힐 마감일. 화면이 시계를 직접 읽지 않도록 DB 가 계산한다. */
   due_at_if_now: Date
+  /**
+   * 의뢰인이 이 의뢰를 물릴 수 있게 되는 시각 (마감일 + 유예). 수락 전이면 null.
+   * 유예 일수는 DB 가 정한다 — 화면이 제 숫자를 들고 있으면 버튼은 떠 있는데 눌러도 거부당한다.
+   */
+  withdrawable_at: Date | null
+  /** 지금 물릴 수 있나. 시각 비교도 DB 에서 한다 (서버와 브라우저의 시계가 다를 수 있다). */
+  can_withdraw: boolean
 }
 
 const REQUEST_SELECT = `
@@ -204,9 +213,14 @@ const REQUEST_SELECT = `
          creator.nickname as creator_nickname, r.client_id, client.nickname as client_nickname,
          r.brief, r.reference_url, r.status, r.quoted_price, r.final_price, r.decline_reason,
          r.accepted_at, r.due_at, r.delivered_at, r.delivery_url, r.delivery_note, r.completed_at,
+         r.cancelled_at,
          r.created_at,
          c.turnaround_days, c.max_slots, active_request_count(c.id) as active_count,
-         now() + make_interval(days => c.turnaround_days) as due_at_if_now
+         now() + make_interval(days => c.turnaround_days) as due_at_if_now,
+         case when r.status = 'accepted' and r.due_at is not null
+              then r.due_at + make_interval(days => withdraw_grace_days()) end as withdrawable_at,
+         (r.status = 'accepted' and r.due_at is not null
+          and now() >= r.due_at + make_interval(days => withdraw_grace_days())) as can_withdraw
     from requests r
     join commissions c on c.id = r.commission_id
     join profiles creator on creator.id = c.creator_id

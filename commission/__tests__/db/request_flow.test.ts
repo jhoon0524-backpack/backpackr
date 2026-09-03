@@ -93,7 +93,10 @@ describe('갈림길', () => {
     expect(await call('accept_request', [r.request_id, creatorId, 50000])).toMatchObject({ reject_reason: 'not_pending' })
   })
 
-  test('의뢰인 취소는 수락 전까지만', async () => {
+  // 규칙이 한 번 바뀐 자리다. 전에는 "수락되면 끝, 못 물린다" 였는데,
+  // 그러면 창작자가 잠수했을 때 자리가 영영 안 비었다. 지금은 마감 + 유예가 지나면 열린다.
+  // 유예가 지난 쪽은 `withdraw_overdue.test.ts` 가 따로 본다.
+  test('의뢰인 취소는 수락 전까지 자유롭고, 수락 뒤에는 마감을 기다려야 한다', async () => {
     const { commissionId, creatorId } = await seedCommission()
     const clientId = await createUser('의뢰인')
     const r1 = await submit(commissionId, clientId)
@@ -102,7 +105,8 @@ describe('갈림길', () => {
 
     const r2 = await submit(commissionId, clientId)
     await call('accept_request', [r2.request_id, creatorId, 50000])
-    expect(await call('cancel_request', [r2.request_id, clientId])).toMatchObject({ reject_reason: 'not_pending' })
+    expect(await call('cancel_request', [r2.request_id, clientId])).toMatchObject({ reject_reason: 'too_early' })
+    expect(await status(r2.request_id!)).toBe('accepted')
   })
 
   test('전달에는 주소나 메모 중 하나가 있어야 한다', async () => {

@@ -78,6 +78,8 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
               {r.accepted_at && <li>{kst(r.accepted_at)} 수락</li>}
               {r.delivered_at && <li>{kst(r.delivered_at)} 전달</li>}
               {r.completed_at && <li>{kst(r.completed_at)} 완료</li>}
+              {/* 물린 것도 기록에 남는다. 창작자가 나중에 "왜 사라졌나" 를 물을 수 있어야 한다. */}
+              {r.cancelled_at && <li>{kst(r.cancelled_at)} {r.accepted_at ? '의뢰인이 물림' : '의뢰인이 취소'}</li>}
             </ul>
           </section>
         </div>
@@ -118,7 +120,27 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
               {isClient && r.status === 'requested' && (
                 <OneButton id={r.id} kind="cancel" label="의뢰 취소" help="창작자가 수락하기 전까지만 취소할 수 있어요." />
               )}
-              {isClient && r.status === 'accepted' && <p className="text-sm font-medium text-strong">창작자가 작업 중이에요. 전달되면 여기서 확인해요.</p>}
+              {/*
+                수락된 뒤에는 의뢰인이 할 일이 없다 — 마감일이 지나도록 아무것도 오지 않을 때까지는.
+                그때 나갈 길을 연다. 이 길이 없으면 창작자가 잠수했을 때 자리가 영영 안 비고,
+                이 서비스가 화면에서 가장 크게 말하는 "자리 N 남았어요" 가 거짓이 된다.
+              */}
+              {isClient && r.status === 'accepted' && (
+                r.can_withdraw ? (
+                  <OneButton id={r.id} kind="cancel" label="의뢰 물리기"
+                    help="마감일이 지났는데 아직 아무것도 오지 않았어요."
+                    confirm="이 의뢰를 물립니다. 창작자의 자리가 하나 비고, 더 이상 결과물을 받을 수 없어요. 되돌릴 수 없습니다." />
+                ) : (
+                  <p className="text-sm font-medium text-strong">
+                    창작자가 작업 중이에요. 전달되면 여기서 확인해요.
+                    {r.withdrawable_at && r.due_at && daysLeft(r.due_at) < 0 && (
+                      <span className="mt-2 block text-urgent-text">
+                        마감일이 지났어요. {kstDate(r.withdrawable_at)}부터 이 의뢰를 물릴 수 있어요.
+                      </span>
+                    )}
+                  </p>
+                )
+              )}
               {isClient && r.status === 'delivered' && (
                 <OneButton id={r.id} kind="complete" label="결과물 확인 · 완료" tone="primary"
                   help="확인을 누르면 의뢰가 끝나고 창작자의 자리가 하나 비어요."

@@ -109,6 +109,7 @@ export const REJECT_MESSAGE: Record<string, string> = {
   not_accepted: '수락된 의뢰만 전달할 수 있습니다.',
   payload_required: '결과물 주소나 전달 메모 중 하나는 있어야 합니다.',
   not_delivered: '창작자가 결과물을 전달한 뒤에 완료할 수 있습니다.',
+  too_early: '아직 물릴 수 없습니다. 마감일이 지나고 며칠 더 기다린 뒤에 열립니다.',
 }
 
 export const rejectMessage = (reason: string | null | undefined) =>

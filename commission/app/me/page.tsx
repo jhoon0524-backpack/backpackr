@@ -29,6 +29,9 @@ function RequestLine({ r, who }: { r: RequestRow; who: 'creator' | 'client' }) {
             {r.final_price === null && ' (기본 가격)'}
           </p>
           {/* 마감은 셋째 줄에 따로. 둘째 줄에 붙이면 390 에서 말줄임표로 사라졌다 (UI/UX 1회차 발견 3). */}
+          {who === 'client' && r.can_withdraw && (
+            <p className="mt-1 text-sm font-bold text-urgent-text">눌러서 물릴 수 있어요</p>
+          )}
           {active && r.due_at && (
             <p className={`num mt-1 text-sm font-bold ${daysLeft(r.due_at) < 0 ? 'text-urgent-text' : 'text-ink'}`}>
               마감 {kstMonthDay(r.due_at)}{daysLeft(r.due_at) < 0 ? ` · ${-daysLeft(r.due_at)}일 지남` : ` · ${daysLeft(r.due_at)}일 남음`}
