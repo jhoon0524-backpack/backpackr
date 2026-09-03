@@ -30,7 +30,7 @@ export default async function CommissionList() {
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.2vw,161px)] leading-[0.9] tracking-[0.015em] text-white">
+          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.2vw,161px)] leading-[0.9] tracking-[0.015em] text-white">
             <span>자리</span>
             <Fraction open={openSlots} all={allSlots} />
             <span>남았어요</span>
@@ -42,50 +42,35 @@ export default async function CommissionList() {
         </div>
       </section>
 
-      {commissions.length === 0 ? (
-        <ul className="mt-16 border-t-[3px] border-ink"><li><EmptyRow n={1} /></li></ul>
-      ) : (
-        /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-16 border-t-[3px] border-ink">
+      {commissions.length > 0 && (
+        /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
+        <ul className="mt-16 border-b-[3px] border-t-[3px] border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
-          <li><EmptyRow n={commissions.length + 1} /></li>
         </ul>
       )}
 
+      <EmptyRow />
     </div>
   )
 }
 
-/**
- * 아직 아무도 안 붙인 자리.
- * 카드 한 장 크기로 두었더니 줄 끝에 혼자 남아 커다란 빈 상자가 됐다 — 줄 전체를 차지하는 낮은 띠로 둔다.
- * 점선은 "여기는 비어 있다" 는 뜻이고, 굵기와 검정은 카드와 같다.
- *
- * 점선 테두리에 플러스 기호는 파일 올리는 칸의 생김새다. 게시판에 붙이는 종이는 그렇게 생기지 않았다.
- *
- * 노랑을 여기에 두지 않는다. 이 화면에서 노랑은 "사러 온 사람이 누를 곳" 하나이고,
- * 창작자를 부르는 이 줄은 그다음 일이다. 색이 중요도를 뒤집으면 안 된다.
- */
-function EmptyRow({ n }: { n: number }) {
+/** 아직 아무도 안 붙인 자리. */
+function EmptyRow() {
   return (
-    <Link href="/open" className="group block border-b border-ink py-8 transition hover:bg-yellow/25">
-      <span className="flex items-baseline gap-4">
-        <span className="disp num w-[46px] shrink-0 text-[min(3.6vw,34px)] leading-none text-line">
-          {String(n).padStart(2, '0')}
-        </span>
-        <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-line">
-          여기에 메뉴 한 장을 붙이세요
-        </span>
-        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        <span className="disp ml-auto w-[196px] shrink-0 text-right text-[min(3.2vw,30px)] leading-none sm:ml-0">
-          <span className="bg-yellow px-3 py-1.5 text-[18px] text-ink">메뉴 붙이기</span>
-        </span>
-      </span>
-      <span className="mt-4 block text-[14px] font-medium text-muted sm:pl-[62px]">
+    /*
+      빈 줄에 번호와 점선을 주었더니 **가짜 메뉴 한 줄**이 되었다 — 진짜 셋과 같은 얼굴이라
+      목록이 넷으로 읽힌다. 번호도 점선도 빼고, 점선 테두리 한 겹으로 "여기는 아직 비어 있다" 만 말한다.
+    */
+    <Link
+      href="/open"
+      className="mt-8 flex flex-wrap items-center justify-between gap-4 border-[2px] border-dashed border-ink/45 px-6 py-6 transition hover:border-ink hover:bg-yellow/25"
+    >
+      <span className="text-[15px] font-medium text-muted">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어옵니다.
       </span>
+      <span className="disp shrink-0 bg-yellow px-4 py-2.5 text-[16px] leading-none text-ink">메뉴 붙이기</span>
     </Link>
   )
 }
@@ -100,10 +85,10 @@ function EmptyRow({ n }: { n: number }) {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-block bg-yellow px-[0.1em] py-[0.04em] align-baseline text-[0.95em] leading-[0.86] text-ink">
+    <span className="num inline-block bg-yellow px-[0.09em] py-[0.05em] align-baseline text-[0.95em] leading-[0.8] text-ink">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
-      <span aria-hidden className="mx-[0.09em] inline-block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-ink align-baseline" />
+      <span aria-hidden className="mx-[0.04em] inline-block h-[0.72em] w-[0.085em] -skew-x-[13deg] bg-ink align-baseline" />
       <span>{all}</span>
     </span>
   )

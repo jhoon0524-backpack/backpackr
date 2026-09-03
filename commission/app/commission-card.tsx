@@ -5,14 +5,13 @@ import { comma } from '@/lib/format'
 /**
  * 자리 상태. **상자를 치지 않는다.**
  *
- * 한동안 이걸 테두리 친 딱지와 검게 칠한 딱지 둘로 두었는데, 그러면 한 가지 상태를 두 부품이 말하게 된다.
- * 이 화면은 글자만으로 짜인 판이다. 상태도 글자로 말한다 —
- * 열린 자리는 제호와 같은 **노랑 덩어리**로, 마감은 그냥 검은 글자로.
+ * 상태는 **값 바로 앞 한 자리**에 온다. 열렸으면 남은 자리 수를 글자로, 닫혔으면 검정 도장을.
+ * 자리가 정해져 있으니 줄마다 어디를 봐야 할지 다시 찾을 필요가 없다.
  */
 export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: number; size?: 'sm' | 'md' }) {
   return (
     <span
-      className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[14px]'}`}
+      className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
       빈자리 <span className="num">{left}/{max}</span>
@@ -23,7 +22,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 같은 자리, 같은 크기. 칠이 없다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp shrink-0 whitespace-nowrap bg-ink px-3 py-1.5 leading-none tracking-[0.1em] text-white ${size === 'md' ? 'text-[17px]' : 'text-[15px]'}`}>
+    <span className={`disp shrink-0 whitespace-nowrap bg-ink px-3 py-1.5 leading-none tracking-[0.1em] text-white ${size === 'md' ? 'text-[16px]' : 'text-[15px]'}`}>
       {label}
     </span>
   )
@@ -82,37 +81,28 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
       className="block border-b border-ink py-8 transition hover:bg-yellow/25"
     >
       {/*
-        한 줄은 하나의 밑선 위에 있다 — 번호, 이름, 점선, 값.
-        칸을 나눠 두면 값 칸의 남는 왼쪽이 그대로 빈 곳이 되어 점선이 값에 닿지 못한다.
-        점선은 닿아야 잇는 줄이다.
+        메뉴판의 한 줄: 번호 · 이름 ····· 상태 · 값.
+        **상태는 값 바로 앞 한 자리에만 온다.** 열렸으면 남은 자리 수, 닫혔으면 도장.
+        곁줄에 작게 적어 두었더니, 이 화면이 제호에서 약속한 바로 그 숫자가 12px 회색으로 묻혔다.
       */}
-      <span className="relative flex items-baseline gap-4">
-        {/* 번호는 제호와 같은 얼굴. 160px 다음에 바로 20px 가 오면 두 장의 서류를 붙여 둔 것처럼 읽힌다. */}
+      <span className="flex items-baseline gap-4">
         <span className="disp num w-[46px] shrink-0 text-[min(3.6vw,34px)] leading-none text-ink">
           {String(n).padStart(2, '0')}
         </span>
         <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
           {c.title}
         </span>
-        {closed ? (
-          <span className="flex flex-1 items-center justify-center">
-            <ClosedStamp label={closed} />
-          </span>
-        ) : (
-          <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        )}
-        <span className="disp num ml-auto w-[196px] shrink-0 text-right text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
+        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
+        {/* 단위 칸의 폭이 고정이라, 잇는 점은 숫자에 닿고 값의 오른쪽 끝은 줄마다 나란하다. */}
+        <span className="disp num ml-auto shrink-0 text-[min(3.2vw,30px)] leading-none text-ink sm:ml-2">
           {comma(c.price)}
           <span className="ml-1.5 inline-block w-[44px] text-left text-[13px] tracking-[0.04em]">원부터</span>
         </span>
       </span>
 
-      {/* 곁줄은 물러나야 한다. 작기만 하고 똑같이 굵으면 물러나는 게 아니라 작게 외치는 것이다. */}
-      <span className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 sm:pl-[62px]">
-        <span className="text-[14px] font-medium text-muted">
-          {c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요
-        </span>
-        {!closed && <SlotStamp left={left} max={c.max_slots} />}
+      <span className="mt-3 block text-[14px] font-medium text-muted sm:pl-[62px]">
+        {c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요
       </span>
     </Link>
   )
