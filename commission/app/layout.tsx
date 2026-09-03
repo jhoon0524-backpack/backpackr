@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { HeaderNav } from "./header-nav";
-import { UserSwitcher } from "./user-switcher";
 
 export const metadata: Metadata = {
   title: "커미션!",
@@ -51,7 +50,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <HeaderNav items={NAV} />
             </div>
             {/* 이 판은 달마다 새로 나온다. 그 사실은 판권면에 묻어 둘 것이 아니라 제호 옆에 적는 것이다. */}
-            <p className="num hidden text-[12px] font-bold tracking-[0.1em] text-white/55 sm:block">제9호 · 2026년 9월</p>
+            <p className="hidden text-[13px] font-medium text-white/55 sm:block">제9호 · 2026년 9월</p>
           </div>
           {/* 좁은 화면의 길. 높이 44 탭 세 개. */}
           <nav className="flex border-t-[3px] border-white/20 sm:hidden">
@@ -70,7 +69,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             시연용 조작기가 나란히 서서, 처음 온 사람에게는 이게 기능인지 장치인지 알 수 없다.
             판권면으로 내린다 — 인쇄물에서 발행 정보가 있는 자리다.
           */}
-          <div className="mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-6 px-8 py-9">
+          <div className="mx-auto max-w-[1200px] px-8 py-9">
             {/* 판권면. 발행 정보는 한 줄로 흘려 쓰는 것이 아니라 층을 갖는다. */}
             <div>
               <p className="poster text-[36px] leading-none">커미션!</p>
@@ -79,7 +78,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               </p>
               <p className="num mt-1 text-[13px] font-medium text-white/50">© 2026 커미션</p>
             </div>
-            <UserSwitcher />
           </div>
         </footer>
       </body>

@@ -76,7 +76,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   const left = c.max_slots - c.active_count
   const closed = closedLabel(c.status, left)
   // 마감한 줄은 회색으로 내려앉는다. 메뉴판에서 다 나간 것은 지우거나 흐리게 두지, 같은 검정으로 두지 않는다.
-  const tone = closed ? 'text-faint' : 'text-ink'
+  const tone = 'text-ink'
   return (
     <Link
       href={`/commissions/${c.id}`}
@@ -88,10 +88,10 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         그래서 간격을 gap 이 아니라 각 칸의 안쪽 여백으로 준다.
       */}
       <span className="flex items-baseline">
-        <span className={`num w-[62px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none text-muted ${closed ? 'line-through decoration-[2px]' : ''}`}>
+        <span className={`num w-[62px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none text-muted`}>
           {String(n).padStart(2, '0')}
         </span>
-        <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] leading-tight ${tone}`}>
+        <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] leading-tight text-ink ${closed ? 'line-through decoration-[2px] decoration-ink/60' : ''}`}>
           {c.title}
         </span>
         <span className="hidden shrink-0 pr-3 sm:block">
@@ -103,7 +103,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         </span>
       </span>
 
-      <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[62px] ${closed ? 'text-faint' : 'text-strong'}`}>
+      <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[62px] text-strong`}>
         <span>{c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요</span>
         <span className="sm:hidden">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}

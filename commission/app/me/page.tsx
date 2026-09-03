@@ -5,6 +5,7 @@ import { FundingRecord } from '@/app/funding-record'
 import { getCurrentUser } from '@/lib/session'
 import { BTN_INK, BTN_PILL, EYEBROW, H2, NOTICE } from '@/app/ui'
 import { toggleCommission } from './actions'
+import { UserSwitcher } from '@/app/user-switcher'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,7 +63,8 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
   if (!me) {
     return (
       <div className="border-[3px] border-ink bg-white p-8 text-center">
-        <p className="disp text-2xl text-ink">먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
+        <p className="disp text-2xl text-ink">먼저 아래에서 사용자를 골라 주세요.</p>
+        <div className="mt-6 flex justify-center"><DemoSwitcher /></div>
       </div>
     )
   }
@@ -150,6 +152,27 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
       </Section>
 
       {!(myCommissions.length === 0 && mine.length > 0) && myRequestsSection}
+
+      <DemoSwitcher />
     </div>
+  )
+}
+
+/**
+ * 시연용 사용자 전환기.
+ *
+ * 한동안 이걸 머리와 판권면에 두었다. 그런데 이건 **제품의 기능이 아니라 시연용 장치**다.
+ * 화면 어디에 두든 브랜드 자리에 놓이면 "만들다 만 앱" 이라는 신호가 된다.
+ * 로그인이 붙기 전까지는 내 화면 맨 아래, 도구 상자 하나로 둔다.
+ */
+function DemoSwitcher() {
+  return (
+    <section className="mt-10 border border-line/25 bg-fill px-5 py-4">
+      <p className="text-[12px] font-bold tracking-[0.14em] text-muted">시연용 도구</p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <UserSwitcher />
+        <p className="text-[13px] font-medium text-muted">로그인이 붙기 전까지, 다른 사람의 화면으로 바꿔 볼 수 있습니다.</p>
+      </div>
+    </section>
   )
 }

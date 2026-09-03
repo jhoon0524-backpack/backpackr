@@ -30,14 +30,14 @@ export default async function CommissionList() {
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.0vw,157px)] leading-[0.9] tracking-[-0.005em] text-white">
+          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(10.4vw,150px)] leading-[0.9] tracking-[-0.005em] text-white">
             <span>자리</span>
             <Fraction open={openSlots} all={allSlots} />
             <span>남았어요</span>
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
           <div className="mt-6 border-t border-white/60 pt-6">
-            <p className="max-w-[76ch] text-[min(2.1vw,19px)] font-normal leading-relaxed text-white/85">
+            <p className="max-w-[52ch] sm:max-w-none text-[min(2.4vw,22px)] font-normal leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
           </div>
@@ -46,7 +46,7 @@ export default async function CommissionList() {
 
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
-        <ul className="mt-10 border-b-4 border-t-4 border-ink">
+        <ul className="mt-10 border-b border-t border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
@@ -69,7 +69,7 @@ function EmptyRow() {
       href="/open"
       className="group mt-8 block"
     >
-      <span className="disp block text-[min(3.1vw,29px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
+      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
         그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
 
       </span>
