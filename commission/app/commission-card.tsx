@@ -14,7 +14,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
       className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
-      빈자리 <span className="num bg-yellow px-1.5 py-0.5">{left}/{max}</span>
+      빈자리 <span className="num">{left}/{max}</span>
     </span>
   )
 }
@@ -76,7 +76,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   const left = c.max_slots - c.active_count
   const closed = closedLabel(c.status, left)
   // 마감한 줄은 회색으로 내려앉는다. 메뉴판에서 다 나간 것은 지우거나 흐리게 두지, 같은 검정으로 두지 않는다.
-  const tone = closed ? 'text-muted' : 'text-ink'
+  const tone = closed ? 'text-faint' : 'text-ink'
   return (
     <Link
       href={`/commissions/${c.id}`}
@@ -97,7 +97,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         <span className="hidden shrink-0 pr-3 sm:block">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </span>
-        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        <span aria-hidden className="hidden min-w-8 flex-1 translate-y-[-0.28em] border-b border-ink/35 sm:block" />
         <span className={`num ml-auto shrink-0 pl-3 text-right text-[min(2.4vw,23px)] font-extrabold leading-none sm:ml-0 ${tone}`}>
           {comma(c.price)}<span className="font-medium">원부터</span>
         </span>

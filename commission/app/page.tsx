@@ -30,13 +30,13 @@ export default async function CommissionList() {
             제호는 판 폭에 꼭 맞게 짠다. 밑선도 설명도 판 안에 있는데 제호만 밖으로 나가면
             그건 판형이 아니라 사고로 읽힌다.
           */}
-          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.0vw,157px)] leading-[0.9] tracking-[0.015em] text-white">
+          <h1 className="poster -ml-[0.035em] flex flex-nowrap items-baseline gap-[0.1em] whitespace-nowrap text-[min(11.0vw,157px)] leading-[0.9] tracking-[-0.005em] text-white">
             <span>자리</span>
             <Fraction open={openSlots} all={allSlots} />
             <span>남았어요</span>
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <div className="mt-5 border-t border-white pt-5">
+          <div className="mt-6 border-t border-white/60 pt-6">
             <p className="max-w-[76ch] text-[min(2.1vw,19px)] font-normal leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
@@ -71,7 +71,7 @@ function EmptyRow() {
     >
       <span className="disp block text-[min(3.1vw,29px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
         그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
-        <span className="ml-3 font-normal text-yellow">→</span>
+
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">
         자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
@@ -90,11 +90,11 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-block align-baseline text-[1.02em] leading-[0.76] text-yellow">
+    <span className="num inline-block align-baseline text-[1.02em] leading-[0.76] text-yellow [-webkit-text-stroke:0.016em_currentColor]">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
       {/* 빗금은 숫자보다 가늘다. 인쇄된 분수의 빗금이 그렇다 — 두 숫자를 가르되 셋째 글자가 되지 않는다. */}
-      <span aria-hidden className="mx-[0.07em] inline-block h-[0.74em] w-[0.045em] -skew-x-[14deg] bg-yellow align-baseline" />
+      <span aria-hidden className="mx-[0.07em] mb-[0.02em] inline-block h-[0.68em] w-[0.05em] -skew-x-[14deg] bg-yellow align-baseline" />
       <span>{all}</span>
     </span>
   )
