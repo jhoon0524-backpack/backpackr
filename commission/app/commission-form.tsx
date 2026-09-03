@@ -2,16 +2,33 @@
 
 import { useActionState } from 'react'
 import { MoneyInput } from '@/app/money-input'
+import type { CommissionFormState } from '@/app/open/actions'
+import type { CommissionValues } from '@/lib/commission-input'
 import { ALERT, BTN_INK, H2, HELP, INPUT, LABEL } from '@/app/ui'
-import { openCommission, type OpenState } from './actions'
 
-export function OpenForm({ categories }: { categories: readonly string[] }) {
-  const [state, action, pending] = useActionState<OpenState, FormData>(openCommission, null)
-  const v = state?.values ?? {}
+/**
+ * 메뉴 폼. 붙이기와 고치기가 같은 필드를 쓰므로 한 벌만 둔다.
+ * 두 벌로 갈라 두면 한쪽에만 칸이 늘어나 서로 어긋난다.
+ *
+ * `initial` 은 고치기 화면이 넘기는 기존 값이다. 제출이 실패하면 사용자가 방금 친 값(`state.values`)이
+ * 그 자리를 덮는다 — 다시 타이핑하게 하지 않는다.
+ */
+export function CommissionForm({ categories, action, initial, commissionId, submitLabel, pendingLabel }: {
+  categories: readonly string[]
+  action: (prev: CommissionFormState, formData: FormData) => Promise<CommissionFormState>
+  initial?: CommissionValues
+  /** 고치기 화면에서만 넘긴다. 어느 메뉴를 고치는지 서버가 알아야 한다. */
+  commissionId?: string
+  submitLabel: string
+  pendingLabel: string
+}) {
+  const [state, formAction, pending] = useActionState<CommissionFormState, FormData>(action, null)
+  const v = state?.values ?? initial ?? {}
 
   return (
-    <form action={action} className="space-y-8">
-      {/* 텀블벅 프로젝트 만들기처럼 묶음마다 제목을 두고 사이를 구분선으로 나눈다. */}
+    <form action={formAction} className="space-y-8">
+      {commissionId && <input type="hidden" name="id" value={commissionId} />}
+      {/* 묶음마다 제목을 두고 사이를 띄운다. */}
       <section className="space-y-5">
         <h2 className={H2}>기본 정보</h2>
         <label className="block">
@@ -66,7 +83,7 @@ export function OpenForm({ categories }: { categories: readonly string[] }) {
 
       {state?.message && <p role="alert" className={ALERT}>{state.message}</p>}
       <button type="submit" disabled={pending} className={BTN_INK}>
-        {pending ? '붙이는 중…' : '메뉴 붙이기'}
+        {pending ? pendingLabel : submitLabel}
       </button>
     </form>
   )

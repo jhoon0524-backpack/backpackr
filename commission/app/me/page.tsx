@@ -132,18 +132,21 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
             {myCommissions.map((c) => {
               const left = c.max_slots - c.active_count
               return (
-                <li key={c.id} className="flex items-center justify-between gap-4 px-3 py-4">
+                <li key={c.id} className="flex flex-col gap-3 px-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <Link href={`/commissions/${c.id}`} className="disp flex min-h-11 items-center truncate text-[20px] hover:underline hover:decoration-[3px]">{c.title}</Link>
                     <p className="num mt-1 text-sm font-medium text-muted">
                       {c.status === 'closed' ? '내려 둠' : left > 0 ? `${left}자리 남음` : '자리 없음'} · {won(c.price)}~ · 동시 진행 {c.active_count}/{c.max_slots}
                     </p>
                   </div>
-                  <form action={toggleCommission}>
-                    <input type="hidden" name="id" value={c.id} />
-                    <input type="hidden" name="to" value={c.status === 'open' ? 'closed' : 'open'} />
-                    <button type="submit" className={BTN_PILL}>{c.status === 'open' ? '내리기' : '다시 붙이기'}</button>
-                  </form>
+                  <div className="flex shrink-0 gap-2">
+                    <Link href={`/commissions/${c.id}/edit`} className={BTN_PILL}>고치기</Link>
+                    <form action={toggleCommission}>
+                      <input type="hidden" name="id" value={c.id} />
+                      <input type="hidden" name="to" value={c.status === 'open' ? 'closed' : 'open'} />
+                      <button type="submit" className={BTN_PILL}>{c.status === 'open' ? '내리기' : '다시 붙이기'}</button>
+                    </form>
+                  </div>
                 </li>
               )
             })}

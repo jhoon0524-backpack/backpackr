@@ -1,7 +1,8 @@
 import { CATEGORIES } from '@/lib/db'
 import { getCurrentUser } from '@/lib/session'
 import { EYEBROW } from '@/app/ui'
-import { OpenForm } from './form'
+import { CommissionForm } from '@/app/commission-form'
+import { openCommission } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +21,12 @@ export default async function OpenPage() {
           <p className="mt-1.5 text-sm text-muted">로그인이 붙기 전까지는 사용자 전환기로 대신합니다.</p>
         </div>
       ) : (
-        <OpenForm categories={CATEGORIES} />
+        <CommissionForm
+          categories={CATEGORIES}
+          action={openCommission}
+          submitLabel="메뉴 붙이기"
+          pendingLabel="붙이는 중…"
+        />
       )}
     </div>
   )

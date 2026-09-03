@@ -5,7 +5,7 @@ import { comma, kstDate, trustFromFunding, won } from '@/lib/format'
 import { getCurrentUser } from '@/lib/session'
 import { Photo } from '@/app/photo'
 import { SlotText } from '@/app/commission-card'
-import { BACK, BTN_PRIMARY, BTN_SECONDARY, EYEBROW, H2 } from '@/app/ui'
+import { BACK, BTN_INK, BTN_PRIMARY, BTN_SECONDARY, EYEBROW, H2, NOTICE } from '@/app/ui'
 import { RequestForm } from './request-form'
 
 export const dynamic = 'force-dynamic'
@@ -14,8 +14,8 @@ export const dynamic = 'force-dynamic'
  * 전단 한 장을 크게 펼친 상세. 정사각 사진에 스티커, 검은고딕 제목, 검정 테두리 3칸 표(기본 가격·작업 기간·동시 진행),
  * 검정 막대 제목의 안내와 진행 순서. 넓은 화면은 오른쪽 고정 패널(의뢰 폼), 좁은 화면은 아래 고정 막대가 폼으로 내려보낸다.
  */
-export default async function CommissionPage({ params }: PageProps<'/commissions/[id]'>) {
-  const { id } = await params
+export default async function CommissionPage({ params, searchParams }: PageProps<'/commissions/[id]'>) {
+  const [{ id }, sp] = await Promise.all([params, searchParams])
   const [c, me] = await Promise.all([getCommission(id), getCurrentUser()])
   if (!c) notFound()
 
@@ -31,6 +31,7 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
   return (
     <div className="pb-28 lg:pb-0">
       <Link href="/" className={BACK}>← 메뉴판</Link>
+      {sp.updated && <p className={NOTICE + ' mt-1'}>메뉴를 고쳤어요. 주소는 그대로라 이미 보낸 링크도 이 내용으로 보여요.</p>}
 
       <div className="mt-2 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div>
@@ -120,7 +121,8 @@ export default async function CommissionPage({ params }: PageProps<'/commissions
               ) : isMine ? (
                 <>
                   <p className="text-sm font-medium leading-relaxed text-strong">내가 붙인 메뉴예요. 들어온 의뢰는 내 것에서 봅니다.</p>
-                  <Link href="/me" className={BTN_SECONDARY + ' mt-4'}>내 것으로</Link>
+                  <Link href={`/commissions/${c.id}/edit`} className={BTN_INK + ' mt-4'}>메뉴 고치기</Link>
+                  <Link href="/me" className={BTN_SECONDARY + ' mt-2'}>내 것으로</Link>
                 </>
               ) : c.status !== 'open' ? (
                 <>

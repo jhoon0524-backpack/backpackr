@@ -100,6 +100,46 @@ export async function createCommission(input: {
   return rows[0].id
 }
 
+export type UpdateCommissionResult =
+  | { ok: true }
+  | { ok: false; reason: 'not_mine' }
+  | { ok: false; reason: 'slots_too_low'; active: number }
+
+/**
+ * 붙인 메뉴 고치기. **주소는 그대로 둔다** — 내리고 새로 붙이면 이미 공유한 링크가 죽는다.
+ *
+ * 동시 진행 건수는 지금 진행 중인 건수보다 작게 줄이지 못한다. 줄이면 "동시 진행 2/1" 처럼
+ * 앞뒤가 안 맞는 상태가 되는데, 진행 중인 작업을 강제로 끝낼 수는 없기 때문이다.
+ * 앱이 먼저 읽고 판단하면 그 사이에 수락이 끼어들 수 있어, 조건을 update 문 안에 둔다.
+ *
+ * 이미 들어와 있는 의뢰는 이 수정에 영향받지 않는다 — 대기 의뢰는 의뢰 시점의 `quoted_price` 를,
+ * 수락된 의뢰는 `final_price` 와 `due_at` 을 각자 들고 있다.
+ */
+export async function updateCommission(
+  id: string, creatorId: string, input: {
+    title: string; description: string; category: string
+    price: number; turnaroundDays: number; maxSlots: number; sampleUrls: string[]
+  },
+): Promise<UpdateCommissionResult> {
+  if (!isUuid(id)) return { ok: false, reason: 'not_mine' }
+  const { rowCount } = await pool.query(
+    `update commissions
+        set title = $3, description = $4, category = $5, price = $6,
+            turnaround_days = $7, max_slots = $8, sample_urls = $9
+      where id = $1 and creator_id = $2 and $8 >= active_request_count(id)`,
+    [id, creatorId, input.title, input.description, input.category, input.price,
+     input.turnaroundDays, input.maxSlots, input.sampleUrls],
+  )
+  if (rowCount) return { ok: true }
+
+  // 안 바뀐 이유를 갈라 준다. 남의 메뉴인지, 진행 중 건수 때문인지에 따라 할 말이 다르다.
+  const { rows } = await pool.query<{ creator_id: string; active: number }>(
+    `select creator_id, active_request_count(id) as active from commissions where id = $1`, [id],
+  )
+  if (!rows[0] || rows[0].creator_id !== creatorId) return { ok: false, reason: 'not_mine' }
+  return { ok: false, reason: 'slots_too_low', active: rows[0].active }
+}
+
 /** 열고 닫기. 본인 것만 바뀌도록 creator_id 를 조건에 넣는다. 바뀐 줄이 없으면 false. */
 export async function setCommissionStatus(id: string, creatorId: string, status: 'open' | 'closed') {
   const { rowCount } = await pool.query(
