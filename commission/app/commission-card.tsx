@@ -86,23 +86,27 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         곁줄에 작게 적어 두었더니, 이 화면이 제호에서 약속한 바로 그 숫자가 12px 회색으로 묻혔다.
       */}
       <span className="flex items-baseline gap-4">
-        <span className="disp num w-[46px] shrink-0 text-[min(3.6vw,34px)] leading-none text-ink">
+        <span className="num w-[46px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none text-muted">
           {String(n).padStart(2, '0')}
         </span>
         <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
           {c.title}
         </span>
         <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
-        {/* 단위 칸의 폭이 고정이라, 잇는 점은 숫자에 닿고 값의 오른쪽 끝은 줄마다 나란하다. */}
-        <span className="disp num ml-auto shrink-0 text-[min(3.2vw,30px)] leading-none text-ink sm:ml-2">
+        <span className="hidden w-[112px] shrink-0 text-right sm:block">
+          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
+        </span>
+        <span className="disp num ml-auto w-[186px] shrink-0 text-right text-[min(2.8vw,26px)] leading-none text-ink sm:ml-0">
           {comma(c.price)}
-          <span className="ml-1.5 inline-block w-[44px] text-left text-[13px] tracking-[0.04em]">원부터</span>
+          <span className="ml-1.5 inline-block w-[44px] text-left text-[13px] font-bold tracking-[0.04em]">원부터</span>
         </span>
       </span>
 
-      <span className="mt-3 block text-[14px] font-medium text-muted sm:pl-[62px]">
-        {c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요
+      <span className="mt-3 flex flex-wrap items-center gap-x-3 text-[14px] font-medium text-muted sm:pl-[62px]">
+        <span>{c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요</span>
+        <span className="sm:hidden">
+          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
+        </span>
       </span>
     </Link>
   )

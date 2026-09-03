@@ -44,7 +44,7 @@ export default async function CommissionList() {
 
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
-        <ul className="mt-16 border-b-[3px] border-t-[3px] border-ink">
+        <ul className="mt-10 border-b-[3px] border-t-[3px] border-ink">
           {commissions.map((c, i) => (
             <li key={c.id}><CommissionCard c={c} n={i + 1} /></li>
           ))}
@@ -65,9 +65,9 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="mt-8 flex flex-wrap items-center justify-between gap-4 border-[2px] border-dashed border-ink/45 px-6 py-6 transition hover:border-ink hover:bg-yellow/25"
+      className="mt-8 flex flex-wrap items-center justify-between gap-4 transition hover:bg-yellow/25 sm:pl-[62px]"
     >
-      <span className="text-[15px] font-medium text-muted">
+      <span className="py-2 text-[15px] font-medium text-muted">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어옵니다.
       </span>
       <span className="disp shrink-0 bg-yellow px-4 py-2.5 text-[16px] leading-none text-ink">메뉴 붙이기</span>
@@ -85,7 +85,7 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-block bg-yellow px-[0.09em] py-[0.05em] align-baseline text-[0.95em] leading-[0.8] text-ink">
+    <span className="num inline-block bg-yellow px-[0.09em] py-[0.05em] align-baseline text-[0.95em] leading-[0.8] text-ink [-webkit-text-stroke:0.022em_currentColor]">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
       <span aria-hidden className="mx-[0.04em] inline-block h-[0.72em] w-[0.085em] -skew-x-[13deg] bg-ink align-baseline" />
