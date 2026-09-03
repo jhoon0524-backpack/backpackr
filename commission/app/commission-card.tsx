@@ -14,7 +14,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
       className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
-      빈자리 <span className="num">{left}/{max}</span>
+      빈자리 <span className="num bg-yellow px-1.5 py-0.5">{left}/{max}</span>
     </span>
   )
 }
@@ -91,20 +91,19 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         <span className={`num w-[62px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none text-muted ${closed ? 'line-through decoration-[2px]' : ''}`}>
           {String(n).padStart(2, '0')}
         </span>
-        <span className={`disp pr-3 text-balance break-keep text-[min(3.2vw,30px)] leading-tight ${tone}`}>
+        <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] leading-tight ${tone}`}>
           {c.title}
         </span>
         <span className="hidden shrink-0 pr-3 sm:block">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </span>
         <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        <span className={`disp num ml-auto shrink-0 pl-3 text-right text-[min(2.8vw,26px)] leading-none sm:ml-0 ${tone}`}>
-          {comma(c.price)}
-          <span className="ml-2 inline-block w-[46px] text-left text-[12px] font-bold tracking-[0.1em]">원부터</span>
+        <span className={`num ml-auto shrink-0 pl-3 text-right text-[min(2.4vw,23px)] font-extrabold leading-none sm:ml-0 ${tone}`}>
+          {comma(c.price)}<span className="font-medium">원부터</span>
         </span>
       </span>
 
-      <span className="mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium text-strong sm:pl-[62px]">
+      <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[62px] ${closed ? 'text-faint' : 'text-strong'}`}>
         <span>{c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요</span>
         <span className="sm:hidden">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}

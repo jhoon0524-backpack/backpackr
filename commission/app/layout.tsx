@@ -75,7 +75,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <div>
               <p className="poster text-[36px] leading-none">커미션!</p>
               <p className="num mt-3 text-[13px] font-bold text-white/80">
-                제9호 · 2026년 9월 · 창작자에게 맞춤 작업을 의뢰하는 곳
+                창작자에게 맞춤 작업을 의뢰하는 곳
               </p>
               <p className="num mt-1 text-[13px] font-medium text-white/50">© 2026 커미션</p>
             </div>

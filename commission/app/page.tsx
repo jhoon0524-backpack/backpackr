@@ -37,7 +37,7 @@ export default async function CommissionList() {
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
           <div className="mt-5 border-t border-white pt-5">
-            <p className="max-w-[76ch] text-[min(2.4vw,21px)] font-medium leading-snug text-white">
+            <p className="max-w-[76ch] text-[min(2.1vw,19px)] font-normal leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
           </div>
@@ -67,11 +67,11 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="group mt-10 block"
+      className="group mt-8 block"
     >
       <span className="disp block text-[min(3.1vw,29px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
         그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
-        <span className="ml-3 font-normal">→</span>
+        <span className="ml-3 font-normal text-yellow">→</span>
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">
         자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
@@ -90,10 +90,11 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-block bg-yellow px-[0.08em] py-[0.055em] align-baseline text-[1.04em] leading-[0.76] text-ink [-webkit-text-stroke:0.026em_currentColor]">
+    <span className="num inline-block align-baseline text-[1.02em] leading-[0.76] text-yellow">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
-      <span aria-hidden className="mx-[0.06em] inline-block h-[0.7em] w-[0.08em] -skew-x-[13deg] bg-ink align-baseline" />
+      {/* 빗금은 숫자보다 가늘다. 인쇄된 분수의 빗금이 그렇다 — 두 숫자를 가르되 셋째 글자가 되지 않는다. */}
+      <span aria-hidden className="mx-[0.07em] inline-block h-[0.74em] w-[0.045em] -skew-x-[14deg] bg-yellow align-baseline" />
       <span>{all}</span>
     </span>
   )
