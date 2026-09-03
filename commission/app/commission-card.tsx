@@ -20,7 +20,7 @@ export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | '
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-b-[3px] border-l-[3px] border-ink bg-accent px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
       {label}
     </span>
   )
@@ -44,7 +44,7 @@ export function TitleField({ title, closed = false, big = false }: { title: stri
         `text-balance` — 두 줄로 넘어갈 때 둘째 줄에 한 단어만 남지 않게 길이를 맞춘다.
         `min-h` — 제목 길이가 달라도 카드 셋의 값이 같은 밑선에 서게 한다.
       */}
-      <span className={`text-balance break-keep font-bold leading-tight ${closed ? 'text-muted' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[62px] text-[24px]'}`}>
+      <span className={`text-balance break-keep font-bold leading-tight ${closed ? 'text-faint' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 h-[62px] text-[24px]'}`}>
         {title}
       </span>
     </div>
@@ -83,7 +83,7 @@ export function CommissionCard({ c }: { c: Card }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className={`group relative flex h-full flex-col border-[3px] border-ink bg-white ${closed ? '' : 'shadow-hard transition hover:-translate-x-1 hover:-translate-y-1'}`}
+      className={`group relative flex h-full flex-col border-[3px] border-ink bg-white ${closed ? '[&_.body]:text-faint' : 'shadow-hard transition hover:-translate-x-1 hover:-translate-y-1'}`}
     >
       <div className={`relative border-b-[3px] border-ink ${c.cover_url ? 'aspect-[16/10]' : ''}`}>
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
@@ -97,13 +97,13 @@ export function CommissionCard({ c }: { c: Card }) {
           자리가 남았다는 말은 아래 값 줄 옆에 글자로 적는다.
         */}
         {closed && (
-          <div className="absolute -right-2 -top-3 z-10 -rotate-[3deg]">
+          <div className="absolute right-0 top-0 z-10">
             <ClosedStamp label={closed} />
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col justify-end p-4">
+      <div className="body flex flex-1 flex-col justify-end p-4">
         {/*
           **점선이 이름과 값을 잇는다.** 종이 메뉴판이 하는 그 일이다.
           앞 판에서는 점선이 이름 아래에 혼자 걸려 있었는데, 그건 잇는 줄이 아니라 그어 둔 선이라
@@ -111,17 +111,18 @@ export function CommissionCard({ c }: { c: Card }) {
           값에 줄을 긋지 않는다 — 마감은 싸진 게 아니라 못 받는 것이다.
         */}
         <span className="flex items-baseline">
-          <span className={`min-w-0 max-w-[6rem] shrink truncate text-[13px] font-bold ${closed ? 'text-muted' : 'text-strong'}`}>
+          <span className={`min-w-0 max-w-[6rem] shrink truncate text-[13px] font-bold ${closed ? '' : 'text-strong'}`}>
             {c.creator_nickname}
           </span>
           <span className="leader min-w-4 flex-1 self-stretch text-line" />
-          <span className={`poster num w-[8.6rem] shrink-0 text-right text-[24px] leading-none ${closed ? 'text-faint' : 'text-ink'}`}>
+          <span className={`poster num w-[8.6rem] shrink-0 text-right text-[24px] leading-none ${closed ? '' : 'text-ink'}`}>
             {comma(c.price)}원~
           </span>
         </span>
-        <span className={`mt-2 flex flex-wrap items-baseline justify-between gap-x-3 text-[13px] font-bold ${closed ? 'text-muted' : 'text-ink'}`}>
+        <span className={`mt-2 flex flex-wrap items-baseline justify-between gap-x-3 text-[13px] font-bold ${closed ? '' : 'text-ink'}`}>
           <span>{c.category} · 작업 {c.turnaround_days}일</span>
-          {!closed && <span className="text-accent">{left}자리 남음</span>}
+          {/* 빨강은 마감 하나에만. 두 빨강이 서로 다른 뜻을 나르면 그건 신호가 아니다. */}
+          {!closed && <span>{left}자리 남음</span>}
         </span>
       </div>
 

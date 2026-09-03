@@ -30,7 +30,7 @@ export async function UserSwitcher() {
           <option key={u.id} value={u.id}>{u.nickname}</option>
         ))}
       </select>
-      <button type="submit" className="h-full px-1 text-[13px] font-bold text-white/60 underline decoration-2 underline-offset-2 hover:text-white">
+      <button type="submit" className="h-full px-1 text-[13px] font-bold text-white/60 hover:text-white">
         바꾸기
       </button>
     </form>

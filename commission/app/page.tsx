@@ -25,16 +25,11 @@ export default async function CommissionList() {
   return (
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
-      <section className="grain relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
+      <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
         <div className="mx-auto max-w-[1200px] px-8 pb-14 pt-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="num text-[13px] font-bold text-white/60">
-              {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
-            </p>
-            <span className="disp -rotate-[3deg] border-[3px] border-white px-3 py-1.5 text-[15px] leading-none text-white">
-              지금 받는 중
-            </span>
-          </div>
+          <p className="num text-[13px] font-bold text-white/60">
+            {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
+          </p>
           <p className="mt-3 max-w-3xl text-[20px] font-medium leading-relaxed text-white">
             고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
           </p>
@@ -92,9 +87,9 @@ function HowItWorks() {
         {STEPS.map((s) => (
           <li
             key={s.n}
-            className="flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 py-5 not-last:border-b-[3px] not-last:border-dashed not-last:border-ink"
+            className="flex flex-wrap items-baseline gap-x-6 gap-y-1 px-6 py-4 not-last:border-b-[3px] not-last:border-ink"
           >
-            <span className="poster num w-14 shrink-0 text-[46px] leading-none text-ink">{s.n}</span>
+            <span className="poster num w-10 shrink-0 text-[30px] leading-none text-ink">{s.n}</span>
             <span className="w-28 shrink-0 text-[17px] font-bold text-ink">{s.t}</span>
             <span className="text-[14px] font-medium leading-relaxed text-muted">{s.d}</span>
           </li>
@@ -118,7 +113,7 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
+      className="group flex h-full flex-col border-[3px] border-line bg-white transition hover:border-ink hover:bg-fill"
     >
       <span className="flex h-[62px] items-start px-4 pb-3 pt-9 text-[24px] font-bold leading-tight text-strong">
         여기 붙이기
