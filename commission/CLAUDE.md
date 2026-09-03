@@ -65,6 +65,10 @@ npm run typecheck
 
 - [검증] 검증 명령은 갓 클론한 상태에서도 통과해야 한다 — `rm -rf node_modules .next && npm ci` 후 세 명령을 돌려 확인
   (dropbid 에서 CI 의 `LayoutProps` 타입 오류로 겪은 것을 그대로 물려받음)
+- [화면] 새로 만들거나 크게 고친 화면은 `uiux/CHECKLIST.md` 의 항목을 **전부** 통과해야 한다 —
+  화면 캡처(폭 390·1440)와 그 표만 새 채점자에게 주고 항목별 통과/실패를 받는다. 실패 0건이 될 때까지 고친다.
+  **점수로 채점하지 않는다.** 10점 만점으로 물었더니 40바퀴를 돌고도 5~6점을 오갔다 —
+  채점자가 매 회차 다른 것을 지적해 목표가 움직였다 (디자인 비평 루프 94차까지 미도달, 2026-09-03 중단)
 - [의뢰] 애플리케이션 코드가 `requests` 에 직접 쓰지 않는다. 상태 변경은 DB 함수 6개 호출로만 —
   `grep -rn "into requests\|update requests" app lib` 결과가 없어야 하고, DB 권한(REVOKE)과 `__tests__/db/permissions.test.ts` 로도 막혀 있어야 한다
   (dropbid 의 `place_bid` 규칙을 그대로 가져옴, 최초 등록)
