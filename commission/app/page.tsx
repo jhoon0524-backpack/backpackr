@@ -40,9 +40,11 @@ export default async function CommissionList() {
             자리 <Fraction open={openSlots} all={allSlots} /> 남았어요
           </h1>
           {/* 판의 밑선. 설명과 발행 정보를 양 끝에 걸어 검정 판의 바닥으로 삼는다. */}
-          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2 border-t-[3px] border-white pt-4">
-            <p className="text-[16px] font-bold text-white">고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.</p>
-            <p className="num text-[14px] font-bold tracking-[0.02em] text-white/70">
+          <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t-[3px] border-white pt-5">
+            <p className="disp text-[min(3.4vw,28px)] leading-tight text-white">
+              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+            </p>
+            <p className="num text-[13px] font-bold text-white/60">
               {MONTH.format(new Date())} 메뉴판 <span className="text-white/40">·</span> 메뉴 {commissions.length}개
             </p>
           </div>
@@ -86,14 +88,14 @@ function HowItWorks() {
             <li
               key={t}
               className={`poster text-[min(5vw,58px)] leading-none text-white ${
-                i > 0 ? 'ml-6 border-l-[3px] border-white/35 pl-6' : ''
+                i > 0 ? 'ml-6 border-l border-white/50 pl-6' : ''
               }`}
             >
               {t}
             </li>
           ))}
         </ol>
-        <p className="mt-8 max-w-3xl text-[17px] font-medium leading-relaxed text-white/70">
+        <p className="mt-8 text-[17px] font-medium leading-relaxed text-white/70 sm:columns-2 sm:gap-12">
           자리가 남은 메뉴에 원하는 것을 적어 보내면, 창작자가 최종가를 정해 수락합니다. 그때 자리 하나가 차고,
           메뉴에 적힌 기간 안에 작업이 끝납니다. 결과물을 받고 확인을 누르면 자리가 다시 빕니다.
         </p>
@@ -121,8 +123,8 @@ function EmptySlot() {
       <span className="disp flex shrink-0 items-center bg-ink px-6 text-[19px] text-white">
         여기 붙이기
       </span>
-      <span className="flex items-center px-6 py-5 text-[15px] font-medium leading-relaxed text-ink">
-        그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어와요.
+      <span className="disp flex items-center px-6 py-5 text-[19px] leading-tight text-ink">
+        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
       </span>
     </Link>
   )
@@ -138,7 +140,7 @@ function EmptySlot() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-flex items-end">
+    <span className="num inline-flex items-end text-[1.2em]">
       <span>{open}</span>
       <span aria-hidden className="mx-[0.03em] mb-[0.055em] block h-[0.66em] w-[0.075em] -skew-x-[13deg] bg-current" />
       <span>{all}</span>
