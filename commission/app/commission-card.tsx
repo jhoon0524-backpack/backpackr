@@ -22,10 +22,11 @@ export function SlotStamp({ left, max, active, size = 'sm' }: { left: number; ma
 }
 
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
-export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
+export function ClosedStamp({ label, max, size = 'sm' }: { label: string; max?: number; size?: 'sm' | 'md' }) {
   return (
-    <span className={`inline-flex items-center border-b-[3px] border-l-[3px] border-ink bg-ink px-3 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
+    <span className={`inline-flex items-center gap-2 border-b-[3px] border-l-[3px] border-ink bg-ink px-3 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
       {label}
+      {max !== undefined && <Seats max={max} active={max} onDark />}
     </span>
   )
 }
@@ -50,7 +51,7 @@ export function TitleField({ title, category, closed = false, big = false }: { t
       */}
       <span className="flex w-full flex-col gap-1.5">
         {category && (
-          <span className={`text-[12px] font-bold tracking-[0.06em] ${closed ? 'text-line' : 'text-muted'}`}>
+          <span className={`text-[11px] font-bold tracking-[0.12em] ${closed ? 'text-line' : 'text-faint'}`}>
             {category}
           </span>
         )}
@@ -68,11 +69,16 @@ export function TitleField({ title, category, closed = false, big = false }: { t
  * "2자리 남음" 이라고 **쓰는 것**보다, 세 칸 중 하나가 칠해진 것을 **보는 것**이 빠르다.
  * 자리는 이 서비스가 파는 물건이므로, 파는 물건은 글자가 아니라 형태로 보여야 한다.
  */
-export function Seats({ max, active }: { max: number; active: number }) {
+export function Seats({ max, active, onDark = false }: { max: number; active: number; onDark?: boolean }) {
   return (
     <span aria-hidden className="flex shrink-0 gap-1">
       {Array.from({ length: max }, (_, i) => (
-        <span key={i} className={`h-3.5 w-3.5 border-2 border-ink ${i < active ? 'bg-ink' : 'bg-white'}`} />
+        <span
+          key={i}
+          className={`h-3.5 w-3.5 border-2 ${onDark ? 'border-white' : 'border-ink'} ${
+            i < active ? (onDark ? 'bg-white' : 'bg-ink') : onDark ? '' : 'bg-white'
+          }`}
+        />
       ))}
     </span>
   )
@@ -91,7 +97,7 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
   const label = closedLabel(status, max - active)
   return (
     <div className="absolute right-0 top-0">
-      {label ? <ClosedStamp label={label} size={size} /> : <SlotStamp left={max - active} max={max} active={active} size={size} />}
+      {label ? <ClosedStamp label={label} max={max} size={size} /> : <SlotStamp left={max - active} max={max} active={active} size={size} />}
     </div>
   )
 }
@@ -125,34 +131,19 @@ export function CommissionCard({ c }: { c: Card }) {
         */}
         {/* 상태 탭은 넉 장 모두 같은 자리에 있다. 하나에만 있으면 그건 상태가 아니라 얼룩이다. */}
         <div className="absolute right-0 top-0 z-10">
-          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} active={c.active_count} />}
+          {closed ? <ClosedStamp label={closed} max={c.max_slots} /> : <SlotStamp left={left} max={c.max_slots} active={c.active_count} />}
         </div>
       </div>
 
       <div className="body flex flex-1 flex-col justify-end p-4">
-        {/*
-          **점선이 이름과 값을 잇는다.** 종이 메뉴판이 하는 그 일이다.
-          앞 판에서는 점선이 이름 아래에 혼자 걸려 있었는데, 그건 잇는 줄이 아니라 그어 둔 선이라
-          메뉴판 흉내만 내고 아무 일도 하지 않았다.
-          값에 줄을 긋지 않는다 — 마감은 싸진 게 아니라 못 받는 것이다.
-        */}
-        <span className="flex items-center justify-between gap-3">
-          {/* 만드는 사람의 이름표. 이 장터가 파는 것은 결국 사람이라, 이름이 값과 같은 줄에 선다. */}
-          <span className="flex min-w-0 items-center gap-2">
-            <span className={`disp flex h-6 w-6 shrink-0 items-center justify-center text-[13px] leading-none ${closed ? 'bg-line text-white' : 'bg-ink text-white'}`}>
-              {c.creator_nickname.slice(0, 1)}
-            </span>
-            <span className={`truncate text-[13px] font-medium ${closed ? '' : 'text-strong'}`}>
-              {c.creator_nickname}
-            </span>
-          </span>
-          <span className={`poster num shrink-0 text-[26px] leading-none ${closed ? '' : 'text-ink'}`}>
-            {comma(c.price)}원~
-          </span>
+        {/* 값이 먼저다. 메뉴판에서 결정을 만드는 것은 값이다. */}
+        <span className={`num block text-[28px] font-extrabold leading-none tracking-tight ${closed ? '' : 'text-ink'}`}>
+          {comma(c.price)}<span className="ml-1 text-[13px] font-medium">원부터</span>
         </span>
-        <span className={`mt-3 flex items-center justify-between gap-x-2 text-[13px] font-medium tracking-[0.01em] ${closed ? '' : 'text-muted'}`}>
-          <span className="truncate">{c.turnaround_days}일 걸려요</span>
-          {/* 자리는 글자가 아니라 칸으로. 마감된 메뉴도 같은 자리에 같은 모양이 선다 — 다 칠해져 있을 뿐이다. */}
+        {/* 만드는 사람과 걸리는 날을 한 줄로. 부품을 일곱 개 얹어 두면 어느 것도 눈에 안 든다. */}
+        <span className={`mt-3 block truncate text-[13px] ${closed ? '' : 'text-ink'}`}>
+          <span className="font-bold">{c.creator_nickname}</span>
+          <span className={closed ? '' : 'text-muted'}> · {c.turnaround_days}일 걸려요</span>
         </span>
       </div>
 
