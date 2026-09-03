@@ -44,7 +44,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <header className="sticky top-0 z-10 bg-ink text-white">
           <div className="mx-auto flex max-w-[1200px] items-baseline justify-between gap-4 px-8 pb-5 pt-7">
             <div className="flex items-baseline gap-12">
-              <Link href="/" className="poster text-[42px] leading-none">
+              <Link href="/" className="poster text-[56px] leading-none">
                 커미션!
               </Link>
               <HeaderNav items={NAV} />
@@ -64,7 +64,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-16 pt-0">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
         <footer className="bg-ink text-white">
-          <div className="mx-auto max-w-[1200px] px-8 py-7">
+          <div className="mx-auto max-w-[1200px] px-8 py-6">
             {/* 판권면은 한 줄이다. 머리를 그대로 되풀이하면 높이만 늘고 새로 아는 것은 없다. */}
             {/* 판권면. 발행 정보 한 줄과 다음 호 예고 — 인쇄물의 마지막 페이지가 하는 일이다. */}
             <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">

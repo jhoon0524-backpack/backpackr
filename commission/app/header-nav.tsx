@@ -13,7 +13,7 @@ import { usePathname } from 'next/navigation'
 export function HeaderNav({ items }: { items: readonly { href: string; label: string }[] }) {
   const path = usePathname()
   return (
-    <nav className="disp hidden gap-8 text-[18px] sm:flex">
+    <nav className="disp hidden gap-8 text-[16px] sm:flex">
       {items.map((n) => {
         const here = n.href === '/' ? path === '/' : path.startsWith(n.href)
         return (

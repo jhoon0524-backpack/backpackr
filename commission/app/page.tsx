@@ -25,7 +25,6 @@ const KO_NUM: Record<number, string> = {
 export default async function CommissionList() {
   const commissions = await listOpenCommissions()
   const openSlots = commissions.reduce((n, c) => n + Math.max(0, c.max_slots - c.active_count), 0)
-  const allSlots = commissions.reduce((n, c) => n + c.max_slots, 0)
 
   return (
     <div>
@@ -43,7 +42,7 @@ export default async function CommissionList() {
             한글 수사로 적으면 애초에 섞일 얼굴이 없다 — 제호는 한 얼굴 한 덩어리가 된다.
             정확한 값(4/6)은 바로 아래 줄, 숫자를 적는 활자(고딕)로 적는다.
           */}
-          <h1 className="poster -ml-[0.035em] border-t border-white/30 pt-6 text-[min(9.6vw,138px)] leading-[0.9] tracking-[-0.005em] [word-spacing:-0.06em] text-white">
+          <h1 className="poster -ml-[0.035em] border-t border-white/30 pt-6 text-[min(11.5vw,165px)] leading-[0.9] tracking-[-0.025em] [word-spacing:-0.08em] text-white">
             {openSlots === 0 ? (
               <>지금은 자리가 없어요</>
             ) : (
@@ -52,12 +51,12 @@ export default async function CommissionList() {
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
           <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white pt-5">
-            <p className="text-[min(2.4vw,22px)] font-normal leading-relaxed text-white/85">
+            <p className="poster text-[min(2.4vw,22px)] leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
             {/* 정확한 값은 숫자를 적는 활자로. 제호는 말하고, 이 줄은 센다. */}
             <p className="num shrink-0 text-[13px] font-medium text-white/70">
-              빈자리 {openSlots}/{allSlots} · 메뉴 {commissions.length}개
+              메뉴 {commissions.length}개
             </p>
           </div>
         </div>
@@ -88,7 +87,7 @@ function EmptyRow() {
     */
     <Link
       href="/open"
-      className="group mt-14 block"
+      className="group mt-16 block border-t border-ink pt-8"
     >
       {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
       <span className="poster block text-[min(3.6vw,36px)] leading-snug text-ink">

@@ -76,7 +76,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
   const left = c.max_slots - c.active_count
   const closed = closedLabel(c.status, left)
   // 마감한 줄은 회색으로 내려앉는다. 메뉴판에서 다 나간 것은 지우거나 흐리게 두지, 같은 검정으로 두지 않는다.
-  const tone = closed ? 'text-muted' : 'text-ink'
+  const tone = closed ? 'text-faint' : 'text-ink'
   return (
     <Link
       href={`/commissions/${c.id}`}
@@ -94,7 +94,7 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] leading-tight text-ink ${closed ? 'line-through decoration-[2px] decoration-ink/60' : ''}`}>
           {c.title}
         </span>
-        <span aria-hidden className="leader hidden h-[0.34em] min-w-8 flex-1 text-ink/45 sm:block" />
+        <span aria-hidden className={`leader hidden h-[0.34em] min-w-8 flex-1 sm:block ${closed ? 'text-ink/20' : 'text-ink/45'}`} />
         <span className={`poster num ml-auto flex shrink-0 items-baseline text-[min(2.6vw,25px)] leading-none sm:ml-0 ${tone}`}>
           <span className="pl-3">{comma(c.price)}</span>
           <span className="w-[64px] whitespace-nowrap pl-1 text-left text-[16px]">원부터</span>
