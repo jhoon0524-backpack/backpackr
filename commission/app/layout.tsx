@@ -61,9 +61,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             ))}
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-8 pt-0">{children}</main>
+        <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-16 pt-0">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
-        <footer className="border-t-[3px] border-white bg-ink text-white">
+        <footer className="bg-ink text-white">
           <div className="mx-auto max-w-[1200px] px-8 py-7">
             {/* 판권면은 한 줄이다. 머리를 그대로 되풀이하면 높이만 늘고 새로 아는 것은 없다. */}
             <p className="flex flex-wrap items-baseline gap-x-4 gap-y-2">

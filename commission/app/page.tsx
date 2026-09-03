@@ -89,8 +89,8 @@ function EmptyRow() {
       className="group mt-12 block sm:max-w-[940px] sm:pl-[86px]"
     >
       {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
-      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink underline decoration-[2px] underline-offset-[8px]">
-        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요. <span aria-hidden>→</span>
+      <span className="poster block border-b border-ink pb-4 text-[min(3.1vw,29px)] leading-snug text-ink">
+        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요 <span aria-hidden>→</span>
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">
         자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
