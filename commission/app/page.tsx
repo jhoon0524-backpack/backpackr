@@ -42,7 +42,7 @@ export default async function CommissionList() {
             한글 수사로 적으면 애초에 섞일 얼굴이 없다 — 제호는 한 얼굴 한 덩어리가 된다.
             정확한 값(4/6)은 바로 아래 줄, 숫자를 적는 활자(고딕)로 적는다.
           */}
-          <h1 className="poster -ml-[0.035em] border-t border-white/30 pt-6 text-[min(11.5vw,165px)] leading-[0.9] tracking-[-0.03em] [word-spacing:-0.12em] text-white">
+          <h1 className="poster -ml-[0.035em] border-t border-white/30 pt-6 text-[min(11vw,158px)] leading-[0.9] tracking-[-0.03em] [word-spacing:-0.12em] text-white">
             {openSlots === 0 ? (
               <>지금은 자리가 없어요</>
             ) : (
@@ -58,7 +58,7 @@ export default async function CommissionList() {
         </div>
       </section>
 
-      <h2 className="poster mt-14 text-[min(4.4vw,44px)] leading-none text-ink">이번 달 메뉴</h2>
+      <h2 className="disp mt-14 text-[min(3.6vw,36px)] leading-none text-ink">이번 달 메뉴</h2>
 
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */
@@ -86,15 +86,15 @@ function EmptyRow() {
       className="group mt-12 block"
     >
       {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
-      <span className="poster block text-[min(3.6vw,36px)] leading-snug text-ink">
-        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요
-      </span>
-      <span className="mt-4 flex flex-wrap items-baseline gap-x-6 gap-y-3">
-        <span className="poster inline-block border border-ink px-6 py-3 text-[22px] leading-none text-ink group-hover:bg-ink group-hover:text-white">
-          메뉴 붙이기 →
+      <span className="flex flex-wrap items-center gap-x-6 gap-y-4 border border-ink px-6 py-5">
+        <span className="disp text-[19px] leading-snug text-ink">
+          그리는 분이라면, 여기에 메뉴 한 장을 붙이세요
         </span>
         <span className="text-[15px] font-medium text-muted">
           자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
+        </span>
+        <span className="disp ml-auto shrink-0 whitespace-nowrap bg-ink px-5 py-2.5 text-[16px] leading-none text-white">
+          메뉴 붙이기 →
         </span>
       </span>
     </Link>

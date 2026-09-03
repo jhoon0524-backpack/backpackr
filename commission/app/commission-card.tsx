@@ -14,7 +14,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
       className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
-      빈자리 <span className="num border-b-2 border-yellow pb-0.5">{left}/{max}</span>
+      빈자리 <span className="num ml-1 bg-yellow px-1.5 py-0.5 text-ink">{left}/{max}</span>
     </span>
   )
 }
@@ -88,16 +88,16 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
         그래서 간격을 gap 이 아니라 각 칸의 안쪽 여백으로 준다.
       */}
       <span className="flex items-baseline">
-        <span className={`poster num w-[52px] shrink-0 text-[min(3vw,28px)] font-extrabold leading-tight ${closed ? 'text-muted' : 'text-ink'}`}>
+        <span className={`disp num w-[52px] shrink-0 text-[min(2.7vw,26px)] leading-tight ${closed ? 'text-muted' : 'text-ink'}`}>
           {String(n).padStart(2, '0')}
         </span>
-        <span className={`poster pr-3 text-balance break-keep text-[min(3vw,28px)] font-extrabold leading-tight text-ink ${closed ? 'line-through decoration-[2px] decoration-ink/60' : ''}`}>
+        <span className={`disp pr-3 text-balance break-keep text-[min(2.7vw,26px)] leading-tight text-ink ${closed ? 'line-through decoration-[2px] decoration-ink/60' : ''}`}>
           {c.title}
         </span>
         <span aria-hidden className={`leader hidden h-[0.18em] min-w-8 flex-1 sm:block ${closed ? 'text-ink/20' : 'text-ink/60'}`} />
-        <span className={`poster num ml-auto flex shrink-0 items-baseline text-[min(2.6vw,25px)] font-extrabold leading-none sm:ml-0 ${tone}`}>
-          <span className="pl-3">{comma(c.price)}</span>
-          <span className="w-[62px] whitespace-nowrap pl-0.5 text-left text-[15px]">원부터</span>
+        <span className={`disp num ml-auto flex shrink-0 items-baseline text-[min(2.4vw,23px)] leading-none sm:ml-0 ${tone}`}>
+          <span className={`pl-3 ${closed ? 'line-through decoration-[2px]' : ''}`}>{comma(c.price)}</span>
+          <span className="w-[62px] whitespace-nowrap pl-1 text-left text-[15px] font-medium">원부터</span>
         </span>
       </span>
 

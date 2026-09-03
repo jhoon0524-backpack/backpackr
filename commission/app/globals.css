@@ -52,7 +52,7 @@ body { }` 규칙은 레이어 밖에 있어서, 레이어 안에 있는 Tailwind
    *   accent #eb4b38 위 흰 글자 → 3.75. 그래서 굵은 디스플레이 글자(18px 이상)에만 얹는다
    *   urgent-text #c0361f / white → 5.5 (작은 붉은 글자)
    */
-  --color-paper: #ffffff;
+  --color-paper: #fbfaf6;
   --color-card: #ffffff;
   --color-ink: #111111;
   --color-strong: #333333;

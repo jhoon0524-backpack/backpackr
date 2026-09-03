@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 const NAV = [
   { href: "/", label: "메뉴판" },
   { href: "/open", label: "메뉴 붙이기" },
-  { href: "/me", label: "내 것" },
+  { href: "/me", label: "내 의뢰" },
 ] as const;
 
 /**
@@ -40,8 +40,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link href="/fonts/fonts.css" rel="stylesheet" />
       </head>
-      <body className="min-h-full flex flex-col overflow-x-hidden bg-white text-ink">
-        <header className="sticky top-0 z-10 border-b border-white/25 bg-ink text-white">
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-paper text-ink">
+        <header className="sticky top-0 z-10 border-b border-white/30 bg-ink text-white">
           <div className="mx-auto flex max-w-[1200px] items-baseline justify-between gap-4 px-8 pb-5 pt-7">
             <div className="flex items-baseline gap-12">
               <Link href="/" className="poster text-[56px] leading-none">
