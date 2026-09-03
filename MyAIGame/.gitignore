@@ -1,7 +1,0 @@
-# Godot 4 에디터가 만드는 캐시
-.godot/
-/android/
-
-# 내보내기 결과물
-/build/
-export_presets.cfg
