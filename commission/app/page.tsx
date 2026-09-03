@@ -27,30 +27,32 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-9 pt-4">
+        <div className="mx-auto max-w-[1200px] px-8 pt-5">
           <p className="num text-[13px] font-bold text-white/60">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
-          {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
-          <div className="relative">
-            <h1 className="poster num mt-2 text-[min(30vw,384px)] leading-[0.78] text-white">
-              {openSlots}/{allSlots}
-            </h1>
-            <p className="poster -mt-[0.06em] text-[min(6.4vw,88px)] leading-[0.9] text-yellow">
+          {/*
+            제호는 **한 덩어리**다. 숫자와 말이 따로 놓여 있으면 둘 다 어중간해진다.
+            분수를 왼쪽에 세우고 그 오른쪽 밑선에 말을 붙여, 하나의 큰 글자 덩어리로 읽히게 한다.
+          */}
+          <div className="mt-1 flex flex-wrap items-end gap-x-6">
+            <Fraction open={openSlots} all={allSlots} />
+            <p className="poster pb-[0.06em] text-[min(7.4vw,88px)] leading-[0.86] text-yellow">
               자리 남았어요
             </p>
-            {/* 이 판은 달마다 새로 붙는다. 호수를 오른쪽 끝에 세워 판 전체를 쓴다. */}
-            <p className="num absolute -right-2 bottom-6 hidden rotate-90 whitespace-nowrap text-[13px] font-bold tracking-[0.3em] text-white/40 lg:block">
+          </div>
+          {/*
+            판의 밑선. 호수는 허공에 뜬 세로 글씨였는데, 그건 어디에도 붙어 있지 않은 장식이다.
+            검정 판이 끝나는 선 위에 앉혀 판의 바닥으로 삼는다.
+          */}
+          <div className="mt-7 flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-t-[3px] border-white py-5">
+            <p className="max-w-2xl text-[17px] font-bold leading-relaxed text-white">
+              고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
+            </p>
+            <p className="num shrink-0 text-[13px] font-bold text-white/60">
               {MONTH.format(new Date())}호
             </p>
           </div>
-          <p className="mt-8 max-w-2xl text-[18px] font-bold leading-relaxed text-white/80">
-            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다.
-          </p>
-          {/*
-            큰 숫자를 오른쪽에 세워 두었더니 화면에 크게 말하는 것이 둘이 되어 서로를 깎아먹었다.
-            숫자는 제목 아래 한 줄로 물러난다 — 큰 것은 제목 하나뿐이다.
-          */}
         </div>
       </section>
 
@@ -60,11 +62,11 @@ export default async function CommissionList() {
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {commissions.map((c, i) => (
-            <li key={c.id} className={i === 0 ? 'lg:col-span-2' : ''}><CommissionCard c={c} wide={i === 0} /></li>
+        <ul className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {commissions.map((c) => (
+            <li key={c.id}><CommissionCard c={c} /></li>
           ))}
-          <li className="sm:col-span-2 lg:col-span-4"><EmptySlot /></li>
+          <li className="sm:col-span-2 lg:col-span-3"><EmptySlot /></li>
         </ul>
       )}
 
@@ -91,17 +93,20 @@ function HowItWorks() {
       메뉴판에서 갑자기 소개 페이지로 바뀌던 자리다. 굵은 테두리도 검정도 여기서 끊겼다.
       머리와 같은 검정 띠로 받아 화면을 닫는다 — 위에서 시작한 판이 아래에서 같은 판으로 끝난다.
     */
-    <section className="relative left-1/2 -mx-[50vw] mt-24 w-screen border-t-[3px] border-ink bg-ink">
+    <section className="relative left-1/2 -mx-[50vw] mt-16 w-screen border-t-[3px] border-ink bg-ink">
       <div className="mx-auto max-w-[1200px] px-8 py-14">
         <h2 className="disp text-[36px] text-white">보내면 이렇게 됩니다</h2>
-        <ol className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="mt-8 border-t-[3px] border-white">
           {STEPS.map((s) => (
-            <li key={s.n} className="relative border-t-[3px] border-white/25 pt-5">
-              <span className="num absolute -top-[11px] left-0 bg-ink pr-3 text-[13px] font-bold text-white/40">
-                {s.n}
+            <li
+              key={s.n}
+              className="grid grid-cols-[40px_1fr] items-baseline gap-x-5 gap-y-1 border-b-[3px] border-white py-5 sm:grid-cols-[40px_180px_1fr]"
+            >
+              <span className="disp text-[28px] leading-none text-white">{s.n}</span>
+              <span className="disp text-[24px] leading-none text-white">{s.t}</span>
+              <span className="col-span-2 text-[15px] font-medium leading-relaxed text-white/60 sm:col-span-1">
+                {s.d}
               </span>
-              <span className="disp block text-[24px] leading-none text-white">{s.t}</span>
-              <span className="mt-3 block text-[14px] font-normal leading-relaxed text-white/60">{s.d}</span>
             </li>
           ))}
         </ol>
@@ -126,13 +131,31 @@ function EmptySlot() {
       href="/open"
       className="group flex items-stretch border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
     >
-      <span className="disp flex shrink-0 items-center border-r-[3px] border-ink px-6 text-[19px] text-ink">
+      <span className="disp flex shrink-0 items-center bg-ink px-6 text-[19px] text-white">
         여기 붙이기
       </span>
-      <span className="flex items-center px-6 py-5 text-[14px] font-normal leading-relaxed text-muted">
+      <span className="flex items-center px-6 py-5 text-[15px] font-medium leading-relaxed text-ink">
         그리는 분이라면 받고 싶은 작업 하나를 메뉴로 붙여 두세요. 자리가 찰 때까지 의뢰가 들어와요.
       </span>
     </Link>
   )
 }
 
+/**
+ * 자리 분수 — 이 화면에서 가장 큰 글자.
+ *
+ * 그냥 "4/6" 이라고 치면 빗금은 활자에 딸려 온 기본 획이라 숫자보다 얇고 짧다.
+ * 400px 로 키우면 그 차이가 그대로 흠이 된다. 그래서 **빗금을 직접 그린다** —
+ * 두께는 숫자 획에 맞추고, 높이는 숫자 키에 맞추고, 기울기는 하나로 정한다.
+ * 분자와 분모는 **같은 크기, 같은 굵기**다. 한쪽을 줄이면 분수가 아니라 큰 숫자와 작은 숫자 둘이 된다.
+ */
+function Fraction({ open, all }: { open: number; all: number }) {
+  return (
+    <h1 className="poster num flex items-end text-[min(22vw,268px)] leading-[0.78] text-white">
+      <span>{open}</span>
+      <span aria-hidden className="mx-[0.05em] mb-[0.015em] block h-[0.72em] w-[0.072em] -skew-x-[13deg] bg-white" />
+      <span>{all}</span>
+      <span className="sr-only">자리 가운데 {open}자리</span>
+    </h1>
+  )
+}

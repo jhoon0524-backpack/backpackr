@@ -12,7 +12,7 @@ import { Photo } from './photo'
 export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: number; size?: 'sm' | 'md' }) {
   return (
     <span
-      className={`inline-flex items-center border-b-[3px] border-l-[3px] border-ink bg-white px-3 py-1.5 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}
+      className={`inline-flex items-center border-[3px] border-ink bg-white px-3 py-1.5 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
       자리 {left}/{max}
@@ -23,7 +23,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`inline-flex items-center gap-2 border-b-[3px] border-l-[3px] border-ink bg-ink px-3 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
+    <span className={`inline-flex items-center gap-2 border-[3px] border-ink bg-ink px-3 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
       {label}
     </span>
   )
@@ -39,7 +39,7 @@ export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm'
  * 그래서 없으면 없는 대로 둔다 — 대신 **제목을 크게 앉힌다.**
  * 메뉴판에서 사진이 없는 칸이 하는 일과 같다. 요리 이름을 큼직하게 쓰는 것.
  */
-export function TitleField({ title, category, closed = false, big = false, wide = false }: { title: string; category?: string; closed?: boolean; big?: boolean; wide?: boolean }) {
+export function TitleField({ title, category, closed = false, big = false }: { title: string; category?: string; closed?: boolean; big?: boolean }) {
   return (
     <div className={`flex h-full w-full items-start bg-white ${big ? 'p-8 pt-20' : 'px-4 pb-3 pt-7'}`}>
       {/*
@@ -53,7 +53,7 @@ export function TitleField({ title, category, closed = false, big = false, wide 
             {category}
           </span>
         )}
-        <span className={`text-balance break-keep font-medium leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : `line-clamp-2 ${wide ? 'text-[26px]' : 'text-[19px]'}`}`}>
+        <span className={`text-balance break-keep font-medium leading-tight ${closed ? 'text-line' : 'text-ink'} ${big ? 'disp text-[52px]' : 'line-clamp-2 text-[19px]'}`}>
           {title}
         </span>
       </span>
@@ -74,7 +74,7 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
 }) {
   const label = closedLabel(status, max - active)
   return (
-    <div className="absolute right-0 top-0">
+    <div className="absolute right-3 top-0 z-10 -translate-y-1/2">
       {label ? <ClosedStamp label={label} size={size} /> : <SlotStamp left={max - active} max={max} size={size} />}
     </div>
   )
@@ -88,19 +88,19 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
  *
  * 그림자는 **누를 수 있는 것**에만 있다. 카드는 링크라서 갖는다. 딱지와 번호표는 갖지 않는다.
  */
-export function CommissionCard({ c, wide = false }: { c: Card; wide?: boolean }) {
+export function CommissionCard({ c }: { c: Card }) {
   const left = c.max_slots - c.active_count
   const closed = closedLabel(c.status, left)
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className={`group relative flex h-full flex-col border-[3px] bg-white ${closed ? 'border-line [&_.body]:text-line' : 'border-ink shadow-hard transition hover:-translate-x-1 hover:-translate-y-1'}`}
+      className="group relative flex h-full flex-col border-[3px] border-ink bg-white shadow-hard transition hover:-translate-x-1 hover:-translate-y-1"
     >
       <div className={`relative border-b-[3px] border-ink ${c.cover_url ? 'aspect-[16/10]' : ''}`}>
         <div className={c.cover_url ? 'absolute inset-0 overflow-hidden' : 'flex'}>
           {c.cover_url
             ? <Photo src={c.cover_url} alt={c.title} className="h-full w-full object-cover" />
-            : <TitleField title={c.title} category={c.category} closed={!!closed} wide={wide} />}
+            : <TitleField title={c.title} category={c.category} closed={!!closed} />}
           {closed && c.cover_url && <div className="absolute inset-0 bg-white/60" />}
         </div>
         {/*
@@ -108,20 +108,20 @@ export function CommissionCard({ c, wide = false }: { c: Card; wide?: boolean })
           자리가 남았다는 말은 아래 값 줄 옆에 글자로 적는다.
         */}
         {/* 상태 탭은 넉 장 모두 같은 자리에 있다. 하나에만 있으면 그건 상태가 아니라 얼룩이다. */}
-        <div className="absolute right-0 top-0 z-10">
+        <div className="absolute right-3 top-0 z-10 -translate-y-1/2">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </div>
       </div>
 
-      <div className="body flex flex-1 flex-col justify-end p-4">
-        {/* 값이 먼저다. 메뉴판에서 결정을 만드는 것은 값이다. */}
-        <span className={`num flex items-baseline gap-1 font-extrabold leading-none tracking-tight ${wide ? 'text-[44px]' : 'text-[32px]'} ${closed ? '' : 'text-ink'}`}>
-          {comma(c.price)}<span className="text-[14px] font-medium">원부터</span>
+      <div className="body flex flex-1 items-end justify-between gap-3 p-4">
+        {/* 만드는 사람과 걸리는 날. 값의 왼쪽에 두 줄로 앉는다 — 메뉴판의 이름 자리다. */}
+        <span className="min-w-0 flex-1 leading-tight text-ink">
+          <span className="block truncate text-[15px] font-bold">{c.creator_nickname}</span>
+          <span className="mt-1.5 block text-[13px] text-muted">{c.turnaround_days}일 걸려요</span>
         </span>
-        {/* 만드는 사람과 걸리는 날을 한 줄로. 부품을 일곱 개 얹어 두면 어느 것도 눈에 안 든다. */}
-        <span className={`mt-3 block truncate text-[13px] ${closed ? '' : 'text-ink'}`}>
-          <span className="font-bold">{c.creator_nickname}</span>
-          <span className={closed ? '' : 'text-muted'}> · {c.turnaround_days}일 걸려요</span>
+        {/* 값. 끝을 맞춰 두면 넉 장의 값이 한 열로 읽힌다. */}
+        <span className="num flex shrink-0 items-baseline text-[30px] font-extrabold leading-none tracking-tight text-ink">
+          {comma(c.price)}<span className="ml-0.5 text-[18px]">원~</span>
         </span>
       </div>
 
@@ -132,7 +132,7 @@ export function CommissionCard({ c, wide = false }: { c: Card; wide?: boolean })
       */}
       <span
         className={`disp flex items-center justify-between border-t-[3px] border-ink px-4 py-3 text-[17px] ${
-          closed ? 'border-line bg-fill text-faint line-through decoration-[2px]' : 'bg-yellow text-ink'
+          closed ? 'bg-white text-ink' : 'bg-yellow text-ink'
         }`}
       >
         {/* 도장이 이미 "마감" 이라고 말했다. 띠는 같은 말을 되풀이하지 않고 다음 할 일을 말한다. */}
