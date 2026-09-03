@@ -22,7 +22,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 같은 자리, 같은 크기. 칠이 없다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}>
+    <span className={`shrink-0 whitespace-nowrap font-bold leading-none text-muted ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}>
       {label}
     </span>
   )
@@ -75,34 +75,36 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
 export function CommissionCard({ c, n }: { c: Card; n: number }) {
   const left = c.max_slots - c.active_count
   const closed = closedLabel(c.status, left)
+  // 마감한 줄은 회색으로 내려앉는다. 메뉴판에서 다 나간 것은 지우거나 흐리게 두지, 같은 검정으로 두지 않는다.
+  const tone = closed ? 'text-muted' : 'text-ink'
   return (
     <Link
       href={`/commissions/${c.id}`}
       className="block border-b border-ink py-8 transition hover:bg-yellow/25"
     >
       {/*
-        메뉴판의 한 줄: 번호 · 이름 ····· 상태 · 값.
-        **상태는 값 바로 앞 한 자리에만 온다.** 열렸으면 남은 자리 수, 닫혔으면 도장.
-        곁줄에 작게 적어 두었더니, 이 화면이 제호에서 약속한 바로 그 숫자가 12px 회색으로 묻혔다.
+        한 줄: 번호 · 이름 ····· 상태 · 값.
+        칸 사이를 flex gap 으로 띄우면 **점선과 상태 사이에도 같은 간격이 생겨** 점선이 상태에 닿지 못한다.
+        그래서 간격을 gap 이 아니라 각 칸의 안쪽 여백으로 준다.
       */}
-      <span className="flex items-baseline gap-4">
-        <span className="num w-[46px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none text-muted">
+      <span className="flex items-baseline">
+        <span className={`num w-[62px] shrink-0 text-[min(3.4vw,32px)] font-normal leading-none ${closed ? 'text-line' : 'text-muted'}`}>
           {String(n).padStart(2, '0')}
         </span>
-        <span className="disp text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
+        <span className={`disp pr-3 text-balance break-keep text-[min(3.2vw,30px)] leading-tight ${tone}`}>
           {c.title}
         </span>
         <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
-        <span className="hidden w-[112px] shrink-0 sm:block">
+        <span className="hidden w-[124px] shrink-0 pl-3 sm:block">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
         </span>
-        <span className="disp num ml-auto w-[186px] shrink-0 text-right text-[min(2.8vw,26px)] leading-none text-ink sm:ml-0">
+        <span className={`disp num ml-auto w-[186px] shrink-0 text-right text-[min(2.8vw,26px)] leading-none sm:ml-0 ${tone}`}>
           {comma(c.price)}
-          <span className="ml-1.5 inline-block w-[46px] text-left text-[12px] font-bold tracking-[0.1em]">원부터</span>
+          <span className="ml-2 inline-block w-[46px] text-left text-[12px] font-bold tracking-[0.1em]">원부터</span>
         </span>
       </span>
 
-      <span className="mt-3 flex flex-wrap items-center gap-x-3 text-[14px] font-medium text-muted sm:pl-[62px]">
+      <span className="mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium text-strong sm:pl-[62px]">
         <span>{c.category} · {c.creator_nickname} · {c.turnaround_days}일 걸려요</span>
         <span className="sm:hidden">
           {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}

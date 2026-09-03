@@ -51,7 +51,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <HeaderNav items={NAV} />
             </div>
             {/* 이 판은 달마다 새로 나온다. 그 사실은 판권면에 묻어 둘 것이 아니라 제호 옆에 적는 것이다. */}
-            <p className="num hidden text-[12px] font-bold tracking-[0.18em] text-white/55 sm:block">제9호 · 2026년 9월</p>
+            <p className="num hidden text-[12px] font-bold tracking-[0.1em] text-white/55 sm:block">제9호 · 2026년 9월</p>
           </div>
           {/* 좁은 화면의 길. 높이 44 탭 세 개. */}
           <nav className="flex border-t-[3px] border-white/20 sm:hidden">

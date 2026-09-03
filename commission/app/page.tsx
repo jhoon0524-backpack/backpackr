@@ -69,8 +69,9 @@ function EmptyRow() {
       href="/open"
       className="group mt-10 block"
     >
-      <span className="disp block text-[min(2.6vw,24px)] leading-snug text-ink">
-        그리는 분이라면, 여기에 <span className="bg-yellow px-1.5 py-0.5">메뉴 한 장</span>을 붙이세요.
+      <span className="disp block text-[min(2.6vw,24px)] leading-snug text-ink group-hover:underline group-hover:decoration-[2px] group-hover:underline-offset-[6px]">
+        그리는 분이라면, 여기에 <span className="bg-yellow px-1.5 py-0.5">메뉴 한 장을</span> 붙이세요.
+        <span className="ml-2 font-normal">→</span>
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">
         자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.
@@ -89,10 +90,10 @@ function EmptyRow() {
  */
 function Fraction({ open, all }: { open: number; all: number }) {
   return (
-    <span className="num inline-block bg-yellow px-[0.09em] py-[0.05em] align-baseline text-[0.95em] leading-[0.8] text-ink [-webkit-text-stroke:0.022em_currentColor]">
+    <span className="num inline-block bg-yellow px-[0.08em] py-[0.055em] align-baseline text-[1.04em] leading-[0.76] text-ink [-webkit-text-stroke:0.024em_currentColor]">
       <span>{open}</span>
       {/* 빗금은 활자에 딸려 온 획이 아니라 직접 그린 것이다 — 두께와 키를 숫자에 맞춘다. */}
-      <span aria-hidden className="mx-[0.04em] inline-block h-[0.72em] w-[0.085em] -skew-x-[13deg] bg-ink align-baseline" />
+      <span aria-hidden className="mx-[0.06em] inline-block h-[0.7em] w-[0.08em] -skew-x-[13deg] bg-ink align-baseline" />
       <span>{all}</span>
     </span>
   )
