@@ -22,7 +22,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 같은 자리, 같은 크기. 칠이 없다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`shrink-0 whitespace-nowrap font-bold leading-none text-muted ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}>
+    <span className={`shrink-0 whitespace-nowrap bg-ink px-2 py-0.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
       {label}
     </span>
   )

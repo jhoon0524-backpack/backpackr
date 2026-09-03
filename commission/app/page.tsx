@@ -43,7 +43,7 @@ export default async function CommissionList() {
             한글 수사로 적으면 애초에 섞일 얼굴이 없다 — 제호는 한 얼굴 한 덩어리가 된다.
             정확한 값(4/6)은 바로 아래 줄, 숫자를 적는 활자(고딕)로 적는다.
           */}
-          <h1 className="poster -ml-[0.035em] text-[min(11.2vw,161px)] leading-[0.9] tracking-[-0.005em] [word-spacing:-0.06em] text-white">
+          <h1 className="poster -ml-[0.035em] text-[min(9.6vw,138px)] leading-[0.9] tracking-[-0.005em] [word-spacing:-0.06em] text-white">
             {openSlots === 0 ? (
               <>지금은 자리가 없어요</>
             ) : (
@@ -51,7 +51,7 @@ export default async function CommissionList() {
             )}
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
-          <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white/60 pt-5">
+          <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white pt-5">
             <p className="text-[min(2.4vw,22px)] font-normal leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
@@ -88,9 +88,9 @@ function EmptyRow() {
       href="/open"
       className="group mt-12 block"
     >
-      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink underline decoration-[2px] underline-offset-[7px]">
-        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요.
-
+      {/* 노랑 밑줄과 화살표. 노랑은 이 화면에서 셋뿐이다 — 남은 자리, 지금 보는 곳, 눌러야 할 곳. */}
+      <span className="poster block text-[min(3.1vw,29px)] leading-snug text-ink underline decoration-yellow decoration-[3px] underline-offset-[8px]">
+        그리는 분이라면, 여기에 메뉴 한 장을 붙이세요. <span aria-hidden>→</span>
       </span>
       <span className="mt-3 block text-[15px] font-medium text-muted">
         자리가 찰 때까지 의뢰가 들어옵니다. 자리가 다시 비면 메뉴는 저절로 열립니다.

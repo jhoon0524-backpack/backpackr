@@ -64,19 +64,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-8 pt-0">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}
         <footer className="border-t-[3px] border-white bg-ink text-white">
-          {/*
-            사용자 전환기는 로그인이 붙기 전까지의 임시 장치다. 머리에 두면 서비스의 길 옆에
-            시연용 조작기가 나란히 서서, 처음 온 사람에게는 이게 기능인지 장치인지 알 수 없다.
-            판권면으로 내린다 — 인쇄물에서 발행 정보가 있는 자리다.
-          */}
-          <div className="mx-auto max-w-[1200px] px-8 py-9">
-            {/* 판권면. 발행 정보는 한 줄로 흘려 쓰는 것이 아니라 층을 갖는다. */}
-            <div>
-              <p className="poster text-[42px] leading-none">커미션!</p>
-              <p className="num mt-3 text-[13px] font-medium text-white/70">
-                창작자에게 맞춤 작업을 의뢰하는 곳 · 제9호 · © 2026 커미션
-              </p>
-            </div>
+          <div className="mx-auto max-w-[1200px] px-8 py-7">
+            {/* 판권면은 한 줄이다. 머리를 그대로 되풀이하면 높이만 늘고 새로 아는 것은 없다. */}
+            <p className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+              <span className="poster text-[26px] leading-none">커미션!</span>
+              <span className="num text-[13px] font-medium text-white/70">
+                창작자에게 맞춤 작업을 의뢰하는 곳 · © 2026
+              </span>
+            </p>
           </div>
         </footer>
       </body>
