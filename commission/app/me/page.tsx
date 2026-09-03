@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { listIncomingRequests, listMyCommissions, listMyRequests, type RequestRow } from '@/lib/db'
 import { REQUEST_STATUS, daysLeft, kstMonthDay, trustFromFunding, won } from '@/lib/format'
 import { FundingRecord } from '@/app/funding-record'
-import { getCurrentUser } from '@/lib/session'
+import { demoLoginEnabled, getCurrentUser } from '@/lib/session'
 import { BTN_INK, BTN_PILL, EYEBROW, H2, NOTICE } from '@/app/ui'
 import { toggleCommission } from './actions'
 import { UserSwitcher } from '@/app/user-switcher'
@@ -66,8 +66,19 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
   if (!me) {
     return (
       <div className="border-[3px] border-ink bg-white p-8 text-center">
-        <p className="disp text-2xl text-ink">먼저 아래에서 사용자를 골라 주세요.</p>
-        <div className="mt-6 flex justify-center"><DemoSwitcher /></div>
+        {demoLoginEnabled() ? (
+          <>
+            <p className="disp text-2xl text-ink">먼저 아래에서 사용자를 골라 주세요.</p>
+            <div className="mt-6 flex justify-center"><DemoSwitcher /></div>
+          </>
+        ) : (
+          <>
+            <p className="disp text-2xl text-ink">로그인이 아직 없습니다.</p>
+            <p className="mt-3 text-[15px] font-medium text-muted">
+              카카오 로그인이 붙기 전까지 이 화면은 볼 수 없어요. 메뉴판은 그대로 볼 수 있습니다.
+            </p>
+          </>
+        )}
       </div>
     )
   }

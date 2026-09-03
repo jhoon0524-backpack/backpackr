@@ -1,9 +1,18 @@
 import { listDemoUsers } from '@/lib/db'
-import { getCurrentUserId } from '@/lib/session'
+import { demoLoginEnabled, getCurrentUserId } from '@/lib/session'
 import { switchUser } from './session-actions'
 
 /** 로그인 자리에 임시로 놓인 사용자 전환기. 창작자·의뢰인 양쪽 화면을 오가며 보기 위한 것이다. */
 export async function UserSwitcher() {
+  // 잠겨 있으면 고를 수 있는 것처럼 보이지 않게 한다. 눌러도 아무 일이 없는 조작기는
+  // "고장" 으로 읽히고, 사람은 고장 난 화면에서 자기가 뭘 잘못했는지 찾는다.
+  if (!demoLoginEnabled()) {
+    return (
+      <p className="text-[13px] font-medium text-muted">
+        로그인이 아직 없어 이 주소에서는 다른 사람으로 볼 수 없습니다.
+      </p>
+    )
+  }
   const users = await listDemoUsers()
   const current = await getCurrentUserId()
 

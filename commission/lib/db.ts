@@ -9,7 +9,23 @@ declare global {
 const connectionString =
   process.env.DATABASE_URL ?? 'postgresql://commission:commission@127.0.0.1:5432/commission_dev'
 
-export const pool = global.commissionPool ?? new Pool({ connectionString })
+/**
+  * 서버리스(Vercel)에서는 **인스턴스마다 이 풀이 따로 생긴다.** 상한이 없으면
+  * 인스턴스가 늘어난 만큼 연결이 늘어, 어느 순간 DB 가 새 연결을 거절한다.
+  * 그때 죽는 것은 한 요청이 아니라 화면 전체다.
+  *
+  * 배포에서는 Supabase 의 Transaction pooler(6543)를 쓰고 인스턴스당 몇 개만 잡는다.
+  * 로컬은 테스트가 동시에 붙으므로 넉넉히 둔다.
+  */
+const isProd = process.env.NODE_ENV === 'production'
+export const pool =
+  global.commissionPool ??
+  new Pool({
+    connectionString,
+    max: Number(process.env.DB_POOL_MAX ?? (isProd ? 3 : 10)),
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 10_000,
+  })
 
 // 개발 중 핫 리로드마다 풀이 새로 생기는 것을 막는다.
 if (process.env.NODE_ENV !== 'production') global.commissionPool = pool
