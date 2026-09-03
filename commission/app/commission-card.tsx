@@ -9,10 +9,14 @@ import { Photo } from './photo'
  *   빨강 = 한 자리 남음 — 진짜로 급한 순간에만. 늘 빨강이면 급하다는 말이 들리지 않는다.
  *   검정 = 마감 (`ClosedStamp`)
  */
-export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | 'md' }) {
+export function SlotStamp({ left, max, active, size = 'sm' }: { left: number; max: number; active: number; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-[3px] border-ink bg-white px-3 py-1.5 leading-none text-ink ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
-      {left === 1 ? '한 자리 남음' : `${left}자리 남음`}
+    <span
+      className={`inline-flex items-center gap-2 border-b-[3px] border-l-[3px] border-ink bg-yellow px-3 py-1.5 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}
+      aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
+    >
+      자리 {left}/{max}
+      <Seats max={max} active={active} />
     </span>
   )
 }
@@ -20,7 +24,7 @@ export function SlotStamp({ left, size = 'sm' }: { left: number; size?: 'sm' | '
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 색만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`disp inline-flex min-w-[92px] items-center justify-center border-b-[3px] border-l-[3px] border-ink bg-ink px-3 py-1.5 leading-none text-white ${size === 'md' ? 'text-[22px]' : 'text-[17px]'}`}>
+    <span className={`inline-flex items-center border-b-[3px] border-l-[3px] border-ink bg-ink px-3 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
       {label}
     </span>
   )
@@ -66,16 +70,10 @@ export function TitleField({ title, category, closed = false, big = false }: { t
  */
 export function Seats({ max, active }: { max: number; active: number }) {
   return (
-    <span className="flex shrink-0 items-center gap-1.5" aria-label={`${max}자리 가운데 ${max - active}자리 비어 있음`}>
-      <span className="num whitespace-nowrap text-[13px] font-medium text-ink">자리 {max - active}/{max}</span>
-      <span className="flex gap-1">
-        {Array.from({ length: max }, (_, i) => (
-          <span
-            key={i}
-            className={`h-3.5 w-3.5 border-2 border-ink ${i < active ? 'bg-ink' : 'bg-yellow'}`}
-          />
-        ))}
-      </span>
+    <span aria-hidden className="flex shrink-0 gap-1">
+      {Array.from({ length: max }, (_, i) => (
+        <span key={i} className={`h-3.5 w-3.5 border-2 border-ink ${i < active ? 'bg-ink' : 'bg-white'}`} />
+      ))}
     </span>
   )
 }
@@ -92,8 +90,8 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
 }) {
   const label = closedLabel(status, max - active)
   return (
-    <div className="absolute right-4 top-4">
-      {label ? <ClosedStamp label={label} size={size} /> : <SlotStamp left={max - active} size={size} />}
+    <div className="absolute right-0 top-0">
+      {label ? <ClosedStamp label={label} size={size} /> : <SlotStamp left={max - active} max={max} active={active} size={size} />}
     </div>
   )
 }
@@ -125,11 +123,10 @@ export function CommissionCard({ c }: { c: Card }) {
           기울여 붙인 것은 **마감 하나뿐**이다. 넷이 다 기울어 있으면 그건 붙인 자국이 아니라 무늬다.
           자리가 남았다는 말은 아래 값 줄 옆에 글자로 적는다.
         */}
-        {closed && (
-          <div className="absolute right-0 top-0 z-10">
-            <ClosedStamp label={closed} />
-          </div>
-        )}
+        {/* 상태 탭은 넉 장 모두 같은 자리에 있다. 하나에만 있으면 그건 상태가 아니라 얼룩이다. */}
+        <div className="absolute right-0 top-0 z-10">
+          {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} active={c.active_count} />}
+        </div>
       </div>
 
       <div className="body flex flex-1 flex-col justify-end p-4">
@@ -156,7 +153,6 @@ export function CommissionCard({ c }: { c: Card }) {
         <span className={`mt-3 flex items-center justify-between gap-x-2 text-[13px] font-medium tracking-[0.01em] ${closed ? '' : 'text-muted'}`}>
           <span className="truncate">{c.turnaround_days}일 걸려요</span>
           {/* 자리는 글자가 아니라 칸으로. 마감된 메뉴도 같은 자리에 같은 모양이 선다 — 다 칠해져 있을 뿐이다. */}
-          <Seats max={c.max_slots} active={c.active_count} />
         </span>
       </div>
 

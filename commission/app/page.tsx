@@ -27,16 +27,21 @@ export default async function CommissionList() {
     <div>
       {/* 머리와 이어 붙은 한 덩어리다. 위쪽 선을 없애 머리에서 그대로 흘러내리게 한다. */}
       <section className="relative left-1/2 -mx-[50vw] w-screen border-b-[3px] border-ink bg-ink">
-        <div className="mx-auto max-w-[1200px] px-8 pb-7 pt-4">
+        <div className="mx-auto max-w-[1200px] px-8 pb-8 pt-4">
           <p className="num text-[13px] font-bold text-white/60">
             {MONTH.format(new Date())} 메뉴판 <span className="text-white/30">·</span> 메뉴 {commissions.length}개
           </p>
           {/* 살아 있는 숫자만 노랑이다. 이 화면에서 매 순간 바뀌는 값은 이것 하나뿐이다. */}
-          <h1 className="poster mt-5 whitespace-nowrap text-[min(6.8vw,97px)] tracking-[-0.035em] text-white">
-            <span className="num text-yellow">{openSlots}</span>자리 남았어요
+          <h1 className="mt-2 flex items-end gap-5">
+            <span className="poster num text-[min(19vw,268px)] leading-[0.76] text-yellow">{openSlots}</span>
+            <span className="poster pb-[0.22em] text-[min(4.4vw,62px)] leading-[0.92] text-white">
+              자리
+              <br />
+              남았어요
+            </span>
           </h1>
-          <p className="mt-4 text-[18px] font-normal text-white/70">
-            열린 자리 {allSlots}개 가운데 {openSlots}개가 비어 있어요. 고르고 보내면 자리 하나가 찹니다.
+          <p className="mt-6 text-[17px] font-normal text-white/70">
+            고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 이번 달 열린 자리는 모두 {allSlots}개예요.
           </p>
           {/*
             큰 숫자를 오른쪽에 세워 두었더니 화면에 크게 말하는 것이 둘이 되어 서로를 깎아먹었다.
@@ -46,12 +51,12 @@ export default async function CommissionList() {
       </section>
 
       {commissions.length === 0 ? (
-        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <li><EmptySlot /></li>
         </ul>
       ) : (
         /* 칸 사이를 좁혀 판을 빽빽하게 채운다. 넉넉히 띄우면 메뉴판이 아니라 요금제 표처럼 보인다. */
-        <ul className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {commissions.map((c) => (
             <li key={c.id}><CommissionCard c={c} /></li>
           ))}
@@ -78,7 +83,7 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section className="mt-14">
+    <section className="mt-24">
       <h2 className="disp text-[40px] text-ink">보내면 이렇게 됩니다</h2>
       {/*
         네모 넷을 나란히 놓고 큰 숫자를 얹는 것은 어느 소개 페이지에나 있는 모양이다.
@@ -91,7 +96,7 @@ function HowItWorks() {
             key={s.n}
             className="flex flex-wrap items-center gap-x-6 gap-y-1 border-t-[3px] border-ink py-3.5 last:border-b-[3px]"
           >
-            <span className="poster num w-8 shrink-0 text-[22px] leading-none text-ink">{s.n}</span>
+            <span className="disp num flex h-7 w-7 shrink-0 items-center justify-center bg-ink text-[15px] leading-none text-white">{s.n}</span>
             <span className="w-28 shrink-0 text-[19px] font-bold text-ink">{s.t}</span>
             <span className="text-[14px] font-normal leading-relaxed text-muted">{s.d}</span>
           </li>
@@ -115,9 +120,12 @@ function EmptySlot() {
   return (
     <Link
       href="/open"
-      className="group flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
+      className="group relative flex h-full flex-col border-[3px] border-dashed border-line bg-white transition hover:border-ink hover:bg-fill"
     >
       {/* 진짜 카드의 제목 칸과 정확히 같은 구조 — 그래야 넉 장의 가름선이 같은 높이에 선다. */}
+      <span className="absolute right-0 top-0 border-b-[3px] border-l-[3px] border-dashed border-line px-3 py-1.5 text-[13px] font-bold text-muted">
+        비어 있음
+      </span>
       <span className="flex w-full flex-col gap-1.5 px-4 pb-3 pt-7">
         <span className="text-[12px] font-bold tracking-[0.06em] text-muted">빈 자리</span>
         <span className="h-[52px] text-[21px] font-semibold leading-tight text-strong">여기 붙이기</span>
