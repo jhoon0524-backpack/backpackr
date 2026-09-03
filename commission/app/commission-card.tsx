@@ -10,7 +10,7 @@ import { comma } from '@/lib/format'
 export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: number; size?: 'sm' | 'md' }) {
   return (
     <span
-      className={`num inline-flex shrink-0 items-center whitespace-nowrap bg-yellow px-3 py-1.5 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}
+      className={`num inline-flex shrink-0 items-center whitespace-nowrap bg-yellow px-2.5 py-1 font-bold leading-none text-ink ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
       빈자리 {left}/{max}
@@ -21,7 +21,7 @@ export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: numbe
 /** 마감. 자리 딱지와 같은 모양, 같은 자리. 칠만 검정이다. */
 export function ClosedStamp({ label, size = 'sm' }: { label: string; size?: 'sm' | 'md' }) {
   return (
-    <span className={`inline-flex shrink-0 items-center whitespace-nowrap bg-ink px-3 py-1.5 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
+    <span className={`inline-flex shrink-0 items-center whitespace-nowrap bg-ink px-2.5 py-1 font-bold leading-none text-white ${size === 'md' ? 'text-[15px]' : 'text-[13px]'}`}>
       {label}
     </span>
   )
@@ -77,31 +77,30 @@ export function CommissionCard({ c }: { c: Card }) {
   return (
     <Link
       href={`/commissions/${c.id}`}
-      className="grid grid-cols-12 items-end gap-x-4 gap-y-3 border-b-[3px] border-ink py-6 transition hover:bg-yellow/25"
+      className="block border-b-[3px] border-ink py-6 transition hover:bg-yellow/25"
     >
-      <span className="col-span-12 lg:col-span-5">
-        <span className="block text-[11px] font-bold uppercase leading-none tracking-[0.14em] text-muted">
-          {c.category}
-        </span>
-        {/* 메뉴판에서 가장 큰 글자는 요리 이름이다. */}
-        <span className="disp mt-2 block text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
+      <span className="block text-[11px] font-bold leading-none tracking-[0.14em] text-muted">{c.category}</span>
+
+      {/*
+        메뉴판의 한 줄 — 이름과 값을 점선이 잇는다.
+        표 머리를 두고 칸을 나눠 두면 그건 메뉴판이 아니라 표다. 인쇄된 메뉴판은 칸을 긋지 않는다.
+        이름 다음에 바로 상태 딱지를 두고, 남은 자리는 점선이 채우고, 끝에 값이 선다.
+      */}
+      <span className="mt-2 flex items-baseline gap-3">
+        <span className="disp shrink-0 text-balance break-keep text-[min(3.2vw,30px)] leading-tight text-ink">
           {c.title}
         </span>
-      </span>
-
-      <span className="col-span-6 text-[14px] font-bold leading-tight text-ink lg:col-span-3">
-        {c.creator_nickname}
-        <span className="block font-medium text-muted">{c.turnaround_days}일 걸려요</span>
-      </span>
-
-      {/* 값은 끝을 맞춘다. 자릿수가 달라도 줄마다 값의 끝이 같은 자리에 선다. */}
-      <span className="disp num col-span-6 flex items-baseline justify-end text-[min(3.2vw,30px)] leading-none text-ink lg:col-span-2">
-        {comma(c.price)}
-        <span className="ml-1 w-[42px] shrink-0 text-left text-[14px]">원부터</span>
-      </span>
-
-      <span className="col-span-12 flex lg:col-span-2 lg:justify-end">
         {closed ? <ClosedStamp label={closed} /> : <SlotStamp left={left} max={c.max_slots} />}
+        <span aria-hidden className="leader hidden h-[1em] min-w-8 flex-1 text-line sm:block" />
+        <span className="disp num ml-auto flex shrink-0 items-baseline text-[min(3.2vw,30px)] leading-none text-ink sm:ml-0">
+          {comma(c.price)}
+          <span className="ml-1 text-[14px]">원부터</span>
+        </span>
+      </span>
+
+      <span className="mt-2 block text-[14px] font-bold text-ink">
+        {c.creator_nickname}
+        <span className="font-medium text-muted"> · {c.turnaround_days}일 걸려요</span>
       </span>
     </Link>
   )
