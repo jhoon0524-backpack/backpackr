@@ -22,24 +22,25 @@ export async function UserSwitcher() {
       머리에서 가장 무거운 물건이 되어 정작 중요한 것들보다 먼저 눈에 든다. 실선 하나로 물러나 있게 한다.
     */
     /*
-      회색 글자 둘이 나란히 떠 있으니 길이 하나 더 난 것처럼 보였다. 선 하나로 묶어
-      "이건 임시 장치" 라고 한 덩어리로 말하게 한다.
+      전에는 둘을 높이 44 상자 **안에** 넣었다. 테두리 2px 를 빼고 나면 실제로 누르는 것은
+      선택칸 80×40, 바꾸기 38×40 — 둘 다 44 에 못 미쳤고 서로 붙어 있었다 (검사표 C1·C2, 실패 10·11).
+      상자를 걷고 각자 높이 44 를 채우게 두고, 사이를 8px 띄운다.
     */
-    <form action={switchUser} className="flex h-11 items-center gap-3 border-[2px] border-ink bg-white px-3">
+    <form action={switchUser} className="flex flex-wrap items-center gap-2">
       <select
         name="userId"
         // 전환 뒤 서버가 새 값을 그려도 브라우저가 기존 select 를 재사용해 빈 칸으로 보인다.
         key={current ?? 'none'}
         defaultValue={current ?? ''}
         aria-label="사용자 고르기"
-        className="h-full appearance-none bg-white text-[14px] font-bold text-ink focus:outline-none"
+        className="h-11 min-w-11 border-[2px] border-ink bg-white px-3 text-[14px] font-bold text-ink"
       >
         <option value="">누구로 볼까요</option>
         {users.map((u) => (
           <option key={u.id} value={u.id}>{u.nickname}</option>
         ))}
       </select>
-      <button type="submit" className="h-full text-[14px] font-bold text-ink underline decoration-2 underline-offset-4">
+      <button type="submit" className="h-11 min-w-11 border-[2px] border-ink bg-white px-4 text-[14px] font-bold text-ink hover:bg-fill">
         바꾸기
       </button>
     </form>

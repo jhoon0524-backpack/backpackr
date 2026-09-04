@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
-import { HeaderNav } from "./header-nav";
+import { HeaderNav, HeaderTabs } from "./header-nav";
 
 export const metadata: Metadata = {
   title: "커미션!",
@@ -52,14 +52,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             {/* 이 판은 달마다 새로 나온다. 그 사실은 판권면에 묻어 둘 것이 아니라 제호 옆에 적는 것이다. */}
             <p className="num hidden text-[13px] font-medium text-white/70 sm:block">제9호 · 2026년 9월</p>
           </div>
-          {/* 좁은 화면의 길. 높이 44 탭 세 개. */}
-          <nav className="flex border-t-[3px] border-white/20 sm:hidden">
-            {NAV.map((n, i) => (
-              <Link key={n.href} href={n.href} className={`flex h-11 flex-1 items-center justify-center text-sm font-bold ${i > 0 ? "border-l-[3px] border-white/20" : ""}`}>
-                {n.label}
-              </Link>
-            ))}
-          </nav>
+          {/* 좁은 화면의 길. 지금 있는 칸을 노랑으로 칠하고 칸 사이를 8px 띄운다 (header-nav.tsx). */}
+          <HeaderTabs items={NAV} />
         </header>
         <main className="mx-auto w-full max-w-[1200px] flex-1 px-8 pb-16 pt-0">{children}</main>
         {/* 바닥은 머리를 되비춘다 — 왼쪽 로고, 오른쪽 길. 한쪽만 채우면 잘려 끝난 것처럼 보인다. */}

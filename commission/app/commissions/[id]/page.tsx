@@ -72,7 +72,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
           <dl className="num mt-6 grid grid-cols-3 border-[3px] border-ink bg-white">
             <div className="flex flex-col gap-1 border-r-[3px] border-ink p-3">
               <dt className={EYEBROW}>기본 가격</dt>
-              <dd className="disp whitespace-nowrap text-[20px] sm:text-[24px]">{won(c.price)}<span className="text-xs">~</span></dd>
+              <dd className="disp whitespace-nowrap text-[20px] sm:text-[24px]">{won(c.price)}<span className="text-xs">부터</span></dd>
             </div>
             <div className="flex flex-col gap-1 border-r-[3px] border-ink p-3">
               <dt className={EYEBROW}>작업 기간</dt>
@@ -114,9 +114,9 @@ export default async function CommissionPage({ params, searchParams }: PageProps
                 <p className="text-sm font-medium leading-relaxed text-strong">의뢰하려면 먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
               ) : isMine ? (
                 <>
-                  <p className="text-sm font-medium leading-relaxed text-strong">내가 붙인 메뉴예요. 들어온 의뢰는 내 것에서 봅니다.</p>
+                  <p className="text-sm font-medium leading-relaxed text-strong">내가 붙인 메뉴예요. 들어온 의뢰는 내 의뢰에서 봅니다.</p>
                   <Link href={`/commissions/${c.id}/edit`} className={BTN_INK + ' mt-4'}>메뉴 고치기</Link>
-                  <Link href="/me" className={BTN_SECONDARY + ' mt-2'}>내 것으로</Link>
+                  <Link href="/me" className={BTN_SECONDARY + ' mt-2'}>내 의뢰로</Link>
                 </>
               ) : c.status !== 'open' ? (
                 <>
@@ -143,7 +143,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
         <div className="fixed inset-x-0 bottom-0 z-10 border-t-[3px] border-ink bg-white lg:hidden">
           <div className="mx-auto flex max-w-[1200px] items-center gap-4 px-4 py-3">
             <div className="num flex min-w-0 flex-col">
-              <span className="disp text-[22px] leading-none">{won(c.price)}~</span>
+              <span className="disp text-[22px] leading-none">{won(c.price)}부터</span>
               <span className="text-xs font-bold text-muted">보내는 건 무료</span>
             </div>
             <a href="#request" className={BTN_PRIMARY + ' ml-auto !w-auto px-7'}>의뢰하기</a>

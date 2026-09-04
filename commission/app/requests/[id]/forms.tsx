@@ -105,7 +105,9 @@ export function DeliverForm({ id }: { id: string }) {
       <p className="disp text-[22px]">완성물 전달</p>
       <label className="block">
         <span className={LABEL}>결과물 주소</span>
-        <input name="deliveryUrl" type="url" placeholder="https:// (드라이브·클라우드 공유 링크)" className={INPUT} />
+        {/* 안내를 안내 글(placeholder)에 다 넣으면 390 에서 잘린다 (검사표 B2, 실패 7). 칸 밖으로 옮긴다. */}
+        <input name="deliveryUrl" type="url" placeholder="https://" className={INPUT} />
+        <span className={HELP}>드라이브·클라우드 공유 링크를 붙여 넣으세요.</span>
       </label>
       <label className="block">
         <span className={LABEL}>전달 메모</span>

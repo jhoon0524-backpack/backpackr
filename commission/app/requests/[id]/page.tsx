@@ -26,7 +26,7 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
   return (
     <div>
       <div className="mb-6">
-        <Link href="/me" className={BACK}>← 내 것</Link>
+        <Link href="/me" className={BACK}>← 내 의뢰</Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="disp text-[34px] leading-[1.05] sm:text-[44px]">
             <Link href={`/commissions/${r.commission_id}`} className="hover:underline hover:decoration-[3px]">{r.commission_title}</Link>

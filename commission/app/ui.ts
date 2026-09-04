@@ -23,7 +23,12 @@ export const BTN_INK = `disp inline-flex h-14 w-full items-center justify-center
 export const BTN_SECONDARY = `inline-flex h-14 w-full items-center justify-center bg-white px-5 text-base font-bold text-ink ${HARD}`
 /** 목록 줄 끝에 붙는 작은 버튼. 높이 44. */
 export const BTN_PILL = 'inline-flex h-11 shrink-0 items-center whitespace-nowrap border-[3px] border-ink bg-white px-3.5 text-[13px] font-bold text-ink transition hover:bg-fill active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50'
-export const INPUT = 'w-full border-[3px] border-ink bg-white px-4 py-3 text-[15px] text-ink placeholder:text-faint focus:bg-yellow/30 focus:outline-none'
+/*
+ * 글 쓰는 칸. 초점이 어디 있는지는 **바탕색만으로 말하지 않는다** —
+ * `focus:outline-none` 을 걸어 두었더니 Tab 으로 움직일 때 입력칸만 외곽선이 사라졌고,
+ * 노랑 바탕은 값이 채워지면 글자에 묻힌다 (검사표 C4). 테두리 밖으로 붉은 선을 한 겹 두른다.
+ */
+export const INPUT = 'w-full border-[3px] border-ink bg-white px-4 py-3 text-[15px] text-ink placeholder:text-faint focus:bg-yellow/30 focus:[outline:3px_solid_var(--color-accent)] focus:[outline-offset:2px]'
 export const LABEL = 'mb-2 block text-sm font-bold text-ink'
 export const HELP = 'mt-2 block text-[13px] font-medium leading-relaxed text-muted'
 export const ALERT = 'border-[3px] border-ink bg-urgent-wash px-4 py-3 text-sm font-bold text-urgent-text'

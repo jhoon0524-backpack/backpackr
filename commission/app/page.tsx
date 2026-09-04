@@ -51,14 +51,14 @@ export default async function CommissionList() {
           </h1>
           {/* 판의 밑선. 제호가 소리치고, 이 줄이 무슨 뜻인지 말한다. */}
           <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-t border-white pt-5">
-            <p className="serif text-[min(2.6vw,24px)] leading-relaxed text-white/85">
+            <p className="serif text-[clamp(16px,2.6vw,24px)] leading-relaxed text-white/85">
               고르고 보내면 창작자가 수락하고, 자리 하나가 찹니다. 받고 확인을 누르면 그 자리가 다시 빕니다.
             </p>
           </div>
         </div>
       </section>
 
-      <h2 className="disp mt-14 text-[min(3.6vw,36px)] leading-none text-ink">이번 달 메뉴</h2>
+      <h2 className="disp mt-14 text-[clamp(24px,3.6vw,36px)] leading-none text-ink">이번 달 메뉴</h2>
 
       {commissions.length > 0 && (
         /* 장부는 굵은 선으로 열고 굵은 선으로 닫는다. 사이는 가는 선이다. */

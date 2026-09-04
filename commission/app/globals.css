@@ -57,7 +57,12 @@ body { }` 규칙은 레이어 밖에 있어서, 레이어 안에 있는 Tailwind
   --color-ink: #111111;
   --color-strong: #333333;
   --color-muted: #555555;
-  --color-faint: #8a8a8a;
+  /*
+   * 흐린 글자. #8a8a8a 는 흰 바탕에서 대비 3.1 이라 **읽어야 하는 글자에 못 쓴다** —
+   * 입력칸 안내 글(placeholder)과 마감한 줄의 가격이 이 색이었다 (검사표 B1, 실패 5·6).
+   * #6d6d6d 는 5.2. 텀블벅 색 체계의 muted 값과 같다.
+   */
+  --color-faint: #6d6d6d;
   --color-line: #111111;
   --color-fill: #f2f2f2;
   --color-ash: #111111;

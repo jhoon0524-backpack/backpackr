@@ -19,23 +19,35 @@ function RequestLine({ r, who }: { r: RequestRow; who: 'creator' | 'client' }) {
   const price = r.final_price ?? r.quoted_price
   const active = r.status === 'accepted' || r.status === 'delivered'
   return (
-    <li>
+    /* 줄과 줄 사이는 3px 선 하나뿐이었다. 누르는 영역끼리 8px 을 띄운다 (검사표 C2). */
+    <li className="py-1">
       <Link href={`/requests/${r.id}`} className="flex items-center justify-between gap-4 px-3 py-4 hover:bg-fill">
         <div className="min-w-0">
           <p className="disp line-clamp-2 text-[20px] leading-tight">{r.commission_title}</p>
           <p className="mt-1 truncate text-sm font-medium text-muted">
             {who === 'creator' ? r.client_nickname : r.creator_nickname}
-            <span className="num"> · {won(price)}</span>
-            {r.final_price === null && ' (기본 가격)'}
+            {' · '}{r.final_price === null ? '기본 가격 ' : '최종가 '}
+            <span className="num">{won(price)}</span>
           </p>
           {/* 마감은 셋째 줄에 따로. 둘째 줄에 붙이면 390 에서 말줄임표로 사라졌다 (UI/UX 1회차 발견 3). */}
           {who === 'client' && r.can_withdraw && (
-            <p className="mt-1 text-sm font-bold text-urgent-text">눌러서 물릴 수 있어요</p>
+            <p className="mt-1 text-[16px] font-bold text-urgent-text">눌러서 물릴 수 있어요</p>
           )}
+          {/*
+            마감일과 남은 날은 이 줄에서 **가장 손해 보는 숫자**다. 이름 줄과 같은 14px 로 두면
+            굵기만 다를 뿐 크기가 같아 눈이 먼저 닿지 않는다 (검사표 B3, 실패 9).
+          */}
           {active && r.due_at && (
-            <p className={`num mt-1 text-sm font-bold ${daysLeft(r.due_at) < 0 ? 'text-urgent-text' : 'text-ink'}`}>
+            <p className={`num mt-1 text-[16px] font-bold ${daysLeft(r.due_at) < 0 ? 'text-urgent-text' : 'text-ink'}`}>
               마감 {kstMonthDay(r.due_at)}{daysLeft(r.due_at) < 0 ? ` · ${-daysLeft(r.due_at)}일 지남` : ` · ${daysLeft(r.due_at)}일 남음`}
             </p>
+          )}
+          {/*
+            창작자에게 온 수락 대기 건. 줄 전체가 링크지만 화면에는 그 말이 없어서,
+            수락하러 어디로 가야 하는지 보이지 않았다 (검사표 A2, 실패 1).
+          */}
+          {who === 'creator' && r.status === 'requested' && (
+            <p className="mt-1 text-[16px] font-bold text-ink underline decoration-2 underline-offset-2">열어서 수락하기 →</p>
           )}
         </div>
         <StatusBadge status={r.status} />
@@ -49,8 +61,9 @@ function Section({ title, count, children }: { title: string; count?: number; ch
     <section>
       <h2 className="flex items-center gap-3">
         <span className={H2}>{title}</span>
+        {/* 숫자만 두면 무엇의 1 인지 알 수 없다 (검사표 F4, 실패 15). */}
         {count !== undefined && count > 0 && (
-          <span className="stamp num bg-accent text-[18px] text-white">{count}</span>
+          <span className="stamp num bg-accent text-[14px] text-white">수락 대기 {count}건</span>
         )}
       </h2>
       {children}
@@ -107,7 +120,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <div className="flex flex-col gap-2">
-        <p className={EYEBROW}>내 것</p>
+        <p className={EYEBROW}>내 의뢰</p>
         <h1 className="disp text-[44px] leading-none">{me.nickname}</h1>
         {me.bio && <p className="text-[15px] font-medium leading-relaxed text-strong">{me.bio}</p>}
         {trust && <div className="mt-1"><FundingRecord trust={trust} followers={me.follower_count} /></div>}
@@ -147,7 +160,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
                   <div className="min-w-0">
                     <Link href={`/commissions/${c.id}`} className="disp flex min-h-11 items-center truncate text-[20px] hover:underline hover:decoration-[3px]">{c.title}</Link>
                     <p className="num mt-1 text-sm font-medium text-muted">
-                      {c.status === 'closed' ? '내려 둠' : left > 0 ? `${left}자리 남음` : '자리 없음'} · {won(c.price)}~ · 동시 진행 {c.active_count}/{c.max_slots}
+                      {c.status === 'closed' ? '내려 둠' : left > 0 ? `${left}자리 남음` : '자리 없음'} · {won(c.price)}부터 · 동시 진행 {c.active_count}/{c.max_slots}
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-2">
