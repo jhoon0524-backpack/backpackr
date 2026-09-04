@@ -1,0 +1,14 @@
+{
+  "name": "backpackr-sales-crm",
+  "version": "0.1.0",
+  "description": "영업용 CRM 툴 — 고객사/연락처/딜 파이프라인/활동 관리",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node lib/seed.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
