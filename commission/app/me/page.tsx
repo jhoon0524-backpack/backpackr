@@ -24,10 +24,15 @@ function RequestLine({ r, who }: { r: RequestRow; who: 'creator' | 'client' }) {
       <Link href={`/requests/${r.id}`} className="flex items-center justify-between gap-4 px-3 py-4 hover:bg-fill">
         <div className="min-w-0">
           <p className="disp line-clamp-2 text-[20px] leading-tight">{r.commission_title}</p>
-          <p className="mt-1 truncate text-sm font-medium text-muted">
-            {who === 'creator' ? r.client_nickname : r.creator_nickname}
-            {' · '}{r.final_price === null ? '기본 가격 ' : '최종가 '}
-            <span className="num">{won(price)}</span>
+          {/*
+            이름은 곁글자, 금액은 값이다. 둘을 같은 14px 회색으로 두었더니
+            놓치면 손해 보는 숫자가 이름과 같은 크기였다 (검사표 B3).
+          */}
+          <p className="mt-1 truncate">
+            <span className="text-sm font-medium text-muted">
+              {who === 'creator' ? r.client_nickname : r.creator_nickname} · {r.final_price === null ? '기본 가격' : '최종가'}{' '}
+            </span>
+            <span className="num text-[16px] font-bold text-ink">{won(price)}</span>
           </p>
           {/* 마감은 셋째 줄에 따로. 둘째 줄에 붙이면 390 에서 말줄임표로 사라졌다 (UI/UX 1회차 발견 3). */}
           {who === 'client' && r.can_withdraw && (
@@ -88,7 +93,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
           <>
             <p className="disp text-2xl text-ink">로그인이 아직 없습니다.</p>
             <p className="mt-3 text-[15px] font-medium text-muted">
-              카카오 로그인이 붙기 전까지 이 화면은 볼 수 없어요. 메뉴판은 그대로 볼 수 있습니다.
+              카카오 로그인이 생기기 전까지 이 화면은 볼 수 없어요. 메뉴판은 그대로 볼 수 있습니다.
             </p>
           </>
         )}
@@ -159,8 +164,12 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
                 <li key={c.id} className="flex flex-col gap-3 px-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <Link href={`/commissions/${c.id}`} className="disp flex min-h-11 items-center truncate text-[20px] hover:underline hover:decoration-[3px]">{c.title}</Link>
+                    {/* 남은 자리는 이 줄에서 창작자가 가장 먼저 봐야 하는 수다 (검사표 B3). 이름은 메뉴판과 같게 (F1). */}
                     <p className="num mt-1 text-sm font-medium text-muted">
-                      {c.status === 'closed' ? '내려 둠' : left > 0 ? `${left}자리 남음` : '자리 없음'} · {won(c.price)}부터 · 동시 진행 {c.active_count}/{c.max_slots}
+                      {c.status === 'closed'
+                        ? '내려 둠'
+                        : <span className="text-[16px] font-bold text-ink">남은 자리 {left}/{c.max_slots}</span>}
+                      {' · '}{won(c.price)}부터
                     </p>
                   </div>
                   <div className="flex shrink-0 gap-2">
@@ -190,7 +199,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
  *
  * 한동안 이걸 머리와 판권면에 두었다. 그런데 이건 **제품의 기능이 아니라 시연용 장치**다.
  * 화면 어디에 두든 브랜드 자리에 놓이면 "만들다 만 앱" 이라는 신호가 된다.
- * 로그인이 붙기 전까지는 내 화면 맨 아래, 도구 상자 하나로 둔다.
+ * 로그인 기능이 생기기 전까지는 내 화면 맨 아래, 도구 상자 하나로 둔다.
  */
 function DemoSwitcher() {
   return (
@@ -198,7 +207,7 @@ function DemoSwitcher() {
       <p className="text-[12px] font-bold tracking-[0.14em] text-muted">시연용 도구</p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <UserSwitcher />
-        <p className="text-[13px] font-medium text-muted">로그인이 붙기 전까지, 다른 사람의 화면으로 바꿔 볼 수 있습니다.</p>
+        <p className="text-[13px] font-medium text-muted">로그인 기능이 생기기 전까지, 다른 사람의 화면으로 바꿔 볼 수 있습니다.</p>
       </div>
     </section>
   )

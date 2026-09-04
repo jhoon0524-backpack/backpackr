@@ -30,7 +30,7 @@ export default async function CommissionPage({ params, searchParams }: PageProps
   const canRequest = !!me && !isMine && c.status === 'open' && left > 0
 
   return (
-    <div className="pb-28 lg:pb-0">
+    <div>
       <Link href="/" className={BACK}>← 메뉴판</Link>
       {sp.updated && <p className={NOTICE + ' mt-1'}>메뉴를 고쳤어요. 주소는 그대로라 이미 보낸 링크도 이 내용으로 보여요.</p>}
 
@@ -69,12 +69,16 @@ export default async function CommissionPage({ params, searchParams }: PageProps
             {trust && <div className="mt-2"><FundingRecord trust={trust} /></div>}
           </div>
 
-          <dl className="num mt-6 grid grid-cols-3 border-[3px] border-ink bg-white">
-            <div className="flex flex-col gap-1 border-r-[3px] border-ink p-3">
+          {/*
+            폭 390 에서 한 칸이 84px 밖에 안 돼 "60,000원부터" 가 칸 밖으로 밀려 나갔다 (검사표 B2).
+            좁을 때는 세로로 쌓는다 — 줄이려면 값을 자르는 수밖에 없는데, 값은 자를 것이 아니다.
+          */}
+          <dl className="num mt-6 grid grid-cols-1 border-[3px] border-ink bg-white sm:grid-cols-3">
+            <div className="flex flex-col gap-1 border-b-[3px] border-ink p-3 sm:border-b-0 sm:border-r-[3px]">
               <dt className={EYEBROW}>기본 가격</dt>
               <dd className="disp whitespace-nowrap text-[20px] sm:text-[24px]">{won(c.price)}<span className="text-xs">부터</span></dd>
             </div>
-            <div className="flex flex-col gap-1 border-r-[3px] border-ink p-3">
+            <div className="flex flex-col gap-1 border-b-[3px] border-ink p-3 sm:border-b-0 sm:border-r-[3px]">
               <dt className={EYEBROW}>작업 기간</dt>
               <dd className="disp text-[20px] sm:text-[24px]">{c.turnaround_days}<span className="text-xs">일</span></dd>
             </div>
@@ -140,7 +144,12 @@ export default async function CommissionPage({ params, searchParams }: PageProps
       </div>
 
       {canRequest && (
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t-[3px] border-ink bg-white lg:hidden">
+        /*
+          `fixed` 로 두었더니 맨 아래까지 내렸을 때 막대가 **판권면을 덮었다** (검사표 C5).
+          `sticky` 는 제 부모(이 화면의 본문) 안에서만 떠 있다가 본문이 끝나면 스스로 비켜난다.
+          `-mx-8` 은 본문의 좌우 여백을 되돌려 화면 끝까지 닿게 한다.
+        */
+        <div className="sticky bottom-0 z-10 -mx-8 mt-10 border-t-[3px] border-ink bg-white lg:hidden">
           <div className="mx-auto flex max-w-[1200px] items-center gap-4 px-4 py-3">
             <div className="num flex min-w-0 flex-col">
               <span className="disp text-[22px] leading-none">{won(c.price)}부터</span>

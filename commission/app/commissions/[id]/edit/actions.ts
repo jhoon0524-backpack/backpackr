@@ -11,7 +11,7 @@ export async function saveCommission(_prev: CommissionFormState, formData: FormD
   const me = await getCurrentUser()
   const parsed = parseCommissionForm(formData)
   if (!me) return { message: '먼저 위쪽에서 사용자를 골라 주세요.', values: parsed.values }
-  if (!parsed.ok) return { message: parsed.message, values: parsed.values }
+  if (!parsed.ok) return { message: parsed.message, values: parsed.values, field: parsed.field }
 
   let result
   try {
@@ -25,7 +25,8 @@ export async function saveCommission(_prev: CommissionFormState, formData: FormD
     const message = result.reason === 'not_mine'
       ? '내가 붙인 메뉴가 아니에요.'
       : `지금 ${result.active}건이 진행 중이라 동시 진행 건수를 ${result.active}보다 작게 줄일 수 없어요. 진행 중인 작업이 끝나면 줄일 수 있어요.`
-    return { message, values: parsed.values }
+    // 자리 수 거부는 동시 진행 칸의 문제다. 그 칸 옆에 붙인다.
+    return { message, values: parsed.values, field: result.reason === 'not_mine' ? undefined : 'maxSlots' }
   }
 
   redirect(`/commissions/${id}?updated=1`)

@@ -29,6 +29,10 @@ export const BTN_PILL = 'inline-flex h-11 shrink-0 items-center whitespace-nowra
  * 노랑 바탕은 값이 채워지면 글자에 묻힌다 (검사표 C4). 테두리 밖으로 붉은 선을 한 겹 두른다.
  */
 export const INPUT = 'w-full border-[3px] border-ink bg-white px-4 py-3 text-[15px] text-ink placeholder:text-faint focus:bg-yellow/30 focus:[outline:3px_solid_var(--color-accent)] focus:[outline-offset:2px]'
+/** 틀린 칸의 테두리. 어느 칸인지 색으로도 말한다. */
+export const INPUT_BAD = '!border-accent'
+/** 칸 바로 아래 붙는 오류 문구. 화면 아래 ALERT 와 달리 **틀린 칸에 붙어** 있다. */
+export const FIELD_ERROR = 'mt-2 block text-[13px] font-bold leading-relaxed text-urgent-text'
 export const LABEL = 'mb-2 block text-sm font-bold text-ink'
 export const HELP = 'mt-2 block text-[13px] font-medium leading-relaxed text-muted'
 export const ALERT = 'border-[3px] border-ink bg-urgent-wash px-4 py-3 text-sm font-bold text-urgent-text'

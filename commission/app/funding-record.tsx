@@ -22,7 +22,11 @@ export function FundingRecord({ trust, followers }: { trust: FundingTrust; follo
         가운뎃점 대신 gap 으로 띄운다. 점을 글자에 붙여 두면 좁은 화면에서 줄이 접힐 때
         둘째 줄이 "· 만족도…" 로 시작한다 (UI/UX 5회차 발견 2).
       */}
-      <p className="num mt-1.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[17px] font-bold text-ink">
+      {/*
+        17px 이면 이 화면에서 가장 큰 숫자가 된다. 그런데 이건 **지난 펀딩의 기록**이지
+        지금 놓치면 손해 보는 수(마감·금액·남은 자리)가 아니다. 본문 크기로 내려앉힌다 (검사표 B3).
+      */}
+      <p className="num mt-1.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[15px] font-bold text-ink">
         <span>후원자 {comma(trust.backers)}명</span>
         {trust.satisfaction !== null && <span>펀딩 만족도 {trust.satisfaction.toFixed(1)}</span>}
         {followers !== undefined && <span>팔로워 {comma(followers)}명</span>}

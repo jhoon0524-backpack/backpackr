@@ -22,30 +22,37 @@ export type CommissionInput = {
   sampleUrls: string[]
 }
 
+/**
+ * 어느 칸이 틀렸는지. 화면이 **그 칸 옆에** 문구를 붙이려면 이름이 필요하다 —
+ * 문구만 돌려주면 폼 맨 아래에 뜨고, 긴 폼에서는 틀린 칸과 350px 떨어진다 (검사표 D2).
+ */
+export type CommissionField = (typeof FIELDS)[number]
+
 export type ParsedCommission =
   | { ok: true; value: CommissionInput; values: CommissionValues }
-  | { ok: false; message: string; values: CommissionValues }
+  | { ok: false; field: CommissionField; message: string; values: CommissionValues }
 
 export function parseCommissionForm(formData: FormData): ParsedCommission {
   const values: CommissionValues = Object.fromEntries(
     FIELDS.map((k) => [k, String(formData.get(k) ?? '')]),
   )
-  const fail = (message: string): ParsedCommission => ({ ok: false, message, values })
+  const fail = (field: CommissionField, message: string): ParsedCommission =>
+    ({ ok: false, field, message, values })
 
   const title = values.title.trim()
-  if (!title || title.length > 60) return fail('제목을 1~60자로 적어 주세요.')
-  if (!values.description.trim()) return fail('무엇을 어떻게 작업하는지 설명을 적어 주세요.')
-  if (!(CATEGORIES as readonly string[]).includes(values.category)) return fail('분류를 골라 주세요.')
+  if (!title || title.length > 60) return fail('title', '제목을 1~60자로 적어 주세요.')
+  if (!values.description.trim()) return fail('description', '무엇을 어떻게 작업하는지 설명을 적어 주세요.')
+  if (!(CATEGORIES as readonly string[]).includes(values.category)) return fail('category', '분류를 골라 주세요.')
 
   const price = Number(values.price)
-  if (!Number.isInteger(price) || price < 1000) return fail('기본 가격은 1,000원 이상이어야 합니다.')
+  if (!Number.isInteger(price) || price < 1000) return fail('price', '기본 가격은 1,000원 이상이어야 합니다.')
   const turnaroundDays = Number(values.turnaroundDays)
   if (!Number.isInteger(turnaroundDays) || turnaroundDays < 1 || turnaroundDays > 90) {
-    return fail('작업 기간은 1~90일 사이여야 합니다.')
+    return fail('turnaroundDays', '작업 기간은 1~90일 사이여야 합니다.')
   }
   const maxSlots = Number(values.maxSlots)
   if (!Number.isInteger(maxSlots) || maxSlots < 1 || maxSlots > 20) {
-    return fail('동시 진행 건수는 1~20 사이여야 합니다.')
+    return fail('maxSlots', '동시 진행 건수는 1~20 사이여야 합니다.')
   }
 
   return {

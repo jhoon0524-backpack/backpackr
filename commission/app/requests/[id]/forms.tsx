@@ -84,20 +84,41 @@ export function CreatorDecision({ id, quotedPrice, dueAtIfNow, maxSlots, activeC
           <button type="button" onClick={() => setArming(true)} className={BTN_PRIMARY}>이 가격으로 수락</button>
         )}
       </form>
-      <form action={action} className="space-y-4 border-[3px] border-ink p-4">
-        <input type="hidden" name="id" value={id} />
-        <input type="hidden" name="kind" value="decline" />
-        <p className="disp text-[22px]">거절하기</p>
-        <textarea name="reason" rows={2} required placeholder="사유는 의뢰인에게 그대로 전달됩니다." className={INPUT} />
-        <button type="submit" disabled={pending} className={BTN_SECONDARY}>{pending ? '처리 중…' : '거절'}</button>
-      </form>
+      <DeclineForm id={id} />
     </div>
+  )
+}
+
+/**
+ * 창작자: 거절.
+ *
+ * 거절도 되돌릴 수 없다 — `declined` 는 끝난 상태라 그 뒤에는 수락이 안 된다.
+ * 수락에만 확인을 두고 거절은 한 번에 나가게 두면, 되돌릴 수 없는 두 길 중 하나만 지키는 셈이다 (검사표 D1).
+ */
+function DeclineForm({ id }: { id: string }) {
+  const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
+  const [arming, setArming] = useConfirmBox(state)
+  return (
+    <form action={action} className="space-y-4 border-[3px] border-ink p-4">
+      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="kind" value="decline" />
+      <p className="disp text-[22px]">거절하기</p>
+      <Alert state={state} />
+      <textarea name="reason" rows={2} required placeholder="사유는 의뢰인에게 그대로 전달됩니다." className={INPUT} />
+      {arming ? (
+        <Confirm pending={pending} submitLabel="거절 확정" onCancel={() => setArming(false)}
+          message="이 의뢰를 거절합니다. 적은 사유가 의뢰인에게 그대로 전달되고, 거절한 뒤에는 수락할 수 없습니다." />
+      ) : (
+        <button type="button" onClick={() => setArming(true)} className={BTN_SECONDARY}>거절</button>
+      )}
+    </form>
   )
 }
 
 /** 창작자: 완성물 전달. */
 export function DeliverForm({ id }: { id: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
+  const [arming, setArming] = useConfirmBox(state)
   return (
     <form action={action} className="space-y-4 border-[3px] border-ink p-4">
       <input type="hidden" name="id" value={id} />
@@ -114,7 +135,12 @@ export function DeliverForm({ id }: { id: string }) {
         <textarea name="deliveryNote" rows={2} placeholder="메일로 보냈다면 여기에 적어 주세요." className={INPUT} />
         <span className={HELP}>주소나 메모 중 하나는 필요합니다.</span>
       </label>
-      <button type="submit" disabled={pending} className={BTN_PRIMARY}>{pending ? '처리 중…' : '전달 완료로 표시'}</button>
+      {arming ? (
+        <Confirm pending={pending} submitLabel="전달 확정" onCancel={() => setArming(false)}
+          message="전달했다고 표시합니다. 의뢰인에게 확인 차례가 넘어가고, 전달한 뒤에는 되돌릴 수 없습니다." />
+      ) : (
+        <button type="button" onClick={() => setArming(true)} className={BTN_PRIMARY}>전달 완료로 표시</button>
+      )}
       <Alert state={state} />
     </form>
   )

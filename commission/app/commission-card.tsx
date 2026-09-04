@@ -9,12 +9,14 @@ import { comma } from '@/lib/format'
  * 자리가 정해져 있으니 줄마다 어디를 봐야 할지 다시 찾을 필요가 없다.
  */
 export function SlotStamp({ left, max, size = 'sm' }: { left: number; max: number; size?: 'sm' | 'md' }) {
+  // 자리가 하나도 없으면 노랑을 벗는다. 노랑은 "지금 잡을 수 있다" 는 뜻이라, 0 에 칠하면 거짓말이 된다.
+  const none = left <= 0
   return (
     <span
-      className={`shrink-0 whitespace-nowrap font-bold leading-none text-ink ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}
+      className={`shrink-0 whitespace-nowrap font-bold leading-none ${none ? 'text-muted' : 'text-ink'} ${size === 'md' ? 'text-[17px]' : 'text-[16px]'}`}
       aria-label={`${max}자리 가운데 ${left}자리 비어 있음`}
     >
-      빈자리 <span className="num ml-1 bg-yellow px-1.5 py-0.5 text-ink">{left}/{max}</span>
+      남은 자리 <span className={`num ml-1 px-1.5 py-0.5 ${none ? 'bg-fill text-strong' : 'bg-yellow text-ink'}`}>{left}/{max}</span>
     </span>
   )
 }
@@ -44,18 +46,19 @@ export function TitleField({ title }: { title: string }) {
   )
 }
 
-/** 못 받는 상태의 이름. 목록과 상세가 같은 말을 쓰게 한 곳에 둔다. */
-export function closedLabel(status: string, left: number) {
-  if (status === 'closed') return '내려 둔 메뉴'
-  // "마감" 은 기간이 끝난 것으로 읽힌다. 실제로는 자리가 찬 것이고, 자리는 다시 빈다 (검사표 E4, 실패 12).
-  return left <= 0 ? '자리 없음' : null
+/**
+ * 창작자가 **내려 둔** 메뉴의 이름. 자리가 찬 것은 여기서 다루지 않는다 —
+ * 그건 `SlotStamp` 이 "남은 자리 0/N" 으로 말한다. 같은 것을 두 이름으로 부르지 않기 위해서다 (검사표 F1).
+ */
+export function closedLabel(status: string) {
+  return status === 'closed' ? '내려 둔 메뉴' : null
 }
 
 /** 상세 화면이 사진 위에 자리 상태를 얹을 때. */
 export function SlotOverlay({ active, max, status, size = 'sm' }: {
   active: number; max: number; status: string; size?: 'sm' | 'md'
 }) {
-  const label = closedLabel(status, max - active)
+  const label = closedLabel(status)
   return (
     <div className="absolute right-0 top-0 z-10">
       {label ? <ClosedStamp label={label} size={size} /> : <SlotStamp left={max - active} max={max} size={size} />}
@@ -75,7 +78,8 @@ export function SlotOverlay({ active, max, status, size = 'sm' }: {
  */
 export function CommissionCard({ c, n }: { c: Card; n: number }) {
   const left = c.max_slots - c.active_count
-  const closed = closedLabel(c.status, left)
+  const down = closedLabel(c.status)
+  const closed = down || left <= 0
   // 마감한 줄은 회색으로 내려앉는다. 메뉴판에서 다 나간 것은 지우거나 흐리게 두지, 같은 검정으로 두지 않는다.
   const tone = closed ? 'text-faint' : 'text-ink'
   return (
@@ -105,14 +109,12 @@ export function CommissionCard({ c, n }: { c: Card; n: number }) {
       <span className={`mt-3 flex flex-wrap items-center gap-x-3 text-[15px] font-medium sm:pl-[52px] ${closed ? 'text-muted' : 'text-strong'}`}>
         <span>{c.creator_nickname} · {c.category} · {c.turnaround_days}일 걸려요</span>
         <span aria-hidden className={closed ? 'text-muted' : 'text-line/40'}>·</span>
-        {closed ? (
+        {down ? <ClosedStamp label={down} /> : (
           <span className="flex flex-wrap items-center gap-x-2">
-            <ClosedStamp label={closed} />
-            {c.status !== 'closed' && (
-              <span className="num">0/{c.max_slots} · 자리가 비면 다시 열려요</span>
-            )}
+            <SlotStamp left={left} max={c.max_slots} />
+            {left <= 0 && <span>· 자리가 비면 다시 열려요</span>}
           </span>
-        ) : <SlotStamp left={left} max={c.max_slots} />}
+        )}
       </span>
     </Link>
   )

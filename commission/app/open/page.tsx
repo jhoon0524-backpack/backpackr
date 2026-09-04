@@ -18,7 +18,7 @@ export default async function OpenPage() {
       {!me ? (
         <div className="border-[3px] border-ink bg-white p-8 text-center">
           <p className="disp text-2xl text-ink">먼저 오른쪽 위에서 사용자를 골라 주세요.</p>
-          <p className="mt-1.5 text-sm text-muted">로그인이 붙기 전까지는 사용자 전환기로 대신합니다.</p>
+          <p className="mt-1.5 text-sm text-muted">로그인 기능이 생기기 전까지는 사용자 전환기로 대신합니다.</p>
         </div>
       ) : (
         <CommissionForm
