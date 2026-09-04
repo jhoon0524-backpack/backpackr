@@ -28,7 +28,10 @@ export function FundingRecord({ trust, followers }: { trust: FundingTrust; follo
       */}
       <p className="num mt-1.5 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[15px] font-bold text-ink">
         <span>후원자 {comma(trust.backers)}명</span>
-        {trust.satisfaction !== null && <span>펀딩 만족도 {trust.satisfaction.toFixed(1)}</span>}
+        {/* 척도 없는 4.8 은 몇 점 만점인지 알 수 없다 (검사표 F4). DB 는 1.0~5.0 만 받는다. */}
+        {trust.satisfaction !== null && (
+          <span>펀딩 만족도 {trust.satisfaction.toFixed(1)}점<span className="font-medium text-muted"> / 5점</span></span>
+        )}
         {followers !== undefined && <span>팔로워 {comma(followers)}명</span>}
       </p>
       <p className="mt-2 text-xs font-medium leading-relaxed text-muted">

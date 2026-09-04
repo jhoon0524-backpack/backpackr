@@ -99,10 +99,10 @@ export const REQUEST_STATUS: Record<string, { text: string; tone: string }> = {
 
 /** DB 함수가 돌려주는 거부 사유를 사람 말로. */
 export const REJECT_MESSAGE: Record<string, string> = {
-  closed: '이 커미션은 지금 의뢰를 받지 않습니다.',
-  own_commission: '내 커미션에는 의뢰할 수 없습니다.',
+  closed: '창작자가 이 메뉴를 내려 두었습니다. 다시 붙으면 여기서 의뢰할 수 있어요.',
+  own_commission: '내가 붙인 메뉴예요. 들어온 의뢰는 내 의뢰에서 봅니다.',
   slots_full: '진행 가능한 자리가 모두 찼습니다. 자리가 비면 다시 열립니다.',
-  already_requested: '이미 수락을 기다리는 의뢰가 있습니다.',
+  already_requested: '이 메뉴에 보낸 의뢰가 아직 수락을 기다리고 있어요. 내 의뢰에서 확인하고, 수락되거나 거절된 뒤에 다시 보내 주세요.',
   not_pending: '이미 처리된 의뢰입니다.',
   price_too_low: '최종가는 1,000원 이상이어야 합니다.',
   reason_required: '거절 사유를 적어 주세요.',

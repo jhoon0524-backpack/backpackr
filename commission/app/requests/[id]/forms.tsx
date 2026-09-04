@@ -115,7 +115,7 @@ function DeclineForm({ id }: { id: string }) {
   )
 }
 
-/** 창작자: 완성물 전달. */
+/** 창작자: 결과물 전달. 화면 전체가 "결과물" 한 이름을 쓴다 (검사표 F1). */
 export function DeliverForm({ id }: { id: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(actOnRequest, null)
   const [arming, setArming] = useConfirmBox(state)
@@ -123,7 +123,7 @@ export function DeliverForm({ id }: { id: string }) {
     <form action={action} className="space-y-4 border-[3px] border-ink p-4">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="kind" value="deliver" />
-      <p className="disp text-[22px]">완성물 전달</p>
+      <p className="disp text-[22px]">결과물 전달</p>
       <label className="block">
         <span className={LABEL}>결과물 주소</span>
         {/* 안내를 안내 글(placeholder)에 다 넣으면 390 에서 잘린다 (검사표 B2, 실패 7). 칸 밖으로 옮긴다. */}
