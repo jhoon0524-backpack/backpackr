@@ -117,8 +117,15 @@ export default async function RequestPage({ params, searchParams }: PageProps<'/
               )}
               {isCreator && r.status === 'accepted' && <DeliverForm id={r.id} />}
               {isCreator && r.status === 'delivered' && <p className="text-sm font-medium text-strong">의뢰인이 확인하면 완료돼요.</p>}
+              {/*
+                수락 전 취소도 되돌릴 수 없다 — `cancelled` 는 끝난 상태라 되살릴 수 없고,
+                다시 하려면 새로 보내야 한다. 같은 자리의 수락·거절·전달·물리기에 다 있는 확인이
+                취소에만 없었다 (검사표 D1).
+              */}
               {isClient && r.status === 'requested' && (
-                <OneButton id={r.id} kind="cancel" label="의뢰 취소" help="창작자가 수락하기 전까지만 취소할 수 있어요." />
+                <OneButton id={r.id} kind="cancel" label="의뢰 취소"
+                  help="창작자가 수락하기 전까지만 취소할 수 있어요."
+                  confirm="이 의뢰를 취소합니다. 취소한 의뢰는 되살릴 수 없고, 다시 맡기려면 새로 보내야 해요." />
               )}
               {/*
                 수락된 뒤에는 의뢰인이 할 일이 없다 — 마감일이 지나도록 아무것도 오지 않을 때까지는.

@@ -17,12 +17,20 @@
  *   빨강 = 자리가 걸린 것. 남은 자리, 되돌릴 수 없는 버튼, 오류.
  * 노랑을 로고에만 두면 화면의 진짜 강조색은 빨강 하나가 되고, 그러면 급한 것과 그냥 버튼이 같은 색이 된다.
  */
-const HARD = 'border-[3px] border-ink shadow-hard transition active:translate-x-[8px] active:translate-y-[8px] active:shadow-none disabled:opacity-50'
+/*
+ * 처리 중인 단추는 **눌린 모양**으로 둔다. 색을 흐리게 하지 않는다.
+ *
+ * `disabled:opacity-50` 이었다. 그러면 빨강 위 흰 글자 "보내는 중…" 이 대비 2.27 로 떨어진다 (검사표 B1) —
+ * 기다리는 동안 읽어야 할 글자가 하나뿐인데 그게 가장 안 읽히는 글자가 된다.
+ * 그림자를 빼고 그림자 쪽으로 밀어 두면 색을 건드리지 않고도 "지금 눌려 있다" 가 보인다.
+ */
+const PRESSED = 'disabled:translate-x-[8px] disabled:translate-y-[8px] disabled:shadow-none disabled:cursor-wait'
+const HARD = `border-[3px] border-ink shadow-hard transition active:translate-x-[8px] active:translate-y-[8px] active:shadow-none ${PRESSED}`
 export const BTN_PRIMARY = `disp inline-flex h-14 w-full items-center justify-center bg-accent px-5 text-[20px] text-white ${HARD}`
 export const BTN_INK = `disp inline-flex h-14 w-full items-center justify-center bg-yellow px-5 text-[20px] text-ink ${HARD}`
 export const BTN_SECONDARY = `inline-flex h-14 w-full items-center justify-center bg-white px-5 text-base font-bold text-ink ${HARD}`
 /** 목록 줄 끝에 붙는 작은 버튼. 높이 44. */
-export const BTN_PILL = 'inline-flex h-11 shrink-0 items-center whitespace-nowrap border-[3px] border-ink bg-white px-3.5 text-[13px] font-bold text-ink transition hover:bg-fill active:translate-x-[2px] active:translate-y-[2px] disabled:opacity-50'
+export const BTN_PILL = 'inline-flex h-11 shrink-0 items-center whitespace-nowrap border-[3px] border-ink bg-white px-3.5 text-[13px] font-bold text-ink transition hover:bg-fill active:translate-x-[2px] active:translate-y-[2px] disabled:translate-x-[2px] disabled:translate-y-[2px] disabled:cursor-wait'
 /*
  * 글 쓰는 칸. 초점이 어디 있는지는 **바탕색만으로 말하지 않는다** —
  * `focus:outline-none` 을 걸어 두었더니 Tab 으로 움직일 때 입력칸만 외곽선이 사라졌고,
