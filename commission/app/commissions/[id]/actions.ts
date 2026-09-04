@@ -33,7 +33,7 @@ export async function sendRequest(_prev: RequestState, formData: FormData): Prom
   try {
     result = await submitRequest(raw.commissionId, me.id, raw.brief.trim(), raw.referenceUrl.trim() || null)
   } catch {
-    return fail('의뢰를 넣지 못했습니다. 잠시 후 다시 시도해 주세요.')
+    return fail('의뢰를 보내지 못했습니다. 잠시 후 다시 시도해 주세요.')
   }
   if (result.outcome === 'rejected') return fail(rejectMessage(result.reject_reason))
 

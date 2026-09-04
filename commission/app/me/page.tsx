@@ -111,10 +111,10 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
   const pendingCount = incoming.filter((r) => r.status === 'requested').length
 
   const myRequestsSection = (
-    <Section title="내가 넣은 의뢰">
+    <Section title="내가 보낸 의뢰">
       {mine.length === 0 ? (
         <p className="py-8 text-center text-sm font-medium text-muted">
-          넣은 의뢰가 없어요. <Link href="/" className="inline-flex min-h-11 items-center font-bold text-ink underline decoration-2">메뉴판 보기</Link>
+          보낸 의뢰가 없어요. <Link href="/" className="inline-flex min-h-11 items-center font-bold text-ink underline decoration-2">메뉴판 보기</Link>
         </p>
       ) : (
         <ul className={BOX}>{mine.map((r) => <RequestLine key={r.id} r={r} who="client" />)}</ul>
@@ -135,7 +135,7 @@ export default async function MyPage({ searchParams }: PageProps<'/me'>) {
 
       {/*
         의뢰인에게는 빈 "들어온 의뢰" 두 칸을 지나야 자기 의뢰가 보였다 (UI/UX 1회차 발견 9).
-        붙인 메뉴가 없고 넣은 의뢰가 있으면 "내가 넣은 의뢰" 를 먼저 보여 준다.
+        붙인 메뉴가 없고 보낸 의뢰가 있으면 "내가 보낸 의뢰" 를 먼저 보여 준다.
       */}
       {myCommissions.length === 0 && mine.length > 0 && myRequestsSection}
 

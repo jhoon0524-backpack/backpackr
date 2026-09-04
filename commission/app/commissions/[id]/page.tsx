@@ -82,9 +82,14 @@ export default async function CommissionPage({ params, searchParams }: PageProps
               <dt className={EYEBROW}>작업 기간</dt>
               <dd className="disp text-[20px] sm:text-[24px]">{c.turnaround_days}<span className="text-xs">일</span></dd>
             </div>
+            {/*
+              전에는 "동시 진행 1/3" 이었다. 그런데 바로 위 딱지가 같은 세 자리를 "남은 자리 2/3" 으로 센다 —
+              같은 것을 두 이름으로, 그것도 서로 다른 수로 부른 셈이다 (검사표 F1).
+              세는 방향을 딱지에 맞춘다. 창작자가 정하는 값(동시 진행 건수)은 폼에만 남는다.
+            */}
             <div className="flex flex-col gap-1 p-3">
-              <dt className={EYEBROW}>동시 진행</dt>
-              <dd className="disp text-[20px] sm:text-[24px]">{c.active_count}<span className="text-xs">/{c.max_slots}</span></dd>
+              <dt className={EYEBROW}>남은 자리</dt>
+              <dd className="disp text-[20px] sm:text-[24px]">{left}<span className="text-xs">/{c.max_slots}</span></dd>
             </div>
           </dl>
 

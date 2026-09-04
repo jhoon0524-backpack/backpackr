@@ -124,7 +124,7 @@ export type UpdateCommissionResult =
 /**
  * 붙인 메뉴 고치기. **주소는 그대로 둔다** — 내리고 새로 붙이면 이미 공유한 링크가 죽는다.
  *
- * 동시 진행 건수는 지금 진행 중인 건수보다 작게 줄이지 못한다. 줄이면 "동시 진행 2/1" 처럼
+ * 동시 진행 건수는 지금 진행 중인 건수보다 작게 줄이지 못한다. 줄이면 "남은 자리 -1/1" 처럼
  * 앞뒤가 안 맞는 상태가 되는데, 진행 중인 작업을 강제로 끝낼 수는 없기 때문이다.
  * 앱이 먼저 읽고 판단하면 그 사이에 수락이 끼어들 수 있어, 조건을 update 문 안에 둔다.
  *
@@ -248,7 +248,7 @@ export async function getRequest(id: string): Promise<RequestRow | null> {
   return rows[0] ?? null
 }
 
-/** 내가 넣은 의뢰. 최신순. */
+/** 내가 보낸 의뢰. 최신순. */
 export async function listMyRequests(clientId: string): Promise<RequestRow[]> {
   const { rows } = await pool.query<RequestRow>(
     `${REQUEST_SELECT} where r.client_id = $1 order by r.created_at desc`, [clientId],
