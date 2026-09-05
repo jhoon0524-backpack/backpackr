@@ -65,3 +65,10 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+---
+
+## 텀블벅 PO 에이전트
+
+텀블벅(크라우드펀딩) PO 업무 — 도메인 분석·PRD 작성·로드맵·지표 — 는 `tbb-po-agent/` 를 참조한다.
+정체성·규칙은 `tbb-po-agent/CLAUDE.md` 와 `tbb-po-agent/persona/po.md` 에 있다.

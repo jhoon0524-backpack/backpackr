@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# pre-push: push되는 ref마다 Slack 알림 발송
+#
+# git이 stdin으로 다음 형식의 라인을 한 줄에 하나씩 전달:
+#   <local_ref> <local_sha> <remote_ref> <remote_sha>
+#
+# 알림은 best-effort. 실패하더라도 push는 절대 막지 않는다.
+
+set +e
+
+ROOT=$(git rev-parse --show-toplevel)
+NOTIFY="$ROOT/scripts/notify-slack.sh"
+[ -x "$NOTIFY" ] || exit 0
+
+REMOTE_NAME="$1"
+USER_NAME=$(git config user.name 2>/dev/null || echo "unknown")
+ZERO="0000000000000000000000000000000000000000"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # 삭제 push — skip
+  [ "$local_sha" = "$ZERO" ] && continue
+
+  branch=${local_ref#refs/heads/}
+
+  if [ "$remote_sha" = "$ZERO" ]; then
+    # 신규 브랜치 push — 전체 커밋 카운트는 의미 없으니 최근 5개만
+    range="$local_sha"
+    commit_count=$(git rev-list --count "$local_sha" 2>/dev/null || echo "?")
+    log_range="$local_sha -n 5"
+    diff_range="$local_sha"
+  else
+    range="$remote_sha..$local_sha"
+    commit_count=$(git rev-list --count "$range" 2>/dev/null || echo "0")
+    [ "$commit_count" = "0" ] && continue
+    log_range="$range"
+    diff_range="$range"
+  fi
+
+  stats=$(git diff --shortstat $diff_range 2>/dev/null | sed 's/^[[:space:]]*//')
+  commits=$(git log --pretty=format:"• \`%h\` %s" -n 5 $log_range 2>/dev/null)
+
+  more=""
+  if [ "$commit_count" != "?" ] && [ "$commit_count" -gt 5 ] 2>/dev/null; then
+    more=$'\n'"... (+$((commit_count - 5)) more)"
+  fi
+
+  msg=":rocket: *tbb-po-agent push* by ${USER_NAME}
+• Branch: \`${branch}\` → ${REMOTE_NAME}
+• Commits (${commit_count}):
+${commits}${more}"
+  [ -n "$stats" ] && msg="${msg}
+• ${stats}"
+
+  "$NOTIFY" "$msg" || true
+done
+
+exit 0

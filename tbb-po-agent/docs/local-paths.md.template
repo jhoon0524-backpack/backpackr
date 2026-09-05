@@ -1,0 +1,29 @@
+# 개인 로컬 경로 설정 (텀블벅 코드 소스)
+
+`sources/` 하위 심링크가 가리키는 실제 로컬 클론 경로. 환경마다 다르므로 이 템플릿을 복사해 채운다.
+`local-paths.md`는 .gitignore 처리되어 git에 올라가지 않는다.
+
+```bash
+cp docs/local-paths.md.template docs/local-paths.md
+```
+
+## 심링크 대상 (be-api-legacy 제외)
+
+| sources/ | GitHub repo | 원격 | 브랜치 | 로컬 경로 |
+|---|---|---|---|---|
+| `be-api` | tumblbug-api-v2 | `git@github.com:tumblbug/tumblbug-api-v2.git` | master | `{YOUR_PATH}/tumblbug-api-v2` |
+| `android` | tumblbug-aos | `git@github.com:tumblbug/tumblbug-aos.git` | features | `{YOUR_PATH}/tumblbug-aos` |
+| `ios` | tumblbug-ios | `git@github.com:tumblbug/tumblbug-ios.git` | features | `{YOUR_PATH}/tumblbug-ios` |
+| `fe` | tbb-frontend | `git@github.com:tumblbug/tbb-frontend.git` | main | `{YOUR_PATH}/tbb-frontend` |
+| `fe-admin` | tbb-fe-admin | `git@github.com:tumblbug/tbb-fe-admin.git` | main | `{YOUR_PATH}/tbb-fe-admin` |
+
+## 심링크 재생성
+
+```bash
+cd sources
+ln -sfn {YOUR_PATH}/tumblbug-api-v2 be-api
+ln -sfn {YOUR_PATH}/tumblbug-aos    android
+ln -sfn {YOUR_PATH}/tumblbug-ios    ios
+ln -sfn {YOUR_PATH}/tbb-frontend    fe
+ln -sfn {YOUR_PATH}/tbb-fe-admin    fe-admin
+```

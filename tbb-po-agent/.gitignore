@@ -1,0 +1,62 @@
+# 코드 소스 (로컬 클론 심링크 — 커밋 금지)
+sources/
+
+# 개인 로컬 경로 (각자 환경 따라 다름)
+docs/local-paths.md
+
+# 환경 변수 / 인증 / 시크릿 (Slack webhook 포함)
+.env
+.env.local
+.credentials/
+
+# Sub-agent 컨텍스트 dump (도메인 분석 일회성 임시 파일)
+prd/tmp/
+tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# Java / Gradle
+*.class
+*.jar
+.gradle/
+build/
+
+# Logs
+*.log
+
+# Obsidian
+.obsidian/
+
+# Claude Code 개인 로컬 설정 (커밋 금지)
+.claude/settings.local.json
+.claude/worktrees/
+
+# Fable 오케스트레이션 로컬 상태 (토글·턴 카운터 — 개인별)
+.claude/fable/state/
+
+# OMC 상태 (로컬 세션 산출물)
+.omc/
+
+# Superpowers SDD scratch (ledger·task-brief·review-package)
+.superpowers/
+
+# Superpowers 작업 산출물 (spec·plan — 세션 로컬 작업 문서, 커밋 제외)
+docs/superpowers/

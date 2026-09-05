@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# post-merge: pull/merge 완료 후 Slack 알림 발송
+# (git merge 계열에서만 trigger됨 — fast-forward 포함. rebase 기반 pull에서는 발동하지 않음)
+
+set +e
+
+ROOT=$(git rev-parse --show-toplevel)
+NOTIFY="$ROOT/scripts/notify-slack.sh"
+[ -x "$NOTIFY" ] || exit 0
+
+USER_NAME=$(git config user.name 2>/dev/null || echo "unknown")
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+
+prev_head=$(git rev-parse HEAD@{1} 2>/dev/null)
+curr_head=$(git rev-parse HEAD 2>/dev/null)
+
+[ -z "$prev_head" ] && exit 0
+[ "$prev_head" = "$curr_head" ] && exit 0
+
+range="${prev_head}..${curr_head}"
+commit_count=$(git rev-list --count "$range" 2>/dev/null || echo "0")
+[ "$commit_count" = "0" ] && exit 0
+
+stats=$(git diff --shortstat "$range" 2>/dev/null | sed 's/^[[:space:]]*//')
+commits=$(git log --pretty=format:"• \`%h\` %s" -n 5 "$range" 2>/dev/null)
+
+more=""
+if [ "$commit_count" -gt 5 ] 2>/dev/null; then
+  more=$'\n'"... (+$((commit_count - 5)) more)"
+fi
+
+msg=":arrow_down: *tbb-po-agent pull* by ${USER_NAME}
+• Branch: \`${branch}\`
+• Pulled (${commit_count}):
+${commits}${more}"
+[ -n "$stats" ] && msg="${msg}
+• ${stats}"
+
+"$NOTIFY" "$msg" || true
+exit 0
