@@ -7,7 +7,7 @@
 - [ ] Godot 4 프로젝트 생성 (렌더러: Compatibility)
 - [ ] 프로젝트 설정: 기준 해상도 640x360, 창 크기 1280x720
 - [ ] 프로젝트 설정: 스트레치 모드 `viewport`, 종횡비 `keep`
-- [ ] 픽셀 아트 임포트 기본값을 Nearest 필터로 변경
+- [ ] 픽셀 아트용 Nearest 필터 확인 (`rendering/textures/canvas_textures/default_texture_filter=0`)
 - [x] `.gitignore` 추가 (`.godot/`, `*.translation` 등 캐시 제외)
 - [x] 폴더 구조 생성: `scenes/`, `scripts/`, `assets/sprites/`, `assets/audio/`, `data/`
 - [ ] `Main.tscn` 생성 후 프로젝트 시작 씬으로 지정
