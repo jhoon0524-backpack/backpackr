@@ -8,11 +8,11 @@
 - [ ] 프로젝트 설정: 기준 해상도 640x360, 창 크기 1280x720
 - [ ] 프로젝트 설정: 스트레치 모드 `viewport`, 종횡비 `keep`
 - [ ] 픽셀 아트 임포트 기본값을 Nearest 필터로 변경
-- [ ] `.gitignore` 추가 (`.godot/`, `*.translation` 등 캐시 제외)
-- [ ] 폴더 구조 생성: `scenes/`, `scripts/`, `assets/sprites/`, `assets/audio/`, `data/`
+- [x] `.gitignore` 추가 (`.godot/`, `*.translation` 등 캐시 제외)
+- [x] 폴더 구조 생성: `scenes/`, `scripts/`, `assets/sprites/`, `assets/audio/`, `data/`
 - [ ] `Main.tscn` 생성 후 프로젝트 시작 씬으로 지정
-- [ ] Main 씬에 Node2D 루트 + Camera2D 배치, 확대 배율 확인
-- [ ] 인풋 맵 등록: `move_up/down/left/right`, `confirm`(Z·Enter), `cancel`(X)
+- [x] Main 씬에 Node2D 루트 + Camera2D 배치, 확대 배율 확인
+- [x] 인풋 맵 등록: `move_up/down/left/right`, `confirm`(Z·Enter), `cancel`(X)
 
 ## [플레이어]
 - [ ] 임시 플레이어 스프라이트 준비 (단색 사각형이라도 무방)
