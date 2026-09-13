@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>제갈량 상소문 영상 제작 키트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Batang:wght@400;700&family=Nanum+Gothic+Coding&display=swap">
+<style>
+  :root{
+    --paper:#EAE3CD;--paper-deep:#DDD3B6;--ink:#1E2229;--ink-soft:#4A4740;--ink-faint:#8B8577;
+    --seal:#B8281E;--rule:#B9AE90;--well:#F4EFE0;
+    --display:"Song Myung","Nanum Myeongjo",serif;
+    --body:"Gowun Batang","Nanum Myeongjo","Batang",serif;
+    --mono:"Nanum Gothic Coding","Consolas","Menlo",monospace;
+  }
+  html{background:var(--paper-deep);}
+  body{margin:0;padding-block:32px 72px;padding-inline:16px;background:var(--paper-deep);color:var(--ink);
+    font-family:var(--body);font-size:16px;line-height:1.8;word-break:keep-all;overflow-wrap:anywhere;}
+  .wrap{max-width:900px;margin:0 auto;background:var(--paper);border-top:6px solid var(--ink);border-bottom:6px solid var(--ink);
+    padding-block:40px 48px;padding-inline:clamp(20px,5vw,56px);box-shadow:0 30px 60px -30px rgba(30,34,41,.45);}
+  .eyebrow{font-size:12.5px;letter-spacing:.16em;color:var(--ink-faint);}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,38px);line-height:1.25;margin:6px 0 10px;text-wrap:balance;}
+  .lede{color:var(--ink-soft);margin:0 0 28px;font-size:15.5px;}
+  h2{font-family:var(--display);font-weight:400;font-size:23px;margin:44px 0 8px;padding-bottom:8px;border-bottom:2px solid var(--ink);}
+  h3{font-family:var(--display);font-weight:400;font-size:18px;margin:0 0 6px;}
+  p{margin:0 0 .9em;}
+  ol.steps{padding-left:1.3em;margin:0;}
+  ol.steps li{margin-bottom:.7em;}
+  ol.steps b{font-weight:700;}
+  .warn{border:1px solid var(--seal);padding:12px 16px;margin:14px 0 0;font-size:15px;}
+  .warn b{color:var(--seal);}
+  .prompt{position:relative;background:var(--well);border:1px solid var(--rule);padding:12px 14px;margin:8px 0 12px;
+    font-family:var(--mono);font-size:13.5px;line-height:1.6;white-space:pre-wrap;color:var(--ink);}
+  .prompt .copy{position:absolute;top:8px;right:8px;font-family:var(--body);font-size:12.5px;
+    background:var(--paper);border:1px solid var(--ink);color:var(--ink);padding:3px 10px;cursor:pointer;}
+  .prompt .copy:hover{background:var(--ink);color:var(--paper);}
+  .shots{display:grid;gap:18px;margin-top:14px;}
+  .shot{border:1px solid var(--rule);padding:18px 20px;background:rgba(255,255,255,.25);}
+  .shot-head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px;}
+  .shot-head .n{font-family:var(--display);font-size:26px;line-height:1;}
+  .shot-head .meta{font-size:13px;color:var(--ink-faint);letter-spacing:.06em;}
+  .shot .kr{color:var(--ink-soft);font-size:15px;margin-bottom:6px;}
+  .shot .narr{border-left:2px solid var(--seal);padding:6px 12px;margin:8px 0 10px;font-size:15.5px;}
+  .shot .narr small{display:block;color:var(--ink-faint);font-size:12.5px;letter-spacing:.08em;}
+  label.k{display:block;font-size:12.5px;letter-spacing:.1em;color:var(--ink-faint);margin-top:8px;}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;margin:10px 0;}
+  th,td{padding:7px 8px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top;}
+  th{color:var(--ink-soft);font-weight:700;}
+  .table-wrap{overflow-x:auto;}
+  code{font-family:var(--mono);font-size:13px;background:var(--well);padding:1px 5px;}
+  :focus-visible{outline:2px solid var(--seal);outline-offset:3px;}
+  @media (max-width:560px){.shot-head .n{font-size:22px;}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="eyebrow">HIGGSFIELD 제작 키트 · 제갈량 상소문</div>
+  <h1>아침 7시, 제갈량이 직접 상소를 올리는 45초</h1>
+  <p class="lede">이 키트대로 힉스필드에서 만든 영상을 <code>intro.mp4</code>라는 이름으로 <code>zhuge-advisor</code> 폴더에 넣으면, 아침 상소문 창이 열릴 때 두루마리 위에서 먼저 재생됩니다. 영상이 없으면 그 자리는 조용히 사라지고 글만 보입니다. 프롬프트는 힉스필드가 가장 잘 알아듣는 영어로 썼고, 각 칸의 <b>복사</b> 단추로 그대로 붙여 넣으면 됩니다.</p>
+
+  <h2>만드는 순서</h2>
+  <ol class="steps">
+    <li><b>얼굴을 먼저 고정합니다.</b> 힉스필드 <b>Soul</b>에서 아래 "캐릭터 시트" 프롬프트로 제갈량 이미지를 만들고, 마음에 드는 것을 골라 <b>Soul ID</b>로 등록합니다. 이후 모든 장면은 이 ID를 붙여 만듭니다. 이걸 건너뛰면 여섯 장면의 얼굴이 제각각이 됩니다.</li>
+    <li><b>장면 이미지 6장을 만듭니다.</b> 장면마다 아래 이미지 프롬프트를 Soul ID와 함께 넣습니다. 세로 화면이 아니라 <b>가로 16:9</b>로 만듭니다. 상소문 창이 가로이기 때문입니다.</li>
+    <li><b>이미지를 영상으로 바꿉니다.</b> 각 이미지를 <b>Image to Video</b>에 넣고, 장면에 적힌 <b>카메라 프리셋</b>을 고릅니다. 길이는 5초짜리로 통일합니다. 모션 프롬프트는 한 줄만 넣습니다. 한 프롬프트에 여러 가지를 시키면 장면이 흐트러집니다.</li>
+    <li><b>4번 장면만 말을 시킵니다.</b> 4번 장면 영상을 <b>Speak</b>(립싱크)에 넣고 나레이션 4번 문장을 한국어 음성으로 넣습니다. 목소리는 낮고 느린 중년 남성으로 고릅니다. 나머지 장면의 나레이션은 5단계에서 목소리만 얹습니다.</li>
+    <li><b>이어 붙입니다.</b> 여섯 클립을 순서대로 붙이고, 전체 나레이션(아래 대본)을 음성으로 얹습니다. 힉스필드 안의 편집 기능이든, 캡컷이든, 어느 것이든 됩니다. 배경음은 거문고나 고쟁 독주 한 줄이면 충분합니다.</li>
+    <li><b>내보내고 넣습니다.</b> MP4(1080p)로 내보내 <code>intro.mp4</code>로 이름을 바꾸고 <code>zhuge-advisor</code> 폴더, 즉 <code>sangsomun.html</code>과 같은 자리에 넣습니다. 끝입니다. 다음 날 아침 7시에 영상이 먼저 나옵니다.</li>
+  </ol>
+  <div class="warn"><b>글자는 넣지 마소서.</b> AI 영상은 한글을 그리면 반드시 깨집니다. 두루마리의 글씨는 "흐릿한 붓글씨"로만 표현하고, 자막은 상소문 창이 나레이션 문장을 화면 아래에 직접 띄웁니다. 영상 안에 글자를 굽지 않아도 됩니다.</div>
+
+  <h2>캐릭터 시트 (Soul · 제일 먼저)</h2>
+  <p>정면·측면·클로즈업이 한 장에 나오게 만들어 Soul ID의 참조로 씁니다. 여러 장 뽑아 얼굴이 가장 차분한 것을 고르십시오.</p>
+  <div class="prompt"><button class="copy" type="button">복사</button>Character reference sheet of Zhuge Liang, chancellor of Shu Han in the Three Kingdoms era, a calm and intelligent man in his mid-40s, slender face, thin long black beard, gentle tired eyes. He wears a pale grey-white Taoist scholar robe with wide sleeves and a dark blue silk scarf-hat (lunjin), and holds a white crane-feather fan. Layout: front view, three-quarter view, profile, and a close-up portrait, on a neutral warm grey background. Photorealistic, historical drama, soft candlelight, 85mm lens, muted earth tones, no text, no watermark.</div>
+
+  <h2>장면별 프롬프트와 카메라</h2>
+  <p>여섯 장면, 각 5초, 합쳐서 30초 남짓. 나레이션은 장면보다 조금 길게 흘러 45초쯤에 끝납니다. 장면 순서가 곧 이야기 순서입니다.</p>
+  <div class="shots">
+
+    <section class="shot">
+      <div class="shot-head"><span class="n">1</span><h3>새벽 승상부, 촛불 앞에서 붓을 든다</h3><span class="meta">5초 · 카메라 Dolly In</span></div>
+      <p class="kr">넓게 시작해 제갈량에게 천천히 다가간다. 첫인상은 고요함이어야 한다.</p>
+      <div class="narr"><small>나레이션 1</small>신(臣) 제갈량이 삼가 아뢰옵니다.</div>
+      <label class="k">이미지 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Wide cinematic shot inside a Han dynasty chancellor's study before dawn. Zhuge Liang sits at a low lacquered desk, lifting a calligraphy brush over an unrolled blank paper scroll. A single candle and a bronze oil lamp light the room, cold blue dawn light leaks through paper windows. Bamboo slips, a folded map and an ink stone on the desk. Photorealistic historical drama, 16:9, shallow depth of field, warm candlelight against cool dawn, muted earth tones, no text.</div>
+      <label class="k">모션 프롬프트 (Image to Video)</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Slow dolly in toward the seated man; candle flame flickers gently; he lowers the brush toward the paper. Calm, no sudden movement.</div>
+    </section>
+
+    <section class="shot">
+      <div class="shot-head"><span class="n">2</span><h3>붓끝, 먹이 한지에 스민다</h3><span class="meta">5초 · 카메라 Crash Zoom In 또는 Macro</span></div>
+      <p class="kr">손과 붓과 종이만 보인다. 글씨는 흐릿한 붓자국으로. 이 장면이 "코드 대신 붓을 잡았다"는 말과 겹친다.</p>
+      <div class="narr"><small>나레이션 2</small>주공께서는 코드를 배운 적이 없으면서도, 붓 대신 클로드 코드를 잡으셨습니다.</div>
+      <label class="k">이미지 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Extreme close-up of a calligraphy brush tip touching handmade mulberry paper, black ink bleeding softly into the fibers, blurred illegible brush strokes already on the page. A scholar's hand with a wide grey sleeve holds the brush. Warm candlelight, macro lens, shallow depth of field, photorealistic, 16:9, no readable text.</div>
+      <label class="k">모션 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>The brush glides slowly across the paper leaving a wet ink stroke; ink spreads into the fibers; camera pushes in on the brush tip.</div>
+    </section>
+
+    <section class="shot">
+      <div class="shot-head"><span class="n">3</span><h3>서안 위, 펼쳐진 두루마리와 죽간과 지도</h3><span class="meta">5초 · 카메라 Crane Up</span></div>
+      <p class="kr">위에서 내려다보며 올라간다. "창고를 열어 기록을 살폈다"는 말에 맞춰, 책상이 곧 기록의 창고다.</p>
+      <div class="narr"><small>나레이션 3</small>신이 창고를 열어 기록을 살펴보니, 잘 되신 것과 헛도신 것이 나란히 보였습니다.</div>
+      <label class="k">이미지 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Top-down view of a Han dynasty scholar's desk covered with unrolled paper scrolls filled with blurred brush calligraphy, stacked bamboo slip books, a hand-drawn silk map of mountains and rivers, an ink stone, a bronze seal with red ink paste, and a small oil lamp. Zhuge Liang's hands rest at the bottom edge of the frame. Photorealistic, warm lamplight, 16:9, rich textures, no readable text.</div>
+      <label class="k">모션 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Camera cranes slowly upward and tilts down over the desk, revealing more scrolls; lamp flame flickers; hands remain still.</div>
+    </section>
+
+    <section class="shot">
+      <div class="shot-head"><span class="n">4</span><h3>제갈량이 정면을 보고 말한다 (Speak 립싱크용)</h3><span class="meta">6초 · 카메라 고정, 아주 느린 Push In</span></div>
+      <p class="kr">유일하게 입을 움직이는 장면. 얼굴이 화면 가운데 크게, 조명은 얼굴에. 립싱크가 잘 붙도록 손과 부채는 움직이지 않게 한다.</p>
+      <div class="narr"><small>나레이션 4 (Speak에 넣는 문장)</small>기억은 대화가 아니라 파일에 두소서. 한 대화에 한 가지 일만 시키소서.</div>
+      <label class="k">이미지 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Medium close-up portrait of Zhuge Liang facing the camera directly, seated, about to speak, calm and sincere expression, holding a white crane-feather fan still at chest level. Dark blue scarf-hat, pale grey robe. Candlelit study background softly blurred. Photorealistic historical drama, 16:9, eye-level 85mm lens, soft key light on the face, no text.</div>
+      <label class="k">모션 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>He speaks calmly to the camera with subtle head movement and a slow blink; fan and hands stay still; very slow push in.</div>
+    </section>
+
+    <section class="shot">
+      <div class="shot-head"><span class="n">5</span><h3>창밖, 안개 낀 새벽 산과 성곽의 깃발</h3><span class="meta">5초 · 카메라 Orbit 또는 FPV Drone</span></div>
+      <p class="kr">유일한 바깥 장면. 숫자 이야기를 할 때 형세(지형)를 보여 준다. 사람 없이 풍경만.</p>
+      <div class="narr"><small>나레이션 5</small>빠진 것은 후원자의 지갑이 아니라 창작자의 수입니다. 하루에 숫자 하나만 보소서.</div>
+      <label class="k">이미지 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Aerial view at dawn of misty layered mountains with a small ancient Chinese fortress city on a ridge, wooden watchtowers, long banners slowly moving in the wind, thin fog in the valleys, first sunlight touching the peaks. Photorealistic, cinematic, 16:9, cool blue and pale gold palette, no people, no text.</div>
+      <label class="k">모션 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Slow aerial orbit around the fortress; fog drifts through the valley; banners ripple; sunlight gradually brightens the peaks.</div>
+    </section>
+
+    <section class="shot">
+      <div class="shot-head"><span class="n">6</span><h3>상소를 두 손으로 올리고, 인장이 찍힌다</h3><span class="meta">5초 · 카메라 Dolly Out</span></div>
+      <p class="kr">마무리. 두루마리를 두 손으로 받쳐 올리는 자세로 끝난다. 그 뒤에 상소문 글이 이어지므로, 마지막 프레임이 두루마리여야 자연스럽다.</p>
+      <div class="narr"><small>나레이션 6</small>담박해야 뜻이 밝고, 고요해야 멀리 이릅니다. 오늘의 상소, 여기 있습니다.</div>
+      <label class="k">이미지 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>Zhuge Liang kneels on one knee and raises a rolled paper scroll tied with a dark cord with both hands toward the camera, head slightly bowed, a red seal stamp visible on the scroll's end. Candlelit study, dawn light growing brighter through paper windows. Photorealistic historical drama, 16:9, low angle, warm and cool light mixed, no text.</div>
+      <label class="k">모션 프롬프트</label>
+      <div class="prompt"><button class="copy" type="button">복사</button>He slowly lifts the scroll toward the camera and bows his head; camera dollies out gently; dawn light brightens the room.</div>
+    </section>
+  </div>
+
+  <h2>나레이션 전체 대본 (한국어 음성용)</h2>
+  <p>약 45초. 낮고 느린 남성 목소리, 문장 사이에 한 박자씩 쉽니다. 힉스필드의 음성(ElevenLabs)에서 한국어 목소리를 고르고 속도는 0.9배로 내립니다.</p>
+  <div class="prompt"><button class="copy" type="button">복사</button>신 제갈량이 삼가 아뢰옵니다.
+
+주공께서는 코드를 배운 적이 없으면서도, 붓 대신 클로드 코드를 잡으셨습니다.
+
+신이 창고를 열어 기록을 살펴보니, 잘 되신 것과 헛도신 것이 나란히 보였습니다.
+
+기억은 대화가 아니라 파일에 두소서. 한 대화에 한 가지 일만 시키소서.
+
+빠진 것은 후원자의 지갑이 아니라 창작자의 수입니다. 하루에 숫자 하나만 보소서.
+
+담박해야 뜻이 밝고, 고요해야 멀리 이릅니다. 오늘의 상소, 여기 있습니다.</div>
+
+  <h2>한눈에 보는 표</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>장면</th><th>카메라 프리셋</th><th>길이</th><th>말하는 장면</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>촛불 앞, 붓을 든다</td><td>Dolly In</td><td>5초</td><td></td></tr>
+      <tr><td>2</td><td>붓끝과 먹</td><td>Crash Zoom In / Macro</td><td>5초</td><td></td></tr>
+      <tr><td>3</td><td>서안 위 두루마리·죽간·지도</td><td>Crane Up</td><td>5초</td><td></td></tr>
+      <tr><td>4</td><td>정면을 보고 말한다</td><td>고정 + 느린 Push In</td><td>6초</td><td>Speak 립싱크</td></tr>
+      <tr><td>5</td><td>안개 낀 산과 성곽</td><td>Orbit / FPV Drone</td><td>5초</td><td></td></tr>
+      <tr><td>6</td><td>상소를 올린다, 인장</td><td>Dolly Out</td><td>5초</td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>프리셋 이름이 화면에서 조금 다르게 보이면 같은 성격의 것을 고르면 됩니다. 힉스필드는 프리셋을 자주 늘리고 이름을 바꿉니다.</p>
+</main>
+<script>
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var box=b.parentNode.cloneNode(true); box.querySelector('.copy').remove();
+    var t=box.textContent.trim();
+    function done(){b.textContent='복사됨';setTimeout(function(){b.textContent='복사';},1500);}
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(done);}
+    else{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();done();}
+  });
+});
+</script>
+</body>
+</html>
