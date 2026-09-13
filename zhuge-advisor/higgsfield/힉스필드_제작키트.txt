@@ -1,0 +1,81 @@
+제갈량 상소문 — 힉스필드 서막 영상 제작 키트 (GPT 붙여넣기용 원문)
+
+아래 프롬프트와 나레이션 문장은 그대로 지켜 주세요. 바꿔야 한다면 어디를 왜 바꿨는지 알려 주세요.
+
+■ 결과물 조건
+- MP4 한 개, 가로 16:9, 1080p, 30~45초
+- 한국어 나레이션 포함 (낮고 느린 중년 남성 목소리, 속도 0.9배)
+- 영상 안에 글자(한글·한자·영문) 절대 넣지 않기. 자막은 받는 쪽에서 얹음
+- 여섯 장면 순서 고정. 각 장면 5초 (4번만 6초)
+- 완성 후: 파일 다운로드 + 장면별 카메라 프리셋 표 + 프롬프트 변경 내역과 이유
+
+■ 만드는 순서
+1. Soul에서 아래 "캐릭터 시트" 프롬프트로 제갈량 이미지를 만들고, Soul ID로 등록한다. 이후 모든 장면은 이 ID로 만든다.
+2. 장면 이미지 6장을 Soul ID와 함께 만든다. 가로 16:9.
+3. 각 이미지를 Image to Video에 넣고 장면에 적힌 카메라 프리셋을 고른다. 모션 프롬프트는 한 줄만.
+4. 4번 장면만 Speak(립싱크)에 넣고 나레이션 4번 문장을 한국어 음성으로 말하게 한다.
+5. 여섯 클립을 순서대로 붙이고 전체 나레이션(맨 아래 대본)을 음성으로 얹는다. 배경음은 거문고나 고쟁 독주 한 줄.
+6. MP4(1080p)로 내보낸다.
+
+■ 캐릭터 시트 프롬프트 (Soul, 제일 먼저)
+Character reference sheet of Zhuge Liang, chancellor of Shu Han in the Three Kingdoms era, a calm and intelligent man in his mid-40s, slender face, thin long black beard, gentle tired eyes. He wears a pale grey-white Taoist scholar robe with wide sleeves and a dark blue silk scarf-hat (lunjin), and holds a white crane-feather fan. Layout: front view, three-quarter view, profile, and a close-up portrait, on a neutral warm grey background. Photorealistic, historical drama, soft candlelight, 85mm lens, muted earth tones, no text, no watermark.
+
+■ 장면 1 — 새벽 승상부, 촛불 앞에서 붓을 든다 (5초, 카메라: Dolly In)
+나레이션 1: 신(臣) 제갈량이 삼가 아뢰옵니다.
+이미지 프롬프트:
+Wide cinematic shot inside a Han dynasty chancellor's study before dawn. Zhuge Liang sits at a low lacquered desk, lifting a calligraphy brush over an unrolled blank paper scroll. A single candle and a bronze oil lamp light the room, cold blue dawn light leaks through paper windows. Bamboo slips, a folded map and an ink stone on the desk. Photorealistic historical drama, 16:9, shallow depth of field, warm candlelight against cool dawn, muted earth tones, no text.
+모션 프롬프트:
+Slow dolly in toward the seated man; candle flame flickers gently; he lowers the brush toward the paper. Calm, no sudden movement.
+
+■ 장면 2 — 붓끝, 먹이 한지에 스민다 (5초, 카메라: Crash Zoom In 또는 Macro)
+나레이션 2: 주공께서는 코드를 배운 적이 없으면서도, 붓 대신 클로드 코드를 잡으셨습니다.
+이미지 프롬프트:
+Extreme close-up of a calligraphy brush tip touching handmade mulberry paper, black ink bleeding softly into the fibers, blurred illegible brush strokes already on the page. A scholar's hand with a wide grey sleeve holds the brush. Warm candlelight, macro lens, shallow depth of field, photorealistic, 16:9, no readable text.
+모션 프롬프트:
+The brush glides slowly across the paper leaving a wet ink stroke; ink spreads into the fibers; camera pushes in on the brush tip.
+
+■ 장면 3 — 서안 위, 펼쳐진 두루마리와 죽간과 지도 (5초, 카메라: Crane Up)
+나레이션 3: 신이 창고를 열어 기록을 살펴보니, 잘 되신 것과 헛도신 것이 나란히 보였습니다.
+이미지 프롬프트:
+Top-down view of a Han dynasty scholar's desk covered with unrolled paper scrolls filled with blurred brush calligraphy, stacked bamboo slip books, a hand-drawn silk map of mountains and rivers, an ink stone, a bronze seal with red ink paste, and a small oil lamp. Zhuge Liang's hands rest at the bottom edge of the frame. Photorealistic, warm lamplight, 16:9, rich textures, no readable text.
+모션 프롬프트:
+Camera cranes slowly upward and tilts down over the desk, revealing more scrolls; lamp flame flickers; hands remain still.
+
+■ 장면 4 — 제갈량이 정면을 보고 말한다 (6초, 카메라: 고정 + 아주 느린 Push In) ← Speak 립싱크 장면
+나레이션 4 (Speak에 넣는 문장): 기억은 대화가 아니라 파일에 두소서. 한 대화에 한 가지 일만 시키소서.
+이미지 프롬프트:
+Medium close-up portrait of Zhuge Liang facing the camera directly, seated, about to speak, calm and sincere expression, holding a white crane-feather fan still at chest level. Dark blue scarf-hat, pale grey robe. Candlelit study background softly blurred. Photorealistic historical drama, 16:9, eye-level 85mm lens, soft key light on the face, no text.
+모션 프롬프트:
+He speaks calmly to the camera with subtle head movement and a slow blink; fan and hands stay still; very slow push in.
+
+■ 장면 5 — 창밖, 안개 낀 새벽 산과 성곽의 깃발 (5초, 카메라: Orbit 또는 FPV Drone)
+나레이션 5: 빠진 것은 후원자의 지갑이 아니라 창작자의 수입니다. 하루에 숫자 하나만 보소서.
+이미지 프롬프트:
+Aerial view at dawn of misty layered mountains with a small ancient Chinese fortress city on a ridge, wooden watchtowers, long banners slowly moving in the wind, thin fog in the valleys, first sunlight touching the peaks. Photorealistic, cinematic, 16:9, cool blue and pale gold palette, no people, no text.
+모션 프롬프트:
+Slow aerial orbit around the fortress; fog drifts through the valley; banners ripple; sunlight gradually brightens the peaks.
+
+■ 장면 6 — 상소를 두 손으로 올리고, 인장이 찍힌다 (5초, 카메라: Dolly Out)
+나레이션 6: 담박해야 뜻이 밝고, 고요해야 멀리 이릅니다. 오늘의 상소, 여기 있습니다.
+이미지 프롬프트:
+Zhuge Liang kneels on one knee and raises a rolled paper scroll tied with a dark cord with both hands toward the camera, head slightly bowed, a red seal stamp visible on the scroll's end. Candlelit study, dawn light growing brighter through paper windows. Photorealistic historical drama, 16:9, low angle, warm and cool light mixed, no text.
+모션 프롬프트:
+He slowly lifts the scroll toward the camera and bows his head; camera dollies out gently; dawn light brightens the room.
+
+■ 나레이션 전체 대본 (한국어 음성용, 약 45초, 문장 사이 한 박자 쉼)
+신 제갈량이 삼가 아뢰옵니다.
+주공께서는 코드를 배운 적이 없으면서도, 붓 대신 클로드 코드를 잡으셨습니다.
+신이 창고를 열어 기록을 살펴보니, 잘 되신 것과 헛도신 것이 나란히 보였습니다.
+기억은 대화가 아니라 파일에 두소서. 한 대화에 한 가지 일만 시키소서.
+빠진 것은 후원자의 지갑이 아니라 창작자의 수입니다. 하루에 숫자 하나만 보소서.
+담박해야 뜻이 밝고, 고요해야 멀리 이릅니다. 오늘의 상소, 여기 있습니다.
+
+■ 한눈에 보는 표
+1 | 촛불 앞, 붓을 든다 | Dolly In | 5초
+2 | 붓끝과 먹 | Crash Zoom In / Macro | 5초
+3 | 서안 위 두루마리·죽간·지도 | Crane Up | 5초
+4 | 정면을 보고 말한다 | 고정 + 느린 Push In | 6초 | Speak 립싱크
+5 | 안개 낀 산과 성곽 | Orbit / FPV Drone | 5초
+6 | 상소를 올린다, 인장 | Dolly Out | 5초
+
+프리셋 이름이 화면에서 조금 다르면 같은 성격의 것을 고르면 됩니다.
