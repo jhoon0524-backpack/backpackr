@@ -28,3 +28,8 @@
 ## 추가로 넣은 소스 (원래 목록에 없음)
 - 블라인드(teamblind.com/kr) 24건: 직장인 커뮤니티로 클리앙과 성격이 비슷하고 검색이 잘 되어 포함. 별도 source로 표시해 뒀으니 제외하려면 필터하면 됨.
 - SLR클럽 1건, NBA매니아 1건: 첫 검색에서 우연히 잡힌 글. 각 1건이라 영향 없음.
+
+## 2차 수집
+- 2026-09-21 재확인: `$CLAUDE_CODE_ENVIRONMENT_NAME` 빈 값(설정한 환경이 세션에 적용되지 않음). reddit.com / m.dcinside.com / forums.sherdog.com 모두 프록시 CONNECT 403.
+- 348개 URL 중 본문을 읽은 건: **0건**. 전부 같은 이유(프록시 차단)라 URL별로 나열하지 않는다.
+- 사용자 결정: 본문 재수집 대신 1차 제목 데이터에 2차 분류표를 적용 → data/raw_v2.jsonl, summary_v2.md, progress_v2.md.
