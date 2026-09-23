@@ -1,0 +1,406 @@
+<title>텀블벅 15년</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&family=Gasoek+One&display=swap">
+<style>
+  :root {
+    --bg: #FBF7F6;
+    --panel: #FFFFFF;
+    --ink: #1F1819;
+    --muted: #6F6263;
+    --line: #E9DEDC;
+    --accent: #EE4E55;
+    --accent-ink: #FFFFFF;
+    --accent-soft: rgba(238, 78, 85, 0.14);
+    --ink-soft: rgba(31, 24, 25, 0.08);
+    --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    --display: "Gasoek One", "IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #151112;
+      --panel: #1E1819;
+      --ink: #F4EDED;
+      --muted: #A99C9D;
+      --line: #342B2C;
+      --accent: #FF666C;
+      --accent-ink: #1A0E0F;
+      --accent-soft: rgba(255, 102, 108, 0.18);
+      --ink-soft: rgba(244, 237, 237, 0.08);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #151112;
+    --panel: #1E1819;
+    --ink: #F4EDED;
+    --muted: #A99C9D;
+    --line: #342B2C;
+    --accent: #FF666C;
+    --accent-ink: #1A0E0F;
+    --accent-soft: rgba(255, 102, 108, 0.18);
+    --ink-soft: rgba(244, 237, 237, 0.08);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 32px 56px;
+    display: grid;
+    gap: 28px;
+  }
+  header { display: grid; gap: 6px; }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(30px, 6vw, 48px);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .lede { margin: 0; color: var(--muted); max-width: 60ch; }
+
+  /* 무대 */
+  .stage {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 20px 18px;
+    display: grid;
+    gap: 18px;
+  }
+  .readout {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 24px;
+    align-items: end;
+  }
+  .year {
+    font-family: var(--display);
+    font-size: clamp(52px, 11vw, 92px);
+    line-height: 0.9;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat { display: grid; gap: 2px; }
+  .stat .label { font-size: 12px; color: var(--muted); letter-spacing: 0.04em; }
+  .stat .value {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(22px, 4.4vw, 34px);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .value small { font-family: var(--sans); font-size: 0.5em; font-weight: 500; margin-left: 2px; }
+
+  .chart-box { width: 100%; overflow-x: auto; }
+  .chart-box svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-text { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .grid-line { stroke: var(--line); stroke-width: 1; }
+  .area { fill: var(--accent-soft); }
+  .curve { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+  .head { fill: var(--accent); }
+  .head-ring { fill: none; stroke: var(--accent); stroke-width: 2; opacity: 0.35; }
+  .ms-dot { fill: var(--panel); stroke: var(--accent); stroke-width: 2; transition: opacity .4s; }
+  .ms-label { fill: var(--ink); font-family: var(--mono); font-size: 12px; font-weight: 600; transition: opacity .4s; }
+  .ev-tick { stroke: var(--muted); stroke-width: 1.5; transition: stroke .3s; }
+  .ev-tick.on { stroke: var(--accent); }
+  .off { opacity: 0; }
+
+  .caption {
+    min-height: 92px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--ink-soft);
+  }
+  .caption .when {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent);
+    padding-top: 3px;
+    white-space: nowrap;
+  }
+  .caption h2 { margin: 0; font-size: 18px; line-height: 1.35; text-wrap: balance; }
+  .caption p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+  .caption.pop { animation: pop .45s ease-out; }
+  @keyframes pop { from { transform: translateY(6px); opacity: .3; } to { transform: none; opacity: 1; } }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button {
+    font: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 999px;
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); min-width: 96px; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .scrub { flex: 1 1 200px; accent-color: var(--accent); min-width: 0; }
+  .speed { font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .speed select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
+
+  /* 전체 연표 */
+  .timeline h3 { margin: 0 0 10px; font-size: 16px; }
+  .timeline ol { list-style: none; margin: 0; padding: 0; display: grid; }
+  .timeline li {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 14px;
+    padding: 10px 8px;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background .25s;
+  }
+  .timeline li:hover { background: var(--ink-soft); }
+  .timeline li.now { background: var(--accent-soft); }
+  .timeline .d { font-family: var(--mono); font-size: 13px; color: var(--muted); padding-top: 1px; font-variant-numeric: tabular-nums; }
+  .timeline .t { font-weight: 500; }
+  .timeline .t span { display: block; font-weight: 400; color: var(--muted); font-size: 13.5px; }
+  .note { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 70ch; }
+  .note a { color: inherit; }
+
+  @media (max-width: 560px) {
+    .readout { grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+    .year { grid-column: 1 / -1; }
+    .caption { grid-template-columns: 1fr; gap: 4px; }
+    .timeline li { grid-template-columns: 70px 1fr; }
+    .chart-box svg { min-width: 560px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .caption.pop { animation: none; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">TUMBLBUG 2011 — 2026</div>
+    <h1>후원 0원에서 5,000억 원까지</h1>
+    <p class="lede">2011년 시범 서비스부터 2026년 누적 펀딩 5,000억 원 돌파까지, 텀블벅이 걸어온 길을 시간 순서대로 재생합니다.</p>
+  </header>
+
+  <section class="stage" aria-label="텀블벅 성장 애니메이션">
+    <div class="readout">
+      <div class="year" id="year">2011</div>
+      <div class="stat">
+        <span class="label">누적 펀딩 금액</span>
+        <span class="value" id="money">0<small>억 원</small></span>
+      </div>
+      <div class="stat">
+        <span class="label">누적 프로젝트</span>
+        <span class="value" id="projects">0<small>건</small></span>
+      </div>
+    </div>
+
+    <div class="chart-box">
+      <svg id="chart" viewBox="0 0 800 290" role="img" aria-label="연도별 누적 펀딩 금액 곡선"></svg>
+    </div>
+
+    <div class="caption" id="caption" aria-live="polite">
+      <div class="when" id="capWhen">2011.03</div>
+      <div>
+        <h2 id="capTitle">텀블벅 시범 서비스 시작</h2>
+        <p id="capBody"></p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="play" type="button">일시정지</button>
+      <button id="restart" type="button">처음부터</button>
+      <input class="scrub" id="scrub" type="range" min="2011" max="2026.6" step="0.01" value="2011" aria-label="재생 위치">
+      <label class="speed" for="speedSel">속도
+        <select id="speedSel">
+          <option value="0.6">천천히</option>
+          <option value="1" selected>보통</option>
+          <option value="1.8">빠르게</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="timeline">
+    <h3>전체 연표 <span style="font-weight:400;color:var(--muted);font-size:13px">· 항목을 누르면 그 시점으로 이동합니다</span></h3>
+    <ol id="list"></ol>
+  </section>
+
+  <p class="note">곡선은 언론에 공개된 누적 금액 돌파 시점(100억·300억·500억·1,000억·3,000억·5,000억)을 이은 근사선입니다. 그 사이 구간의 숫자는 보간값이며 실제 월별 실적과 다를 수 있습니다. 2016년 100억 원 돌파는 연도만 확인되어 연중으로 표시했습니다. 출처: 이투데이(2018.11, 2020.07), ZDNet Korea(2021.12, 2023.07, 2023.09), 바이라인네트워크·아시아경제(2026.08), 위키백과 텀블벅 문서.</p>
+</div>
+
+<script>
+(() => {
+  // 누적 펀딩 금액(억 원) — 공개된 돌파 시점
+  const MONEY = [
+    [2011.21, 0], [2016.5, 100], [2018.12, 300], [2018.87, 500],
+    [2020.5, 1000], [2023.7, 3000], [2026.49, 5000]
+  ];
+  // 누적 프로젝트(건) — 공개된 돌파 시점
+  const PROJ = [
+    [2011.21, 0], [2012.5, 100], [2014.5, 1000], [2018.5, 10000],
+    [2023.7, 50000], [2026.49, 80000]
+  ];
+  const EVENTS = [
+    { t: 2011.21, d: "2011.03", title: "텀블벅 시범 서비스 시작", body: "영화·디자인 전공생 등 4명이 만든 크라우드펀딩 서비스. 2011년 1월 법인 등록 후 3월 30일 시범 운영을 시작했습니다." },
+    { t: 2012.5,  d: "2012",    title: "론치 프로젝트 100건 돌파", body: "첫 해를 지나며 창작자들의 프로젝트가 100건을 넘어섰습니다." },
+    { t: 2014.5,  d: "2014",    title: "론치 프로젝트 1,000건 돌파", body: "출판·영상·음악 등 다양한 분야로 프로젝트가 늘어났습니다." },
+    { t: 2015.5,  d: "2015",    title: "시리즈 A 투자 유치", body: "소풍, 스트롱벤처스, 네이버로부터 투자를 받았습니다." },
+    { t: 2016.5,  d: "2016",    title: "누적 후원액 100억 원 달성", body: "서비스 시작 약 5년 만에 첫 100억 원을 넘었습니다." },
+    { t: 2018.12, d: "2018.02", title: "누적 후원액 300억 원", body: "2년이 채 안 되어 누적 후원액이 세 배가 되었습니다." },
+    { t: 2018.5,  d: "2018",    title: "론치 프로젝트 1만 건 돌파", body: "창작자 1만 팀이 텀블벅에서 프로젝트를 열었습니다." },
+    { t: 2018.87, d: "2018.11", title: "누적 500억 원 · 후원자 60만 명", body: "300억 원 발표 후 8개월 만에 200억 원이 더해졌습니다. 당시 리워드형 크라우드펀딩 국내 최대 후원자 수였습니다." },
+    { t: 2020.45, d: "2020.06", title: "백패커, 텀블벅 인수", body: "핸드메이드 마켓 아이디어스를 운영하는 백패커가 텀블벅을 인수했습니다." },
+    { t: 2020.5,  d: "2020.07", title: "누적 후원액 1,000억 원 돌파", body: "'룬의 아이들' 오디오북, 디지몬 어드벤처 음원, 달빛천사 DVD 등 팬덤 프로젝트가 억 원대 후원을 모았습니다." },
+    { t: 2021.96, d: "2021.12", title: "김동환 대표 체제로 전환", body: "창업자 염재승 대표에 이어 백패커 김동환 대표가 텀블벅 대표를 겸임하게 되었습니다." },
+    { t: 2023.5,  d: "2023.07", title: "백패커와 텀블벅 합병", body: "아이디어스·텀블벅·스테디오를 한 회사에서 운영하며 창작자 생태계를 넓혔습니다." },
+    { t: 2023.7,  d: "2023.09", title: "누적 3,000억 원 · 후원 700만 건", body: "서비스 12년 만에 5만 건 이상의 프로젝트가 진행되었습니다." },
+    { t: 2026.49, d: "2026.06", title: "누적 펀딩 5,000억 원 · 후원 1,000만 건", body: "1,000억 원 달성 후 6년 만입니다. 약 8만 개 프로젝트가 진행되었고, 보드게임·TRPG와 캐릭터·굿즈 분야가 성장을 이끌었습니다." }
+  ].sort((a, b) => a.t - b.t);
+
+  const T0 = 2011, T1 = 2026.6;
+  const W = 800, H = 290, L = 54, R = 20, TOP = 20, B = 36;
+  const YMAX = 5500;
+  const x = t => L + (t - T0) / (2027 - T0) * (W - L - R);
+  const y = v => TOP + (1 - v / YMAX) * (H - TOP - B);
+
+  function interp(table, t) {
+    if (t <= table[0][0]) return table[0][1];
+    for (let i = 1; i < table.length; i++) {
+      const [ta, va] = table[i - 1], [tb, vb] = table[i];
+      if (t <= tb) return va + (vb - va) * (t - ta) / (tb - ta);
+    }
+    return table[table.length - 1][1];
+  }
+
+  // ---- 차트 뼈대 ----
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.getElementById("chart");
+  const el = (tag, attrs, parent = svg) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    parent.appendChild(n);
+    return n;
+  };
+  for (let v = 0; v <= 5000; v += 1000) {
+    el("line", { class: "grid-line", x1: L, x2: W - R, y1: y(v), y2: y(v) });
+    const tx = el("text", { class: "axis-text", x: L - 8, y: y(v) + 4, "text-anchor": "end" });
+    tx.textContent = v === 0 ? "0" : v.toLocaleString("ko-KR") + "억";
+  }
+  for (let yr = 2011; yr <= 2026; yr += 3) {
+    const tx = el("text", { class: "axis-text", x: x(yr), y: H - 10, "text-anchor": "middle" });
+    tx.textContent = yr;
+  }
+  const ticks = EVENTS.map(e => el("line", { class: "ev-tick", x1: x(e.t), x2: x(e.t), y1: y(0) + 4, y2: y(0) + 12 }));
+  const area = el("path", { class: "area" });
+  const curve = el("path", { class: "curve" });
+  const milestones = MONEY.slice(1).map(([t, v]) => {
+    const g = el("g", { class: "off" });
+    el("circle", { class: "ms-dot", cx: x(t), cy: y(v), r: 5 }, g);
+    const lab = el("text", { class: "ms-label", x: x(t) - 8, y: y(v) - (v === 500 ? 26 : 10), "text-anchor": "end" }, g);
+    lab.textContent = v.toLocaleString("ko-KR") + "억";
+    return { t, g };
+  });
+  const ring = el("circle", { class: "head-ring", r: 11 });
+  const head = el("circle", { class: "head", r: 5.5 });
+
+  // ---- 연표 목록 ----
+  const list = document.getElementById("list");
+  const items = EVENTS.map(e => {
+    const li = document.createElement("li");
+    li.tabIndex = 0;
+    li.innerHTML = `<div class="d">${e.d}</div><div class="t">${e.title}<span>${e.body}</span></div>`;
+    const go = () => { pause(); setT(e.t + 0.001); };
+    li.addEventListener("click", go);
+    li.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(); } });
+    list.appendChild(li);
+    return li;
+  });
+
+  // ---- 렌더 ----
+  const $ = id => document.getElementById(id);
+  const yearEl = $("year"), moneyEl = $("money"), projEl = $("projects");
+  const cap = $("caption"), capWhen = $("capWhen"), capTitle = $("capTitle"), capBody = $("capBody");
+  const scrub = $("scrub");
+  let current = -1;
+
+  function render(t) {
+    const pts = [];
+    for (let s = T0; s < t; s += 0.05) pts.push([s, interp(MONEY, s)]);
+    pts.push([t, interp(MONEY, t)]);
+    const d = pts.map((p, i) => (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[1]).toFixed(1)).join("");
+    curve.setAttribute("d", d);
+    area.setAttribute("d", d + `L${x(t).toFixed(1)} ${y(0)}L${x(T0)} ${y(0)}Z`);
+    const hx = x(t), hy = y(interp(MONEY, t));
+    head.setAttribute("cx", hx); head.setAttribute("cy", hy);
+    ring.setAttribute("cx", hx); ring.setAttribute("cy", hy);
+    milestones.forEach(m => m.g.classList.toggle("off", t < m.t - 0.0001));
+    ticks.forEach((k, i) => k.classList.toggle("on", t >= EVENTS[i].t));
+
+    yearEl.textContent = Math.floor(Math.min(t, 2026));
+    moneyEl.firstChild.nodeValue = Math.round(interp(MONEY, t)).toLocaleString("ko-KR");
+    projEl.firstChild.nodeValue = Math.round(interp(PROJ, t)).toLocaleString("ko-KR");
+    scrub.value = t;
+
+    let idx = 0;
+    EVENTS.forEach((e, i) => { if (t >= e.t) idx = i; });
+    if (idx !== current) {
+      current = idx;
+      const e = EVENTS[idx];
+      capWhen.textContent = e.d; capTitle.textContent = e.title; capBody.textContent = e.body;
+      cap.classList.remove("pop"); void cap.offsetWidth; cap.classList.add("pop");
+      items.forEach((li, i) => li.classList.toggle("now", i === idx));
+    }
+  }
+
+  // ---- 재생 제어 ----
+  const YEARS_PER_SEC = 0.8;
+  let t = T0, playing = false, last = 0, speed = 1;
+  const playBtn = $("play");
+
+  function setT(v) { t = Math.max(T0, Math.min(T1, v)); render(t); }
+  function frame(now) {
+    if (!playing) return;
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    setT(t + dt * YEARS_PER_SEC * speed);
+    if (t >= T1) { pause(); return; }
+    requestAnimationFrame(frame);
+  }
+  function play() {
+    if (t >= T1) setT(T0);
+    playing = true; playBtn.textContent = "일시정지";
+    last = performance.now(); requestAnimationFrame(frame);
+  }
+  function pause() { playing = false; playBtn.textContent = t >= T1 ? "다시 재생" : "재생"; }
+
+  playBtn.addEventListener("click", () => (playing ? pause() : play()));
+  $("restart").addEventListener("click", () => { setT(T0); play(); });
+  scrub.addEventListener("input", () => { pause(); setT(parseFloat(scrub.value)); });
+  $("speedSel").addEventListener("change", ev => { speed = parseFloat(ev.target.value); });
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) { setT(T1); pause(); } else { setT(T0); play(); }
+})();
+</script>
