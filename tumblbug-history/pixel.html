@@ -1,0 +1,584 @@
+<title>텀블벅 픽셀 연대기</title>
+<style>
+  @font-face { font-family: "Galmuri11"; src: url("fonts/Galmuri11.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Galmuri11"; src: url("fonts/Galmuri11-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+  /* 픽셀 게임 화면이라는 하나의 세계로 고정한 단일 테마 */
+  :root {
+    color-scheme: dark;
+    --bg: #140F22;
+    --panel: #1D1631;
+    --ink: #EFE8FF;
+    --muted: #A79CC4;
+    --line: #3A2F57;
+    --accent: #EE4E55;
+    --gold: #FFD23F;
+    --px: "Galmuri11", "Apple SD Gothic Neo", "Malgun Gothic", monospace;
+  }
+  body { background: var(--bg); color: var(--ink); font-family: var(--px); font-size: 14px; line-height: 1.7; }
+  .wrap { max-width: 880px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 20px; }
+  header { display: grid; gap: 4px; }
+  .eyebrow { color: var(--gold); font-size: 12px; letter-spacing: 0.14em; }
+  h1 { margin: 0; font-weight: 700; font-size: clamp(24px, 5vw, 36px); line-height: 1.25; text-wrap: balance; }
+  .lede { margin: 0; color: var(--muted); max-width: 62ch; }
+
+  .screen {
+    position: relative;
+    border: 4px solid var(--ink);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px var(--line);
+    background: #000;
+    line-height: 0;
+  }
+  canvas { width: 100%; height: auto; aspect-ratio: 192 / 108; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+  .hud {
+    position: absolute; top: 8px; left: 8px; right: 8px;
+    display: flex; justify-content: space-between; gap: 8px; line-height: 1.2; pointer-events: none;
+  }
+  .tag { background: rgba(10, 7, 20, 0.78); border: 2px solid var(--ink); padding: 4px 8px; font-size: clamp(11px, 2vw, 14px); }
+  .tag b { color: var(--gold); font-weight: 700; }
+  .stat-v { font-variant-numeric: tabular-nums; }
+
+  .dialog {
+    border: 4px solid var(--ink);
+    box-shadow: inset 0 0 0 3px var(--bg), inset 0 0 0 5px var(--line);
+    background: #0F0B1C;
+    padding: 16px 18px 14px;
+    display: grid; gap: 6px;
+    min-height: 132px;
+    cursor: pointer;
+  }
+  .dialog .who { color: var(--accent); font-weight: 700; font-size: 13px; letter-spacing: 0.06em; }
+  .dialog .title { font-weight: 700; font-size: 18px; }
+  .dialog .text { margin: 0; font-size: 15px; max-width: 66ch; }
+  .dialog .more { justify-self: end; color: var(--gold); font-size: 12px; animation: blink 0.8s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: inherit; font-weight: 700; font-size: 14px; color: var(--ink);
+    background: var(--panel); border: 3px solid var(--ink); padding: 6px 14px; cursor: pointer;
+    box-shadow: 3px 3px 0 var(--line);
+  }
+  button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--line); }
+  button.primary { background: var(--accent); color: #FFFFFF; min-width: 104px; }
+  button:focus-visible, li:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .dots { display: flex; gap: 6px; margin-left: auto; }
+  .dots span { width: 12px; height: 12px; background: var(--line); }
+  .dots span.on { background: var(--gold); }
+
+  .chapters h2 { margin: 8px 0 8px; font-size: 16px; }
+  .chapters ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .chapters li {
+    display: grid; grid-template-columns: 96px 1fr; gap: 12px;
+    padding: 10px 12px; border: 2px solid var(--line); background: var(--panel); cursor: pointer;
+  }
+  .chapters li.now { border-color: var(--gold); }
+  .chapters .y { color: var(--gold); font-size: 13px; }
+  .chapters .t { font-weight: 700; }
+  .chapters .t span { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+  .note { color: var(--muted); font-size: 12px; margin: 0; max-width: 72ch; }
+
+  @media (max-width: 560px) {
+    .chapters li { grid-template-columns: 1fr; gap: 2px; }
+    .dots { margin-left: 0; width: 100%; }
+    .dialog .title { font-size: 16px; }
+    .dialog .text { font-size: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .dialog .more { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">TUMBLBUG · 2011 → 2026</div>
+    <h1>텀블벅 픽셀 연대기</h1>
+    <p class="lede">아이디어 하나와 응원하는 사람들. 2011년 첫걸음부터 누적 펀딩 5,000억 원까지, 일곱 장면으로 따라갑니다.</p>
+  </header>
+
+  <div class="screen">
+    <canvas id="cv" width="192" height="108" aria-label="텀블벅 연혁 픽셀 아트 애니메이션"></canvas>
+    <div class="hud">
+      <div class="tag" id="hudYear"><b>2011</b></div>
+      <div class="tag"><span id="hudLabel">첫걸음</span> <b class="stat-v" id="hudStat">2011.03.30</b></div>
+    </div>
+  </div>
+
+  <div class="dialog" id="dialog" aria-live="polite" title="눌러서 글 전체 보기">
+    <div class="who" id="who">CHAPTER 1</div>
+    <div class="title" id="dTitle"></div>
+    <p class="text" id="dText"></p>
+    <div class="more" id="more" hidden>▼</div>
+  </div>
+
+  <div class="controls">
+    <button id="prev" type="button">◀ 이전</button>
+    <button class="primary" id="play" type="button">일시정지</button>
+    <button id="next" type="button">다음 ▶</button>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <section class="chapters">
+    <h2>일곱 장면</h2>
+    <ol id="list"></ol>
+  </section>
+
+  <p class="note">장면 속 인물과 배경은 이해를 돕기 위한 연출입니다. 날짜와 숫자는 공개된 언론 보도 기준입니다. 출처: 위키백과 텀블벅 문서, 아주경제(2018.11), 이투데이(2020.07), ZDNet Korea(2021.12, 2023.07, 2023.09), 바이라인네트워크·아시아경제(2026.08). 글꼴: 갈무리(Galmuri, SIL OFL 1.1).</p>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById("cv");
+  const c = cv.getContext("2d");
+  const W = 192, H = 108, GY = 88;
+
+  // ---------- 그리기 도구 ----------
+  const R = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
+  const rnd = i => { const v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  const ease = v => 1 - Math.pow(1 - clamp01(v), 3);
+  function spr(rows, x, y, pal, flip) {
+    const w = rows[0].length;
+    for (let j = 0; j < rows.length; j++)
+      for (let i = 0; i < w; i++) {
+        const k = rows[j][i];
+        if (k !== ".") R(x + (flip ? w - 1 - i : i), y + j, 1, 1, pal[k]);
+      }
+  }
+  function sky(cols, h) {
+    const bh = Math.ceil(h / cols.length);
+    cols.forEach((col, i) => R(0, i * bh, W, bh + 1, col));
+  }
+
+  // 3x5 숫자 글꼴
+  const DIG = {
+    "0": ["111","101","101","101","111"], "1": ["010","110","010","010","111"],
+    "2": ["111","001","111","100","111"], "3": ["111","001","111","001","111"],
+    "4": ["101","101","111","001","001"], "5": ["111","100","111","001","111"],
+    "6": ["111","100","111","101","111"], "7": ["111","001","001","001","001"],
+    "8": ["111","101","111","101","111"], "9": ["111","101","111","001","111"]
+  };
+  const numW = (str, sc) => str.length * 4 * sc - sc;
+  function num(str, x, y, col, sc = 1) {
+    [...str].forEach((ch, n) => {
+      const g = DIG[ch];
+      for (let j = 0; j < 5; j++) for (let i = 0; i < 3; i++)
+        if (g[j][i] === "1") R(x + (n * 4 + i) * sc, y + j * sc, sc, sc, col);
+    });
+  }
+
+  // ---------- 스프라이트 ----------
+  const PERSON = [
+    [".hhh.", "hhhhh", ".ese.", ".sss.", "ccccc", "scccs", ".ccc.", ".p.p.", ".p.p."],
+    [".hhh.", "hhhhh", ".ese.", ".sss.", "ccccc", "scccs", ".ccc.", ".p.p.", "p...p"]
+  ];
+  const HAIRS = ["#2B1B14", "#5A3522", "#1F1F2E", "#8C4B2A", "#3B2A4F"];
+  const SHIRTS = ["#EE4E55", "#3FA7D6", "#59C36A", "#F2A541", "#9B6BDB", "#F07FB0", "#E8E8F0"];
+  const pal = (i, over = {}) => Object.assign({
+    h: HAIRS[i % HAIRS.length], s: "#F2C7A5", e: "#2A1A1A",
+    c: SHIRTS[i % SHIRTS.length], p: "#3A3552"
+  }, over);
+  function person(x, y, p, s, walking, flip) {
+    const f = walking ? Math.floor(s * 6) % 2 : 0;
+    spr(PERSON[f], x, y, p, flip);
+  }
+  const HEART = ["rr.rr", "rrrrr", ".rrr.", "..r.."];
+  const heart = (x, y) => spr(HEART, x, y, { r: "#FF4D6D" });
+  const coin = (x, y) => { R(x, y, 2, 2, "#FFD23F"); R(x, y, 1, 1, "#FFF3B0"); };
+  const BIGCOIN = [".yyy.", "yyywy", "yyyyy", "yoyyy", ".yyy."];
+  const bigCoin = (x, y) => spr(BIGCOIN, x, y, { y: "#FFD23F", w: "#FFF3B0", o: "#D9A21B" });
+
+  const ICONS = {
+    dice:   { rows: ["wwwww", "wkwkw", "wwkww", "wkwkw", "wwwww"], pal: { w: "#F7F4FF", k: "#2A1A1A" } },
+    meeple: { rows: ["..m..", ".mmm.", "mmmmm", ".mmm.", "mm.mm"], pal: { m: "#F2A541" } },
+    plush:  { rows: [".pppp.", "pkppkp", "pprrpp", ".pppp.", ".p..p."], pal: { p: "#9FE3C9", k: "#2A1A1A", r: "#FF9DB5" } },
+    book:   { rows: ["bbbbb", "bwwwb", "bwwwb", "bbbbb"], pal: { b: "#3FA7D6", w: "#F7F4FF" } },
+    note:   { rows: ["..nn", "..n.", "..n.", "nnn.", "nn.."], pal: { n: "#FFD23F" } },
+    disc:   { rows: [".ddd.", "ddddd", "dd.dd", "ddddd", ".ddd."], pal: { d: "#C9C4E8" } }
+  };
+  const icon = (name, x, y) => spr(ICONS[name].rows, x, y, ICONS[name].pal);
+
+  function backpack(x, y) {
+    R(x, y + 2, 9, 11, "#E0873A");
+    R(x, y, 9, 4, "#C96F28");
+    R(x + 3, y - 2, 3, 1, "#8A4A1A"); R(x + 2, y - 1, 1, 1, "#8A4A1A"); R(x + 6, y - 1, 1, 1, "#8A4A1A");
+    R(x + 2, y + 7, 5, 4, "#C96F28");
+    R(x + 4, y + 3, 1, 2, "#FFE0A3");
+  }
+  function building(x, w, h, col, winOn, seed, lit) {
+    R(x, GY - h, w, h, col);
+    R(x, GY - h, w, 1, "rgba(255,255,255,0.18)");
+    for (let wx = x + 2; wx < x + w - 2; wx += 4)
+      for (let wy = GY - h + 3; wy < GY - 4; wy += 5)
+        R(wx, wy, 2, 2, rnd(seed + wx * 3.1 + wy * 7.7) < lit ? winOn : "rgba(0,0,0,0.28)");
+  }
+  function cloud(x, y) {
+    R(x, y + 2, 14, 3, "#FFFFFF"); R(x + 3, y, 7, 3, "#FFFFFF"); R(x + 2, y + 5, 10, 1, "#DCE8F6");
+  }
+  function stars(n, h, s, seed) {
+    for (let i = 0; i < n; i++) {
+      const on = (Math.floor(s * 2 + rnd(seed + i + 7) * 4) % 4) !== 0;
+      if (on) R(rnd(seed + i) * W, rnd(seed + i + 99) * h, 1, 1, "#FFF6D8");
+    }
+  }
+  function firework(x, y, age, col) {
+    if (age < 0 || age > 1.5) return;
+    if (age < 0.35) { R(x, y + (0.35 - age) * 80, 1, 2, "#FFF3B0"); return; }
+    const a2 = age - 0.35, r = ease(a2 / 0.8) * 16;
+    for (let i = 0; i < 16; i++) {
+      if (a2 > 0.8 && (i + Math.floor(a2 * 20)) % 2) continue;
+      const ang = i / 16 * Math.PI * 2;
+      R(x + Math.cos(ang) * r, y + Math.sin(ang) * r + a2 * a2 * 8, 1, 1, col);
+    }
+  }
+  function billboard(x, y, w, h, str, sc, s) {
+    R(x + w / 2 - 1, y + h, 2, GY - y - h, "#4A4060");
+    R(x - 2, y - 2, w + 4, h + 4, "#4A4060");
+    R(x, y, w, h, "#120C22");
+    for (let i = 0; i < w + 4; i += 3) {
+      const on = (Math.floor(s * 4) + i / 3) % 2 < 1;
+      R(x - 2 + i, y - 2, 1, 1, on ? "#FFD23F" : "#7A6420");
+      R(x - 2 + i, y + h + 1, 1, 1, on ? "#7A6420" : "#FFD23F");
+    }
+    num(str, x + (w - numW(str, sc)) / 2, y + (h - 5 * sc) / 2, "#FF6B70", sc);
+  }
+  function crowd(n, s, seed, y0) {
+    for (let i = 0; i < n; i++) {
+      const side = i % 2, sp = 10 + rnd(seed + i) * 14;
+      const travel = (s * sp + rnd(seed + i + 50) * 60) % 70;
+      const x = side ? W - 4 - travel : travel;
+      const y = y0 + Math.floor(rnd(seed + i + 3) * 14);
+      R(x, y, 1, 1, "#F2C7A5");
+      R(x, y + 1, 1, 2, SHIRTS[i % SHIRTS.length]);
+    }
+  }
+  function risingHearts(n, s, seed, xMin, xMax, yStart) {
+    for (let i = 0; i < n; i++) {
+      const life = (s * 0.6 + rnd(seed + i)) % 1;
+      heart(xMin + rnd(seed + i + 5) * (xMax - xMin), yStart - life * 40);
+    }
+  }
+  function ground(col, top) { R(0, GY, W, H - GY, col); R(0, GY, W, 1, top); }
+
+  // ---------- 장면 ----------
+  const SCENES = [
+    {
+      year: "2011", title: "첫걸음",
+      text: "영화와 디자인을 공부하던 청년 넷이 모여 크라우드펀딩 서비스를 만듭니다. 아이디어가 있는 사람과, 그 아이디어를 응원하는 사람을 잇는 곳. 2011년 3월 30일, 텀블벅이 시범 운영을 시작합니다.",
+      label: "시범 운영", stat: () => "2011.03.30",
+      draw(t, s) {
+        R(0, 0, W, H, "#2A1F3D");
+        for (let x = 0; x < W; x += 12) R(x, 0, 1, 86, "#30244A");
+        R(0, 86, W, 22, "#3D2C52"); R(0, 86, W, 1, "#4D3A66");
+        for (let x = 8; x < W; x += 16) R(x, 87, 1, 21, "#35264A");
+        // 창문과 밤하늘
+        R(18, 14, 36, 28, "#5B4478"); R(20, 16, 32, 24, "#0F1030");
+        c.save(); c.beginPath(); c.rect(20, 16, 32, 24); c.clip();
+        for (let i = 0; i < 10; i++) if ((Math.floor(s * 2 + i) % 3) !== 0) R(20 + rnd(i) * 32, 16 + rnd(i + 40) * 24, 1, 1, "#FFF6D8");
+        spr([".mmm.", "mm...", "m....", "m....", "mm...", ".mmm."], 42, 19, { m: "#FFF4C2" });
+        c.restore();
+        R(35, 16, 2, 24, "#5B4478"); R(20, 27, 32, 2, "#5B4478");
+        // 벽 달력
+        R(160, 18, 20, 18, "#F4EFE6"); R(160, 18, 20, 4, "#EE4E55");
+        num("2011", 162, 26, "#2A1F3D");
+        // 네 사람
+        [74, 86, 126, 138].forEach((x, i) => {
+          const bob = Math.floor(s * 5 + i * 1.3) % 2;
+          person(x, 54 + bob, pal(i + 1));
+          if (t > 0.72 && Math.floor(s * 3 + i) % 2) R(x + 2, 46, 1, 4, "#FFD23F"), R(x + 2, 51, 1, 1, "#FFD23F");
+        });
+        // 모니터
+        c.globalAlpha = 0.08; R(80, 40, 64, 46, "#6FD0FF"); c.globalAlpha = 1;
+        R(98, 46, 26, 18, "#1B1B24");
+        R(100, 48, 22, 13, Math.floor(s * 8) % 5 ? "#6FD0FF" : "#7CD9FF");
+        if (t > 0.35) {
+          heart(108, 50);
+          R(102, 57, 18 * clamp01((t - 0.35) * 2), 2, "#EE4E55");
+        }
+        R(109, 64, 4, 1, "#1B1B24");
+        // 책상
+        R(64, 64, 94, 4, "#8A5A3C"); R(64, 68, 94, 1, "#6B4430");
+        R(68, 68, 3, 18, "#6B4430"); R(151, 68, 3, 18, "#6B4430");
+        // 전구: 아이디어가 켜진다
+        const on = t > 0.55;
+        R(110, 22, 1, 10, "#4A4060");
+        spr([".yyy.", "yyyyy", "yyyyy", ".yyy.", "..g..", ".ggg."], 108, 30 - 6 + 6, { y: on ? "#FFE66B" : "#6B6480", g: "#9A94B0" });
+        if (on && Math.floor(s * 4) % 2) { R(104, 31, 2, 1, "#FFE66B"); R(115, 31, 2, 1, "#FFE66B"); R(110, 26, 1, 2, "#FFE66B"); R(105, 27, 1, 1, "#FFE66B"); R(115, 27, 1, 1, "#FFE66B"); }
+        // 화분
+        R(170, 78, 8, 8, "#B5653A"); R(171, 72, 2, 6, "#59C36A"); R(174, 70, 2, 8, "#4AA85A"); R(168, 74, 3, 2, "#59C36A");
+      }
+    },
+    {
+      year: "2012–2014", title: "하나둘 모이는 사람들",
+      text: "창작자가 아이디어를 올리면, 응원하는 사람들이 하나둘 찾아와 후원합니다. 2012년 프로젝트 100건, 2014년에는 1,000건이 문을 열었습니다.",
+      label: "론치 프로젝트", stat: t => (t < 0.5 ? "100" : "1,000") + "건",
+      draw(t, s) {
+        sky(["#8FD3FF", "#A6DCFF", "#BFE6FF", "#D6F0FF"], GY);
+        R(160, 10, 8, 8, "#FFF1A8"); R(161, 9, 6, 10, "#FFF1A8"); R(159, 11, 10, 6, "#FFF1A8");
+        cloud((20 + s * 4) % 230 - 30, 12); cloud((120 + s * 3) % 230 - 30, 22);
+        for (let x = 0; x < W; x++) { const hh = 8 + Math.sin(x / 14) * 4 + Math.sin(x / 5) * 1; R(x, GY - hh, 1, hh, "#8CC084"); }
+        ground("#6DBB5E", "#83CC72"); R(0, 94, W, 5, "#D9C28F");
+        // 가판대
+        R(16, 62, 2, 26, "#7A4B2F"); R(52, 62, 2, 26, "#7A4B2F");
+        for (let x = 12; x < 58; x += 4) R(x, 56, 4, 6, (x / 4) % 2 ? "#EE4E55" : "#FFFFFF");
+        R(14, 74, 42, 14, "#B77A4C"); R(14, 74, 42, 2, "#D49A66");
+        // 창작자와 아이디어 보드
+        person(58, GY - 9, pal(0, { c: "#EE4E55" }));
+        R(66, 60, 22, 16, "#7A4B2F"); R(67, 61, 20, 14, "#F4EFE6");
+        spr([".y.", "yyy", ".g."], 69, 63, { y: "#FFD23F", g: "#9A94B0" });
+        num(t < 0.5 ? "100" : "1000", t < 0.5 ? 74 : 71, 68, "#EE4E55");
+        R(76, 76, 2, 12, "#7A4B2F");
+        // 후원자 행렬
+        let arrived = 0;
+        for (let k = 0; k < 8; k++) {
+          const st = k * 0.85; if (s < st) continue;
+          const tx = 92 + k * 11, x = Math.max(tx, 200 - (s - st) * 38);
+          person(x, GY - 9, pal(k + 2), s, x > tx, true);
+          const ta = st + (200 - tx) / 38;
+          if (s > ta) {
+            arrived++;
+            const age = s - ta;
+            if (age < 1.4) heart(x, GY - 16 - age * 8);
+            if (age < 0.8) { const p = age / 0.8; coin(x + (34 - x) * p, 72 - Math.sin(p * Math.PI) * 22 - p * 2); }
+          }
+        }
+        // 동전 항아리
+        R(29, 64, 10, 10, "#CFEFFF"); R(30, 63, 8, 1, "#9ED7F0");
+        const lv = Math.min(8, arrived);
+        if (lv) R(30, 73 - lv, 8, lv, "#FFD23F");
+        R(29, 64, 1, 10, "#9ED7F0"); R(38, 64, 1, 10, "#9ED7F0");
+      }
+    },
+    {
+      year: "2015–2016", title: "든든한 동료들",
+      text: "2015년, 투자사들이 합류하며 시리즈 A 투자를 유치합니다. 이듬해 2016년, 누적 후원액이 처음으로 100억 원을 넘어섭니다.",
+      label: "누적 후원액", stat: t => Math.round(100 * ease(t / 0.85)) + "억 원",
+      draw(t, s) {
+        sky(["#7EC8F5", "#98D2F7", "#B3DDF8", "#CFE8FA", "#F6E3C8"], GY);
+        cloud((60 + s * 3) % 230 - 30, 14);
+        [[100, 16, 30], [124, 12, 22], [150, 18, 38], [176, 14, 26]].forEach(([x, w, h], i) => {
+          const hh = h * ease((t - i * 0.12) * 2.5); if (hh > 1) building(x, w, hh, "#8FA3C8", "#FFF1A8", i * 13, 0.3);
+        });
+        ground("#6DBB5E", "#83CC72"); R(0, 94, W, 5, "#D9C28F");
+        // 가게로 커진 텀블벅
+        R(12, 58, 50, 30, "#F4EFE6");
+        for (let x = 8; x < 66; x += 2) R(x, 52 + Math.abs(x - 37) / 6, 2, 6, "#EE4E55");
+        R(22, 70, 12, 18, "#7A4B2F"); R(42, 66, 14, 10, "#9ED7F0"); R(48, 66, 1, 10, "#F4EFE6");
+        // 깃발 100
+        if (t > 0.7) {
+          R(60, 30, 1, 22, "#4A4060");
+          const wave = Math.floor(s * 4) % 2;
+          R(61, 30 + wave, 18, 9, "#FFD23F");
+          num("100", 63, 32 + wave, "#EE4E55");
+        }
+        // 보물상자
+        const fill = ease(t / 0.85);
+        R(66, 78, 16, 10, "#8A5A3C"); R(66, 78, 16, 2, "#B77A4C"); R(73, 81, 2, 3, "#FFD23F");
+        for (let i = 0; i < Math.floor(fill * 14); i++) coin(67 + (i * 5) % 14, 76 - Math.floor(i / 3) * 2);
+        person(86, GY - 9, pal(0, { c: "#EE4E55" }));
+        // 투자사 셋
+        for (let k = 0; k < 3; k++) {
+          const tx = 100 + k * 10, x = Math.max(tx, 205 - s * 30 - k * 12);
+          person(x, GY - 9, pal(k, { c: "#3A3552", p: "#22203A", h: HAIRS[(k + 2) % 5] }), s, x > tx, true);
+          R(x - 2, GY - 4, 3, 3, "#6B4430");
+          if (x <= tx && t < 0.8 && Math.floor(s * 2 + k) % 2) heart(x, GY - 16);
+        }
+        // 꽃가루
+        if (t > 0.7) for (let i = 0; i < 40; i++) {
+          const y = ((s - 6.3) * 22 + rnd(i) * 60) % 90;
+          R(rnd(i + 9) * W, y, 1, 1, SHIRTS[i % 7]);
+        }
+      }
+    },
+    {
+      year: "2018", title: "60만 명의 광장",
+      text: "2018년, 텀블벅에서 열린 프로젝트가 1만 건을 넘습니다. 2월 누적 300억 원, 11월 500억 원. 후원자는 60만 명이 되었습니다.",
+      label: "누적 후원액", stat: t => (t < 0.5 ? Math.round(100 + 200 * ease(t / 0.45)) : Math.round(300 + 200 * ease((t - 0.5) / 0.4))) + "억 원",
+      draw(t, s) {
+        sky(["#2B2250", "#4A2D6B", "#7A3B78", "#C0567A", "#EF8A6E", "#F7B77A"], GY);
+        stars(14, 20, s, 3);
+        // 솟아오르는 프로젝트 건물들
+        const B = [[0, 14, 34], [16, 12, 24], [30, 16, 44], [48, 10, 28], [60, 14, 20], [128, 14, 22], [144, 10, 36], [156, 16, 28], [174, 18, 46]];
+        B.forEach(([x, w, h], i) => {
+          const hh = h * ease((s - i * 0.35) / 0.6);
+          if (hh > 1) building(x, w, hh, i % 2 ? "#3D2F5C" : "#4A3A6E", "#FFE08A", i * 17, 0.55);
+        });
+        ground("#3A2F57", "#5A4B80");
+        billboard(74, 22, 44, 22, t < 0.5 ? "300" : "500", 3, s);
+        crowd(Math.floor(40 + t * 120), s, 11, 90);
+        risingHearts(Math.floor(4 + t * 10), s, 21, 20, 172, 92);
+      }
+    },
+    {
+      year: "2020", title: "새 가족, 백패커",
+      text: "2020년 6월, 핸드메이드 마켓 아이디어스를 운영하는 백패커가 텀블벅을 인수합니다. 한 달 뒤 누적 후원액 1,000억 원. 오디오북, 애니메이션 음원, DVD 같은 팬덤 프로젝트가 억 원대 후원을 모았습니다.",
+      label: "누적 후원액", stat: t => Math.round(500 + 500 * ease((t - 0.35) / 0.5)).toLocaleString("ko-KR") + "억 원",
+      draw(t, s) {
+        sky(["#5FB4F0", "#78C0F2", "#92CCF4", "#ACD8F6"], GY);
+        cloud((10 + s * 5) % 230 - 30, 10); cloud((110 + s * 4) % 230 - 30, 20);
+        // 텀블벅 건물
+        building(14, 40, 46, "#F4EFE6", "#9ED7F0", 5, 0.8);
+        for (let x = 10; x < 58; x += 2) R(x, GY - 52 + Math.abs(x - 34) / 5, 2, 6, "#EE4E55");
+        R(28, GY - 12, 12, 12, "#7A4B2F");
+        ground("#6DBB5E", "#83CC72"); R(0, 94, W, 5, "#D9C28F");
+        // 커다란 배낭을 멘 동료가 걸어온다
+        const tx = 92, x = Math.max(tx, 205 - s * 36);
+        const walking = x > tx;
+        person(x, GY - 9, pal(3, { c: "#F2A541" }), s, walking, true);
+        backpack(x + 4, GY - 16);
+        person(64, GY - 9, pal(0, { c: "#EE4E55" }));
+        if (!walking) {
+          const age = s - (205 - tx) / 36;
+          if (age < 2.5) { heart(76, GY - 20 - (age % 1) * 6); heart(84, GY - 18 - ((age + 0.5) % 1) * 6); }
+        }
+        // 1,000억 불꽃과 팬덤 풍선
+        if (t > 0.5) {
+          const s0 = s - 4.5;
+          firework(130, 26, s0 % 1.6, "#FF6B70"); firework(160, 18, (s0 + 0.6) % 1.6, "#FFD23F"); firework(110, 16, (s0 + 1.1) % 1.6, "#9FE3C9");
+          billboard(136, 36, 40, 16, "1000", 2, s);
+          ["note", "disc", "book"].forEach((n, i) => {
+            const y = GY - 12 - ((s0 * 8 + i * 14) % 60);
+            R(104 + i * 12 + 2, y + 5, 1, 6, "#E8E8F0");
+            icon(n, 104 + i * 12, y);
+          });
+        }
+      }
+    },
+    {
+      year: "2021–2023", title: "한 지붕 아래",
+      text: "2021년 12월, 백패커 김동환 대표가 텀블벅 대표를 함께 맡습니다. 2023년 7월 두 회사가 하나로 합쳐지고, 그해 9월 누적 후원액 3,000억 원, 후원 700만 건을 넘어섭니다.",
+      label: "누적 후원액", stat: t => Math.round(1000 + 2000 * ease((t - 0.55) / 0.35)).toLocaleString("ko-KR") + "억 원",
+      draw(t, s) {
+        sky(["#6AA9E8", "#86BAEC", "#A3CCF1", "#C2DDF5", "#F9E6C6"], GY);
+        cloud((40 + s * 3) % 230 - 30, 12);
+        ground("#6DBB5E", "#83CC72"); R(0, 94, W, 5, "#D9C28F");
+        const m = ease(t / 0.45);
+        if (t < 0.5) {
+          const xa = 20 + 44 * m, xb = 136 - 44 * m;
+          building(xa, 30, 40, "#F4EFE6", "#9ED7F0", 3, 0.8);
+          for (let x = xa - 3; x < xa + 33; x += 2) R(x, GY - 46 + Math.abs(x - xa - 15) / 5, 2, 6, "#EE4E55");
+          building(xb, 30, 44, "#FCE3C4", "#9ED7F0", 9, 0.8);
+          R(xb - 2, GY - 48, 34, 4, "#E0873A");
+          backpack(xb + 11, GY - 30);
+        } else {
+          if (t < 0.56) R(0, 0, W, H, "#FFFFFF");
+          building(62, 64, 62, "#F4EFE6", "#9ED7F0", 21, 0.85);
+          R(60, GY - 66, 34, 4, "#EE4E55"); R(94, GY - 66, 34, 4, "#E0873A");
+          R(94, GY - 86, 1, 20, "#4A4060");
+          const wave = Math.floor(s * 4) % 2;
+          R(95, GY - 86 + wave, 12, 7, "#EE4E55"); R(95, GY - 82 + wave, 12, 3, "#E0873A");
+          backpack(90, GY - 40);
+          R(88, GY - 14, 16, 14, "#7A4B2F");
+        }
+        crowd(Math.floor(20 + t * 60), s, 31, 90);
+        if (t > 0.6) {
+          bigCoin(136, 26);
+          num("3000", 144, 24, "#FFFFFF", 2);
+          R(144, 36, 30 * ease((t - 0.6) / 0.3), 1, "#FFD23F");
+          risingHearts(8, s, 41, 50, 140, 86);
+        }
+      }
+    },
+    {
+      year: "2026", title: "5,000억 원의 밤",
+      text: "2026년 6월, 누적 펀딩 5,000억 원. 약 8만 개 프로젝트에 후원 1,000만 건이 모였습니다. 보드게임·TRPG와 캐릭터·굿즈가 성장을 이끌고 있습니다. 다음 장면은, 다음 창작자의 몫입니다.",
+      label: "누적 펀딩", stat: t => Math.round(3000 + 2000 * ease(t / 0.6)).toLocaleString("ko-KR") + "억 원",
+      draw(t, s) {
+        sky(["#0E0B26", "#17123A", "#23194F", "#352060", "#4E2A6E", "#6E3576"], GY);
+        stars(36, 50, s, 9);
+        const B = [[0, 12, 40], [12, 16, 56], [28, 10, 32], [38, 18, 64], [56, 12, 44], [68, 14, 30], [110, 14, 34], [124, 12, 50], [136, 18, 60], [154, 10, 38], [164, 16, 52], [180, 12, 42]];
+        B.forEach(([x, w, h], i) => building(x, w, h, i % 2 ? "#221A40" : "#2C2250", "#FFE08A", i * 29, 0.6));
+        ground("#1C1636", "#3A2F57");
+        for (let k = 0; k < 5; k++) firework(20 + k * 38, 14 + (k % 2) * 10, (s * 0.9 + k * 0.33) % 1.8, ["#FF6B70", "#FFD23F", "#9FE3C9", "#F07FB0", "#8FD3FF"][k]);
+        // 큰 숫자
+        const a = ease((t - 0.1) / 0.3);
+        if (a > 0) {
+          c.globalAlpha = a;
+          bigCoin(70, 36);
+          num("5000", 78, 34, "#FFFFFF", 2);
+          c.globalAlpha = 1;
+        }
+        // 떠오르는 프로젝트들
+        const names = ["dice", "meeple", "plush", "book", "note", "dice", "plush", "meeple"];
+        names.forEach((n, i) => {
+          const y = GY - ((s * 9 + i * 11) % 70);
+          icon(n, 16 + i * 22 + Math.sin(s * 2 + i) * 2, y);
+        });
+        crowd(90, s, 51, 90);
+        person(93, GY - 9, pal(0, { c: "#EE4E55" }));
+        if (Math.floor(s * 2) % 2) R(92, GY - 12, 1, 3, "#F2C7A5"); // 손 흔들기
+        if (t > 0.6) heart(93, GY - 16 - ((s * 0.8) % 1) * 6);
+      }
+    }
+  ];
+
+  // ---------- 재생 ----------
+  const DUR = 9;
+  const TOTAL = SCENES.length * DUR;
+  const $ = id => document.getElementById(id);
+  const hudYear = $("hudYear"), hudLabel = $("hudLabel"), hudStat = $("hudStat");
+  const who = $("who"), dTitle = $("dTitle"), dText = $("dText"), more = $("more");
+  const playBtn = $("play"), dots = $("dots"), list = $("list");
+
+  SCENES.forEach((sc, i) => {
+    dots.appendChild(document.createElement("span"));
+    const li = document.createElement("li");
+    li.tabIndex = 0;
+    li.innerHTML = `<div class="y">CH.${i + 1} · ${sc.year}</div><div class="t">${sc.title}<span>${sc.text}</span></div>`;
+    const go = () => { jump(i); document.querySelector(".screen").scrollIntoView({ behavior: "smooth", block: "start" }); };
+    li.addEventListener("click", go);
+    li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    list.appendChild(li);
+  });
+
+  let T = 0, playing = false, last = 0, cur = -1, shown = -1, skipType = false;
+
+  function frame() {
+    const idx = Math.min(SCENES.length - 1, Math.floor(T / DUR));
+    const local = T - idx * DUR, t = local / DUR, sc = SCENES[idx];
+    if (idx !== cur) {
+      cur = idx; shown = -1; skipType = !playing;
+      hudYear.innerHTML = `<b>${sc.year}</b>`;
+      hudLabel.textContent = sc.label;
+      who.textContent = `CHAPTER ${idx + 1} · ${sc.year}`;
+      dTitle.textContent = sc.title;
+      [...dots.children].forEach((d, i) => d.classList.toggle("on", i <= idx));
+      [...list.children].forEach((li, i) => li.classList.toggle("now", i === idx));
+    }
+    c.clearRect(0, 0, W, H);
+    sc.draw(t, local);
+    hudStat.textContent = sc.stat(t);
+    const n = skipType ? sc.text.length : Math.min(sc.text.length, Math.floor(local * 26));
+    if (n !== shown) { shown = n; dText.textContent = sc.text.slice(0, n); more.hidden = n < sc.text.length; }
+  }
+
+  function loop(now) {
+    if (!playing) return;
+    T += Math.max(0, Math.min(0.1, (now - last) / 1000)); last = now;
+    if (T >= TOTAL) { T = TOTAL - 0.001; frame(); pause(); playBtn.textContent = "다시 보기"; return; }
+    frame();
+    requestAnimationFrame(loop);
+  }
+  function play() {
+    if (T >= TOTAL - 0.01) { T = 0; cur = -1; }
+    playing = true; playBtn.textContent = "일시정지";
+    last = performance.now(); requestAnimationFrame(loop);
+  }
+  function pause() { playing = false; playBtn.textContent = "재생"; }
+  function jump(i) {
+    T = Math.max(0, Math.min(SCENES.length - 1, i)) * DUR; cur = -1;
+    if (!playing) play(); else frame();
+  }
+
+  playBtn.addEventListener("click", () => (playing ? pause() : play()));
+  $("prev").addEventListener("click", () => jump(cur - 1));
+  $("next").addEventListener("click", () => jump(cur + 1));
+  $("dialog").addEventListener("click", () => { skipType = true; frame(); });
+  document.addEventListener("keydown", e => {
+    if (e.target.closest("li, button")) return;
+    if (e.key === " ") { e.preventDefault(); playing ? pause() : play(); }
+    if (e.key === "ArrowRight") jump(cur + 1);
+    if (e.key === "ArrowLeft") jump(cur - 1);
+  });
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) { T = 4; frame(); pause(); } else play();
+})();
+</script>

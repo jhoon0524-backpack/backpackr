@@ -15,4 +15,4 @@
 - `dropbid/`, `dropbid-mobile/` — 입찰 서비스 실험 (웹 + 네이티브)
 - `agent-starter/` — 에이전트 스타터 실험
 - `docs/prd/` — 기획 문서
-- `tumblbug-history/` — 텀블벅 연혁 애니메이션 (브라우저로 `index.html` 열기)
+- `tumblbug-history/` — 텀블벅 연혁 애니메이션 (`index.html` 그래프판, `pixel.html` 픽셀 아트 이야기판)
