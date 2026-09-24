@@ -1,5 +1,5 @@
 #!/bin/sh
-# 다섯 장을 대상 프로젝트에 복사한다. 이미 있는 파일은 건드리지 않는다.
+# 파일들을 대상 프로젝트에 복사한다. 이미 있는 파일은 건드리지 않는다.
 #
 #   sh install.sh ../my-new-service
 
@@ -19,7 +19,7 @@ SRC=$(dirname "$0")
 copied=0
 skipped=0
 
-for f in CLAUDE.md SPEC.md ADR.md TASKS.md PROGRESS.md PROMPTS.md; do
+for f in CLAUDE.md SPEC.md ADR.md TASKS.md PROGRESS.md PROMPTS.md run.sh; do
   if [ -e "$TARGET/$f" ]; then
     echo "  건너뜀  $f (이미 있음)"
     skipped=$((skipped + 1))
