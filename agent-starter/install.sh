@@ -33,6 +33,9 @@ done
 
 echo
 echo "복사 $copied / 건너뜀 $skipped"
+if [ "$skipped" -gt 0 ]; then
+  echo "건너뛴 파일은 이 킷의 새 버전과 내용이 다를 수 있다. run.sh 를 돌리기 전에 직접 비교한다."
+fi
 if [ "$copied" -gt 0 ]; then
   echo
   echo "다음 할 일:"
