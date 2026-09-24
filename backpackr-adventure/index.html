@@ -1,0 +1,581 @@
+<title>백패커의 모험</title>
+<style>
+  :root { color-scheme: dark; --bg: #0B0916; --frame: #F2E6D8; }
+  body { background: var(--bg); margin: 0; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding-inline: 16px; padding-block: 24px; }
+  canvas {
+    display: block; width: 100%; aspect-ratio: 16 / 9; height: auto;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    border: 4px solid var(--frame); box-shadow: 0 0 0 4px var(--bg), 0 0 0 8px #3A2F57;
+    cursor: pointer; background: #000; box-sizing: border-box;
+  }
+  canvas:focus-visible { outline: 3px solid #FFD23F; outline-offset: 10px; }
+</style>
+
+<div class="wrap">
+  <canvas id="view" tabindex="0" aria-label="백패커의 모험: 배낭을 멘 여행자가 아이디어스, 텀블벅, 스테디오를 지나 하나의 캠프에 모이는 픽셀 아트 애니메이션. 누르면 멈추거나 다시 재생합니다."></canvas>
+</div>
+
+<script>
+(() => {
+  // ================= 기본 설정 =================
+  const W = 192, H = 108, GY = 86, PY = 92;          // GY: 풀밭 윗선, PY: 길 위 발 위치
+  const OUT = "#1A1020";
+  const FONT = "'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', system-ui, sans-serif";
+  const view = document.getElementById("view"), vctx = view.getContext("2d");
+  const px = document.createElement("canvas"); px.width = W; px.height = H;
+  const pctx = px.getContext("2d");
+  let g = pctx;
+
+  // ================= 그리기 도구 =================
+  const R = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
+  const P1 = (x, y, col) => R(x, y, 1, 1, col);
+  const rnd = i => { const v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  const ease = v => { v = clamp01(v); return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; };
+  const lerp = (a, b, f) => a + (b - a) * f;
+  const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  const bay = (x, y) => (BAYER[(Math.round(y) & 3) * 4 + (Math.round(x) & 3)] + 0.5) / 16;
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const mix = (a, b, f) => "#" + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * f).toString(16).padStart(2, "0")).join("");
+
+  function layer(fn) {
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const prev = g; g = c.getContext("2d"); fn(); g = prev; return c;
+  }
+  function spr(rows, x, y, pal, flip) {
+    const w = Math.max(...rows.map(r => r.length));
+    x = Math.round(x); y = Math.round(y);
+    for (let j = 0; j < rows.length; j++)
+      for (let i = 0; i < w; i++) {
+        const k = rows[j][i];
+        if (k && k !== ".") P1(x + (flip ? w - 1 - i : i), y + j, pal[k]);
+      }
+  }
+  function skyGrad(cols, y0, y1) {
+    const n = cols.length - 1;
+    for (let y = y0; y < y1; y++) {
+      const p = (y - y0) / Math.max(1, y1 - y0 - 1) * n, i = Math.min(n - 1, Math.floor(p)), f = p - i;
+      for (let x = 0; x < W; x++) P1(x, y, f > bay(x, y) ? cols[i + 1] : cols[i]);
+    }
+  }
+  function glow(cx, cy, r, col, k) {
+    cx = Math.round(cx); cy = Math.round(cy);
+    for (let y = Math.max(0, cy - r); y <= Math.min(H - 1, cy + r); y++)
+      for (let x = Math.max(0, cx - r); x <= Math.min(W - 1, cx + r); x++) {
+        const d = Math.hypot(x - cx, y - cy) / r;
+        if (d < 1 && (1 - d) * k > bay(x, y)) P1(x, y, col);
+      }
+  }
+  function disc(cx, cy, r, col) {
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++)
+      if (dx * dx + dy * dy <= r * r + r * 0.5) P1(cx + dx, cy + dy, col);
+  }
+  function sparkle(x, y, col) { P1(x, y, "#FFFFFF"); P1(x - 1, y, col); P1(x + 1, y, col); P1(x, y - 1, col); P1(x, y + 1, col); }
+  const DIG = {
+    "0": ["111","101","101","101","111"], "1": ["010","110","010","010","111"], "2": ["111","001","111","100","111"],
+    "3": ["111","001","111","001","111"], "4": ["101","101","111","001","001"], "5": ["111","100","111","001","111"],
+    "6": ["111","100","111","101","111"], "7": ["111","001","001","001","001"], "8": ["111","101","111","101","111"],
+    "9": ["111","101","111","001","111"]
+  };
+  const numW = s => s.length * 4 - 1;
+  function num(str, x, y, col) {
+    [...str].forEach((ch, n) => { const gl = DIG[ch]; for (let j = 0; j < 5; j++) for (let i = 0; i < 3; i++) if (gl[j][i] === "1") P1(x + n * 4 + i, y + j, col); });
+  }
+
+  // ================= 캐릭터 =================
+  const BODY = [
+    "......OOOO......", ".....OwwwwO.....", "....OOwwwwOO....", "...OHHHHHHHHO...", "..OHHHHHHHHHhO..",
+    "..OHHHHHHHHHhO..", "..OwwwwwwwwwwO..", "..OKKSSSSSSSSO..", "..OKSSSSSSESSO..", "..OKSSSSSSESSO..",
+    "..OKSSSSSSrSsO..", "...OsSSSSSSsO...", "...OFFFFFFFFFO..", "..OCFFFFFFFFfO..", ".OCCCFfCCCCCcCO.",
+    ".OCCCFfCCCCCcCO.", ".OSOCFfCCCCCcOSO", "..OOCCCCCCCCcOO.", "...OCCCCCCCCcO.."
+  ];
+  const LEGS = [
+    ["...OPPPPOPPPPO..", "...OPPpO.OPPpO..", "...OPPpO.OPPpO..", "...OBBBO.OBBBO..", "...OOOOO.OOOOO.."],
+    ["...OPPPPOPPPPO..", "..OPPpO..OPPpO..", "..OPPpO...OBBBO.", "..OBBBO...OOOOO.", "..OOOOO........."],
+    ["...OPPPPOPPPPO..", "....OPPpPPpO....", "....OPPpPPpO....", "....OBBBBBBO....", "....OOOOOOOO...."]
+  ];
+  const BASE = { O: OUT, E: OUT, w: "#F2E6D8", K: "#3B2418", S: "#F2C7A5", s: "#C98F73", r: "#FF9DB5", P: "#3A3552", p: "#262338", B: "#5A3522" };
+  // 주인공 백패커: 주황 비니, 보라 코트, 큰 배낭
+  const HERO = Object.assign({}, BASE, { H: "#E0873A", h: "#B0601F", K: "#1F1F2E", F: "#F4EFE6", f: "#C9C4B8", C: "#6B4FA0", c: "#4A3578" });
+  // 동료들
+  const ARTISAN = Object.assign({}, BASE, { H: "#8A5A3C", h: "#5E3A24", w: "#D9C28F", F: "#F2E6D8", f: "#C9C4B8", C: "#59C36A", c: "#3E9150" });
+  const MAKER = Object.assign({}, BASE, { H: "#D8434B", h: "#9E2A3A", F: "#F2A541", f: "#C07A1E", C: "#2F7F86", c: "#1F5A60" });
+  const MUSIC = Object.assign({}, BASE, { H: "#2B3A6B", h: "#1C2648", K: "#8C4B2A", F: "#FFD23F", f: "#C9A020", C: "#F07FB0", c: "#C0588A" });
+
+  function person(x, y, pal, s, walking, flip) {
+    const f = walking ? 1 + Math.floor(s * 7) % 2 : 0;
+    spr(BODY.concat(LEGS[f]), x, y, pal, flip);
+  }
+  const PACK = [
+    "...OOOO...", "..OO..OO..", ".OGGGGGGO.", "OGGGGGGGgO", "OLLLLLLLgO", "OGGGGGGGgO", "OGGOOOOGgO",
+    "OGGOYYOGgO", "OGGOYYOGgO", "OGGOOOOGgO", "OGGGGGGGgO", "OggggggggO", ".OOOOOOOO."
+  ];
+  const PPAL = { O: OUT, G: "#E0873A", g: "#B0601F", L: "#F4A55A", Y: "#FFE0A3" };
+  function hero(x, y, s, walking) {
+    spr(PACK, x - 5, y + 5 + (walking && Math.floor(s * 7) % 2 ? -1 : 0), PPAL);
+    person(x, y, HERO, s, walking, false);
+  }
+  function guitar(x, y, s) {
+    const b = Math.floor(s * 4) % 2;
+    R(x, y + 3 + b, 7, 6, OUT); R(x + 1, y + 4 + b, 5, 4, "#C96F28"); P1(x + 3, y + 5 + b, OUT); P1(x + 1, y + 4 + b, "#E09050");
+    R(x + 6, y + 2 + b, 7, 2, OUT); R(x + 7, y + 2 + b, 5, 1, "#7A4B2F"); R(x + 12, y + 1 + b, 2, 3, OUT);
+  }
+  const BACKER = [
+    "..OOO..", ".OHHHO.", "OHHHHHO", "OHSSESO", "OSSSSSO", ".OSSsO.", "OCCCCcO", "SCCCCcS", "OCCCCcO", ".OPPPO.", ".OPOPO.", ".OBOBO."
+  ];
+  const HAIRS = ["#2B1B14", "#5A3522", "#1F1F2E", "#8C4B2A", "#3B2A4F", "#C9A06A"];
+  const SKINS = [["#F2C7A5", "#C98F73"], ["#E0A882", "#B07A58"], ["#C98F73", "#9A6448"]];
+  const SHIRTS = [["#EE4E55", "#B8343C"], ["#3FA7D6", "#2A7AA3"], ["#59C36A", "#3E9150"], ["#F2A541", "#C07A1E"], ["#9B6BDB", "#7049A8"], ["#F07FB0", "#C0588A"], ["#E8E8F0", "#B0B0C8"]];
+  const bpal = i => ({ O: OUT, E: OUT, H: HAIRS[i % 6], S: SKINS[i % 3][0], s: SKINS[i % 3][1], C: SHIRTS[i % 7][0], c: SHIRTS[i % 7][1], P: "#3A3552", B: "#5A3522" });
+
+  // ================= 소품 =================
+  const HEART = [".OO.OO.", "OrrOrrO", "OrWrrrO", ".OrrrO.", "..OrO..", "...O..."];
+  const heart = (x, y) => spr(HEART, x, y, { O: OUT, r: "#FF4D6D", W: "#FFC2D0" });
+  const BULB = [".OOO.", "OYyyO", "OyyyO", "OyyyO", ".OyO.", ".OgO.", ".OOO."];
+  const ITEMS = {
+    vase:   { rows: [".OOO.", ".OvO.", "OvvvO", "OvWvO", "OvvvO", ".OvO.", ".OOO."], pal: { O: OUT, v: "#C96F28", W: "#F0A060" } },
+    yarn:   { rows: [".OOOO.", "OyyYyO", "OyYyyO", "OYyyYO", "OyyYyO", ".OOOO."], pal: { O: OUT, y: "#F07FB0", Y: "#FFB3D1" } },
+    candle: { rows: [".f.", ".F.", "OOO", "OwO", "OwO", "OwO", "OOO"], pal: { O: OUT, f: "#FFD23F", F: "#FF8A3D", w: "#F7F4FF" } },
+    ring:   { rows: ["..b..", ".ggg.", "g...g", "g...g", ".ggg."], pal: { b: "#6FD0FF", g: "#FFD23F" } },
+    note:   { rows: ["...OO", "..OnO", "..On.", "..On.", "OOOn.", "OnnO.", ".OO.."], pal: { O: OUT, n: "#FFD23F" } },
+    card:   { rows: ["OOOOOOO", "OwwwwwO", "OwrwrwO", "OwwrwwO", "OOOOOOO"], pal: { O: OUT, w: "#F7F4FF", r: "#FF4D6D" } },
+    lantern:{ rows: [".O.", "ORO", "RYR", "RYR", "ORO"], pal: { O: OUT, R: "#FF8A3D", Y: "#FFE08A" } }
+  };
+  const item = (n, x, y) => spr(ITEMS[n].rows, x, y, ITEMS[n].pal);
+  const ROCK = ["...OOO...", "..OGggO..", ".OGggggO.", "OGggggggO", "OOOOOOOOO"];
+  const FLAME = [
+    ["...y...", "..yY...", "..yYy..", ".yYWYy.", ".yYWYy.", "yyYWYyy", "yYWWWYy", ".yYWYy.", "..yyy.."],
+    ["....y..", "...Yy..", "..yYy..", ".yYWYy.", "yyYWYy.", "yYYWYyy", "yYWWWYy", ".yYWYy.", "..yyy.."]
+  ];
+  function signpost(x, str) {
+    R(x + 7, 70, 3, 17, OUT); R(x + 8, 70, 1, 17, "#7A4B2F");
+    R(x - 1, 61, 19, 11, OUT); R(x, 62, 17, 9, "#B07A52"); R(x, 62, 17, 1, "#D49A66");
+    if (str === ">") spr(["...O...", "...OO..", "OOOOOO.", "OOOOOOO", "OOOOOO.", "...OO..", "...O..."], x + 5, 63, { O: "#3A2418" });
+    else num(str, x + Math.round((17 - numW(str)) / 2), 64, "#3A2418");
+  }
+  function cloud(x, y) {
+    R(x + 5, y, 8, 2, "#FFFFFF"); R(x + 2, y + 1, 15, 3, "#FFFFFF"); R(x, y + 3, 21, 3, "#FFFFFF");
+    R(x + 3, y + 5, 16, 1, "#EAF2FA"); R(x + 1, y + 6, 19, 1, "#D3E3F3");
+  }
+  function moon(cx, cy, r) {
+    glow(cx, cy, r + 8, "#2A2460", 0.7);
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      if (dx * dx + dy * dy > r * r + r * 0.6) continue;
+      P1(cx + dx, cy + dy, (dx + dy) / r > 0.5 && bay(cx + dx, cy + dy) < 0.75 ? "#D9CFA0" : "#F3ECC8");
+    }
+    [[-3, -3, 2], [2, -1, 2], [-2, 2, 1], [3, 3, 1]].forEach(([dx, dy, q]) => R(cx + dx, cy + dy, q, q, "#CFC497"));
+  }
+  function tent(x, w, h, col, shade) {
+    for (let j = 0; j < h; j++) {
+      const ww = Math.max(1, Math.round((j + 1) / h * w)), x0 = x + Math.round((w - ww) / 2), y = GY - h + j;
+      R(x0 - 1, y, ww + 2, 1, OUT);
+      R(x0, y, Math.ceil(ww / 2), 1, col); R(x0 + Math.ceil(ww / 2), y, Math.floor(ww / 2), 1, shade);
+    }
+    for (let j = 0; j < 8; j++) { const ww = Math.round(j * 0.8) + 1; R(x + Math.round((w - ww) / 2), GY - 8 + j, ww, 1, "#2A1A2A"); }
+  }
+
+  // ================= 하늘과 땅 =================
+  const TIMES = {
+    dawn:    { sky: ["#3B3A6E", "#8A5D8F", "#E08A7A", "#F6C08A"], mtn: "#6A5A86", hill: "#4F6A5E", top: "#A8C47E", grass: "#5C8A52", path: "#C9A882", stars: 0.35, day: 0.2, sun: [162, 70] },
+    day:     { sky: ["#5FB4F0", "#80C4F3", "#A7D6F6", "#D4ECFA"], mtn: "#8FA8CF", hill: "#78B96C", top: "#9BE07A", grass: "#5AA84F", path: "#D9C28F", stars: 0, day: 1, sun: [150, 16] },
+    sunset:  { sky: ["#4A2D6B", "#B0507A", "#EF8A6E", "#F7C27A"], mtn: "#7A4A78", hill: "#5E4A5E", top: "#B8A060", grass: "#5E6A3E", path: "#B8906E", stars: 0.25, day: 0.4, sun: [34, 66] },
+    night:   { sky: ["#0B0920", "#141036", "#211850", "#33215E"], mtn: "#2A2450", hill: "#1C2638", top: "#3A5A4A", grass: "#1F3A2E", path: "#4A4460", stars: 1, day: 0, moon: [150, 22] },
+    sunrise: { sky: ["#2E2A5E", "#E0788A", "#F7B27A", "#FFE2A8"], mtn: "#8A6A8A", hill: "#5A7A5A", top: "#B8D08A", grass: "#5F9A52", path: "#D0B08A", stars: 0.1, day: 0.6, sun: [104, 58] }
+  };
+  const TKEYS = [[0, "dawn"], [230, "day"], [650, "day"], [830, "sunset"], [1070, "night"], [1650, "night"], [1880, "sunrise"]];
+  const SKY = {};
+  function timeAt(wx) {
+    let i = 0;
+    while (i < TKEYS.length - 2 && wx >= TKEYS[i + 1][0]) i++;
+    const [x0, ka] = TKEYS[i], [x1, kb] = TKEYS[i + 1];
+    const f = clamp01((wx - x0) / (x1 - x0)), A = TIMES[ka], B = TIMES[kb];
+    const t = { ka, kb, f };
+    ["mtn", "hill", "top", "grass", "path"].forEach(k => t[k] = mix(A[k], B[k], f));
+    t.stars = lerp(A.stars, B.stars, f); t.day = lerp(A.day, B.day, f);
+    if (A.sun && B.sun) t.sun = [lerp(A.sun[0], B.sun[0], f), lerp(A.sun[1], B.sun[1], f)];
+    else { const N = f < 0.5 ? A : B; t.sun = N.sun; t.moon = N.moon; }
+    return t;
+  }
+  function drawSky(tm) {
+    SKY[tm.ka] = SKY[tm.ka] || layer(() => skyGrad(TIMES[tm.ka].sky, 0, GY));
+    SKY[tm.kb] = SKY[tm.kb] || layer(() => skyGrad(TIMES[tm.kb].sky, 0, GY));
+    g.drawImage(SKY[tm.ka], 0, 0);
+    if (tm.f > 0 && tm.ka !== tm.kb) { g.globalAlpha = tm.f; g.drawImage(SKY[tm.kb], 0, 0); g.globalAlpha = 1; }
+  }
+  function stars(tm, T) {
+    const n = Math.floor(70 * tm.stars);
+    for (let i = 0; i < n; i++) {
+      const x = Math.floor(rnd(i) * W), y = Math.floor(rnd(i + 99) * 64), ph = Math.floor(T * 3 + rnd(i + 7) * 6) % 6;
+      if (ph === 0 && i % 4 === 0) { P1(x, y, "#FFFFFF"); P1(x - 1, y, "#8F88C0"); P1(x + 1, y, "#8F88C0"); P1(x, y - 1, "#8F88C0"); P1(x, y + 1, "#8F88C0"); }
+      else if (ph) P1(x, y, i % 3 ? "#8F88C0" : "#FFF6D8");
+    }
+  }
+  const hillH = w => 14 + 5 * Math.sin(w * 0.03) + 3 * Math.sin(w * 0.07 + 2);
+  function backdrop(camX, tm, T) {
+    // 먼 산
+    const mtop = mix(tm.mtn, "#FFFFFF", 0.18);
+    for (let x = 0; x < W; x++) {
+      const w = x + camX * 0.12, h = Math.round(30 + 9 * Math.sin(w * 0.021) + 6 * Math.sin(w * 0.047 + 1.3) + 3 * Math.sin(w * 0.11 + 2));
+      R(x, GY - h, 1, h, tm.mtn); P1(x, GY - h, mtop);
+      if (h > 42) P1(x, GY - h + 1, mtop);
+    }
+    // 가까운 언덕과 전나무
+    const htop = mix(tm.hill, "#FFFFFF", 0.12), dark = mix(tm.hill, "#000000", 0.22), cx = camX * 0.4;
+    for (let x = 0; x < W; x++) { const h = Math.round(hillH(x + cx)); R(x, GY - h, 1, h, tm.hill); P1(x, GY - h, htop); }
+    const first = Math.floor((cx - 10) / 19);
+    for (let k = first; k < first + 13; k++) {
+      if (rnd(k * 3.7) < 0.4) continue;
+      const tx = Math.round(k * 19 + rnd(k) * 8 - cx), base = GY - Math.round(hillH(tx + cx)) + 2;
+      R(tx, base - 2, 1, 3, dark);
+      for (let j = 0; j < 10; j++) { const ww = 1 + Math.floor(j / 2) * 2; R(tx - Math.floor(ww / 2), base - 12 + j, ww, 1, dark); }
+    }
+  }
+  function ground(camX, tm) {
+    R(0, GY, W, H - GY, tm.grass);
+    const dk = mix(tm.grass, "#000000", 0.18);
+    for (let y = GY + 2; y < H; y++) for (let x = 0; x < W; x++) if (bay(x + camX, y) < (y - GY) / (H - GY) * 0.5) P1(x, y, dk);
+    R(0, GY, W, 1, tm.top); R(0, GY + 1, W, 1, mix(tm.top, tm.grass, 0.5));
+    const edge = mix(tm.path, "#000000", 0.14);
+    R(0, 89, W, 7, tm.path); R(0, 89, W, 1, edge); R(0, 95, W, 1, edge);
+    for (let x = 0; x < W; x++) {
+      const wx = x + camX;
+      if (rnd(wx * 1.3) < 0.07) P1(x, 91 + Math.floor(rnd(wx * 2.1) * 3), edge);
+      if (rnd(wx * 0.77) < 0.06) { const y = 98 + Math.floor(rnd(wx * 3.3) * 8); P1(x, y, tm.top); P1(x + 1, y - 1, tm.top); }
+      if (tm.day > 0.5 && rnd(wx * 5.1) < 0.015) P1(x, 99 + Math.floor(rnd(wx * 4.2) * 7), ["#FFFFFF", "#FFD23F", "#FF9DB5"][Math.floor(rnd(wx) * 3)]);
+    }
+  }
+  function foreground(camX, tm) {
+    const col = mix(tm.grass, "#000000", 0.35);
+    for (let x = 0; x < W; x++) {
+      const wx = Math.floor(x + camX * 1.3);
+      if (rnd(wx * 0.91) < 0.3) { const h = 2 + Math.floor(rnd(wx * 1.7) * 5); R(x, H - h, 1, h, col); }
+    }
+  }
+  function birds(T, n) {
+    for (let i = 0; i < n; i++) {
+      const x = (T * 14 + i * 67) % 250 - 30, y = 16 + i * 7 + Math.sin(T * 2 + i) * 2;
+      spr(Math.floor(T * 6 + i) % 2 ? ["O...O", ".O.O.", "..O.."] : ["..O..", ".O.O.", "O...O"], x, y, { O: "#2A2440" });
+    }
+  }
+  function fireflies(T, k) {
+    for (let i = 0; i < 16; i++) {
+      if (rnd(i + 40) > k || Math.floor(T * 4 + i) % 3 === 0) continue;
+      P1(((i * 29 + Math.sin(T * 0.6 + i) * 12) % W + W) % W, 58 + (i * 13) % 26 + Math.sin(T * 1.1 + i * 2) * 4, "#E8FF8A");
+    }
+  }
+
+  // ================= 여정 =================
+  const SPEED = 38, START_X = 56, END_X = 1880, INTRO = 3.5, OUTRO = 8;
+  const STOPS = [
+    { key: "idus", x: 420, stay: 7 },
+    { key: "tumblbug", x: 820, stay: 7.5 },
+    { key: "steadio", x: 1200, stay: 7 },
+    { key: "camp", x: 1560, stay: 8 }
+  ];
+  const SX = {}, SEG = [], SEGBY = {};
+  (() => {
+    let t = 0, x = START_X;
+    const push = s => { SEG.push(s); if (s.key) SEGBY[s.key] = s; };
+    push({ t0: 0, t1: INTRO, x0: x, x1: x, key: "intro" }); t = INTRO;
+    STOPS.forEach(st => {
+      SX[st.key] = st.x;
+      const d = (st.x - x) / SPEED;
+      push({ t0: t, t1: t + d, x0: x, x1: st.x }); t += d; x = st.x;
+      push({ t0: t, t1: t + st.stay, x0: x, x1: x, key: st.key }); t += st.stay;
+    });
+    const d = (END_X - x) / SPEED;
+    push({ t0: t, t1: t + d, x0: x, x1: END_X }); t += d;
+    push({ t0: t, t1: t + OUTRO, x0: END_X, x1: END_X, key: "end" });
+  })();
+  const TOTAL = SEG[SEG.length - 1].t1;
+  const ROCKS = [262, 650, 1030, 1400, 1740];
+  function jumpY(x) {
+    const c = x + 8;
+    for (const r of ROCKS) { const d = c - (r + 4); if (Math.abs(d) < 14) return -Math.round(Math.sin((d + 14) / 28 * Math.PI) * 8); }
+    return 0;
+  }
+  function heroAt(T) {
+    const s = SEG.find(q => T < q.t1) || SEG[SEG.length - 1];
+    const local = T - s.t0;
+    if (s.key === "end") { const x = END_X + Math.max(0, local - 0.4) * 30; return { x, walking: local > 0.4, cam: END_X - 56, seg: s, local }; }
+    const x = s.x1 > s.x0 ? lerp(s.x0, s.x1, local / (s.t1 - s.t0)) : s.x0;
+    return { x, walking: s.x1 > s.x0, cam: x - 56, seg: s, local };
+  }
+  const MEMBERS = [
+    { pal: ARTISAN, stop: "idus", spot: 70, sy: 0, off: 22, seat: 18 },
+    { pal: MAKER, stop: "tumblbug", spot: 58, sy: 0, off: 42, seat: 60 },
+    { pal: MUSIC, stop: "steadio", spot: 70, sy: -12, off: 62, seat: 76, guitar: true }
+  ];
+  const FIRE = 44;
+  function memberAt(m, T, h) {
+    const S = SEGBY[m.stop], X = SX[m.stop], joinT = S.t1 - 1.5, sx = X + m.spot, base = PY - 24;
+    if (T < joinT) return { x: sx, y: base + m.sy, walking: false, flip: true, play: !!m.guitar };
+    const follow = h.x - m.off, p = clamp01((T - joinT) / 1.5);
+    if (p < 1) return { x: lerp(sx, follow, ease(p)), y: base + m.sy * (1 - ease(p)), walking: true, flip: follow < sx };
+    const C = SEGBY.camp;
+    if (T >= C.t0 && T <= C.t1) {
+      const l = T - C.t0, q = Math.min(ease(l / 1.4), ease((C.t1 - T) / 1.4)), seat = SX.camp + m.seat;
+      const x = lerp(follow, seat, q), walking = q > 0.02 && q < 0.98;
+      const going = l < (C.t1 - C.t0) / 2, dir = going ? Math.sign(seat - follow) : Math.sign(follow - seat);
+      return { x, y: base, walking, flip: walking ? dir < 0 : x > SX.camp + FIRE, play: !!m.guitar && q > 0.98 };
+    }
+    return { x: follow, y: base + (h.walking ? jumpY(follow) : 0), walking: h.walking, flip: false };
+  }
+  const stopState = (key, T) => { const s = SEGBY[key]; return { active: T >= s.t0 && T <= s.t1, local: T - s.t0, stay: s.t1 - s.t0 }; };
+
+  // ================= 장소 =================
+  const STATIONS = [
+    { // 2014 아이디어스: 손끝의 마을
+      key: "idus", sign: "2014",
+      back(ox, st, T, tm) {
+        R(ox + 36, 44, 2, 42, OUT); R(ox + 138, 44, 2, 42, OUT);
+        for (let u = 0; u <= 100; u++) P1(ox + 37 + u, 46 + Math.round(Math.sin(u / 100 * Math.PI) * 6), "#3A2A20");
+        for (let k = 0; k < 12; k++) {
+          const u = 4 + k * 8.2, x = ox + 37 + u, y = 46 + Math.round(Math.sin(u / 100 * Math.PI) * 6);
+          spr(["ccccc", ".ccc.", "..c.."], x - 2, y + 1, { c: ["#FF7B30", "#F2E6D8", "#59C36A", "#FFD23F"][k % 4] });
+        }
+        [["vase", "vase"], ["yarn", "yarn"], ["candle", "ring"]].forEach((goods, i) => {
+          const x = ox + 40 + i * 32;
+          spr(BACKER.slice(0, 9), x + 11, 63 + (Math.floor(T * 3 + i) % 2), bpal(i + 3), false);
+          R(x, 56, 2, 30, OUT); R(x + 27, 56, 2, 30, OUT);
+          R(x - 2, 54, 33, 8, OUT);
+          for (let k = 0; k < 31; k += 4) { const col = (k / 4) % 2 ? "#FFFFFF" : "#FF7B30"; R(x - 1 + k, 55, Math.min(4, 30 - k), 6, col); R(x + k, 61, 2, 1, col); }
+          R(x - 1, 72, 31, 14, OUT); R(x, 73, 29, 13, "#B77A4C"); R(x, 73, 29, 2, "#D49A66"); R(x + 14, 75, 1, 11, "#9A6440");
+          goods.forEach((n, j) => { const it = ITEMS[n]; item(n, x + 4 + j * 13, 72 - it.rows.length); });
+          if (goods[0] === "candle") glow(x + 5, 66, 6, "#FFE9A8", 0.4);
+        });
+        for (let b = 0; b < 3; b++) {
+          const bx = ox + 58 + b * 30 + Math.sin(T * 1.3 + b) * 12, by = 36 + b * 5 + Math.sin(T * 2.1 + b * 2) * 5;
+          spr(Math.floor(T * 8 + b) % 2 ? ["c.c", ".O."] : [".c.", "cOc"], bx, by, { c: ["#FF9DB5", "#FFD23F", "#9FE3C9"][b], O: OUT });
+        }
+      },
+      front(ox, st, T) {
+        if (!st.active) return;
+        const src = [[ox + 44, 64], [ox + 76, 64], [ox + 108, 64], [ox + 121, 66]], kinds = ["vase", "yarn", "candle", "ring"];
+        src.forEach(([sx, sy], k) => {
+          const a = (st.local - (0.9 + k * 0.85)) / 0.9;
+          if (a < 0 || a > 1.35) return;
+          if (a <= 1) item(kinds[k], lerp(sx, 52, a), lerp(sy, 74, a) - Math.sin(a * Math.PI) * 22);
+          else sparkle(55, 76, "#FFD23F");
+        });
+      }
+    },
+    { // 2020 텀블벅: 별을 모으는 언덕
+      key: "tumblbug", sign: "2020",
+      back(ox, st, T, tm) {
+        const hh = dx => { const d = (dx - 100) / 44; return Math.abs(d) < 1 ? Math.round(18 * Math.cos(d * Math.PI / 2)) : 0; };
+        for (let dx = 56; dx <= 144; dx++) { const h = hh(dx); if (h > 0) { R(ox + dx, GY - h, 1, h, tm.grass); P1(ox + dx, GY - h, tm.top); } }
+        const lit = st.active && st.local > 0.8;
+        if (lit) glow(ox + 100, 54, 18, "#FFC08A", 0.55);
+        R(ox + 99, 62, 3, 7, OUT);
+        R(ox + 87, 45, 27, 18, OUT); R(ox + 88, 46, 25, 16, "#F4EFE6"); R(ox + 88, 46, 25, 1, "#FFFFFF");
+        spr(BULB, ox + 91, 49, { O: OUT, y: lit ? "#FFD23F" : "#C9C4B8", Y: lit ? "#FFF6C0" : "#E2DED4", g: "#9A94B0" });
+        heart(ox + 101, 50);
+        const spots = [70, 80, 120, 130];
+        spots.forEach((dx, i) => spr(BACKER, ox + dx, GY - hh(dx + 3) - 12, bpal(i + 1), dx > 100));
+        for (let i = 0; i < 20; i++) {
+          const b = spots[i % 4], life = (T * 0.12 + rnd(i * 7)) % 1;
+          const x = ox + b + 2 + Math.sin(T * 1.5 + i) * 3 + (rnd(i) - 0.5) * life * 30, y = GY - hh(b + 3) - 14 - life * 72;
+          if (y < -6) continue;
+          glow(x + 1, y + 2, 4, "#FFC890", 0.45);
+          item("lantern", x, y);
+        }
+        if (lit) for (let k = 0; k < 6; k++) sparkle(ox + 100 + Math.cos(k + T * 2) * 18, 54 + Math.sin(k + T * 2) * 12, "#FFD23F");
+      },
+      front() {}
+    },
+    { // 2022 스테디오: 창작자와 팬이 함께 사는 집
+      key: "steadio", sign: "2022",
+      back(ox, st, T, tm) {
+        const cx = ox + 100;
+        for (let i = 0; i < 6; i++) {
+          const life = (T * 0.25 + i / 6) % 1;
+          if (life > 0.85 && i % 2) continue;
+          disc(Math.round(cx + 43 + Math.sin(life * 6 + i) * 3), Math.round(34 - life * 30), 1 + Math.floor(life * 3), mix("#B8B2CC", "#6B6480", life));
+        }
+        R(cx + 40, 36, 6, 10, OUT); R(cx + 41, 37, 4, 9, "#6B6480");
+        for (let j = 0; j < 15; j++) {
+          const ww = 6 + j * 4, x0 = cx + 28 - ww / 2, y = 41 + j;
+          R(x0 - 1, y, ww + 2, 1, OUT); R(x0, y, ww, 1, j % 2 ? "#6B2A2A" : "#8A3A3A");
+        }
+        R(cx - 1, 55, 58, 31, OUT); R(cx, 56, 56, 30, "#8A5A3C");
+        for (let k = 3; k < 30; k += 4) R(cx, 56 + k, 56, 1, "#6B4430");
+        R(cx + 54, 56, 2, 30, "#6B4430");
+        [[cx + 6, 62], [cx + 38, 62]].forEach(([x, y]) => { R(x, y, 12, 10, OUT); R(x + 1, y + 1, 10, 8, "#FFE08A"); R(x + 6, y + 1, 1, 8, OUT); P1(x + 1, y + 1, "#FFF6D0"); });
+        R(cx + 22, 68, 12, 18, OUT); R(cx + 23, 69, 10, 17, "#5A3522"); P1(cx + 31, 77, "#FFD23F");
+        R(ox + 62, 80, 34, 6, OUT); R(ox + 63, 81, 32, 5, "#B07A52"); R(ox + 63, 81, 32, 1, "#D49A66");
+        [50, 58, 98].forEach((dx, i) => spr(BACKER, ox + dx, GY - 12, bpal(i + 2), dx > 80));
+        if (st.active && st.local > 0.8) [50, 58, 98].forEach((dx, i) => {
+          const life = (st.local * 0.7 + i / 3) % 1;
+          item("card", ox + dx, GY - 20 - life * 26);
+        });
+        for (let i = 0; i < 3; i++) { const life = (T * 0.5 + i / 3) % 1; item("note", ox + 84 + Math.sin(life * 5 + i) * 6, 52 - life * 30); }
+      },
+      front() {}
+    },
+    { // 2023 하나의 캠프
+      key: "camp", sign: "2023",
+      back(ox, st, T, tm) {
+        const fx = ox + FIRE;
+        glow(fx, 86, 36, "#3A2A36", 0.75); glow(fx, 86, 22, "#5A3A30", 0.75);
+        tent(ox + 70, 26, 20, "#FF7B30", "#C95A1E");
+        tent(ox + 100, 26, 20, "#D8434B", "#9E2A3A");
+        tent(ox + 130, 26, 20, "#9B6BDB", "#7049A8");
+        R(ox + 162, 34, 2, 52, OUT);
+        const wv = Math.floor(T * 4) % 2;
+        R(ox + 164, 34 + wv, 18, 12, OUT); R(ox + 165, 35 + wv, 16, 10, "#F4EFE6");
+        spr(PACK, ox + 168, 34 + wv, PPAL);
+        [[88, 3], [118, 5], [150, 1]].forEach(([dx, i]) => spr(BACKER, ox + dx, GY - 12, bpal(i), dx < 100));
+      },
+      front(ox, st, T) {
+        const fx = ox + FIRE;
+        R(fx - 7, 89, 14, 3, OUT); R(fx - 6, 89, 12, 2, "#6B4430"); R(fx - 3, 88, 6, 1, "#8A5A3C");
+        const f = Math.floor(T * 8) % 3;
+        spr(FLAME[f === 2 ? 0 : f], fx - 3, 80, { y: "#FF8A3D", Y: "#FFD23F", W: "#FFF6C0" }, f === 2);
+        for (let i = 0; i < 12; i++) {
+          const life = (T * 0.8 + rnd(i)) % 1;
+          P1(fx + Math.sin(i + T * 3) * 5 * life, 82 - life * 34, life < 0.5 ? "#FFE08A" : "#FF8A3D");
+        }
+      }
+    }
+  ];
+
+  // ================= 자막 =================
+  const CAPS = {
+    intro: { center: true, lines: [
+      { text: "백패커의 모험", k: 7, min: 16, bold: true, color: "#FFFFFF" },
+      { text: "2012년, 배낭 하나 메고 길을 나섭니다", k: 3.4, min: 10, color: "#F2E6D8" },
+      { text: "화면을 누르면 멈춥니다", k: 2.6, min: 8, color: "#A79CC4" }] },
+    idus: { lines: [
+      { text: "2014", k: 3, min: 8, bold: true, color: "#FFD23F" },
+      { text: "손끝의 마을 · 아이디어스", k: 4.6, min: 11, bold: true, color: "#FFFFFF" },
+      { text: "작가의 손끝에서 태어난 작품을 사람들과 잇습니다", k: 3, min: 8, color: "#F2E6D8" }] },
+    tumblbug: { lines: [
+      { text: "2020", k: 3, min: 8, bold: true, color: "#FFD23F" },
+      { text: "별을 모으는 언덕 · 텀블벅", k: 4.6, min: 11, bold: true, color: "#FFFFFF" },
+      { text: "아이디어에 불을 밝혀 주는 텀블벅과 한 팀이 됩니다", k: 3, min: 8, color: "#F2E6D8" }] },
+    steadio: { lines: [
+      { text: "2022", k: 3, min: 8, bold: true, color: "#FFD23F" },
+      { text: "함께 사는 집 · 스테디오", k: 4.6, min: 11, bold: true, color: "#FFFFFF" },
+      { text: "창작자와 팬이 자주 만나는 집을 짓습니다", k: 3, min: 8, color: "#F2E6D8" }] },
+    camp: { lines: [
+      { text: "2023", k: 3, min: 8, bold: true, color: "#FFD23F" },
+      { text: "하나의 캠프", k: 4.6, min: 11, bold: true, color: "#FFFFFF" },
+      { text: "아이디어스·텀블벅·스테디오가 백패커 한 지붕 아래 모입니다", k: 3, min: 8, color: "#F2E6D8" }] },
+    end: { center: true, lines: [
+      { text: "BACKPACKR", k: 8, min: 18, bold: true, color: "#FFFFFF" },
+      { text: "창작자의 길은 계속됩니다", k: 3.6, min: 10, color: "#F2E6D8" }] }
+  };
+  function caption(cap, alpha) {
+    if (alpha <= 0) return;
+    const S = view.width / W, D = view.width / Math.max(1, view.clientWidth);
+    const sizes = cap.lines.map(l => Math.round(Math.max(l.min * D, l.k * S)));
+    const fontOf = (l, i) => `${l.bold ? 700 : 500} ${sizes[i]}px ${FONT}`;
+    vctx.save();
+    vctx.globalAlpha = alpha;
+    let wMax = 0;
+    cap.lines.forEach((l, i) => { vctx.font = fontOf(l, i); wMax = Math.max(wMax, vctx.measureText(l.text).width); });
+    const pad = Math.round(Math.max(6 * D, 3.2 * S)), gap = Math.round(sizes[1] * 0.3);
+    const bh = sizes.reduce((a, b) => a + b, 0) + gap * (sizes.length - 1) + pad * 2, bw = Math.min(view.width - 8 * D, wMax + pad * 2);
+    const bx = cap.center ? Math.round((view.width - bw) / 2) : Math.round(5 * S), by = cap.center ? Math.round(16 * S) : Math.round(5 * S);
+    const b = Math.max(2 * D, Math.round(S * 0.9));
+    vctx.fillStyle = "#F2E6D8"; vctx.fillRect(bx - b, by - b, bw + b * 2, bh + b * 2);
+    vctx.fillStyle = "#0E0A1C"; vctx.fillRect(bx, by, bw, bh);
+    vctx.fillStyle = "#0B0916";
+    [[bx - b, by - b], [bx + bw, by - b], [bx - b, by + bh], [bx + bw, by + bh]].forEach(([x, y]) => vctx.fillRect(x, y, b, b));
+    vctx.textBaseline = "top"; vctx.textAlign = cap.center ? "center" : "left";
+    let y = by + pad;
+    cap.lines.forEach((l, i) => {
+      vctx.font = fontOf(l, i); vctx.fillStyle = l.color;
+      vctx.fillText(l.text, cap.center ? view.width / 2 : bx + pad, y, bw - pad * 2);
+      y += sizes[i] + gap;
+    });
+    vctx.restore();
+  }
+
+  // ================= 한 장면 그리기 =================
+  function render(T) {
+    const h = heroAt(T), camX = Math.round(h.cam), tm = timeAt(camX + 56);
+    g = pctx;
+    drawSky(tm);
+    stars(tm, T);
+    if (tm.sun) { glow(Math.round(tm.sun[0]), Math.round(tm.sun[1]), 16, "#FFF3C8", 0.5); disc(Math.round(tm.sun[0]), Math.round(tm.sun[1]), 5, "#FFF1A8"); disc(Math.round(tm.sun[0]) - 1, Math.round(tm.sun[1]) - 1, 2, "#FFFBE0"); }
+    if (tm.moon) moon(tm.moon[0], tm.moon[1], 7);
+    if (tm.day > 0.5) for (let i = 0; i < 3; i++) cloud(((i * 90 - camX * 0.2 + T * 3) % 270 + 270) % 270 - 40, 10 + i * 9);
+    if (tm.day > 0.3) birds(T, 3);
+    backdrop(camX, tm, T);
+    ground(camX, tm);
+
+    STATIONS.forEach(s => { const ox = SX[s.key] - camX; s.ox = ox; s.st = stopState(s.key, T); if (ox > -200 && ox < W + 60) { signpost(ox - 26, s.sign); s.back(ox, s.st, T, tm); } });
+    if (END_X + 30 - camX < W + 20) signpost(END_X + 30 - camX, ">");
+    ROCKS.forEach(r => { const x = r - camX; if (x > -10 && x < W) spr(ROCK, x, 87, { O: OUT, G: "#B8B2CC", g: "#8A84A0" }); });
+
+    const drawn = MEMBERS.map(m => ({ m, s: memberAt(m, T, h) })).sort((a, b) => a.s.x - b.s.x);
+    drawn.forEach(({ m, s }) => {
+      const x = s.x - camX;
+      if (x < -20 || x > W + 4) return;
+      person(x, s.y, m.pal, T, s.walking, s.flip);
+      if (s.play) guitar(s.flip ? x - 4 : x + 5, s.y + 12, T);
+    });
+    hero(h.x - camX, PY - 24 + (h.walking ? jumpY(h.x) : 0), T, h.walking);
+    STATIONS.forEach(s => { if (s.ox > -200 && s.ox < W + 60) s.front(s.ox, s.st, T); });
+
+    fireflies(T, 1 - tm.day);
+    foreground(camX, tm);
+
+    vctx.imageSmoothingEnabled = false;
+    vctx.drawImage(px, 0, 0, view.width, view.height);
+    const key = h.seg.key;
+    if (key && CAPS[key]) {
+      const stay = h.seg.t1 - h.seg.t0;
+      const a = key === "end" ? clamp01((h.local - 0.8) / 0.6) : Math.min(clamp01(h.local / 0.5), clamp01((stay - h.local) / 0.5));
+      caption(CAPS[key], a);
+    }
+  }
+  function overlay() {
+    const D = view.width / Math.max(1, view.clientWidth), S = view.width / W;
+    if (ended) {
+      const s = Math.round(Math.max(12 * D, 3 * S));
+      vctx.font = `700 ${s}px ${FONT}`; vctx.textAlign = "center"; vctx.textBaseline = "bottom";
+      vctx.fillStyle = Math.floor(performance.now() / 600) % 2 ? "#FFD23F" : "#F2E6D8";
+      vctx.fillText("눌러서 다시 보기", view.width / 2, view.height - 6 * S);
+    } else if (!playing) {
+      vctx.fillStyle = "rgba(8, 6, 18, 0.45)"; vctx.fillRect(0, 0, view.width, view.height);
+      const r = 10 * S, cx = view.width / 2, cy = view.height / 2;
+      vctx.fillStyle = "#F2E6D8";
+      vctx.beginPath(); vctx.moveTo(cx - r * 0.6, cy - r); vctx.lineTo(cx + r, cy); vctx.lineTo(cx - r * 0.6, cy + r); vctx.closePath(); vctx.fill();
+    }
+  }
+
+  // ================= 재생 =================
+  let T = 0, playing = false, ended = false, last = 0;
+  function frame() { render(T); overlay(); }
+  function loop(now) {
+    if (!playing && !ended) return;
+    if (playing) {
+      T += Math.max(0, Math.min(0.1, (now - last) / 1000));
+      if (T >= TOTAL) { T = TOTAL - 0.001; playing = false; ended = true; }
+    }
+    last = now;
+    frame();
+    requestAnimationFrame(loop);
+  }
+  function play() { if (ended) { T = 0; ended = false; } playing = true; last = performance.now(); requestAnimationFrame(loop); }
+  function pause() { playing = false; frame(); }
+  function toggle() { if (ended || !playing) play(); else pause(); }
+  view.addEventListener("click", toggle);
+  view.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); } });
+
+  function resize() {
+    const w = view.clientWidth || 800, dpr = Math.min(2, window.devicePixelRatio || 1);
+    view.width = Math.round(w * dpr); view.height = Math.round(w * dpr * 9 / 16);
+    if (!playing) frame();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { T = SEGBY.camp.t0 + 3; frame(); }
+  else play();
+})();
+</script>

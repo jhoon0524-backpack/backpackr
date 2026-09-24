@@ -15,4 +15,5 @@
 - `dropbid/`, `dropbid-mobile/` — 입찰 서비스 실험 (웹 + 네이티브)
 - `agent-starter/` — 에이전트 스타터 실험
 - `docs/prd/` — 기획 문서
+- `backpackr-adventure/` — 백패커의 모험 (자바스크립트와 캔버스만으로 만든 픽셀 모험 애니메이션)
 - `tumblbug-history/` — 텀블벅 연혁 애니메이션 (`index.html` 그래프판, `pixel.html` 픽셀 아트 이야기판)
