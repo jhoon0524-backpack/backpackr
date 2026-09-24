@@ -19,11 +19,12 @@ SRC=$(dirname "$0")
 copied=0
 skipped=0
 
-for f in CLAUDE.md SPEC.md ADR.md TASKS.md PROGRESS.md PROMPTS.md run.sh; do
+for f in CLAUDE.md SPEC.md ADR.md TASKS.md PROGRESS.md PROMPTS.md run.sh          .claude/agents/deep-reasoner.md .claude/agents/runner.md; do
   if [ -e "$TARGET/$f" ]; then
     echo "  건너뜀  $f (이미 있음)"
     skipped=$((skipped + 1))
   else
+    mkdir -p "$(dirname "$TARGET/$f")"
     cp "$SRC/$f" "$TARGET/$f"
     echo "  복사됨  $f"
     copied=$((copied + 1))
