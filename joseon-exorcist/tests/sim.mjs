@@ -31,7 +31,7 @@ function greedyAlly(s, u) {
       const saved = [u.r, u.c];
       u.r = cell.r; u.c = cell.c; // 서낭당 판정은 대상 칸 기준이라 공격자 위치는 피해에 영향 없음
       const basic = Core.damage(s, u, t, false);
-      const skill = u.skill !== Core.HEAL_SKILL && u.ki >= Core.SKILL_COST ? Core.damage(s, u, t, true) : 0;
+      const skill = u.skill && u.skill !== Core.HEAL_SKILL && u.ki >= Core.SKILL_COST ? Core.damage(s, u, t, true) : 0;
       [u.r, u.c] = saved;
       for (const [kind, dmg] of [['attack', basic], ['skill', skill]]) {
         if (!dmg) continue;
@@ -58,10 +58,10 @@ function greedyAlly(s, u) {
   return Core.wait(s, u.id);
 }
 
-// 한 판을 끝까지. mode: 'greedy' | 'idle'(아군은 대기만). 결과 상태를 돌려준다.
-export function playBattle({ seed = 1, mode = 'greedy' } = {}) {
+// 한 판을 끝까지. mode: 'greedy' | 'idle'(아군은 대기만). stage·merit(누계)로 장·품계를 고른다.
+export function playBattle({ seed = 1, mode = 'greedy', stage, merit } = {}) {
   const rng = seeded(seed);
-  const s = Core.newBattle();
+  const s = Core.newBattle(stage, merit === undefined ? undefined : { merit });
   let guard = 0;
   while (s.result === null) {
     if (++guard > 50) throw new Error('전투가 끝나지 않는다');
