@@ -200,6 +200,34 @@ var Core = (function () {
     return 1;
   }
 
+  // ── 날씨와 피해 (specs/battle.md 6·7장) ───────────────
+  var WEATHERS = ['맑음', '강풍', '비', '흐림'];
+  var SHRINE_FACTOR = 0.8;
+
+  function weatherMultiplier(weather, elem) {
+    if (weather === '맑음' && elem === '화') return 1.3;
+    if (weather === '강풍' && elem === '목') return 1.3;
+    if (weather === '비' && elem === '화') return 0.7;
+    return 1;
+  }
+
+  // 기본공격 = max(1, 공격 − 방어). 상성·날씨 없음.
+  // 스킬     = max(1, 공격×1.5 − 방어) × 상성 × 날씨.
+  // 대상이 서낭당이면 마지막에 ×0.8. 반올림은 맨 끝에 한 번 (0.5 이상 올림).
+  function damage(state, attacker, target, useSkill) {
+    var v;
+    if (useSkill) {
+      v = Math.max(1, attacker.atk * 1.5 - target.def)
+        * elementMultiplier(attacker.elem, target.elem)
+        * weatherMultiplier(state.weather, attacker.elem);
+    } else {
+      v = Math.max(1, attacker.atk - target.def);
+    }
+    if (isShrine(target.r, target.c)) v *= SHRINE_FACTOR;
+    // 1e-9: 0.5 경계가 부동소수점 오차로 내림되는 것을 막는다
+    return Math.max(1, Math.round(v + 1e-9));
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -221,7 +249,10 @@ var Core = (function () {
     distance: distance,
     attackTargets: attackTargets,
     skillTargets: skillTargets,
-    elementMultiplier: elementMultiplier
+    elementMultiplier: elementMultiplier,
+    WEATHERS: WEATHERS,
+    weatherMultiplier: weatherMultiplier,
+    damage: damage
   };
 })();
 </script>
