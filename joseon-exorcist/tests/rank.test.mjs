@@ -50,3 +50,20 @@ test('관군은 벽사청이라 마지막 일격이 공적이 된다', () => {
 test('관군 합류가 요괴 행동 순서를 바꾸지 않는다', () => {
   assert.deepEqual(Core.enemyOrder(Core.newBattle(ch2, { merit: 8 })), Core.enemyOrder(Core.newBattle(ch2)));
 });
+
+test('관군 자리가 있는 스테이지: 품계만큼 그 자리 순서대로 (specs/chapter2.md 7-2)', () => {
+  const st = { ...Core.STAGES.ch1, allies: [{ id: 'yoon', r: 7, c: 2 }], reserves: [{ r: 3, c: 0 }, { r: 3, c: 7 }] };
+  const pos = (s, id) => { const u = Core.getUnit(s, id); return u && [u.r, u.c]; };
+  assert.equal(pos(Core.newBattle(st, { merit: 0 }), 'gwangun1'), null);
+  assert.deepEqual(pos(Core.newBattle(st, { merit: 3 }), 'gwangun1'), [3, 0]);
+  assert.equal(pos(Core.newBattle(st, { merit: 3 }), 'gwangun2'), null);
+  const s = Core.newBattle(st, { merit: 6 });
+  assert.deepEqual([pos(s, 'gwangun1'), pos(s, 'gwangun2')], [[3, 0], [3, 7]]);
+});
+
+test('관군 자리에 유닛이 있으면 그 자리에서 가장 가까운 빈 칸', () => {
+  // 1장 흑린 자리 (0,3) 를 관군 자리로
+  const st = { ...Core.STAGES.ch1, reserves: [{ r: 0, c: 3 }] };
+  const g = Core.getUnit(Core.newBattle(st, { merit: 3 }), 'gwangun1');
+  assert.deepEqual([g.r, g.c], [0, 2], '위(밖) → 아래(장산범) → 왼쪽 (0,2)');
+});

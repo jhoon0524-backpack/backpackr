@@ -118,3 +118,46 @@ test('편집한 맵으로도 전투가 만들어진다', () => {
   assert.deepEqual([Core.getUnit(s, 'yoon').r, Core.getUnit(s, 'yoon').c], [9, 0]);
   assert.equal(s.rows, 10);
 });
+
+// ── 관군 자리 (specs/chapter2.md 7-2) ──
+const R = (index) => ({ kind: 'reserve', index });
+
+test('관군 자리 1·2번 놓기, 옮기기', () => {
+  let st = Core.paintStage(ch1, R(0), 4, 4);
+  assert.deepEqual(st.reserves, [{ r: 4, c: 4 }]);
+  st = Core.paintStage(st, R(1), 4, 0);
+  assert.deepEqual(st.reserves, [{ r: 4, c: 4 }, { r: 4, c: 0 }]);
+  st = Core.paintStage(st, R(0), 3, 0);
+  assert.deepEqual(st.reserves, [{ r: 3, c: 0 }, { r: 4, c: 0 }], '1번이 옮겨진다');
+});
+
+test('2번은 1번이 없으면 1번이 된다', () => {
+  assert.deepEqual(Core.paintStage(ch1, R(1), 4, 4).reserves, [{ r: 4, c: 4 }]);
+});
+
+test('같은 칸에 두 자리를 겹치지 않는다 (빈 칸 없는 목록)', () => {
+  let st = Core.paintStage(ch1, R(0), 4, 4);
+  st = Core.paintStage(st, R(1), 4, 4);
+  assert.deepEqual(st.reserves, [{ r: 4, c: 4 }]);
+  assert.equal(st.reserves.every(Boolean), true);
+});
+
+test('관군 자리: 초가집 위 금지, 초가집으로 칠하면 사라짐, 지우개는 유닛 → 자리 → 지형', () => {
+  assert.equal(Core.paintStage(ch1, R(0), 1, 1).reserves, undefined);
+  let st = Core.paintStage(ch1, R(0), 4, 4);
+  assert.equal(Core.paintStage(st, T('D'), 4, 4).reserves, undefined);
+  st = Core.paintStage(Core.paintStage(ch1, T('K'), 4, 4), R(0), 4, 4);
+  st = Core.paintStage(st, ERASE, 4, 4);
+  assert.equal(st.reserves, undefined);
+  assert.equal(st.map[4].charAt(4), 'K', '자리만 지우고 지형은 그대로');
+});
+
+test('관군 자리는 맵 코드에 남고, 크기를 줄이면 밖의 자리는 지워진다', () => {
+  let st = Core.paintStage(Core.paintStage(ch1, R(0), 2, 2), R(1), 7, 7);
+  const back = Core.decodeStage(Core.encodeStage(st));
+  assert.deepEqual(back.stage.reserves, [{ r: 2, c: 2 }, { r: 7, c: 7 }]);
+  assert.deepEqual(Core.resizeStage(st, 7, 7).reserves, [{ r: 2, c: 2 }]);
+  const bad = JSON.parse(Core.encodeStage(st));
+  bad.reserves.push({ r: 0, c: 0 });
+  assert.match(Core.decodeStage(JSON.stringify(bad)).error, /관군 자리는 2개까지/);
+});
