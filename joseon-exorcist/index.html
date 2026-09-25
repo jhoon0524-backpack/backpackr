@@ -374,6 +374,10 @@
   }
   #ed-msg { font-size: 12px; min-height: 16px; color: #6fcf6a; }
   #ed-msg.bad { color: #ff7a7a; }
+  #ed-saved { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  #ed-saved li { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  #ed-saved li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #ed-saved .empty { color: var(--muted); font-size: 12px; }
   #open-editor { display: block; margin: 14px auto 0; background: none; border: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; }
 
   #legend {
@@ -469,6 +473,13 @@
     </div>
     <textarea id="ed-code" readonly spellcheck="false" aria-label="맵 코드"></textarea>
     <div id="ed-msg" role="status"></div>
+  </div>
+  <div class="ed-section">
+    <h2>이 브라우저에 저장</h2>
+    <div class="ed-row">
+      <button class="small-btn" id="ed-save" type="button">지금 맵 저장 (맵 이름으로)</button>
+    </div>
+    <ul id="ed-saved"></ul>
   </div>
 </div>
 
@@ -1849,6 +1860,81 @@ var Core = (function () {
     if (!pasting) document.getElementById('ed-code').value = Core.encodeStage(stage);
   }
 
+  // ── 브라우저 저장 (이 기기·이 브라우저에만 남는다) ──
+  var STORE_KEY = 'joseon-exorcist.maps';
+  var NO_STORE = '이 브라우저에는 저장할 수 없습니다. 코드 복사를 쓰세요.';
+
+  function readSaved() {
+    try {
+      return JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {};
+    } catch (e) {
+      return null; // 저장소를 쓸 수 없음
+    }
+  }
+  function writeSaved(all) {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(all));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  var armedDelete = null; // 삭제는 두 번 눌러야 한다 (확인 창을 쓸 수 없는 환경 대비)
+  function renderSaved() {
+    var list = document.getElementById('ed-saved');
+    list.innerHTML = '';
+    var all = readSaved();
+    if (all === null) return list.appendChild(el('li', 'empty', NO_STORE));
+    var names = Object.keys(all).sort();
+    if (!names.length) return list.appendChild(el('li', 'empty', '저장한 맵이 없습니다.'));
+    names.forEach(function (name) {
+      var li = el('li');
+      li.appendChild(el('span', '', name));
+      var load = el('button', 'small-btn', '불러오기');
+      load.type = 'button';
+      load.addEventListener('click', function () {
+        var result = Core.decodeStage(all[name]);
+        if (result.error) return say(result.error, true);
+        stage = result.stage;
+        setPasting(false);
+        render();
+        say('불러왔습니다: ' + name);
+      });
+      var del = el('button', 'small-btn', armedDelete === name ? '정말 삭제' : '삭제');
+      del.type = 'button';
+      del.addEventListener('click', function () {
+        if (armedDelete !== name) {
+          armedDelete = name;
+          renderSaved();
+          setTimeout(function () { if (armedDelete === name) { armedDelete = null; renderSaved(); } }, 3000);
+          return;
+        }
+        armedDelete = null;
+        var now = readSaved() || {};
+        delete now[name];
+        if (!writeSaved(now)) return say(NO_STORE, true);
+        renderSaved();
+        say('삭제했습니다: ' + name);
+      });
+      li.appendChild(load);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
+  }
+
+  document.getElementById('ed-save').addEventListener('click', function () {
+    var name = (stage.name || '').trim();
+    if (!name) return say('맵 이름을 적어 주세요.', true);
+    var all = readSaved();
+    if (all === null) return say(NO_STORE, true);
+    var existed = Object.prototype.hasOwnProperty.call(all, name);
+    all[name] = Core.encodeStage(stage);
+    if (!writeSaved(all)) return say(NO_STORE, true);
+    renderSaved();
+    say((existed ? '덮어써서 저장했습니다: ' : '저장했습니다: ') + name);
+  });
+
   // ── 맵 코드 복사·붙여넣기 ──
   var pasting = false;
   var codeBox = document.getElementById('ed-code');
@@ -1999,7 +2085,10 @@ var Core = (function () {
     var editing = location.hash === '#editor';
     app.hidden = !editing;
     game.hidden = editing;
-    if (editing) render();
+    if (editing) {
+      render();
+      renderSaved();
+    }
   }
   document.getElementById('open-editor').addEventListener('click', function () {
     location.hash = 'editor';
