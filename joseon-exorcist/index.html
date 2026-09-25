@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>조선 퇴마전 — 1장 흑린 토벌</title>
+<title>조선 퇴마전</title>
 <style>
   :root {
     --bg: #0e1016;
@@ -824,7 +824,7 @@ var Core = (function () {
   }
 
   // ── 승패 (specs/battle.md 13장) ───────────────────────
-  // 흑린 격파 → 즉시 승리. 아군 전원 퇴각 → 즉시 패배. 끝나면 phase 는 'over'.
+  // 보스(1장 흑린, 2장 달래) 격파 → 즉시 승리. 아군 전원 퇴각 → 즉시 패배. 끝나면 phase 는 'over'.
   function updateResult(state, events) {
     if (state.result !== null) return;
     var boss = state.units.filter(function (u) { return u.boss; })[0];
@@ -835,7 +835,7 @@ var Core = (function () {
     events.push({ type: 'result', result: state.result });
   }
 
-  // 요괴 페이즈가 끝났을 때: 10턴이었으면 패배(흑린 승천), 아니면 다음 턴으로.
+  // 요괴 페이즈가 끝났을 때: 마지막 턴이었으면 패배, 아니면 다음 턴으로.
   function endEnemyPhase(state) {
     var events = [];
     if (state.result !== null) return events;
@@ -1108,10 +1108,15 @@ var Core = (function () {
       if (allyCount[a.id] === 2) warn(josa(ALLY_DEFS[a.id].name, '이', '가') + ' 두 번 배치되었습니다');
     });
     st.enemies.forEach(function (e) { if (ENEMY_TYPES[e.type].boss) bosses++; });
-    if (bosses === 0) warn('흑린이 없으면 이길 수 없습니다');
-    if (bosses > 1) warn('흑린은 한 마리만 둘 수 있습니다');
+    if (bosses === 0) warn('보스(흑린·달래)가 없으면 이길 수 없습니다');
+    if (bosses > 1) warn('보스는 한 마리만 둘 수 있습니다');
     if (st.allies.length === 0) warn('아군이 한 명도 없습니다');
     return out;
+  }
+
+  // 공적 최대 = 보스 아닌 적 수 × 1 + 보스 3 (specs/chapter2.md S11)
+  function maxMerit(st) {
+    return st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss; }).length * MERIT_NORMAL + MERIT_BOSS;
   }
 
   // 맵 코드 = 한 줄 JSON. 게임 안 스테이지 데이터와 같은 모양이다.
@@ -1182,7 +1187,7 @@ var Core = (function () {
     } else if (tool.kind === 'enemy') {
       removeUnitAt(st, r, c);
       if (ENEMY_TYPES[tool.type].boss) {
-        st.enemies = st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss; }); // 흑린은 한 마리
+        st.enemies = st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss; }); // 보스는 한 마리
       }
       st.enemies.push({ type: tool.type, r: r, c: c });
     }
@@ -1262,6 +1267,7 @@ var Core = (function () {
     COLS_MIN: COLS_MIN,
     COLS_MAX: COLS_MAX,
     validateStage: validateStage,
+    maxMerit: maxMerit,
     encodeStage: encodeStage,
     decodeStage: decodeStage,
     paintStage: paintStage,

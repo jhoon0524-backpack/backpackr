@@ -43,7 +43,7 @@ test('경고는 불러오기를 막지 않는다', () => {
   s.allies = [];
   const r = Core.decodeStage(JSON.stringify(s));
   assert.equal(r.error, undefined);
-  assert.deepEqual(msgs(r.problems).sort(), ['아군이 한 명도 없습니다', '흑린이 없으면 이길 수 없습니다'].sort());
+  assert.deepEqual(msgs(r.problems).sort(), ['아군이 한 명도 없습니다', '보스(흑린·달래)가 없으면 이길 수 없습니다'].sort());
   assert.ok(r.problems.every((p) => p.level === 'warn'));
 });
 
@@ -59,7 +59,7 @@ test('유닛 위치 경고: 초가집 위, 맵 밖, 같은 칸, 두 번 배치, 
   assert.match(text, /윤무겸이 두 번/);
   assert.match(text, /도깨비가 맵 밖/);
   assert.match(text, /장산범과 윤무겸이 같은 칸/);
-  assert.match(text, /흑린은 한 마리만/);
+  assert.match(text, /보스는 한 마리만/);
   const rock = p.find((x) => /초가집/.test(x.msg));
   assert.deepEqual([rock.r, rock.c], [1, 1], '경고에 칸 위치가 붙는다');
 });

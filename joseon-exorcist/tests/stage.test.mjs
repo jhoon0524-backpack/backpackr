@@ -59,3 +59,18 @@ test('작은 맵에서도 한 판이 끝까지 돈다', () => {
   }
   assert.equal(s.result, 'lose');
 });
+
+test('공적 최대 = 보스 아닌 적 수 + 3 (1장 = 8)', () => {
+  assert.equal(Core.maxMerit(Core.STAGES.ch1), 8);
+  assert.equal(Core.maxMerit(small), 1 + 3);
+});
+
+test('보스가 흑린이 아니어도 보스 격파 = 승리 (보스 플래그 기준)', () => {
+  const s = Core.newBattle(small);
+  const boss = Core.getUnit(s, 'heuklin');
+  assert.equal(boss.boss, true);
+  const yoon = Core.getUnit(s, 'yoon');
+  yoon.r = 0; yoon.c = 5; boss.hp = 1;
+  Core.attack(s, 'yoon', 'heuklin');
+  assert.equal(s.result, 'win');
+});
