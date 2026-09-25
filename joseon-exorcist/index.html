@@ -681,7 +681,8 @@ var Core = (function () {
       title: '요괴의 수장', ai: 'hold', entityType: 'YOGOE' },
     // 2장 (specs/chapter2.md 2-2, 보충 S6)
     munyeo: { name: '신당회 무녀', emoji: '🪭', hp: 20, atk: 9, def: 4, mov: 3, rng: 2, elem: '없음',
-      faction: '신당회', ai: 'archer', human: true, entityType: 'HUMAN' },
+      faction: '신당회', ai: 'archer', human: true, entityType: 'HUMAN',
+      attackName: '무령' }, // 기본 원거리 공격 표시명: 방울 (specs/lore.md 8장)
     dokkaebi_p: { name: '정화된 도깨비', emoji: '👹', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '목',
       faction: '신당회 (정화된 요괴)', entityType: 'YOGOE' },
     jangsan_p: { name: '정화된 장산범', emoji: '🐅', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '토',
@@ -715,6 +716,7 @@ var Core = (function () {
       ai: d.ai || null,
       human: !!d.human, // 사람(신당회). 요괴가 아니다 (specs/chapter2.md 7-3)
       entityType: d.entityType || 'HUMAN', // 아군은 모두 사람
+      attackName: d.attackName || null, // 기본공격 표시명 (무녀 '무령'). 없으면 그냥 '공격'
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: d.skill || null,
       // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
@@ -1010,6 +1012,7 @@ var Core = (function () {
     target.hp = Math.max(0, target.hp - amount);
     events.push({
       type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount,
+      name: useSkill ? attacker.skill : attacker.attackName, // 화면에 띄울 기술 이름 (없으면 null)
       mult: useSkill ? elementMultiplier(attacker.elem, target.elem) : 1 // 상성 배율 (화면 연출용)
     });
     if (target.hp === 0) knockOut(state, attacker, target, events);
@@ -1089,7 +1092,7 @@ var Core = (function () {
     if (u.skill === HEAL_SKILL) {
       var amount = Math.min(HEAL_AMOUNT, t.maxHp - t.hp);
       t.hp += amount;
-      events = [{ type: 'heal', attackerId: u.id, targetId: t.id, amount: amount }];
+      events = [{ type: 'heal', attackerId: u.id, targetId: t.id, amount: amount, name: HEAL_SKILL }];
     } else {
       events = hit(state, u, t, true, []);
     }
@@ -1329,7 +1332,7 @@ var Core = (function () {
         var amount = Math.min(HEAL_AMOUNT, t.maxHp - t.hp);
         t.hp += amount;
         e.ki -= SKILL_COST;
-        events.push({ type: 'heal', attackerId: e.id, targetId: t.id, amount: amount });
+        events.push({ type: 'heal', attackerId: e.id, targetId: t.id, amount: amount, name: HEAL_SKILL });
         healed = true;
       }
     }

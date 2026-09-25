@@ -51,7 +51,7 @@ test('기본공격: 사거리 안 적만, HP 감소, 행동 완료', () => {
   u('yoon').r = 3; u('yoon').c = 4;
   assert.equal(Core.canAttack(s, u('yoon')), true);
   const ev = Core.attack(s, 'yoon', 'bulgasari');
-  assert.deepEqual(ev, [{ type: 'damage', attackerId: 'yoon', targetId: 'bulgasari', amount: 7, mult: 1 }]);
+  assert.deepEqual(ev, [{ type: 'damage', attackerId: 'yoon', targetId: 'bulgasari', amount: 7, mult: 1, name: null }]);
   assert.equal(u('bulgasari').hp, 15);
   assert.equal(u('yoon').acted, true);
   assert.equal(u('yoon').ki, 6, '기본공격은 기력을 안 쓴다');
@@ -94,7 +94,7 @@ test('기력 4 미만이면 스킬 불가', () => {
 test('정화수: +12, 최대 HP 초과 안 함, 가득 찬 아군도 대상 가능', () => {
   const { s, u } = setup();
   u('hangyeol').hp = 5;
-  assert.deepEqual(Core.useSkill(s, 'dallae', 'hangyeol'), [{ type: 'heal', attackerId: 'dallae', targetId: 'hangyeol', amount: 12 }]);
+  assert.deepEqual(Core.useSkill(s, 'dallae', 'hangyeol'), [{ type: 'heal', attackerId: 'dallae', targetId: 'hangyeol', amount: 12, name: '정화수' }]);
   assert.equal(u('hangyeol').hp, 17);
   assert.equal(u('dallae').ki, 2);
 
