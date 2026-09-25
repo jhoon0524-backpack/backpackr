@@ -518,6 +518,22 @@ var Core = (function () {
     return e.boss ? bossAct(state, e) : normalEnemyAct(state, e);
   }
 
+  // 이번 요괴 페이즈에 행동할 요괴 id (표 순서)
+  function enemyOrder(state) {
+    return livingUnits(state, 'enemy').map(function (u) { return u.id; });
+  }
+
+  // 요괴 페이즈 전체를 한 번에 돈다 (테스트·시뮬레이션용. 화면은 enemyOrder + enemyAct + endEnemyPhase 로 나눠 부른다).
+  // 도중에 아군이 전원 퇴각하면 남은 요괴는 행동하지 않는다.
+  function runEnemyPhase(state) {
+    var events = [];
+    enemyOrder(state).forEach(function (id) {
+      if (state.result !== null) return;
+      events = events.concat(enemyAct(state, id));
+    });
+    return events.concat(endEnemyPhase(state));
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -556,8 +572,11 @@ var Core = (function () {
     allActed: allActed,
     endAllyPhase: endAllyPhase,
     approachMap: approachMap,
+    attackPlans: attackPlans,
     normalEnemyAct: normalEnemyAct,
-    enemyAct: enemyAct
+    enemyAct: enemyAct,
+    enemyOrder: enemyOrder,
+    runEnemyPhase: runEnemyPhase
   };
 })();
 </script>
