@@ -162,6 +162,32 @@ var Core = (function () {
     }).sort(function (a, b) { return a.r - b.r || a.c - b.c; });
   }
 
+  // ── 거리와 대상 (specs/battle.md 4·8장) ───────────────
+  var HEAL_RANGE = 2;
+
+  function distance(a, b) {
+    return Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
+  }
+
+  // pos 를 주면 그 칸에 서 있다고 보고 잰다 (이동 전 미리 보기용). 없으면 지금 위치.
+  function attackTargets(state, unit, pos) {
+    var from = pos || unit;
+    return state.units.filter(function (t) {
+      if (!t.alive || t.side === unit.side) return false;
+      var d = distance(from, t);
+      return d >= 1 && d <= unit.rng;
+    });
+  }
+
+  // 생명수: 거리 2 안의 아군(자기 포함). 그 외 스킬: 기본공격과 같은 대상.
+  function skillTargets(state, unit, pos) {
+    if (unit.skill !== HEAL_SKILL) return attackTargets(state, unit, pos);
+    var from = pos || unit;
+    return state.units.filter(function (t) {
+      return t.alive && t.side === unit.side && distance(from, t) <= HEAL_RANGE;
+    });
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -179,7 +205,10 @@ var Core = (function () {
     unitAt: unitAt,
     livingUnits: livingUnits,
     stepCosts: stepCosts,
-    moveTargets: moveTargets
+    moveTargets: moveTargets,
+    distance: distance,
+    attackTargets: attackTargets,
+    skillTargets: skillTargets
   };
 })();
 </script>
