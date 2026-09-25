@@ -19,6 +19,7 @@
     --enemy: #a35ad8;   /* 요괴 */
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { margin: 0; height: 100%; }
   body {
     background: var(--bg);
@@ -100,6 +101,39 @@
     z-index: 0;
   }
   .hl-move::after { background: rgba(70, 140, 255, .38); box-shadow: inset 0 0 0 2px rgba(120, 180, 255, .8); }
+  .hl-attack::after { background: rgba(230, 60, 60, .35); box-shadow: inset 0 0 0 2px rgba(255, 110, 110, .9); }
+  .hl-heal::after { background: rgba(60, 200, 110, .32); box-shadow: inset 0 0 0 2px rgba(110, 240, 150, .9); }
+  .tag {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    z-index: 2;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 3px;
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  .tag.good { background: #f5c542; color: #2a1d00; }
+  .tag.bad { background: #5a6070; color: #e8e8e8; }
+  .float {
+    position: absolute;
+    z-index: 5;
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    pointer-events: none;
+    text-shadow: 0 1px 2px #000, 0 0 4px #000;
+    animation: rise .9s ease-out forwards;
+  }
+  .float.dmg { color: #ff4a4a; }
+  .float.heal { color: #5ef08a; }
+  @keyframes rise {
+    0% { transform: translateY(0); opacity: 0; }
+    15% { opacity: 1; }
+    100% { transform: translateY(-70%); opacity: 0; }
+  }
   .unit.selected { box-shadow: 0 0 0 2px #fff, 0 0 10px 2px rgba(255, 255, 255, .5); }
   .hpbar {
     position: absolute;
@@ -819,7 +853,42 @@ var Core = (function () {
         marks[p.r + ',' + p.c] = 'hl-move';
       });
     }
+    if (ui.step === 'target') {
+      var u = Core.getUnit(state, ui.id);
+      var cls = ui.kind === 'skill' && u.skill === Core.HEAL_SKILL ? 'hl-heal' : 'hl-attack';
+      currentTargets().forEach(function (t) { marks[t.r + ',' + t.c] = cls; });
+    }
     return marks;
+  }
+
+  function currentTargets() {
+    var u = Core.getUnit(state, ui.id);
+    return ui.kind === 'skill' ? Core.skillTargets(state, u) : Core.attackTargets(state, u);
+  }
+
+  // 공격 스킬 대상 위 "유리!"(×1.5) / "불리"(×0.7)
+  function affinityTag(t) {
+    var u = Core.getUnit(state, ui.id);
+    if (ui.step !== 'target' || ui.kind !== 'skill' || u.skill === Core.HEAL_SKILL) return null;
+    var m = Core.elementMultiplier(u.elem, t.elem);
+    if (m > 1) return el('span', 'tag good', '유리!');
+    if (m < 1) return el('span', 'tag bad', '불리');
+    return null;
+  }
+
+  // 피해·회복 숫자를 칸 위에 띄웠다 사라지게 한다
+  function showFloats(events) {
+    events.forEach(function (e) {
+      if (e.type !== 'damage' && e.type !== 'heal' && e.type !== 'spring') return;
+      var t = Core.getUnit(state, e.targetId);
+      var cell = cellAt(t.r, t.c);
+      var f = el('div', 'float ' + (e.type === 'damage' ? 'dmg' : 'heal'), (e.type === 'damage' ? '-' : '+') + e.amount);
+      f.style.left = cell.offsetLeft + 'px';
+      f.style.top = cell.offsetTop + 'px';
+      f.style.width = cell.offsetWidth + 'px';
+      board.appendChild(f);
+      setTimeout(function () { if (f.parentNode) f.parentNode.removeChild(f); }, 950);
+    });
   }
 
   function render() {
@@ -831,6 +900,8 @@ var Core = (function () {
       cell.className = cell.className.replace(/\s*\bhl(-\w+)?\b/g, '');
       var m = marks[cell.dataset.r + ',' + cell.dataset.c];
       if (m) cell.className += ' hl ' + m;
+      var oldTag = cell.querySelector('.tag');
+      if (oldTag) cell.removeChild(oldTag);
     });
     state.units.forEach(function (u) {
       if (!u.alive) return;
@@ -838,6 +909,8 @@ var Core = (function () {
       if (u.id === ui.id) tile.className += ' selected';
       if (u.side === 'ally' && u.acted) tile.className += ' acted';
       cellAt(u.r, u.c).appendChild(tile);
+      var tag = u.side !== 'ally' || ui.kind === 'skill' ? affinityTag(u) : null;
+      if (tag && marksHas(marks, u)) cellAt(u.r, u.c).appendChild(tag);
     });
     renderMenu();
   }
@@ -855,6 +928,10 @@ var Core = (function () {
     skill.appendChild(el('small', '', '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')'));
   }
 
+  function marksHas(marks, u) {
+    return !!marks[u.r + ',' + u.c];
+  }
+
   function selectable(u) {
     return !!u && Core.canCommand(state, u) && !u.from;
   }
@@ -862,6 +939,7 @@ var Core = (function () {
   function clearSelection() {
     ui.step = 'none';
     ui.id = null;
+    ui.kind = null;
   }
 
   // 맵 칸을 눌렀을 때. 터치와 클릭 모두 click 이벤트로 온다.
@@ -879,6 +957,15 @@ var Core = (function () {
       } else {
         clearSelection();
       }
+    } else if (ui.step === 'target') {
+      var target = u && currentTargets().indexOf(u) !== -1 ? u : null;
+      if (!target) {
+        ui.step = 'menu'; // 대상 밖을 누르면 메뉴로 돌아간다
+      } else {
+        var events = ui.kind === 'skill' ? Core.useSkill(state, ui.id, target.id) : Core.attack(state, ui.id, target.id);
+        afterAction(events);
+        return;
+      }
     } else if (ui.step === 'none') {
       if (selectable(u)) {
         ui.step = 'move';
@@ -889,9 +976,10 @@ var Core = (function () {
   }
 
   // 행동이 끝난 뒤 공통 처리
-  function afterAction() {
+  function afterAction(events) {
     clearSelection();
     render();
+    showFloats(events || []);
   }
 
   document.getElementById('btn-wait').addEventListener('click', function () {
