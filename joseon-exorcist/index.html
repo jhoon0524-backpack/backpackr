@@ -502,6 +502,22 @@ var Core = (function () {
     return events;
   }
 
+  // 흑린: 움직이지 않는다. 인접한 아군 중 HP 최저(동률은 아군 표 순서)를 친다.
+  function bossAct(state, e) {
+    var targets = attackTargets(state, e).slice().sort(function (a, b) {
+      return a.hp - b.hp || distance(e, a) - distance(e, b);
+    });
+    if (!targets.length) return [];
+    return hit(state, e, targets[0], false, []);
+  }
+
+  // 요괴 한 마리 행동. 화면은 이것을 0.5초 간격으로 부른다.
+  function enemyAct(state, id) {
+    var e = getUnit(state, id);
+    if (!e || !e.alive || e.side !== 'enemy' || state.phase !== 'enemy' || state.result !== null) return [];
+    return e.boss ? bossAct(state, e) : normalEnemyAct(state, e);
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -540,7 +556,8 @@ var Core = (function () {
     allActed: allActed,
     endAllyPhase: endAllyPhase,
     approachMap: approachMap,
-    normalEnemyAct: normalEnemyAct
+    normalEnemyAct: normalEnemyAct,
+    enemyAct: enemyAct
   };
 })();
 </script>
