@@ -1686,6 +1686,23 @@ var Core = (function () {
       .filter(function (t, i, all) { return all.indexOf(t) === i; });
   }
 
+  // ── 용어 사전 (specs/lore.md 7장) ─────────────────────
+  // 게임 속 조선 사람은 '퇴마'라는 말을 거의 쓰지 않는다. 제목 「조선 퇴마전」만 예외.
+  // 화면 문구·대사·기술 이름은 오른쪽 말을 쓴다. tests/lore.test.mjs 가 왼쪽 말이 새로 들어오는지 검사한다.
+  // GLOSSARY-START
+  var GLOSSARY = [
+    { avoid: '퇴마', use: ['축귀', '귀를 쫓다'] },
+    { avoid: '엑소시즘', use: ['나례', '축귀'] },
+    { avoid: '귀신 제거', use: ['귀를 퇴송하다'] },
+    { avoid: '악마', use: ['귀물', '사특한 것'] },
+    { avoid: '저주', use: ['부정', '사기'] },
+    { avoid: '몬스터', use: ['요물', '귀물'] },
+    { avoid: '퇴마사', use: ['벽사청 관원', '무격', '도류'] }
+  ];
+  // GLOSSARY-END
+  // '정화'는 '부정을 씻다'로 풀어 쓰되, 확정된 유닛 이름(정화된 도깨비)과 기술 이름(정화수)은 그대로 둔다.
+  // '축역'은 역병 귀신을 몰아내는 맥락에서만 쓴다.
+
   return {
     STAGES: STAGES,
     TERRAINS: TERRAINS,
@@ -1759,7 +1776,8 @@ var Core = (function () {
     LORE_CATEGORIES: LORE_CATEGORIES,
     LORE: LORE,
     loreUnlocked: loreUnlocked,
-    loreTokensForBattle: loreTokensForBattle
+    loreTokensForBattle: loreTokensForBattle,
+    GLOSSARY: GLOSSARY
   };
 })();
 </script>
@@ -2023,11 +2041,17 @@ var Core = (function () {
     box.appendChild(text);
   }
 
+  // 적 차례 문구: 귀물만 있으면 '귀물의 차례', 사람(신당회)이 섞이면 '상대의 차례' (specs/lore.md 보충 L5)
+  function enemyTurnLabel() {
+    var human = Core.livingUnits(state, 'enemy').some(function (u) { return u.entityType === 'HUMAN'; });
+    return human ? '상대의 차례…' : '귀물의 차례…';
+  }
+
   function renderPhase() {
     var canEnd = state.phase === 'ally' && !ui.busy && state.result === null;
     document.getElementById('btn-end').disabled = !canEnd;
     document.getElementById('phase-note').textContent =
-      state.phase === 'enemy' ? '요괴의 차례…' : (canEnd ? '아군 차례 — 유닛을 눌러 움직이세요' : '');
+      state.phase === 'enemy' ? enemyTurnLabel() : (canEnd ? '아군 차례 — 유닛을 눌러 움직이세요' : '');
   }
 
   function renderMenu() {

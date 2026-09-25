@@ -151,3 +151,22 @@ test('유닛은 정의표 종류(type)를 안다', () => {
   assert.equal(Core.getUnit(s, 'gwangun1').type, 'gwangun');
   assert.equal(Core.getUnit(s, 'yoon').type, 'yoon');
 });
+
+// ── 용어 사전 (specs/lore.md 7장) ──
+import { readHtml } from './load.mjs';
+
+test('용어 사전: 피할 말과 쓸 말', () => {
+  const avoid = Core.GLOSSARY.map((g) => g.avoid);
+  for (const w of ['퇴마', '엑소시즘', '악마', '저주', '몬스터', '퇴마사']) assert.ok(avoid.includes(w), w);
+  for (const g of Core.GLOSSARY) assert.ok(g.use.length > 0, g.avoid);
+});
+
+test('화면 문구·대사·벽사록에 피할 말이 없다 (제목 「조선 퇴마전」만 예외)', () => {
+  let html = readHtml();
+  html = html.replace(/\/\/ GLOSSARY-START[\s\S]*?\/\/ GLOSSARY-END/, ''); // 사전 자체는 뺀다
+  html = html.split('조선 퇴마전').join('');                           // 제목
+  html = html.replace(/\/\/[^\n]*/g, '');                                // 코드 주석
+  for (const g of Core.GLOSSARY) {
+    assert.equal(html.includes(g.avoid), false, `"${g.avoid}" 대신 ${g.use.join('·')}`);
+  }
+});
