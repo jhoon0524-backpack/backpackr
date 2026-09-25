@@ -75,6 +75,7 @@
     font-size: clamp(16px, 5.6vw, 28px);
     line-height: 1;
     background: rgba(0, 0, 0, .35);
+    z-index: 1;
   }
   .f-bs    { border-color: var(--bs); }
   .f-guest { border-color: var(--guest); }
@@ -90,6 +91,16 @@
     color: #111;
     border-radius: 0 0 3px 0;
   }
+  .hl::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hl-move::after { background: rgba(70, 140, 255, .38); box-shadow: inset 0 0 0 2px rgba(120, 180, 255, .8); }
+  .unit.selected { box-shadow: 0 0 0 2px #fff, 0 0 10px 2px rgba(255, 255, 255, .5); }
   .hpbar {
     position: absolute;
     left: 3px;
@@ -717,6 +728,8 @@ var Core = (function () {
   var state = Core.newBattle();
   var board = document.getElementById('board');
   var cells = [];
+  // 조작 상태. step: 'none' 선택 없음 / 'move' 파란 칸 고르는 중 / 'menu' 이동 후 행동 고르는 중
+  var ui = { step: 'none', id: null, busy: false };
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -771,16 +784,71 @@ var Core = (function () {
     document.getElementById('top-merit').textContent = '공적 ' + state.merit;
   }
 
+  function highlights() {
+    var marks = {};
+    if (ui.step === 'move') {
+      Core.moveTargets(state, Core.getUnit(state, ui.id)).forEach(function (p) {
+        marks[p.r + ',' + p.c] = 'hl-move';
+      });
+    }
+    return marks;
+  }
+
   function render() {
     renderTop();
+    var marks = highlights();
     cells.forEach(function (cell) {
       var old = cell.querySelector('.unit');
       if (old) cell.removeChild(old);
+      cell.className = cell.className.replace(/\s*\bhl(-\w+)?\b/g, '');
+      var m = marks[cell.dataset.r + ',' + cell.dataset.c];
+      if (m) cell.className += ' hl ' + m;
     });
     state.units.forEach(function (u) {
-      if (u.alive) cellAt(u.r, u.c).appendChild(unitTile(u));
+      if (!u.alive) return;
+      var tile = unitTile(u);
+      if (u.id === ui.id) tile.className += ' selected';
+      cellAt(u.r, u.c).appendChild(tile);
     });
   }
+
+  function selectable(u) {
+    return !!u && Core.canCommand(state, u) && !u.from;
+  }
+
+  function clearSelection() {
+    ui.step = 'none';
+    ui.id = null;
+  }
+
+  // 맵 칸을 눌렀을 때. 터치와 클릭 모두 click 이벤트로 온다.
+  function onCell(r, c) {
+    if (ui.busy || state.phase !== 'ally') return;
+    var u = Core.unitAt(state, r, c);
+    if (ui.step === 'move') {
+      var isBlue = Core.moveTargets(state, Core.getUnit(state, ui.id))
+        .some(function (p) { return p.r === r && p.c === c; });
+      if (isBlue) {
+        Core.moveUnit(state, ui.id, r, c);
+        ui.step = 'menu';
+      } else if (selectable(u)) {
+        ui.id = u.id;
+      } else {
+        clearSelection();
+      }
+    } else if (ui.step === 'none') {
+      if (selectable(u)) {
+        ui.step = 'move';
+        ui.id = u.id;
+      }
+    }
+    render();
+  }
+
+  board.addEventListener('click', function (ev) {
+    var cell = ev.target.closest('.cell');
+    if (cell) onCell(+cell.dataset.r, +cell.dataset.c);
+  });
 
   buildBoard();
   render();
