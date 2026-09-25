@@ -556,16 +556,29 @@ var Core = (function () {
     soun: { name: '소운', faction: '청운 도문', guest: true, title: '청운 도문 도사', emoji: '🧙',
       hp: 22, atk: 11, def: 3, mov: 3, rng: 2, elem: '화', skill: '화염부' },
     dallae: { name: '달래', faction: '신당회', guest: true, title: '신당회 만신', emoji: '🔔',
-      hp: 26, atk: 7, def: 5, mov: 4, rng: 1, elem: '없음', skill: '생명수' }
+      hp: 26, atk: 7, def: 5, mov: 4, rng: 1, elem: '없음', skill: '생명수' },
+    // 2장부터 품계에 따라 합류 (specs/chapter2.md 1-2). 스테이지에 직접 두지 않는다
+    gwangun: { name: '관군', faction: '벽사청', guest: false, title: '벽사청 관군', emoji: '🪖',
+      hp: 20, atk: 9, def: 5, mov: 3, rng: 1, elem: '없음', skill: null }
   };
   var ALLY_ORDER = ['yoon', 'hangyeol', 'yeoul', 'soun', 'dallae'];
   var ENEMY_TYPES = {
     dokkaebi: { name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목' },
     jangsan: { name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토' },
     bulgasari: { name: '불가사리', emoji: '🐗', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '금' },
-    heuklin: { name: '흑린', emoji: '🐍', hp: 50, atk: 13, def: 8, mov: 2, rng: 1, elem: '수', boss: true }
+    heuklin: { name: '흑린', emoji: '🐍', hp: 50, atk: 13, def: 8, mov: 2, rng: 1, elem: '수', boss: true,
+      title: '요괴의 수장' },
+    // 2장 (specs/chapter2.md 2-2, 보충 S6)
+    munyeo: { name: '신당회 무녀', emoji: '🪭', hp: 20, atk: 9, def: 4, mov: 3, rng: 2, elem: '없음',
+      faction: '신당회' },
+    dokkaebi_p: { name: '정화된 도깨비', emoji: '👹', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '목',
+      faction: '신당회 (정화된 요괴)' },
+    jangsan_p: { name: '정화된 장산범', emoji: '🐅', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '토',
+      faction: '신당회 (정화된 요괴)' },
+    dallae_boss: { name: '달래', emoji: '🔔', hp: 40, atk: 9, def: 6, mov: 4, rng: 1, elem: '없음', boss: true,
+      faction: '신당회', title: '신당회 만신', skill: '생명수' }
   };
-  var ENEMY_ORDER = ['dokkaebi', 'jangsan', 'bulgasari', 'heuklin'];
+  var ENEMY_ORDER = ['dokkaebi', 'jangsan', 'bulgasari', 'heuklin', 'munyeo', 'dokkaebi_p', 'jangsan_p', 'dallae_boss'];
   var KI_MAX = 10;
   var KI_START = 6;
   var SKILL_COST = 4;
@@ -575,13 +588,14 @@ var Core = (function () {
     var ally = side === 'ally';
     return {
       id: id, name: d.name, side: side, emoji: d.emoji,
-      faction: ally ? d.faction : '요괴 세력',
-      guest: ally ? d.guest : false,
-      title: ally ? d.title : (d.boss ? '요괴의 수장' : '—'),
+      faction: d.faction || '요괴 세력',
+      guest: !!d.guest,
+      title: d.title || '—',
       boss: !!d.boss,
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
-      skill: ally ? d.skill : null,
-      maxKi: ally ? KI_MAX : null, ki: ally ? KI_START : null,
+      skill: d.skill || null,
+      // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
+      maxKi: ally || d.skill ? KI_MAX : null, ki: ally || d.skill ? KI_START : null,
       r: r, c: c, alive: true, acted: false,
       from: null // 이동했지만 아직 행동 전일 때 이동 전 위치 (취소용)
     };
@@ -789,7 +803,7 @@ var Core = (function () {
     return attackTargets(state, unit).length > 0;
   }
   function canSkill(state, unit) {
-    return unit.ki !== null && unit.ki >= SKILL_COST && skillTargets(state, unit).length > 0;
+    return !!unit.skill && unit.ki >= SKILL_COST && skillTargets(state, unit).length > 0;
   }
 
   // 피해를 입히고 이벤트 목록에 남긴다. HP 는 0 밑으로 내려가지 않는다.
@@ -868,7 +882,7 @@ var Core = (function () {
 
   function useSkill(state, id, targetId) {
     var u = getUnit(state, id);
-    if (!canCommand(state, u) || u.ki < SKILL_COST) return null;
+    if (!canCommand(state, u) || !u.skill || u.ki < SKILL_COST) return null;
     var t = inList(skillTargets(state, u), targetId);
     if (!t) return null;
     u.ki -= SKILL_COST;
