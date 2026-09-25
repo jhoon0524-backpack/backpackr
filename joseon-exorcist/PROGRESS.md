@@ -101,5 +101,6 @@
 
 ## 다음 사람이 헷갈릴 만한 것
 - 배포: Vercel 프로젝트 `joseon-exorcist` (팀 khan-9759s-projects), 주소 https://joseon-exorcist.vercel.app . 저장소 연결·루트 폴더 `joseon-exorcist`. 기본 브랜치(main)에 게임이 아직 없어서 **작업 브랜치 커밋을 production 으로 직접 배포**한다 (Vercel `create_deployment`, gitSource ref=브랜치). 작업 브랜치에 push 하면 미리보기(로그인 필요)만 생긴다. `.vercelignore` 로 index.html 만 올린다
+- 2026-09-25 기획자가 시크릿 창(로그인 없음)에서 https://joseon-exorcist.vercel.app 열림 확인
 - 규칙은 `<script id="core">` 에만 둔다. 화면 스크립트에서 피해·이동을 따로 계산하지 않는다 (`ADR.md` 1번)
 - 이 폴더는 `backpackr` 저장소 안의 하위 폴더다. 커밋은 저장소 전체에 쌓이지만 이 폴더 밖은 건드리지 않는다
