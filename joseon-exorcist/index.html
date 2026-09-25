@@ -461,6 +461,60 @@
   #ed-saved .empty { color: var(--muted); font-size: 12px; }
   #open-editor { display: block; margin: 14px auto 0; background: none; border: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; }
 
+  /* ── 벽사록: 관문서 종이·먹·붉은 관인 톤 (specs/lore.md 19장) ── */
+  #top { position: relative; padding-left: 36px; padding-right: 36px; }
+  .lore-open {
+    position: absolute; right: 0; top: 0; width: 32px; height: 32px;
+    border-radius: 6px; border: 1px solid #5a3440; background: #2a1f24; color: var(--text);
+    font-size: 16px; line-height: 1; touch-action: manipulation;
+  }
+  #lore {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(4, 5, 8, .7);
+    display: flex; justify-content: center; align-items: stretch;
+    padding: 12px;
+  }
+  #lore .paper {
+    width: 100%; max-width: 480px; display: flex; flex-direction: column;
+    background: #efe6d2; color: #1d1a14; border-radius: 6px;
+    border: 1px solid #b9a984; box-shadow: 0 8px 28px rgba(0, 0, 0, .6);
+    overflow: hidden;
+  }
+  #lore header {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 12px 14px 8px; border-bottom: 2px solid #1d1a14;
+  }
+  #lore h2 { margin: 0; font-size: 18px; letter-spacing: .15em; }
+  #lore .count { font-size: 11px; color: #6b5f48; }
+  #lore .seal {
+    display: inline-block; margin-left: 6px; padding: 1px 5px; border: 2px solid #b0302a; color: #b0302a;
+    border-radius: 3px; font-size: 11px; font-weight: 800; transform: rotate(-4deg);
+  }
+  #lore .close { min-width: 44px; min-height: 36px; border-radius: 6px; border: 1px solid #1d1a14; background: transparent; color: #1d1a14; font: inherit; font-weight: 700; }
+  #lore .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 12px; border-bottom: 1px dashed #b9a984; }
+  #lore .tabs button {
+    min-height: 32px; padding: 0 10px; border-radius: 4px; border: 1px solid #b9a984; background: #f7f1e3; color: #1d1a14;
+    font: inherit; font-size: 13px;
+  }
+  #lore .tabs button.on { background: #1d1a14; color: #efe6d2; border-color: #1d1a14; }
+  #lore .body { flex: 1; overflow-y: auto; padding: 8px 12px 16px; -webkit-overflow-scrolling: touch; }
+  #lore .entry {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 10px 8px; border: none; border-bottom: 1px solid #d8cdb2; background: transparent; color: inherit;
+    font: inherit; font-size: 15px; text-align: left;
+  }
+  #lore .entry.locked { color: #9a8f78; }
+  #lore .entry small { color: #6b5f48; font-size: 12px; margin-left: 4px; }
+  #lore .grade { font-size: 11px; color: #6b5f48; white-space: nowrap; }
+  #lore .empty { color: #6b5f48; font-size: 13px; padding: 16px 4px; }
+  #lore .detail h3 { margin: 6px 0 2px; font-size: 20px; }
+  #lore .detail .meta { font-size: 12px; color: #6b5f48; margin-bottom: 10px; }
+  #lore .detail p { font-size: 14px; line-height: 1.7; margin: 0 0 12px; word-break: keep-all; }
+  #lore .detail .foot { border-top: 1px dashed #b9a984; padding-top: 10px; font-size: 13px; line-height: 1.6; color: #3b3326; }
+  #lore .detail .foot b { color: #b0302a; }
+  #lore .back { margin-top: 4px; min-height: 32px; padding: 0 10px; border-radius: 4px; border: 1px solid #b9a984; background: #f7f1e3; font: inherit; font-size: 13px; color: #1d1a14; }
+  #lore button:focus-visible { outline: 2px solid #b0302a; outline-offset: 1px; }
+
   #legend {
     display: flex;
     justify-content: center;
@@ -488,6 +542,7 @@
     <span id="top-turn"></span><span class="sep">·</span>
     <span id="top-weather"></span><span class="sep">·</span>
     <span id="top-merit"></span>
+    <button class="lore-open" id="lore-open-battle" type="button" aria-label="벽사록 열기">📖</button>
   </header>
   <div id="board"></div>
   <div id="legend">
@@ -516,12 +571,28 @@
     <div class="prog" id="title-prog"></div>
     <button class="big-btn" id="btn-continue" type="button">이어하기</button>
     <button class="big-btn plain" id="btn-new" type="button">처음부터</button>
+    <button class="big-btn plain" id="lore-open-title" type="button">📖 벽사록</button>
     <div class="note" id="title-note"></div>
     <!-- 처음부터 확인 (specs/chapter2.md 7-4): 폰 오터치로 기록이 지워지지 않게 -->
     <div class="confirm" id="new-confirm" hidden>
       <p>정말 처음부터 시작할까요?<br>공적 누계와 진행 기록이 지워집니다.</p>
       <button class="big-btn" id="btn-new-yes" type="button">기록 지우고 처음부터</button>
       <button class="big-btn plain" id="btn-new-no" type="button">취소</button>
+    </div>
+  </div>
+
+  <!-- 벽사록: 도감 + 세계관 사전 (specs/lore.md 10~11장) -->
+  <div id="lore" hidden role="dialog" aria-modal="true" aria-labelledby="lore-title">
+    <div class="paper">
+      <header>
+        <div>
+          <h2 id="lore-title">辟邪錄 벽사록</h2>
+          <div class="count" id="lore-count"></div>
+        </div>
+        <button class="close" id="lore-close" type="button">닫기</button>
+      </header>
+      <div class="tabs" id="lore-tabs"></div>
+      <div class="body" id="lore-body"></div>
     </div>
   </div>
 
@@ -1906,6 +1977,29 @@ var Core = (function () {
     }
   }
   var progress = loadProgress();
+
+  // ── 벽사록 밝힘 기록 (이 브라우저에만, 진행 저장과 따로 — specs/lore.md 보충 L4) ──
+  var LORE_KEY = 'joseon-exorcist.lore';
+  var loreSeen = (function () {
+    try {
+      var v = JSON.parse(localStorage.getItem(LORE_KEY) || '[]');
+      return Array.isArray(v) ? v.filter(function (t) { return typeof t === 'string'; }) : [];
+    } catch (e) {
+      return [];
+    }
+  })();
+  function seeLore(tokens) {
+    var added = false;
+    tokens.forEach(function (t) {
+      if (loreSeen.indexOf(t) === -1) { loreSeen.push(t); added = true; }
+    });
+    if (!added) return;
+    try { localStorage.setItem(LORE_KEY, JSON.stringify(loreSeen)); } catch (e) { /* 저장 못 해도 이번 판은 보인다 */ }
+  }
+  // 이전 저장(벽사록 없던 때)의 깬 장도 밝힘으로 친다 — 마이그레이션 없이 호환
+  function loreTokens() {
+    return loreSeen.concat(progress.cleared.map(function (id) { return 'clear:' + id; }));
+  }
   var chapterId = 'ch1';
 
   var state = Core.newBattle();
@@ -2214,6 +2308,7 @@ var Core = (function () {
   }
 
   function skillEffects(events) {
+    seeLore(events.filter(function (e) { return e.name; }).map(function (e) { return 'skill:' + e.name; }));
     events.forEach(function (e) {
       var kind = LABELED[e.name];
       if (!kind || (e.type !== 'damage' && e.type !== 'heal')) return;
@@ -2380,6 +2475,84 @@ var Core = (function () {
     show();
   }
 
+  // ── 벽사록 화면 ──
+  var loreView = { cat: '세력', id: null };
+
+  function renderLore() {
+    var seen = loreTokens();
+    var open = Core.LORE.filter(function (e) { return Core.loreUnlocked(e, seen); }).length;
+    document.getElementById('lore-count').textContent = '밝힌 기록 ' + open + ' / ' + Core.LORE.length;
+    var tabs = document.getElementById('lore-tabs');
+    tabs.innerHTML = '';
+    Core.LORE_CATEGORIES.forEach(function (cat) {
+      var b = el('button', cat === loreView.cat ? 'on' : '', cat);
+      b.type = 'button';
+      b.addEventListener('click', function () { loreView = { cat: cat, id: null }; renderLore(); });
+      tabs.appendChild(b);
+    });
+    var body = document.getElementById('lore-body');
+    body.innerHTML = '';
+    body.scrollTop = 0;
+    var entry = loreView.id && Core.LORE.filter(function (e) { return e.id === loreView.id; })[0];
+    if (entry) return renderLoreDetail(body, entry);
+    var list = Core.LORE.filter(function (e) { return e.cat === loreView.cat; });
+    if (!list.length) return body.appendChild(el('div', 'empty', '아직 기록이 없습니다.'));
+    list.forEach(function (e) {
+      var on = Core.loreUnlocked(e, seen);
+      var row = el('button', 'entry' + (on ? '' : ' locked'));
+      row.type = 'button';
+      var name = el('span', '', on ? e.name : '????');
+      if (on && e.hanja) name.appendChild(el('small', '', e.hanja));
+      row.appendChild(name);
+      var g = Core.HISTORICITY[e.grade];
+      row.appendChild(el('span', 'grade', on ? g.icon + ' ' + g.label : '잠김'));
+      row.disabled = !on;
+      row.addEventListener('click', function () { loreView.id = e.id; renderLore(); });
+      body.appendChild(row);
+    });
+  }
+
+  function renderLoreDetail(body, e) {
+    var box = el('div', 'detail');
+    var back = el('button', 'back', '← ' + e.cat + ' 목록');
+    back.type = 'button';
+    back.addEventListener('click', function () { loreView.id = null; renderLore(); });
+    box.appendChild(back);
+    var h = el('h3', '', e.name);
+    if (e.grade === 'A') h.appendChild(el('span', 'seal', '史'));
+    box.appendChild(h);
+    var meta = [e.hanja, e.entityType ? '분류 ' + Core.ENTITY_TYPES[e.entityType] : '', e.faction ? e.faction + ' 계열' : '']
+      .filter(Boolean).join(' · ');
+    if (meta) box.appendChild(el('div', 'meta', meta));
+    box.appendChild(el('p', '', e.text));
+    var g = Core.HISTORICITY[e.grade];
+    var foot = el('div', 'foot');
+    foot.appendChild(el('b', '', g.icon + ' ' + g.label));
+    foot.appendChild(el('div', '', e.note));
+    if (e.motif) foot.appendChild(el('div', '', '모티프: ' + e.motif.join(', ')));
+    box.appendChild(foot);
+    body.appendChild(box);
+  }
+
+  function openLore() {
+    loreView.id = null;
+    renderLore();
+    document.getElementById('lore').hidden = false;
+    document.getElementById('lore-close').focus();
+  }
+  function closeLore() {
+    document.getElementById('lore').hidden = true;
+  }
+  document.getElementById('lore-open-title').addEventListener('click', openLore);
+  document.getElementById('lore-open-battle').addEventListener('click', openLore);
+  document.getElementById('lore-close').addEventListener('click', closeLore);
+  document.getElementById('lore').addEventListener('click', function (ev) {
+    if (ev.target.id === 'lore') closeLore(); // 종이 바깥을 누르면 닫힌다
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && !document.getElementById('lore').hidden) closeLore();
+  });
+
   // 장 시작: 공적 누계로 품계·관군을 정하고 시작 대사부터
   function startChapter(id) {
     chapterId = id;
@@ -2389,6 +2562,7 @@ var Core = (function () {
     ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false, orb: null };
     buildBoard();
     Core.startAllyPhase(state, Math.random);
+    seeLore(Core.loreTokensForBattle(state)); // 전투에서 만난 귀물
     render();
     playScene(CHAPTERS[id].intro(), function () {
       ui.busy = false;
@@ -2440,6 +2614,7 @@ var Core = (function () {
     if (win) {
       progress = Core.applyResult(progress, chapterId, 'win', state.merit);
       saveProgress();
+      seeLore(['clear:' + chapterId]);
     }
     var next = Core.nextStage(progress);
     var t = document.getElementById('result-text');
