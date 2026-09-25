@@ -141,7 +141,12 @@
     60% { transform: translateX(-2px); filter: brightness(1.6); }
     100% { filter: none; transform: translateX(0); }
   }
-  .float.heal { color: #5ef08a; }
+  .float.heal { color: #6dff9a; font-size: 24px; }
+  .unit.healed { animation: healed .7s ease-out; }
+  @keyframes healed {
+    0% { box-shadow: 0 0 0 3px #6dff9a, 0 0 16px 6px rgba(109, 255, 154, .8); }
+    100% { box-shadow: 0 0 0 0 rgba(109, 255, 154, 0); }
+  }
   @keyframes rise {
     0% { transform: translateY(0); opacity: 0; }
     15% { opacity: 1; }
@@ -209,7 +214,7 @@
   @keyframes dotfade { from { opacity: .9; } to { opacity: 0; } }
   @media (prefers-reduced-motion: reduce) {
     .ghost { transition: none; }
-    .float, .step-dot, .unit.fading, .dying, .unit.hit { animation-duration: .01s; }
+    .float, .step-dot, .unit.fading, .dying, .unit.hit, .unit.healed { animation-duration: .01s; }
   }
   .unit.acted { filter: grayscale(1) brightness(.55); }
 
@@ -320,6 +325,11 @@
   #title .sub { color: var(--muted); font-size: 13px; margin-top: -6px; }
   #title .prog { font-size: 14px; line-height: 1.6; min-height: 22px; }
   #title .prog b { color: #f5c542; }
+  #title .confirm {
+    position: absolute; inset: 0; background: rgba(4, 5, 8, .92);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px;
+  }
+  #title .confirm p { margin: 0 0 6px; font-size: 15px; line-height: 1.6; }
   #title .note { font-size: 12px; color: var(--muted); max-width: 300px; }
   .big-btn {
     min-width: 200px; min-height: 48px; border-radius: 10px;
@@ -474,6 +484,12 @@
     <button class="big-btn" id="btn-continue" type="button">이어하기</button>
     <button class="big-btn plain" id="btn-new" type="button">처음부터</button>
     <div class="note" id="title-note"></div>
+    <!-- 처음부터 확인 (specs/chapter2.md 7-4): 폰 오터치로 기록이 지워지지 않게 -->
+    <div class="confirm" id="new-confirm" hidden>
+      <p>정말 처음부터 시작할까요?<br>공적 누계와 진행 기록이 지워집니다.</p>
+      <button class="big-btn" id="btn-new-yes" type="button">기록 지우고 처음부터</button>
+      <button class="big-btn plain" id="btn-new-no" type="button">취소</button>
+    </div>
   </div>
 
   <!-- 대사·결과 화면은 게임 안에 둔다: 에디터로 가면 함께 숨는다 -->
@@ -2009,9 +2025,10 @@ var Core = (function () {
   // 맞은 유닛 번쩍·흔들림. render() 뒤에 붙인다 (render 가 타일을 새로 만들기 때문)
   function flashHits(events) {
     events.forEach(function (e) {
-      if (e.type !== 'damage') return;
+      if (e.type !== 'damage' && e.type !== 'heal') return;
       var tile = board.querySelector('.unit[data-id="' + e.targetId + '"]');
-      if (tile) tile.classList.add('hit');
+      // 회복은 초록 빛 (2장 달래 생명수가 눈에 띄게, specs/chapter2.md 7-5)
+      if (tile) tile.classList.add(e.type === 'heal' ? 'healed' : 'hit');
     });
   }
 
@@ -2154,12 +2171,11 @@ var Core = (function () {
   }
 
   // 첫 화면: 누계·품계와 이어서 할 장
-  var armedNew = false;
   function showTitle() {
     document.getElementById('result').hidden = true;
     document.getElementById('scene').hidden = true;
     document.getElementById('title').hidden = false;
-    armedNew = false;
+    document.getElementById('new-confirm').hidden = true;
     var next = Core.nextStage(progress);
     var started = progress.cleared.length > 0;
     var prog = document.getElementById('title-prog');
@@ -2229,17 +2245,20 @@ var Core = (function () {
     var next = Core.nextStage(progress);
     if (next) startChapter(next);
   });
-  // 처음부터: 진행이 있으면 두 번 눌러야 누계가 지워진다 (확인 창을 쓸 수 없는 환경 대비)
-  document.getElementById('btn-new').addEventListener('click', function () {
-    var b = document.getElementById('btn-new');
-    if (progress.cleared.length > 0 && !armedNew) {
-      armedNew = true;
-      b.textContent = '정말 처음부터? (공적 누계가 지워집니다)';
-      return;
-    }
+  // 처음부터: 진행이 있으면 확인 화면을 거친다 (브라우저 확인 창은 쓸 수 없는 환경이라 화면 안에)
+  function newGame() {
+    document.getElementById('new-confirm').hidden = true;
     progress = Core.newProgress();
     saveProgress();
     startChapter('ch1');
+  }
+  document.getElementById('btn-new').addEventListener('click', function () {
+    if (progress.cleared.length > 0) document.getElementById('new-confirm').hidden = false;
+    else newGame();
+  });
+  document.getElementById('btn-new-yes').addEventListener('click', newGame);
+  document.getElementById('btn-new-no').addEventListener('click', function () {
+    document.getElementById('new-confirm').hidden = true;
   });
 
   document.getElementById('btn-end').addEventListener('click', function () {
