@@ -62,6 +62,71 @@ var Core = (function () {
     return terrainAt(r, c) === 'K';
   }
 
+  // ── 유닛 (specs/battle.md 2장) ────────────────────────
+  // 배열 순서가 곧 동률 판정 순서(아군)이고 행동 순서(요괴)다
+  var ALLIES = [
+    { id: 'yoon', name: '윤무겸', faction: '벽사청', guest: false, title: '벽사청 종사관', emoji: '🗡️',
+      hp: 30, atk: 12, def: 6, mov: 3, rng: 1, elem: '금', skill: '벽사검', r: 7, c: 2 },
+    { id: 'hangyeol', name: '한결', faction: '벽사청', guest: false, title: '벽사청 궁수', emoji: '🏹',
+      hp: 24, atk: 10, def: 4, mov: 3, rng: 2, elem: '목', skill: '파사궁', r: 7, c: 3 },
+    { id: 'yeoul', name: '여울', faction: '청운 도문', guest: true, title: '축지의 도인', emoji: '🥷',
+      hp: 34, atk: 11, def: 7, mov: 5, rng: 1, elem: '토', skill: '축지격', r: 7, c: 4 },
+    { id: 'soun', name: '소운', faction: '청운 도문', guest: true, title: '청운 도문 도사', emoji: '🧙',
+      hp: 22, atk: 11, def: 3, mov: 3, rng: 2, elem: '화', skill: '화염부', r: 7, c: 5 },
+    { id: 'dallae', name: '달래', faction: '신당회', guest: true, title: '신당회 만신', emoji: '🔔',
+      hp: 26, atk: 7, def: 5, mov: 4, rng: 1, elem: '없음', skill: '생명수', r: 6, c: 3 }
+  ];
+  var ENEMIES = [
+    { id: 'dokkaebi1', name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목', r: 0, c: 1 },
+    { id: 'dokkaebi2', name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목', r: 0, c: 6 },
+    { id: 'jangsan1', name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토', r: 1, c: 3 },
+    { id: 'jangsan2', name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토', r: 1, c: 4 },
+    { id: 'bulgasari', name: '불가사리', emoji: '🐗', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '금', r: 2, c: 4 },
+    { id: 'heuklin', name: '흑린', emoji: '🐍', hp: 50, atk: 13, def: 8, mov: 2, rng: 1, elem: '수', r: 0, c: 3, boss: true }
+  ];
+  var KI_MAX = 10;
+  var KI_START = 6;
+  var SKILL_COST = 4;
+  var HEAL_SKILL = '생명수';
+
+  function makeUnit(d, side) {
+    var ally = side === 'ally';
+    return {
+      id: d.id, name: d.name, side: side, emoji: d.emoji,
+      faction: ally ? d.faction : '요괴 세력',
+      guest: ally ? d.guest : false,
+      title: ally ? d.title : (d.boss ? '요괴의 수장' : '—'),
+      boss: !!d.boss,
+      maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
+      skill: ally ? d.skill : null,
+      maxKi: ally ? KI_MAX : null, ki: ally ? KI_START : null,
+      r: d.r, c: d.c, alive: true, acted: false
+    };
+  }
+
+  function newBattle() {
+    return {
+      turn: 1, maxTurn: 10, weather: '흐림', merit: 0, phase: 'ally', result: null,
+      units: ALLIES.map(function (d) { return makeUnit(d, 'ally'); })
+        .concat(ENEMIES.map(function (d) { return makeUnit(d, 'enemy'); }))
+    };
+  }
+
+  function getUnit(state, id) {
+    for (var i = 0; i < state.units.length; i++) if (state.units[i].id === id) return state.units[i];
+    return null;
+  }
+  function unitAt(state, r, c) {
+    for (var i = 0; i < state.units.length; i++) {
+      var u = state.units[i];
+      if (u.alive && u.r === r && u.c === c) return u;
+    }
+    return null;
+  }
+  function livingUnits(state, side) {
+    return state.units.filter(function (u) { return u.alive && u.side === side; });
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -69,7 +134,15 @@ var Core = (function () {
     terrainAt: terrainAt,
     isPassable: isPassable,
     isShrine: isShrine,
-    isSpring: isSpring
+    isSpring: isSpring,
+    KI_MAX: KI_MAX,
+    KI_START: KI_START,
+    SKILL_COST: SKILL_COST,
+    HEAL_SKILL: HEAL_SKILL,
+    newBattle: newBattle,
+    getUnit: getUnit,
+    unitAt: unitAt,
+    livingUnits: livingUnits
   };
 })();
 </script>
