@@ -673,21 +673,30 @@ var Core = (function () {
   };
   var ALLY_ORDER = ['yoon', 'hangyeol', 'yeoul', 'soun', 'dallae'];
   var ENEMY_TYPES = {
-    dokkaebi: { name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목' },
-    jangsan: { name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토' },
-    bulgasari: { name: '불가사리', emoji: '🐗', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '금' },
+    dokkaebi: { name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목', entityType: 'YOGOE' },
+    jangsan: { name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토', entityType: 'YOGOE' },
+    bulgasari: { name: '불가사리', emoji: '🐗', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '금', entityType: 'YOGOE' },
     // ai: 없으면 1장 일반 요괴 / hold 자리 지킴 / archer 거리 두고 쏨 / flee 도망·회복
     heuklin: { name: '흑린', emoji: '🐍', hp: 50, atk: 13, def: 8, mov: 2, rng: 1, elem: '수', boss: true,
-      title: '요괴의 수장', ai: 'hold' },
+      title: '요괴의 수장', ai: 'hold', entityType: 'YOGOE' },
     // 2장 (specs/chapter2.md 2-2, 보충 S6)
     munyeo: { name: '신당회 무녀', emoji: '🪭', hp: 20, atk: 9, def: 4, mov: 3, rng: 2, elem: '없음',
-      faction: '신당회', ai: 'archer', human: true },
+      faction: '신당회', ai: 'archer', human: true, entityType: 'HUMAN' },
     dokkaebi_p: { name: '정화된 도깨비', emoji: '👹', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '목',
-      faction: '신당회 (정화된 요괴)' },
+      faction: '신당회 (정화된 요괴)', entityType: 'YOGOE' },
     jangsan_p: { name: '정화된 장산범', emoji: '🐅', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '토',
-      faction: '신당회 (정화된 요괴)' },
+      faction: '신당회 (정화된 요괴)', entityType: 'YOGOE' },
     dallae_boss: { name: '달래', emoji: '🔔', hp: 40, atk: 9, def: 6, mov: 4, rng: 1, elem: '없음', boss: true,
-      faction: '신당회', title: '신당회 만신', skill: '정화수', ai: 'flee', human: true }
+      faction: '신당회', title: '신당회 만신', skill: '정화수', ai: 'flee', human: true, entityType: 'HUMAN' }
+  };
+  // ── 존재 분류·고증 등급 (specs/lore.md 1·6장). 게임용 분류이며 역사적 공식 분류가 아니다 ──
+  var ENTITY_TYPES = {
+    JAPGWI: '잡귀', YEOKGWI: '역귀', WONGWI: '원귀', YOGOE: '요괴', SINRYEONG: '신령', HUMAN: '사람'
+  };
+  var HISTORICITY = {
+    A: { icon: '📜', label: '사료 기반' },
+    B: { icon: '🪶', label: '민속·무속 기반' },
+    C: { icon: '✏️', label: '창작 재구성' }
   };
   var ENEMY_ORDER = ['dokkaebi', 'jangsan', 'bulgasari', 'heuklin', 'munyeo', 'dokkaebi_p', 'jangsan_p', 'dallae_boss'];
   var KI_MAX = 10;
@@ -705,6 +714,7 @@ var Core = (function () {
       boss: !!d.boss,
       ai: d.ai || null,
       human: !!d.human, // 사람(신당회). 요괴가 아니다 (specs/chapter2.md 7-3)
+      entityType: d.entityType || 'HUMAN', // 아군은 모두 사람
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: d.skill || null,
       // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
@@ -1588,6 +1598,8 @@ var Core = (function () {
     ALLY_ORDER: ALLY_ORDER,
     ENEMY_TYPES: ENEMY_TYPES,
     ENEMY_ORDER: ENEMY_ORDER,
+    ENTITY_TYPES: ENTITY_TYPES,
+    HISTORICITY: HISTORICITY,
     inBounds: inBounds,
     terrainAt: terrainAt,
     isPassable: isPassable,
