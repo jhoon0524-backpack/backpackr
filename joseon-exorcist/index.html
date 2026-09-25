@@ -162,6 +162,22 @@
   .unit.acted { filter: grayscale(1) brightness(.55); }
 
   #panel { margin-top: 8px; min-height: 120px; }
+  #info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--panel);
+    border: 1px solid #2c303c;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  #info .face { font-size: 30px; line-height: 1; }
+  #info .name { font-size: 15px; font-weight: 700; }
+  #info .guest { font-size: 11px; font-weight: 600; color: #111; background: var(--guest); border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+  #info .sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  #info .stats { margin-top: 3px; }
+  #info .stats b { font-weight: 600; }
   .btns { display: flex; gap: 6px; margin-top: 6px; }
   .btns button {
     flex: 1;
@@ -214,6 +230,7 @@
     <span style="--c: var(--rock)">초가집·바위 · 못 지나감</span>
   </div>
   <div id="panel">
+    <div id="info" hidden></div>
     <div id="menu" class="btns" hidden>
       <button id="btn-attack">공격</button>
       <button id="btn-skill">스킬</button>
@@ -791,7 +808,7 @@ var Core = (function () {
   var board = document.getElementById('board');
   var cells = [];
   // 조작 상태. step: 'none' 선택 없음 / 'move' 파란 칸 고르는 중 / 'menu' 이동 후 행동 고르는 중
-  var ui = { step: 'none', id: null, busy: false };
+  var ui = { step: 'none', id: null, busy: false, infoId: null };
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -912,7 +929,28 @@ var Core = (function () {
       var tag = u.side !== 'ally' || ui.kind === 'skill' ? affinityTag(u) : null;
       if (tag && marksHas(marks, u)) cellAt(u.r, u.c).appendChild(tag);
     });
+    renderInfo();
     renderMenu();
+  }
+
+  // 정보창: 이름 / 소속 / 칭호 / HP / 기력 / 속성
+  function renderInfo() {
+    var box = document.getElementById('info');
+    var u = ui.infoId && Core.getUnit(state, ui.infoId);
+    box.hidden = !u || !u.alive;
+    if (box.hidden) return;
+    box.innerHTML = '';
+    box.appendChild(el('div', 'face', u.emoji));
+    var text = el('div');
+    var name = el('div', 'name', u.name);
+    if (u.guest) name.appendChild(el('span', 'guest', '객장'));
+    text.appendChild(name);
+    text.appendChild(el('div', 'sub', u.faction + ' · ' + u.title));
+    text.appendChild(el('div', 'stats',
+      'HP ' + u.hp + '/' + u.maxHp +
+      ' · 기력 ' + (u.ki === null ? '—' : u.ki + '/' + u.maxKi) +
+      ' · 속성 ' + u.elem));
+    box.appendChild(text);
   }
 
   function renderMenu() {
@@ -946,16 +984,19 @@ var Core = (function () {
   function onCell(r, c) {
     if (ui.busy || state.phase !== 'ally') return;
     var u = Core.unitAt(state, r, c);
+    if (u) ui.infoId = u.id;
     if (ui.step === 'move') {
       var isBlue = Core.moveTargets(state, Core.getUnit(state, ui.id))
         .some(function (p) { return p.r === r && p.c === c; });
       if (isBlue) {
         Core.moveUnit(state, ui.id, r, c);
         ui.step = 'menu';
+        ui.infoId = ui.id;
       } else if (selectable(u)) {
         ui.id = u.id;
-      } else {
-        clearSelection();
+      } else if (!u) {
+        clearSelection(); // 빈 칸: 선택 해제. 다른 유닛: 정보만 보고 선택은 유지
+        ui.infoId = null;
       }
     } else if (ui.step === 'target') {
       var target = u && currentTargets().indexOf(u) !== -1 ? u : null;
@@ -970,6 +1011,8 @@ var Core = (function () {
       if (selectable(u)) {
         ui.step = 'move';
         ui.id = u.id;
+      } else if (!u) {
+        ui.infoId = null;
       }
     }
     render();
