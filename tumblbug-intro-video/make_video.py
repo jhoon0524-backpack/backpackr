@@ -1,4 +1,4 @@
-"""텀블벅 소개영상 (40초, 1920x1080, 30fps) — 모션그래픽을 코드로 직접 그림
+"""텀블벅 소개영상 (46초, 1920x1080, 30fps) — 모션그래픽을 코드로 직접 그림
 
 실행: python3 make_music.py && python3 make_video.py
 결과: tumblbug_intro.mp4
@@ -10,7 +10,7 @@ import subprocess
 import imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
 
-W, H, FPS, DUR = 1920, 1080, 30, 40.0
+W, H, FPS, DUR = 1920, 1080, 30, 46.0
 BEAT = 0.5
 
 CORAL = (250, 100, 98)
@@ -185,11 +185,12 @@ def scene_brand(img, t):
     pop = ease_back(prog(lt, 0.35, 0.5))
     text(img, "텀블벅", "Black", 260, (W / 2, H / 2 - 40), WHITE, clamp(pop * 2), pop)
     a, dy = slide_in(lt, 1.2)
-    text(img, "창작자와 후원자가 함께 만드는 크라우드펀딩", "Bold", 56, (W / 2, H / 2 + 150 + dy), WHITE, a)
+    text(img, "크리에이터를 위한 크라우드펀딩", "Bold", 56, (W / 2, H / 2 + 150 + dy), WHITE, a)
 
 
-CATS = [("🎲", "보드게임"), ("📖", "웹툰·만화"), ("🧸", "캐릭터·굿즈"), ("📚", "출판"),
-        ("🎵", "음악"), ("🎬", "영화·비디오"), ("🎭", "공연"), ("🎨", "디자인·예술")]
+# 텀블벅 실제 카테고리명 기준
+CATS = [("🎲", "보드게임·TRPG"), ("🎮", "디지털 게임"), ("📖", "웹툰·만화"), ("🧸", "캐릭터·굿즈"),
+        ("📚", "출판"), ("🎵", "음악"), ("🎬", "영화·비디오"), ("🎭", "공연")]
 
 
 def scene_categories(img, t):
@@ -217,7 +218,7 @@ def scene_categories(img, t):
         rounded(img, (cx - w2, cy - h2, cx + w2, cy + h2), 36, WHITE, clamp(p * 2))
         rounded(img, (cx - w2, cy - h2, cx + w2, cy - h2 + 14 * s), 7, ACCENTS[i % 5], clamp(p * 2))
         paste_center(img, emoji(em, 110), (cx, cy - 30 * s), clamp(p * 2), s)
-        text(img, name, "Bold", 44, (cx, cy + 90 * s), DARK, clamp(p * 2), s)
+        text(img, name, "Bold", 40, (cx, cy + 90 * s), DARK, clamp(p * 2), s)
     a, dy = slide_in(lt, 5.0)
     text(img, "작은 아이디어부터 큰 도전까지", "Bold", 60, (W / 2, 960 + dy), CORAL, a)
 
@@ -279,6 +280,39 @@ def scene_how(img, t):
             text(img, "※ 목표 금액에 미달하면 결제되지 않아요", "Medium", 30, (W / 2, H - 40), GRAY, clamp(sp * 2))
 
 
+# 출처: 텀블벅 발표(2026.8.18 보도, 2026년 6월 29일 기준), 88억 원은 2024.11 보도
+STATS = [(5000, "{:,}억 원+", "누적 펀딩 금액"),
+         (8, "약 {}만 개", "진행된 프로젝트"),
+         (1000, "{:,}만 건+", "누적 후원")]
+
+
+def scene_stats(img, t):
+    """28~34초: 숫자로 보는 텀블벅"""
+    lt = t - 28
+    img.paste(DARK, (0, 0, W, H))
+    a, dy = slide_in(lt, 0.1)
+    text(img, "숫자로 보는 텀블벅", "ExtraBold", 72, (W / 2, 190 + dy), WHITE, a)
+    xs = [W / 2 - 580, W / 2, W / 2 + 580]
+    for i, (val, fmt, label) in enumerate(STATS):
+        st = 0.5 + i * 1.0
+        p = prog(lt, st, 1.2)
+        if p <= 0:
+            continue
+        s = ease_back(prog(lt, st, 0.4))
+        cur = round(val * ease_out(p))
+        cx, cy = xs[i], 470
+        rounded(img, (cx - 270, cy - 150, cx + 270, cy + 150), 40, (48, 48, 56), clamp(p * 3))
+        text(img, fmt.format(cur), "Black", 74, (cx, cy - 20), ACCENTS[(i + 4) % 5] if i == 0 else ACCENTS[i - 1],
+             clamp(p * 3), s)
+        text(img, label, "Medium", 40, (cx, cy + 80), (200, 196, 200), clamp(p * 3))
+    p = ease_back(prog(lt, 3.6, 0.5))
+    if p > 0:
+        text(img, "역대 최고 펀딩 기록", "Medium", 44, (W / 2 - 170, 780), (200, 196, 200), clamp(p * 2))
+        text(img, "88억 원", "Black", 96, (W / 2 + 260, 775), CORAL, clamp(p * 2), p)
+    text(img, "※ 누적 수치는 2026년 6월 29일 기준 텀블벅 발표, 최고 기록은 2024년 11월 프로젝트", "Medium", 30, (W / 2, H - 60), GRAY,
+         clamp((lt - 1.0) * 2))
+
+
 # 하트 모양 좌표 (후원자 점들이 모여 하트를 이룸)
 random.seed(11)
 HEART = []
@@ -292,8 +326,8 @@ for k in range(140):
 
 
 def scene_together(img, t):
-    """28~34초: 혼자라면 어려운 일도, 함께라면 현실이 됩니다"""
-    lt = t - 28
+    """34~40초: 혼자라면 어려운 일도, 함께라면 현실이 됩니다"""
+    lt = t - 34
     img.paste(CORAL, (0, 0, W, H))
     d = ImageDraw.Draw(img)
     cx, cy = W / 2, H / 2 - 110
@@ -312,8 +346,8 @@ def scene_together(img, t):
 
 
 def scene_end(img, t):
-    """34~40초: 엔딩 카드"""
-    lt = t - 34
+    """40~46초: 엔딩 카드"""
+    lt = t - 40
     img.paste(CREAM, (0, 0, W, H))
     floating_dots(img, t, 0.7)
     pop = ease_back(prog(lt, 0.05, 0.5))
@@ -331,7 +365,7 @@ def scene_end(img, t):
 
 
 SCENES = [(0, scene_intro), (4, scene_ideas), (8, scene_brand), (12, scene_categories),
-          (20, scene_how), (28, scene_together), (34, scene_end)]
+          (20, scene_how), (28, scene_stats), (34, scene_together), (40, scene_end)]
 
 
 def render(t):
