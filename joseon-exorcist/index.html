@@ -188,6 +188,18 @@ var Core = (function () {
     });
   }
 
+  // ── 오행 상성 (specs/battle.md 5장) ───────────────────
+  // 금 > 목 > 토 > 수 > 화 > 금 : 각 속성이 이기는 상대
+  var BEATS = { '금': '목', '목': '토', '토': '수', '수': '화', '화': '금' };
+  var ADVANTAGE = 1.5;
+  var DISADVANTAGE = 0.7;
+
+  function elementMultiplier(skillElem, targetElem) {
+    if (BEATS[skillElem] === targetElem) return ADVANTAGE;
+    if (BEATS[targetElem] === skillElem) return DISADVANTAGE;
+    return 1;
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -208,7 +220,8 @@ var Core = (function () {
     moveTargets: moveTargets,
     distance: distance,
     attackTargets: attackTargets,
-    skillTargets: skillTargets
+    skillTargets: skillTargets,
+    elementMultiplier: elementMultiplier
   };
 })();
 </script>
