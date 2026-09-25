@@ -294,6 +294,34 @@ var Core = (function () {
       type: target.side === 'enemy' ? 'defeat' : 'retreat',
       attackerId: attacker.id, targetId: target.id, merit: merit
     });
+    updateResult(state, events);
+  }
+
+  // ── 승패 (specs/battle.md 13장) ───────────────────────
+  // 흑린 격파 → 즉시 승리. 아군 전원 퇴각 → 즉시 패배. 끝나면 phase 는 'over'.
+  function updateResult(state, events) {
+    if (state.result !== null) return;
+    var boss = state.units.filter(function (u) { return u.boss; })[0];
+    if (!boss.alive) state.result = 'win';
+    else if (livingUnits(state, 'ally').length === 0) state.result = 'lose';
+    else return;
+    state.phase = 'over';
+    events.push({ type: 'result', result: state.result });
+  }
+
+  // 요괴 페이즈가 끝났을 때: 10턴이었으면 패배(흑린 승천), 아니면 다음 턴으로.
+  function endEnemyPhase(state) {
+    var events = [];
+    if (state.result !== null) return events;
+    if (state.turn >= state.maxTurn) {
+      state.result = 'lose';
+      state.phase = 'over';
+      events.push({ type: 'result', result: 'lose' });
+      return events;
+    }
+    state.turn += 1;
+    state.phase = 'ally';
+    return events;
   }
 
   function inList(list, id) {
@@ -369,7 +397,8 @@ var Core = (function () {
     canSkill: canSkill,
     attack: attack,
     useSkill: useSkill,
-    wait: wait
+    wait: wait,
+    endEnemyPhase: endEnemyPhase
   };
 })();
 </script>
