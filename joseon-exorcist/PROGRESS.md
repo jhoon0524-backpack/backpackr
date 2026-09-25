@@ -12,9 +12,10 @@
 - 오행 상성 배율 — Core.elementMultiplier, tests/element.test.mjs
 - 피해 계산 — Core.damage/weatherMultiplier/WEATHERS, 검산 예시 5개 + 날씨·반올림 테스트 (tests/damage.test.mjs)
 - 행동 실행 — Core.moveUnit/cancelMove/attack/useSkill/wait/canAttack/canSkill. 행동 함수는 이벤트 배열을 돌려준다(화면 연출용), tests/actions.test.mjs
+- HP 0 처리와 공적 — hit 안에서 knockOut: 요괴 defeat / 아군 retreat 이벤트, 벽사청 일격 +1·흑린 +3, tests/knockout.test.mjs
 
 ## 다음에 진행할 작업
-- [규칙] HP 0 처리와 공적
+- [규칙] 승패 판정
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.

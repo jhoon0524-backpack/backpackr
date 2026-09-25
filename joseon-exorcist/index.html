@@ -274,7 +274,26 @@ var Core = (function () {
     var amount = damage(state, attacker, target, useSkill);
     target.hp = Math.max(0, target.hp - amount);
     events.push({ type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount });
+    if (target.hp === 0) knockOut(state, attacker, target, events);
     return events;
+  }
+
+  // ── HP 0 처리와 공적 (specs/battle.md 11·12장) ────────
+  var MERIT_NORMAL = 1;
+  var MERIT_BOSS = 3;
+
+  // 요괴는 사라지고, 아군은 퇴각해 사라진다. 벽사청 유닛의 마지막 일격만 공적이 된다.
+  function knockOut(state, attacker, target, events) {
+    target.alive = false;
+    var merit = 0;
+    if (target.side === 'enemy' && attacker.faction === '벽사청') {
+      merit = target.boss ? MERIT_BOSS : MERIT_NORMAL;
+      state.merit += merit;
+    }
+    events.push({
+      type: target.side === 'enemy' ? 'defeat' : 'retreat',
+      attackerId: attacker.id, targetId: target.id, merit: merit
+    });
   }
 
   function inList(list, id) {
