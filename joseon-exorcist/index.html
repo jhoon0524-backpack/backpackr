@@ -501,6 +501,33 @@ var Core = (function () {
     return costs;
   }
 
+  // unit 위치에서 (r, c) 까지 실제로 걷는 길. 출발 칸과 도착 칸을 포함한다. 못 가면 null.
+  // 같은 거리의 길이 여럿이면 위 → 아래 → 왼쪽 → 오른쪽 순서로 먼저 찾은 길.
+  function pathTo(state, unit, r, c) {
+    var start = unit.r + ',' + unit.c, goal = r + ',' + c;
+    var prev = {};
+    prev[start] = null;
+    var queue = [[unit.r, unit.c]];
+    while (queue.length && prev[goal] === undefined) {
+      var cur = queue.shift();
+      for (var i = 0; i < DIRS.length; i++) {
+        var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
+        if (prev[key] !== undefined || !isPassable(state, nr, nc)) continue;
+        var other = unitAt(state, nr, nc);
+        if (other && other !== unit) continue;
+        prev[key] = cur[0] + ',' + cur[1];
+        queue.push([nr, nc]);
+      }
+    }
+    if (prev[goal] === undefined) return null;
+    var path = [];
+    for (var k = goal; k !== null; k = prev[k]) {
+      var p = k.split(',');
+      path.unshift({ r: +p[0], c: +p[1] });
+    }
+    return path;
+  }
+
   // 이동할 수 있는 칸 (제자리 포함). 행 → 열 순서로 정렬한다.
   function moveTargets(state, unit) {
     var costs = stepCosts(state, unit, unit.mov);
@@ -818,7 +845,8 @@ var Core = (function () {
 
   function relocate(state, e, cell, events) {
     if (cell.r === e.r && cell.c === e.c) return;
-    events.push({ type: 'move', unitId: e.id, from: { r: e.r, c: e.c }, to: { r: cell.r, c: cell.c } });
+    events.push({ type: 'move', unitId: e.id, from: { r: e.r, c: e.c }, to: { r: cell.r, c: cell.c },
+      path: pathTo(state, e, cell.r, cell.c) });
     e.r = cell.r; e.c = cell.c;
   }
 
@@ -902,6 +930,7 @@ var Core = (function () {
     unitAt: unitAt,
     livingUnits: livingUnits,
     stepCosts: stepCosts,
+    pathTo: pathTo,
     moveTargets: moveTargets,
     distance: distance,
     attackTargets: attackTargets,

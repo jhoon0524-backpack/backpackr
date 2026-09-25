@@ -65,7 +65,13 @@ test('칠 수 없으면 가장 가까운 아군 쪽으로 최대한 다가간다
   // 도깨비 (0,1) → 윤무겸 (7,2). 3칸 간 뒤 남은 칸 수가 가장 작은(6칸) 칸은 (1,3)·(2,0)·(2,2) → 행이 작은 (1,3)
   const { s, u } = scene({ dokkaebi1: [0, 1], yoon: [7, 2] });
   const ev = Core.normalEnemyAct(s, u('dokkaebi1'));
-  assert.deepEqual(ev, [{ type: 'move', unitId: 'dokkaebi1', from: { r: 0, c: 1 }, to: { r: 1, c: 3 } }]);
+  assert.equal(ev.length, 1);
+  assert.equal(ev[0].type, 'move');
+  assert.equal(ev[0].unitId, 'dokkaebi1');
+  assert.deepEqual(ev[0].from, { r: 0, c: 1 });
+  assert.deepEqual(ev[0].to, { r: 1, c: 3 });
+  // 지나간 길: (0,1)→(0,2)→(1,2)→(1,3). (0,3) 은 흑린이 막고 있다
+  assert.deepEqual(ev[0].path, [{ r: 0, c: 1 }, { r: 0, c: 2 }, { r: 1, c: 2 }, { r: 1, c: 3 }]);
 });
 
 test('다가갈 대상은 실제 이동 칸 수로 고른다 (직선거리 아님)', () => {
