@@ -957,6 +957,154 @@ var Core = (function () {
     return events.concat(endEnemyPhase(state));
   }
 
+  // ── 맵 에디터용: 스테이지 검사·코드·편집 (specs/editor.md) ──
+  var ROWS_MIN = 6, ROWS_MAX = 12, COLS_MIN = 6, COLS_MAX = 10;
+
+  // 받침 유무로 조사 고르기: josa('윤무겸', '이', '가') → '윤무겸이', josa('도깨비', '이', '가') → '도깨비가'
+  function josa(word, withFinal, withoutFinal) {
+    var code = word.charCodeAt(word.length - 1) - 0xAC00;
+    var hasFinal = code >= 0 && code <= 11171 && code % 28 !== 0;
+    return word + (hasFinal ? withFinal : withoutFinal);
+  }
+
+  // 문제 목록. level 'error' 는 불러오기 거부, 'warn' 은 경고만.
+  function validateStage(st) {
+    var out = [];
+    function err(msg) { out.push({ level: 'error', msg: msg }); }
+    function warn(msg, r, c) { out.push({ level: 'warn', msg: msg, r: r, c: c }); }
+    if (!st || typeof st !== 'object') { err('맵 데이터가 아닙니다'); return out; }
+    if (!(st.rows >= ROWS_MIN && st.rows <= ROWS_MAX)) err('행 수는 ' + ROWS_MIN + '~' + ROWS_MAX + ' 사이여야 합니다');
+    if (!(st.cols >= COLS_MIN && st.cols <= COLS_MAX)) err('열 수는 ' + COLS_MIN + '~' + COLS_MAX + ' 사이여야 합니다');
+    if (!Array.isArray(st.map) || st.map.length !== st.rows) err('지형 줄 수가 행 수와 다릅니다');
+    if (!Array.isArray(st.allies) || !Array.isArray(st.enemies)) err('유닛 목록이 없습니다');
+    if (out.length) return out;
+    for (var r = 0; r < st.rows; r++) {
+      var row = st.map[r];
+      if (typeof row !== 'string' || row.length !== st.cols) { err((r + 1) + '번째 줄 길이가 열 수와 다릅니다'); continue; }
+      for (var c = 0; c < row.length; c++) {
+        if (TERRAINS.indexOf(row.charAt(c)) === -1) err('알 수 없는 지형 글자 "' + row.charAt(c) + '"');
+      }
+    }
+    st.allies.forEach(function (a) { if (!ALLY_DEFS[a.id]) err('알 수 없는 아군 "' + a.id + '"'); });
+    st.enemies.forEach(function (e) { if (!ENEMY_TYPES[e.type]) err('알 수 없는 요괴 "' + e.type + '"'); });
+    if (out.length) return out;
+
+    var seen = {}, allyCount = {}, bosses = 0;
+    st.allies.map(function (a) { return { u: a, name: ALLY_DEFS[a.id].name }; })
+      .concat(st.enemies.map(function (e) { return { u: e, name: ENEMY_TYPES[e.type].name }; }))
+      .forEach(function (x) {
+        var u = x.u, key = u.r + ',' + u.c;
+        if (!(u.r >= 0 && u.r < st.rows && u.c >= 0 && u.c < st.cols)) { warn(josa(x.name, '이', '가') + ' 맵 밖에 있습니다', u.r, u.c); return; }
+        if (st.map[u.r].charAt(u.c) === 'D') warn(josa(x.name, '이', '가') + ' 초가집·바위 위에 있습니다', u.r, u.c);
+        if (seen[key]) warn(josa(x.name, '과', '와') + ' ' + josa(seen[key], '이', '가') + ' 같은 칸에 있습니다', u.r, u.c);
+        seen[key] = x.name;
+      });
+    st.allies.forEach(function (a) {
+      allyCount[a.id] = (allyCount[a.id] || 0) + 1;
+      if (allyCount[a.id] === 2) warn(josa(ALLY_DEFS[a.id].name, '이', '가') + ' 두 번 배치되었습니다');
+    });
+    st.enemies.forEach(function (e) { if (ENEMY_TYPES[e.type].boss) bosses++; });
+    if (bosses === 0) warn('흑린이 없으면 이길 수 없습니다');
+    if (bosses > 1) warn('흑린은 한 마리만 둘 수 있습니다');
+    if (st.allies.length === 0) warn('아군이 한 명도 없습니다');
+    return out;
+  }
+
+  // 맵 코드 = 한 줄 JSON. 게임 안 스테이지 데이터와 같은 모양이다.
+  function encodeStage(st) {
+    return JSON.stringify({
+      v: 1, name: st.name || '', rows: st.rows, cols: st.cols, map: st.map,
+      allies: st.allies.map(function (a) { return { id: a.id, r: a.r, c: a.c }; }),
+      enemies: st.enemies.map(function (e) { return { type: e.type, r: e.r, c: e.c }; })
+    });
+  }
+
+  // 결과: { stage, problems } 또는 { error }. 'error' 수준 문제가 있으면 불러오지 않는다.
+  function decodeStage(text) {
+    var st;
+    try {
+      st = JSON.parse(String(text).trim());
+    } catch (e) {
+      return { error: '맵 코드를 읽을 수 없습니다: 형식이 잘못되었습니다' };
+    }
+    var problems = validateStage(st);
+    var fatal = problems.filter(function (p) { return p.level === 'error'; });
+    if (fatal.length) return { error: '맵 코드를 읽을 수 없습니다: ' + fatal[0].msg };
+    return { stage: JSON.parse(encodeStage(st)), problems: problems };
+  }
+
+  function copyStage(st) {
+    return JSON.parse(encodeStage(st));
+  }
+
+  // 아군은 정의표 순서, 요괴는 종류 순서 → 행 → 열 순서로 둔다 (1장 순서와 같아진다)
+  function sortUnits(st) {
+    st.allies.sort(function (a, b) { return ALLY_ORDER.indexOf(a.id) - ALLY_ORDER.indexOf(b.id); });
+    st.enemies.sort(function (a, b) {
+      return ENEMY_ORDER.indexOf(a.type) - ENEMY_ORDER.indexOf(b.type) || a.r - b.r || a.c - b.c;
+    });
+    return st;
+  }
+
+  function removeUnitAt(st, r, c) {
+    var at = function (u) { return u.r === r && u.c === c; };
+    var had = st.allies.some(at) || st.enemies.some(at);
+    st.allies = st.allies.filter(function (u) { return !at(u); });
+    st.enemies = st.enemies.filter(function (u) { return !at(u); });
+    return had;
+  }
+
+  function setTerrain(st, r, c, t) {
+    st.map[r] = st.map[r].slice(0, c) + t + st.map[r].slice(c + 1);
+  }
+
+  // 칸 하나를 칠한 새 스테이지를 돌려준다 (원본은 그대로).
+  // tool: { kind: 'terrain', t } | { kind: 'ally', id } | { kind: 'enemy', type } | { kind: 'erase' }
+  function paintStage(stage, tool, r, c) {
+    var st = copyStage(stage);
+    if (!(r >= 0 && r < st.rows && c >= 0 && c < st.cols)) return st;
+    var rock = st.map[r].charAt(c) === 'D';
+    if (tool.kind === 'terrain') {
+      setTerrain(st, r, c, tool.t);
+      if (tool.t === 'D') removeUnitAt(st, r, c);
+    } else if (tool.kind === 'erase') {
+      if (!removeUnitAt(st, r, c)) setTerrain(st, r, c, '.');
+    } else if (rock) {
+      return st; // 초가집·바위 위에는 유닛을 놓지 않는다
+    } else if (tool.kind === 'ally') {
+      removeUnitAt(st, r, c);
+      st.allies = st.allies.filter(function (a) { return a.id !== tool.id; }); // 이미 있으면 옮긴다
+      st.allies.push({ id: tool.id, r: r, c: c });
+    } else if (tool.kind === 'enemy') {
+      removeUnitAt(st, r, c);
+      if (ENEMY_TYPES[tool.type].boss) {
+        st.enemies = st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss; }); // 흑린은 한 마리
+      }
+      st.enemies.push({ type: tool.type, r: r, c: c });
+    }
+    return sortUnits(st);
+  }
+
+  // 크기 바꾸기: 늘어난 칸은 흙길, 밖으로 나간 유닛은 지운다. 범위를 넘는 값은 끝값으로 맞춘다.
+  function resizeStage(stage, rows, cols) {
+    var st = copyStage(stage);
+    rows = Math.max(ROWS_MIN, Math.min(ROWS_MAX, rows));
+    cols = Math.max(COLS_MIN, Math.min(COLS_MAX, cols));
+    var map = [];
+    for (var r = 0; r < rows; r++) {
+      var row = (st.map[r] || '').slice(0, cols);
+      while (row.length < cols) row += '.';
+      map.push(row);
+    }
+    var inside = function (u) { return u.r < rows && u.c < cols; };
+    st.rows = rows;
+    st.cols = cols;
+    st.map = map;
+    st.allies = st.allies.filter(inside);
+    st.enemies = st.enemies.filter(inside);
+    return st;
+  }
+
   return {
     STAGES: STAGES,
     TERRAINS: TERRAINS,
@@ -1004,7 +1152,16 @@ var Core = (function () {
     normalEnemyAct: normalEnemyAct,
     enemyAct: enemyAct,
     enemyOrder: enemyOrder,
-    runEnemyPhase: runEnemyPhase
+    runEnemyPhase: runEnemyPhase,
+    ROWS_MIN: ROWS_MIN,
+    ROWS_MAX: ROWS_MAX,
+    COLS_MIN: COLS_MIN,
+    COLS_MAX: COLS_MAX,
+    validateStage: validateStage,
+    encodeStage: encodeStage,
+    decodeStage: decodeStage,
+    paintStage: paintStage,
+    resizeStage: resizeStage
   };
 })();
 </script>

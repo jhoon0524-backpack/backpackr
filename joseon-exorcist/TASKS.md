@@ -47,7 +47,7 @@
 - [x] 쓰러짐 연출 — 0.4초 흐려지며 사라짐, 동작 줄이기 설정 존중
 
 ## [v0.2 에디터] (`specs/editor.md`)
-- [ ] 스테이지 검사와 맵 코드 — `Core.validateStage` / `encodeStage` / `decodeStage` + 테스트
+- [x] 스테이지 검사와 맵 코드 — `Core.validateStage` / `encodeStage` / `decodeStage` + 테스트
 - [ ] 편집 규칙 — `Core.paintStage(stage, tool, r, c)` (지형·아군 1명씩·흑린 1마리·초가집 위 금지·지우개), `Core.resizeStage` + 테스트
 - [ ] 에디터 화면 — `#editor`·[🛠 맵 에디터] 버튼으로 진입, 맵 그리기, 크기 조절, [게임으로]
 - [ ] 도구 줄과 칠하기 — 지형 4·아군 5·요괴 4·지우개, 지형 끌어 칠하기(터치·마우스), 경고 표시
