@@ -600,17 +600,18 @@ var Core = (function () {
     dokkaebi: { name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목' },
     jangsan: { name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토' },
     bulgasari: { name: '불가사리', emoji: '🐗', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '금' },
+    // ai: 없으면 1장 일반 요괴 / hold 자리 지킴 / archer 거리 두고 쏨 / flee 도망·회복
     heuklin: { name: '흑린', emoji: '🐍', hp: 50, atk: 13, def: 8, mov: 2, rng: 1, elem: '수', boss: true,
-      title: '요괴의 수장' },
+      title: '요괴의 수장', ai: 'hold' },
     // 2장 (specs/chapter2.md 2-2, 보충 S6)
     munyeo: { name: '신당회 무녀', emoji: '🪭', hp: 20, atk: 9, def: 4, mov: 3, rng: 2, elem: '없음',
-      faction: '신당회' },
+      faction: '신당회', ai: 'archer' },
     dokkaebi_p: { name: '정화된 도깨비', emoji: '👹', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '목',
       faction: '신당회 (정화된 요괴)' },
     jangsan_p: { name: '정화된 장산범', emoji: '🐅', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '토',
       faction: '신당회 (정화된 요괴)' },
     dallae_boss: { name: '달래', emoji: '🔔', hp: 40, atk: 9, def: 6, mov: 4, rng: 1, elem: '없음', boss: true,
-      faction: '신당회', title: '신당회 만신', skill: '생명수' }
+      faction: '신당회', title: '신당회 만신', skill: '생명수', ai: 'flee' }
   };
   var ENEMY_ORDER = ['dokkaebi', 'jangsan', 'bulgasari', 'heuklin', 'munyeo', 'dokkaebi_p', 'jangsan_p', 'dallae_boss'];
   var KI_MAX = 10;
@@ -626,6 +627,7 @@ var Core = (function () {
       guest: !!d.guest,
       title: d.title || '—',
       boss: !!d.boss,
+      ai: d.ai || null,
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: d.skill || null,
       // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
@@ -1083,6 +1085,20 @@ var Core = (function () {
 
   // 이동해서 칠 수 있는 아군마다 가장 좋은 공격 칸을 찾는다.
   // 결과: [{ target, cell }] (아군 표 순서)
+  // 칸에서 가장 가까운 아군까지의 거리 (가로+세로 칸 수). 2장 무녀·달래가 쓴다 (보충 S4)
+  function nearestAllyDistance(state, p) {
+    var best = Infinity;
+    livingUnits(state, 'ally').forEach(function (a) { best = Math.min(best, distance(p, a)); });
+    return best;
+  }
+
+  // 아군에게서 먼 칸 먼저, 동률이면 byCell
+  function byFarness(state) {
+    return function (a, b) {
+      return nearestAllyDistance(state, b) - nearestAllyDistance(state, a) || byCell(a, b);
+    };
+  }
+
   function attackPlans(state, e) {
     var cells = moveTargets(state, e);
     var plans = [];
@@ -1090,7 +1106,7 @@ var Core = (function () {
       var ok = cells.filter(function (p) {
         var d = distance(p, t);
         return d >= 1 && d <= e.rng;
-      }).sort(byCell);
+      }).sort(e.ai === 'archer' ? byFarness(state) : byCell); // 무녀는 거리 두고 쏜다 (보충 S5)
       if (ok.length) plans.push({ target: t, cell: ok[0] });
     });
     return plans;
@@ -1139,11 +1155,41 @@ var Core = (function () {
     return hit(state, e, targets[0], false, []);
   }
 
+  // 2장 달래: 공격하지 않는다 (보충 S3).
+  // 기력 4 이상이고 HP 절반 이하 동료가 있으면 → 그 동료(HP 비율 낮은 쪽)에게 거리 2 안인 칸 중 아군에게서 먼 칸으로 가서 생명수.
+  // 아니면 → 아군에게서 가장 먼 칸으로 이동.
+  function fleeAct(state, e) {
+    var events = [];
+    var cells = moveTargets(state, e);
+    if (e.skill === HEAL_SKILL && e.ki >= SKILL_COST) {
+      var hurt = livingUnits(state, 'enemy').filter(function (u) { return u.hp <= u.maxHp / 2; })
+        .sort(function (a, b) { return a.hp / a.maxHp - b.hp / b.maxHp; });
+      for (var i = 0; i < hurt.length; i++) {
+        var t = hurt[i];
+        var near = cells.filter(function (p) {
+          // 자기 자신을 고칠 때는 어디로 가든 거리 0
+          return t === e || distance(p, t) <= HEAL_RANGE;
+        }).sort(byFarness(state));
+        if (!near.length) continue;
+        relocate(state, e, near[0], events);
+        var amount = Math.min(HEAL_AMOUNT, t.maxHp - t.hp);
+        t.hp += amount;
+        e.ki -= SKILL_COST;
+        events.push({ type: 'heal', attackerId: e.id, targetId: t.id, amount: amount });
+        return events;
+      }
+    }
+    relocate(state, e, cells.sort(byFarness(state))[0], events);
+    return events;
+  }
+
   // 요괴 한 마리 행동. 화면은 이것을 0.5초 간격으로 부른다.
   function enemyAct(state, id) {
     var e = getUnit(state, id);
     if (!e || !e.alive || e.side !== 'enemy' || state.phase !== 'enemy' || state.result !== null) return [];
-    return e.boss ? bossAct(state, e) : normalEnemyAct(state, e);
+    if (e.ai === 'hold') return bossAct(state, e);
+    if (e.ai === 'flee') return fleeAct(state, e);
+    return normalEnemyAct(state, e); // 1장 요괴, 2장 정화된 요괴·무녀(archer)
   }
 
   // 이번 요괴 페이즈에 행동할 요괴 id (표 순서)
@@ -1361,6 +1407,7 @@ var Core = (function () {
     allActed: allActed,
     endAllyPhase: endAllyPhase,
     approachMap: approachMap,
+    nearestAllyDistance: nearestAllyDistance,
     attackPlans: attackPlans,
     normalEnemyAct: normalEnemyAct,
     enemyAct: enemyAct,

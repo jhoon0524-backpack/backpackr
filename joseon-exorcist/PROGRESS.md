@@ -44,9 +44,11 @@
 - [v0.3] 2장 임시 스테이지 — Core.STAGES.ch2(10×8, maxTurn 12, 무녀2·정화 도깨비2·정화 장산범1·달래), 맵 코드에 maxTurn 유지·검사(1~30). tests/ch2-stage.test.mjs
 - [v0.3] 품계와 관군 — Core.RANKS·rankFor, newBattle(stage, { merit }) → state.rank, 윤무겸 칭호 앞 품계, 관군 0~2명(reserveCells: 윤무겸에서 가까운 빈 칸 BFS, 아군 목록 끝). tests/rank.test.mjs
 - [v0.3] 적 기력 — endAllyPhase(요괴 페이즈 시작)에서 기력 있는 적 +1 (2턴부터, 최대 10). tests/turn.test.mjs
+- [v0.3] 무녀 AI — 유닛 ai 필드(hold/archer/flee), archer 는 공격 칸을 가장 가까운 아군과 먼 칸부터(= 거리 2), 칠 수 없으면 1장 접근
+- [v0.3] 달래 AI — fleeAct: 기력 4↑·HP 절반 이하 동료(자기 포함, HP 비율 순) → 거리 2 안 먼 칸에서 생명수, 아니면 가장 먼 칸으로 도망, 공격 안 함. 무녀·달래 함께 tests/ch2-ai.test.mjs (한 커밋)
 
 ## 다음에 진행할 작업
-- [v0.3 규칙] 무녀 AI
+- [v0.3 규칙] 진행 계산
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
