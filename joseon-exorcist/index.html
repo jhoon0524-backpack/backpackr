@@ -645,16 +645,65 @@ var Core = (function () {
     });
   }
 
+  // ── 품계 (specs/chapter2.md 1-1) ──────────────────────
+  var RANKS = [
+    { name: '종9품', need: 0, gwangun: 0 },
+    { name: '정9품', need: 3, gwangun: 1 },
+    { name: '종8품', need: 6, gwangun: 2 }
+  ];
+
+  // 공적 누계로 품계를 정한다
+  function rankFor(total) {
+    var rank = RANKS[0];
+    RANKS.forEach(function (r) { if (total >= r.need) rank = r; });
+    return rank;
+  }
+
+  // 관군을 놓을 칸: 윤무겸(없으면 첫 아군) 칸에서 가까운 빈 칸 순서. 거리 같으면 위 → 아래 → 왼쪽 → 오른쪽 (보충 S1)
+  function reserveCells(state, n) {
+    var allies = livingUnits(state, 'ally');
+    var origin = getUnit(state, 'yoon') || allies[0];
+    var out = [];
+    if (!origin || n <= 0) return out;
+    var seen = {};
+    seen[origin.r + ',' + origin.c] = true;
+    var queue = [[origin.r, origin.c]];
+    while (queue.length && out.length < n) {
+      var cur = queue.shift();
+      for (var i = 0; i < DIRS.length && out.length < n; i++) {
+        var r = cur[0] + DIRS[i][0], c = cur[1] + DIRS[i][1], key = r + ',' + c;
+        if (seen[key] || !isPassable(state, r, c)) continue;
+        seen[key] = true;
+        queue.push([r, c]);
+        if (!unitAt(state, r, c)) out.push({ r: r, c: c });
+      }
+    }
+    return out;
+  }
+
   // 스테이지로 새 전투 상태를 만든다. 스테이지를 안 주면 1장.
-  function newBattle(stage) {
+  // opts.merit(공적 누계)를 주면 품계를 윤무겸 칭호 앞에 붙이고, 품계만큼 관군을 합류시킨다.
+  function newBattle(stage, opts) {
     stage = stage || STAGES.ch1;
     var ids = enemyIds(stage.enemies);
-    return {
+    var state = {
       turn: 1, maxTurn: stage.maxTurn || 10, weather: '흐림', merit: 0, phase: 'ally', result: null,
       rows: stage.rows, cols: stage.cols, map: stage.map.slice(),
       units: stage.allies.map(function (a) { return makeUnit(ALLY_DEFS[a.id], a.id, 'ally', a.r, a.c); })
         .concat(stage.enemies.map(function (e, i) { return makeUnit(ENEMY_TYPES[e.type], ids[i], 'enemy', e.r, e.c); }))
     };
+    if (opts && opts.merit !== undefined) {
+      var rank = rankFor(opts.merit);
+      state.rank = rank.name;
+      var yoon = getUnit(state, 'yoon');
+      if (yoon) yoon.title = rank.name + ' ' + yoon.title;
+      reserveCells(state, rank.gwangun).forEach(function (p, i) {
+        // 적 뒤가 아니라 아군 끝에 넣어 아군 동률 순서의 마지막이 되게 한다
+        var at = livingUnits(state, 'ally').length;
+        state.units.splice(at, 0, makeUnit(ALLY_DEFS.gwangun, 'gwangun' + (i + 1), 'ally', p.r, p.c));
+      });
+    }
+    return state;
   }
 
   function getUnit(state, id) {
@@ -1317,6 +1366,8 @@ var Core = (function () {
     ROWS_MAX: ROWS_MAX,
     COLS_MIN: COLS_MIN,
     COLS_MAX: COLS_MAX,
+    RANKS: RANKS,
+    rankFor: rankFor,
     validateStage: validateStage,
     maxMerit: maxMerit,
     encodeStage: encodeStage,
