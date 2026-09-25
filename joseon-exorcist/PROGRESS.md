@@ -61,9 +61,10 @@
 - [v0.4] 정화수 — 생명수를 정화수로 (1장 달래 아군·2장 달래 보스 모두, HEAL_SKILL 상수, 효과 그대로). 명세(battle·screens·chapter2)·테스트 문구 갱신 (보충 L1)
 - [v0.4] 존재 분류·고증 등급 데이터 — Core.ENTITY_TYPES(잡귀·역귀·원귀·요괴·신령·사람), HISTORICITY(A 사료/B 민속·무속/C 창작), 적 종류와 유닛에 entityType(요괴 YOGOE, 신당회 HUMAN, 아군 HUMAN). tests/lore.test.mjs
 - [v0.4] 무령 — 무녀 attackName '무령'(수치 그대로), 유닛 attackName, damage 이벤트 name(스킬이면 스킬명·기본공격이면 attackName 또는 null), heal 이벤트 name '정화수'(아군·달래 보스). tests/lore.test.mjs·actions
+- [v0.4] 벽사록 데이터 — Core.LORE(세력 3·귀물 3·의식 3·물건 10: 등급·설명·재해석 메모·모티프·밝힘 조건), LORE_CATEGORIES 6, loreUnlocked·loreTokensForBattle, 유닛 type(정의표 키). 장산범은 현대 괴담이라 C 로 분류·메모. 사료 수치(진자 48명 등)는 원문 대조 전이라 넣지 않음. tests/lore.test.mjs
 
 ## 다음에 진행할 작업
-- [v0.4 고증 반영] 벽사록 데이터
+- [v0.4 고증 반영] 용어 사전
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
