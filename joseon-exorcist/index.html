@@ -10,6 +10,13 @@
     --panel: #181b24;
     --text: #e6e2d6;
     --muted: #8a8778;
+    --dirt: #2a2620;
+    --rock: #121212;
+    --shrine: #3a2327;
+    --spring: #1d3140;
+    --bs: #d9443a;      /* 벽사청 */
+    --guest: #9a9a9a;   /* 객장 */
+    --enemy: #a35ad8;   /* 요괴 */
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
@@ -19,12 +26,113 @@
     font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    -webkit-user-select: none;
   }
   #app { max-width: 480px; margin: 0 auto; padding: 8px; }
+
+  /* 맵: 폭 360px 세로 화면에서도 8칸이 다 들어가게 화면 폭·높이 중 작은 쪽에 맞춘다 */
+  #board {
+    position: relative;
+    width: min(calc(100vw - 16px), 58vh, 464px);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 2px;
+    background: #07080b;
+    padding: 2px;
+    border-radius: 6px;
+    touch-action: manipulation;
+  }
+  .cell {
+    position: relative;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .t-dirt   { background: var(--dirt); }
+  .t-rock   { background: var(--rock); }
+  .t-shrine { background: var(--shrine); }
+  .t-spring { background: var(--spring); }
+  .mark {
+    position: absolute;
+    font-size: clamp(12px, 4.5vw, 22px);
+    opacity: .35;
+    pointer-events: none;
+  }
+  .unit {
+    position: relative;
+    width: 86%;
+    height: 86%;
+    border: 2px solid;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(16px, 5.6vw, 28px);
+    line-height: 1;
+    background: rgba(0, 0, 0, .35);
+  }
+  .f-bs    { border-color: var(--bs); }
+  .f-guest { border-color: var(--guest); }
+  .f-enemy { border-color: var(--enemy); }
+  .badge {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    font-size: 9px;
+    line-height: 1;
+    padding: 1px 2px;
+    background: var(--guest);
+    color: #111;
+    border-radius: 0 0 3px 0;
+  }
+  .hpbar {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    bottom: 2px;
+    height: 3px;
+    background: rgba(255, 255, 255, .15);
+    border-radius: 2px;
+  }
+  .hpbar i { display: block; height: 100%; border-radius: 2px; background: #6fcf6a; }
+  .hpbar i.low { background: #e0a030; }
+  .hpbar i.crit { background: #e05050; }
+
+  #legend {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  #legend span::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 4px;
+    vertical-align: -1px;
+    border-radius: 2px;
+    background: var(--c);
+  }
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">
+  <div id="board"></div>
+  <div id="legend">
+    <span style="--c: var(--shrine)">서낭당 · 받는 피해 −20%</span>
+    <span style="--c: var(--spring)">약수터 · 턴 시작 HP +10</span>
+    <span style="--c: var(--rock)">초가집·바위 · 못 지나감</span>
+  </div>
+</div>
 
 <!-- 규칙: 화면(DOM)과 Math.random 을 쓰지 않는다. tests/ 가 Node 로 검사한다 (ADR 1번) -->
 <script id="core">
@@ -585,6 +693,73 @@ var Core = (function () {
 <script id="ui">
 (function () {
   'use strict';
+
+  var TERRAIN_CLASS = { '.': 't-dirt', 'D': 't-rock', 'M': 't-shrine', 'K': 't-spring' };
+  var TERRAIN_MARK = { 'D': '🛖', 'M': '🏮', 'K': '💧' };
+
+  var state = Core.newBattle();
+  var board = document.getElementById('board');
+  var cells = [];
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function buildBoard() {
+    board.innerHTML = '';
+    cells = [];
+    for (var r = 0; r < Core.SIZE; r++) {
+      for (var c = 0; c < Core.SIZE; c++) {
+        var t = Core.terrainAt(r, c);
+        var cell = el('div', 'cell ' + TERRAIN_CLASS[t]);
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        if (TERRAIN_MARK[t]) cell.appendChild(el('span', 'mark', TERRAIN_MARK[t]));
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+  }
+
+  function factionClass(u) {
+    if (u.side === 'enemy') return 'f-enemy';
+    return u.guest ? 'f-guest' : 'f-bs';
+  }
+
+  function unitTile(u) {
+    var tile = el('div', 'unit ' + factionClass(u), u.emoji);
+    tile.dataset.id = u.id;
+    if (u.guest) tile.appendChild(el('span', 'badge', '객'));
+    var bar = el('div', 'hpbar');
+    var fill = el('i');
+    var ratio = u.hp / u.maxHp;
+    fill.style.width = Math.round(ratio * 100) + '%';
+    if (ratio <= 0.25) fill.className = 'crit';
+    else if (ratio <= 0.5) fill.className = 'low';
+    bar.appendChild(fill);
+    tile.appendChild(bar);
+    return tile;
+  }
+
+  function cellAt(r, c) {
+    return cells[r * Core.SIZE + c];
+  }
+
+  function render() {
+    cells.forEach(function (cell) {
+      var old = cell.querySelector('.unit');
+      if (old) cell.removeChild(old);
+    });
+    state.units.forEach(function (u) {
+      if (u.alive) cellAt(u.r, u.c).appendChild(unitTile(u));
+    });
+  }
+
+  buildBoard();
+  render();
 })();
 </script>
 </body>
