@@ -523,6 +523,40 @@ var Core = (function () {
         { type: 'bulgasari', r: 2, c: 4 },
         { type: 'heuklin', r: 0, c: 3 }
       ]
+    },
+    // AI 임시 맵 (specs/chapter2.md 보충 S8). 기획자가 에디터로 그린 맵 코드가 오면 map·배치를 바꾼다
+    ch2: {
+      v: 1,
+      name: '2장 사라진 여의주',
+      rows: 10,
+      cols: 8,
+      maxTurn: 12,
+      map: [
+        'D.M..M.D',
+        '...MM...',
+        '.D....D.',
+        '..D..D..',
+        '........',
+        '.DD..DD.',
+        '...K....',
+        'D......D',
+        '........',
+        '........'
+      ],
+      allies: [
+        { id: 'yoon', r: 9, c: 3 },
+        { id: 'hangyeol', r: 9, c: 2 },
+        { id: 'yeoul', r: 9, c: 4 },
+        { id: 'soun', r: 9, c: 5 }
+      ],
+      enemies: [
+        { type: 'munyeo', r: 1, c: 1 },
+        { type: 'munyeo', r: 1, c: 6 },
+        { type: 'dokkaebi_p', r: 3, c: 1 },
+        { type: 'dokkaebi_p', r: 3, c: 6 },
+        { type: 'jangsan_p', r: 4, c: 4 },
+        { type: 'dallae_boss', r: 1, c: 3 }
+      ]
     }
   };
   var TERRAINS = ['.', 'D', 'M', 'K'];
@@ -1095,6 +1129,7 @@ var Core = (function () {
     if (!(st.cols >= COLS_MIN && st.cols <= COLS_MAX)) err('열 수는 ' + COLS_MIN + '~' + COLS_MAX + ' 사이여야 합니다');
     if (!Array.isArray(st.map) || st.map.length !== st.rows) err('지형 줄 수가 행 수와 다릅니다');
     if (!Array.isArray(st.allies) || !Array.isArray(st.enemies)) err('유닛 목록이 없습니다');
+    if (st.maxTurn !== undefined && !(st.maxTurn >= 1 && st.maxTurn <= 30)) err('턴 제한은 1~30 이어야 합니다');
     if (out.length) return out;
     for (var r = 0; r < st.rows; r++) {
       var row = st.map[r];
@@ -1135,11 +1170,13 @@ var Core = (function () {
 
   // 맵 코드 = 한 줄 JSON. 게임 안 스테이지 데이터와 같은 모양이다.
   function encodeStage(st) {
-    return JSON.stringify({
+    var out = {
       v: 1, name: st.name || '', rows: st.rows, cols: st.cols, map: st.map,
       allies: st.allies.map(function (a) { return { id: a.id, r: a.r, c: a.c }; }),
       enemies: st.enemies.map(function (e) { return { type: e.type, r: e.r, c: e.c }; })
-    });
+    };
+    if (st.maxTurn) out.maxTurn = st.maxTurn; // 장마다 다른 턴 제한 (없으면 10)
+    return JSON.stringify(out);
   }
 
   // 결과: { stage, problems } 또는 { error }. 'error' 수준 문제가 있으면 불러오지 않는다.

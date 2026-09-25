@@ -41,9 +41,10 @@
 - [v0.2] 브라우저 저장 — localStorage 'joseon-exorcist.maps'(이름→맵 코드), 맵 이름으로 저장·덮어쓰기, 목록 불러오기, 삭제는 두 번 눌러 확인(3초), 저장소 막히면 안내. 브라우저로 저장·새로고침 유지·불러오기·삭제·저장 막힘 확인
 - [v0.3] 보스 일반화 — 승패는 boss 플래그 기준(원래도 그랬음, 주석·문구 정리), 에디터 경고 '보스(흑린·달래)', Core.maxMerit(stage) = 보스 아닌 적 수 + 3
 - [v0.3] 2장 유닛 정의 — ALLY_DEFS.gwangun(에디터 목록 제외), ENEMY_TYPES munyeo·dokkaebi_p·jangsan_p·dallae_boss(보스, 생명수, 기력), 적 소속·칭호를 정의표에서. 스킬 없는 유닛은 canSkill/useSkill 불가. 화면 스킬 버튼이 관군에서 'null' 로 보일 것 — 2장 유닛 표시 작업에서 처리
+- [v0.3] 2장 임시 스테이지 — Core.STAGES.ch2(10×8, maxTurn 12, 무녀2·정화 도깨비2·정화 장산범1·달래), 맵 코드에 maxTurn 유지·검사(1~30). tests/ch2-stage.test.mjs
 
 ## 다음에 진행할 작업
-- [v0.3 규칙] 2장 임시 스테이지
+- [v0.3 규칙] 품계와 관군
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
