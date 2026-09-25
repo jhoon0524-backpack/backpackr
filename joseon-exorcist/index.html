@@ -412,6 +412,96 @@ var Core = (function () {
     return events;
   }
 
+  // ── 요괴 AI (specs/battle.md 10장) ────────────────────
+  // target 을 칠 수 있는 칸(거리 1~사거리)들에서 거꾸로 퍼져 나가며, 각 칸에서 그곳까지 몇 칸인지 잰다.
+  // mover 자신의 칸은 비어 있다고 본다. 다른 유닛 칸은 지나갈 수 없다.
+  function approachMap(state, mover, target) {
+    var dist = {}, queue = [];
+    function free(r, c) {
+      if (!isPassable(r, c)) return false;
+      var o = unitAt(state, r, c);
+      return !o || o === mover;
+    }
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var d = distance({ r: r, c: c }, target);
+        if (d >= 1 && d <= mover.rng && free(r, c)) {
+          dist[r + ',' + c] = 0;
+          queue.push([r, c]);
+        }
+      }
+    }
+    while (queue.length) {
+      var cur = queue.shift();
+      var base = dist[cur[0] + ',' + cur[1]];
+      for (var i = 0; i < DIRS.length; i++) {
+        var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
+        if (dist[key] !== undefined || !free(nr, nc)) continue;
+        dist[key] = base + 1;
+        queue.push([nr, nc]);
+      }
+    }
+    return dist;
+  }
+
+  function stepsFrom(map, p) {
+    var v = map[p.r + ',' + p.c];
+    return v === undefined ? Infinity : v;
+  }
+
+  // 칸 고르기 동률 규칙: 이동 칸 수가 적은 칸 → 행이 작은 칸 → 열이 작은 칸
+  function byCell(a, b) {
+    return a.cost - b.cost || a.r - b.r || a.c - b.c;
+  }
+
+  // 이동해서 칠 수 있는 아군마다 가장 좋은 공격 칸을 찾는다.
+  // 결과: [{ target, cell }] (아군 표 순서)
+  function attackPlans(state, e) {
+    var cells = moveTargets(state, e);
+    var plans = [];
+    livingUnits(state, 'ally').forEach(function (t) {
+      var ok = cells.filter(function (p) {
+        var d = distance(p, t);
+        return d >= 1 && d <= e.rng;
+      }).sort(byCell);
+      if (ok.length) plans.push({ target: t, cell: ok[0] });
+    });
+    return plans;
+  }
+
+  function relocate(state, e, cell, events) {
+    if (cell.r === e.r && cell.c === e.c) return;
+    events.push({ type: 'move', unitId: e.id, from: { r: e.r, c: e.c }, to: { r: cell.r, c: cell.c } });
+    e.r = cell.r; e.c = cell.c;
+  }
+
+  // 일반 요괴 한 마리의 행동.
+  // 칠 수 있으면: HP 최저 → 이동 칸 수가 적은 쪽 → 아군 표 순서로 대상을 골라 이동 후 공격.
+  // 없으면: 실제 이동 칸 수로 가장 가까운 아군(동률은 표 순서)에게 최대한 다가간다. 길이 없으면 제자리.
+  function normalEnemyAct(state, e) {
+    var events = [];
+    var plans = attackPlans(state, e);
+    if (plans.length) {
+      plans.sort(function (a, b) {
+        return a.target.hp - b.target.hp || a.cell.cost - b.cell.cost;
+      }); // sort 는 안정 정렬이라 나머지 동률은 아군 표 순서가 유지된다
+      relocate(state, e, plans[0].cell, events);
+      return hit(state, e, plans[0].target, false, events);
+    }
+    var best = null;
+    livingUnits(state, 'ally').forEach(function (t) {
+      var map = approachMap(state, e, t);
+      var d = stepsFrom(map, e);
+      if (d !== Infinity && (!best || d < best.d)) best = { map: map, d: d };
+    });
+    if (!best) return events;
+    var cells = moveTargets(state, e).sort(function (a, b) {
+      return stepsFrom(best.map, a) - stepsFrom(best.map, b) || byCell(a, b);
+    });
+    relocate(state, e, cells[0], events);
+    return events;
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -448,7 +538,9 @@ var Core = (function () {
     endEnemyPhase: endEnemyPhase,
     startAllyPhase: startAllyPhase,
     allActed: allActed,
-    endAllyPhase: endAllyPhase
+    endAllyPhase: endAllyPhase,
+    approachMap: approachMap,
+    normalEnemyAct: normalEnemyAct
   };
 })();
 </script>

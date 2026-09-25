@@ -15,9 +15,10 @@
 - HP 0 처리와 공적 — hit 안에서 knockOut: 요괴 defeat / 아군 retreat 이벤트, 벽사청 일격 +1·흑린 +3, tests/knockout.test.mjs
 - 승패 판정 — updateResult(흑린 격파 즉시 승리·전원 퇴각 즉시 패배, phase 'over'), Core.endEnemyPhase(10턴 끝 패배/턴 +1), tests/result.test.mjs. 전원 퇴각 패배 테스트는 요괴 페이즈 작업으로 미룸
 - 턴 진행 — Core.startAllyPhase(rng, 1턴 포함 매 턴 호출)/endAllyPhase/allActed, 약수터는 각자 페이즈 시작, tests/turn.test.mjs
+- 일반 요괴 AI — Core.normalEnemyAct/approachMap. '가까움'은 공격 칸까지 실제 이동 칸 수, tests/enemy-ai.test.mjs (전원 퇴각 즉시 패배 포함)
 
 ## 다음에 진행할 작업
-- [규칙] 일반 요괴 AI
+- [규칙] 흑린 AI
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
