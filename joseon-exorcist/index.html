@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>조선 퇴마전 — 1장 흑린 토벌</title>
+<style>
+  :root {
+    --bg: #0e1016;
+    --panel: #181b24;
+    --text: #e6e2d6;
+    --muted: #8a8778;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  #app { max-width: 480px; margin: 0 auto; padding: 8px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- 규칙: 화면(DOM)과 Math.random 을 쓰지 않는다. tests/ 가 Node 로 검사한다 (ADR 1번) -->
+<script id="core">
+var Core = (function () {
+  'use strict';
+
+  return {};
+})();
+</script>
+
+<!-- 화면: 규칙은 Core 를 불러 쓰기만 한다 -->
+<script id="ui">
+(function () {
+  'use strict';
+})();
+</script>
+</body>
+</html>

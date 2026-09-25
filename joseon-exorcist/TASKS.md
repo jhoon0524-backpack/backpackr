@@ -8,7 +8,7 @@
 [규칙] 항목은 해당 규칙의 테스트를 `tests/` 에 **같이** 추가해야 완료다.
 
 ## [기반]
-- [ ] `index.html` 뼈대 — 빈 `<script id="core">`(전역 `Core` 객체) + 빈 화면 스크립트, 어두운 배경. `tests/html.test.mjs` 로 ① 모든 script 문법 검사 ② 외부 주소(`src`/`href` 의 http·//) 0개 ③ core 를 Node `vm` 으로 불러 `Core` 가 있는지 검사
+- [x] `index.html` 뼈대 — 빈 `<script id="core">`(전역 `Core` 객체) + 빈 화면 스크립트, 어두운 배경. `tests/html.test.mjs` 로 ① 모든 script 문법 검사 ② 외부 주소(`src`/`href` 의 http·//) 0개 ③ core 를 Node `vm` 으로 불러 `Core` 가 있는지 검사
 
 ## [규칙]
 - [ ] 맵 데이터 — 8×8 지형, 칸별 통과 가능·서낭당·약수터 조회 함수 + 테스트
