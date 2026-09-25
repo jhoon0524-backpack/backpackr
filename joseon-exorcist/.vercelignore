@@ -1,0 +1,3 @@
+# Vercel 배포에는 게임 파일(index.html)만 올린다. 명세·테스트·작업 기록은 저장소에만 둔다
+*
+!index.html
