@@ -611,7 +611,9 @@ var Core = (function () {
         { type: 'dokkaebi_p', r: 6, c: 6 },
         { type: 'jangsan_p', r: 5, c: 1 },
         { type: 'dallae_boss', r: 2, c: 0 }
-      ]
+      ],
+      // 관군 자리: 탈출로로 가는 두 갈래(5열·7열) 중간. 정9품이면 5열, 종8품이면 7열까지 막는다 (7-2)
+      reserves: [{ r: 3, c: 5 }, { r: 3, c: 7 }]
     }
   };
   var TERRAINS = ['.', 'D', 'M', 'K', 'E'];

@@ -16,7 +16,7 @@ export function seeded(seed) {
 
 // 아군 한 명: 칠 수 있는 칸 중 (흑린 격파 > 요괴 격파 > 큰 피해) 를 고르고,
 // 없으면 가장 가까운 요괴 쪽으로 다가간다. 달래는 HP 가 12 이상 빠진 아군이 있으면 생명수.
-function greedyAlly(s, u) {
+function greedyAlly(s, u, chase = true) {
   const cells = Core.moveTargets(s, u);
   let best = null;
   for (const cell of cells) {
@@ -48,7 +48,7 @@ function greedyAlly(s, u) {
   }
   // 칠 적이 없으면 다가간다. 도망 보스(2장 달래)가 있으면 보스를 쫓는다
   let goal = null;
-  const runner = Core.livingUnits(s, 'enemy').find((e) => e.ai === 'flee');
+  const runner = chase && Core.livingUnits(s, 'enemy').find((e) => e.ai === 'flee');
   for (const e of runner ? [runner] : Core.livingUnits(s, 'enemy')) {
     const map = Core.approachMap(s, u, e);
     for (const cell of cells) {
@@ -60,7 +60,7 @@ function greedyAlly(s, u) {
   return Core.wait(s, u.id);
 }
 
-// 한 판을 끝까지. mode: 'greedy' | 'idle'(아군은 대기만). stage·merit(누계)로 장·품계를 고른다.
+// 한 판을 끝까지. mode: 'greedy'(도망 보스를 쫓음) | 'nearest'(가까운 적만 침) | 'idle'(아군은 대기만). stage·merit(누계)로 장·품계를 고른다.
 export function playBattle({ seed = 1, mode = 'greedy', stage, merit } = {}) {
   const rng = seeded(seed);
   const s = Core.newBattle(stage, merit === undefined ? undefined : { merit });
@@ -71,7 +71,7 @@ export function playBattle({ seed = 1, mode = 'greedy', stage, merit } = {}) {
     for (const u of Core.livingUnits(s, 'ally')) {
       if (s.result !== null) break;
       if (mode === 'idle') Core.wait(s, u.id);
-      else greedyAlly(s, u);
+      else greedyAlly(s, u, mode !== 'nearest');
     }
     if (s.result !== null) break;
     Core.endAllyPhase(s);

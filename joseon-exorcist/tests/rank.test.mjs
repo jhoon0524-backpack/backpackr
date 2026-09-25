@@ -29,8 +29,8 @@ test('관군: 종9품 0명, 정9품 1명, 종8품 2명', () => {
   assert.deepEqual(allyIds(Core.newBattle(ch2, { merit: 8 })), ['yoon', 'hangyeol', 'yeoul', 'soun', 'gwangun1', 'gwangun2']);
 });
 
-test('관군 위치: 윤무겸 (9,3) 에서 가까운 빈 칸, 위 → 아래 → 왼 → 오 (보충 S1)', () => {
-  const s = Core.newBattle(ch2, { merit: 6 });
+test('관군 자리가 없는 맵: 윤무겸 (9,3) 에서 가까운 빈 칸, 위 → 아래 → 왼 → 오 (보충 S1, 예비 규칙)', () => {
+  const s = Core.newBattle({ ...ch2, reserves: undefined }, { merit: 6 });
   // (9,3) 이웃: 위 (8,3) 빈칸 → 1번. 왼 (9,2) 한결, 오 (9,4) 여울 → 거리 2 로: (8,3) 에서 위 (7,3) → 2번
   assert.deepEqual([Core.getUnit(s, 'gwangun1').r, Core.getUnit(s, 'gwangun1').c], [8, 3]);
   assert.deepEqual([Core.getUnit(s, 'gwangun2').r, Core.getUnit(s, 'gwangun2').c], [7, 3]);
