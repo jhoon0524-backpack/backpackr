@@ -7,9 +7,10 @@
 - index.html 뼈대와 tests/html.test.mjs (문법·외부 주소·core 로딩·core 에 document/window/Math.random 금지). 검사 명령을 `node --test` 로 바꿨다 (Node 22 는 폴더 경로 인자를 못 받음)
 - 맵 데이터 — Core.MAP 과 terrainAt/isPassable/isShrine/isSpring, tests/map.test.mjs
 - 유닛 데이터 — ALLIES/ENEMIES, Core.newBattle/getUnit/unitAt/livingUnits, tests/units.test.mjs
+- 이동 가능 칸 계산 — Core.stepCosts(칸 수 지도, AI 에서도 씀)/moveTargets, tests/move.test.mjs
 
 ## 다음에 진행할 작업
-- [규칙] 이동 가능 칸 계산
+- [규칙] 거리와 대상 찾기
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.

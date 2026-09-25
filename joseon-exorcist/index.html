@@ -127,6 +127,41 @@ var Core = (function () {
     return state.units.filter(function (u) { return u.alive && u.side === side; });
   }
 
+  // ── 이동 (specs/battle.md 8장) ────────────────────────
+  var DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+  // unit 위치에서 상하좌우로 퍼져 나가며 칸별 이동 칸 수를 잰다.
+  // 초가집·바위와 다른 유닛이 있는 칸은 통과도 정지도 못 한다. limit 을 넘는 칸은 버린다.
+  // 결과: { 'r,c': 칸 수 }
+  function stepCosts(state, unit, limit) {
+    var costs = {};
+    costs[unit.r + ',' + unit.c] = 0;
+    var queue = [[unit.r, unit.c]];
+    while (queue.length) {
+      var cur = queue.shift();
+      var d = costs[cur[0] + ',' + cur[1]];
+      if (d >= limit) continue;
+      for (var i = 0; i < DIRS.length; i++) {
+        var r = cur[0] + DIRS[i][0], c = cur[1] + DIRS[i][1], key = r + ',' + c;
+        if (costs[key] !== undefined || !isPassable(r, c)) continue;
+        var other = unitAt(state, r, c);
+        if (other && other !== unit) continue;
+        costs[key] = d + 1;
+        queue.push([r, c]);
+      }
+    }
+    return costs;
+  }
+
+  // 이동할 수 있는 칸 (제자리 포함). 행 → 열 순서로 정렬한다.
+  function moveTargets(state, unit) {
+    var costs = stepCosts(state, unit, unit.mov);
+    return Object.keys(costs).map(function (key) {
+      var p = key.split(',');
+      return { r: +p[0], c: +p[1], cost: costs[key] };
+    }).sort(function (a, b) { return a.r - b.r || a.c - b.c; });
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -142,7 +177,9 @@ var Core = (function () {
     newBattle: newBattle,
     getUnit: getUnit,
     unitAt: unitAt,
-    livingUnits: livingUnits
+    livingUnits: livingUnits,
+    stepCosts: stepCosts,
+    moveTargets: moveTargets
   };
 })();
 </script>
