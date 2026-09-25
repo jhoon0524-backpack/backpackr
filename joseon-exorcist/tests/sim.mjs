@@ -46,8 +46,10 @@ function greedyAlly(s, u) {
     Core.moveUnit(s, u.id, best.cell.r, best.cell.c);
     return best.kind === 'attack' ? Core.attack(s, u.id, best.t.id) : Core.useSkill(s, u.id, best.t.id);
   }
+  // 칠 적이 없으면 다가간다. 도망 보스(2장 달래)가 있으면 보스를 쫓는다
   let goal = null;
-  for (const e of Core.livingUnits(s, 'enemy')) {
+  const runner = Core.livingUnits(s, 'enemy').find((e) => e.ai === 'flee');
+  for (const e of runner ? [runner] : Core.livingUnits(s, 'enemy')) {
     const map = Core.approachMap(s, u, e);
     for (const cell of cells) {
       const d = map[`${cell.r},${cell.c}`] ?? Infinity;

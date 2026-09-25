@@ -114,3 +114,53 @@ test('흑린은 여전히 자리를 지킨다 (ai: hold)', () => {
   assert.deepEqual(Core.enemyAct(s, 'heuklin'), []);
   assert.deepEqual(at(u('heuklin')), [0, 0]);
 });
+
+// ── 달래 탈출 (specs/chapter2.md 7-1) ──
+// 8×8, 오른쪽 위 (0,7) 이 탈출로
+const ESC = ['.......E', '........', '........', '........', '........', '........', '........', '........'];
+
+test('달래는 탈출로에 가까워지는 칸으로 간다 (아군에게서 먼 칸이 아니라)', () => {
+  // 윤무겸이 오른쪽 위에 있어도 탈출로 쪽으로 간다
+  const { s, u } = scene({ yoon: [2, 5] }, [['dallae_boss', 6, 3]], ESC);
+  const before = Core.escapeMap(s, u('dallae_boss'))['6,3'];
+  Core.enemyAct(s, 'dallae_boss');
+  const after = Core.escapeMap(s, u('dallae_boss'))[`${u('dallae_boss').r},${u('dallae_boss').c}`];
+  assert.equal(before - after, 4, '이동력 4 만큼 가까워진다');
+});
+
+test('탈출로에 닿으면 즉시 패배', () => {
+  const { s, u } = scene({ yoon: [7, 0] }, [['munyeo', 5, 0], ['dallae_boss', 2, 5]], ESC);
+  const ev = Core.enemyAct(s, 'dallae_boss');
+  assert.deepEqual(at(u('dallae_boss')), [0, 7]);
+  assert.deepEqual(ev.slice(-2).map((e) => e.type), ['escape', 'result']);
+  assert.equal(s.result, 'lose');
+  assert.equal(s.phase, 'over');
+  assert.deepEqual(Core.enemyAct(s, 'munyeo'), [], '남은 요괴는 행동하지 않는다');
+});
+
+test('아군이 탈출로에 서 있으면 그 칸으로는 못 나간다 (길막)', () => {
+  const { s, u } = scene({ yoon: [0, 7] }, [['dallae_boss', 2, 5]], ESC);
+  Core.enemyAct(s, 'dallae_boss');
+  assert.equal(s.result, null);
+  assert.equal(Core.isEscape(s, u('dallae_boss').r, u('dallae_boss').c), false);
+});
+
+test('회복이 탈출보다 먼저: 회복하는 턴에는 동료 곁에서 탈출로에 가까운 칸', () => {
+  const { s, u } = scene({ yoon: [7, 0] }, [['munyeo', 4, 2, 5], ['dallae_boss', 5, 3]], ESC);
+  const ev = Core.enemyAct(s, 'dallae_boss');
+  assert.equal(ev.find((e) => e.type === 'heal').targetId, 'munyeo');
+  assert.ok(Core.distance(u('dallae_boss'), u('munyeo')) <= 2);
+  // 무녀 거리 2 안 칸 중 탈출로에 가장 가까운 칸
+  const d = Core.escapeMap(s, u('dallae_boss'));
+  const mine = d[`${u('dallae_boss').r},${u('dallae_boss').c}`];
+  // (4-a, 2+b), a+b≤2 → 탈출로 (0,7) 까지 9-(a+b) ≥ 7. 최소 7칸 남는 칸을 고른다
+  assert.equal(mine, 7);
+});
+
+test('탈출로까지 길이 완전히 막히면 아군에게서 먼 칸으로 (예전 규칙)', () => {
+  // 탈출로 (0,7) 을 초가집이 감싼다
+  const walled = ['......DE', '.......D', '........', '........', '........', '........', '........', '........'];
+  const { s, u } = scene({ yoon: [4, 3] }, [['dallae_boss', 4, 4]], walled);
+  Core.enemyAct(s, 'dallae_boss');
+  assert.equal(Core.distance(u('dallae_boss'), u('yoon')), 5);
+});

@@ -1206,31 +1206,77 @@ var Core = (function () {
     return hit(state, e, targets[0], false, []);
   }
 
-  // 2장 달래: 공격하지 않는다 (보충 S3).
-  // 기력 4 이상이고 HP 절반 이하 동료가 있으면 → 그 동료(HP 비율 낮은 쪽)에게 거리 2 안인 칸 중 아군에게서 먼 칸으로 가서 생명수.
-  // 아니면 → 아군에게서 가장 먼 칸으로 이동.
+  // 탈출로(E)까지 남은 실제 이동 칸 수 지도. mover 자신의 칸은 비어 있다고 본다.
+  // 아군이 서 있는 탈출로·길은 막힌다 (길막). 결과: { 'r,c': 칸 수 }
+  function escapeMap(state, mover) {
+    var dist = {}, queue = [];
+    function free(r, c) {
+      if (!isPassable(state, r, c)) return false;
+      var o = unitAt(state, r, c);
+      return !o || o === mover;
+    }
+    for (var r = 0; r < state.rows; r++) {
+      for (var c = 0; c < state.cols; c++) {
+        if (isEscape(state, r, c) && free(r, c)) {
+          dist[r + ',' + c] = 0;
+          queue.push([r, c]);
+        }
+      }
+    }
+    while (queue.length) {
+      var cur = queue.shift();
+      var base = dist[cur[0] + ',' + cur[1]];
+      for (var i = 0; i < DIRS.length; i++) {
+        var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
+        if (dist[key] !== undefined || !free(nr, nc)) continue;
+        dist[key] = base + 1;
+        queue.push([nr, nc]);
+      }
+    }
+    return dist;
+  }
+
+  // 탈출로에 가까운 칸 먼저 → 아군에게서 먼 칸 → 이동 칸 적은 → 행 → 열.
+  // 탈출로까지 길이 없으면 아군에게서 먼 칸 순서 (specs/chapter2.md 7-1)
+  function byEscape(state, map) {
+    var far = byFarness(state);
+    return function (a, b) {
+      return stepsFrom(map, a) - stepsFrom(map, b) || far(a, b);
+    };
+  }
+
+  // 2장 달래: 공격하지 않는다. 회복할 동료가 있으면 회복, 아니면 탈출로로 (specs/chapter2.md 7-1)
+  // 탈출로에 닿으면 즉시 패배.
   function fleeAct(state, e) {
     var events = [];
     var cells = moveTargets(state, e);
+    var map = escapeMap(state, e);
+    var order = Object.keys(map).length && stepsFrom(map, e) !== Infinity ? byEscape(state, map) : byFarness(state);
+    var healed = false;
     if (e.skill === HEAL_SKILL && e.ki >= SKILL_COST) {
       var hurt = livingUnits(state, 'enemy').filter(function (u) { return u.hp <= u.maxHp / 2; })
         .sort(function (a, b) { return a.hp / a.maxHp - b.hp / b.maxHp; });
-      for (var i = 0; i < hurt.length; i++) {
+      for (var i = 0; i < hurt.length && !healed; i++) {
         var t = hurt[i];
         var near = cells.filter(function (p) {
-          // 자기 자신을 고칠 때는 어디로 가든 거리 0
-          return t === e || distance(p, t) <= HEAL_RANGE;
-        }).sort(byFarness(state));
+          return t === e || distance(p, t) <= HEAL_RANGE; // 자기 자신은 어디서든
+        }).sort(order);
         if (!near.length) continue;
         relocate(state, e, near[0], events);
         var amount = Math.min(HEAL_AMOUNT, t.maxHp - t.hp);
         t.hp += amount;
         e.ki -= SKILL_COST;
         events.push({ type: 'heal', attackerId: e.id, targetId: t.id, amount: amount });
-        return events;
+        healed = true;
       }
     }
-    relocate(state, e, cells.sort(byFarness(state))[0], events);
+    if (!healed) relocate(state, e, cells.sort(order)[0], events);
+    if (isEscape(state, e.r, e.c) && state.result === null) {
+      state.result = 'lose';
+      state.phase = 'over';
+      events.push({ type: 'escape', unitId: e.id });
+      events.push({ type: 'result', result: 'lose' });
+    }
     return events;
   }
 
@@ -1495,6 +1541,7 @@ var Core = (function () {
     endAllyPhase: endAllyPhase,
     approachMap: approachMap,
     nearestAllyDistance: nearestAllyDistance,
+    escapeMap: escapeMap,
     attackPlans: attackPlans,
     normalEnemyAct: normalEnemyAct,
     enemyAct: enemyAct,
@@ -1584,7 +1631,7 @@ var Core = (function () {
         ];
       },
       outro: ch2VictoryLines,
-      lose: '달래가 산속으로 사라졌다.'
+      lose: '달래가 여의주를 가지고 산속으로 사라졌다.' // 탈출로 도착·12턴 모두 (specs/chapter2.md 7-1)
     }
   };
 
