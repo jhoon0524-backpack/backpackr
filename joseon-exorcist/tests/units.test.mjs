@@ -25,7 +25,7 @@ test('아군 5명 수치·시작 위치가 기획서 표 순서와 같다', () =
     { name: '소운', hp: 22, atk: 11, def: 3, mov: 3, rng: 2, elem: '화', r: 7, c: 5 },
     { name: '달래', hp: 26, atk: 7, def: 5, mov: 4, rng: 1, elem: '없음', r: 6, c: 3 },
   ]);
-  assert.deepEqual(allies.map((u) => u.skill), ['벽사검', '파사궁', '축지격', '화염부', '생명수']);
+  assert.deepEqual(allies.map((u) => u.skill), ['벽사검', '파사궁', '축지격', '화염부', '정화수']);
   assert.deepEqual(allies.map((u) => u.title), ['벽사청 종사관', '벽사청 궁수', '축지의 도인', '청운 도문 도사', '신당회 만신']);
   assert.deepEqual(allies.map((u) => u.guest), [false, false, true, true, true]);
   for (const u of allies) {

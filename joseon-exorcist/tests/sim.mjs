@@ -15,7 +15,7 @@ export function seeded(seed) {
 }
 
 // 아군 한 명: 칠 수 있는 칸 중 (흑린 격파 > 요괴 격파 > 큰 피해) 를 고르고,
-// 없으면 가장 가까운 요괴 쪽으로 다가간다. 달래는 HP 가 12 이상 빠진 아군이 있으면 생명수.
+// 없으면 가장 가까운 요괴 쪽으로 다가간다. 달래는 HP 가 12 이상 빠진 아군이 있으면 정화수.
 function greedyAlly(s, u, chase = true) {
   const cells = Core.moveTargets(s, u);
   let best = null;

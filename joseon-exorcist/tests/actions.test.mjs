@@ -91,7 +91,7 @@ test('기력 4 미만이면 스킬 불가', () => {
   assert.equal(u('yoon').ki, 0);
 });
 
-test('생명수: +12, 최대 HP 초과 안 함, 가득 찬 아군도 대상 가능', () => {
+test('정화수: +12, 최대 HP 초과 안 함, 가득 찬 아군도 대상 가능', () => {
   const { s, u } = setup();
   u('hangyeol').hp = 5;
   assert.deepEqual(Core.useSkill(s, 'dallae', 'hangyeol'), [{ type: 'heal', attackerId: 'dallae', targetId: 'hangyeol', amount: 12 }]);
@@ -108,7 +108,7 @@ test('생명수: +12, 최대 HP 초과 안 함, 가득 찬 아군도 대상 가�
   assert.equal(c.u('dallae').ki, 2, '기력은 쓴다');
 });
 
-test('생명수는 적을 대상으로 못 한다', () => {
+test('정화수는 적을 대상으로 못 한다', () => {
   const { s, u } = setup();
   u('dallae').r = 3; u('dallae').c = 4;
   assert.equal(Core.useSkill(s, 'dallae', 'bulgasari'), null);

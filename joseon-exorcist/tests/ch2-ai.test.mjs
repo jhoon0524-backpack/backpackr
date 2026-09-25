@@ -69,7 +69,7 @@ test('먼 칸이 여럿이면 이동 칸 적은 → 행 → 열', () => {
   assert.deepEqual(at(u('dallae_boss')), [0, 4]);
 });
 
-test('HP 절반 이하 동료가 있으면 다가가 생명수 (+12, 기력 −4)', () => {
+test('HP 절반 이하 동료가 있으면 다가가 정화수 (+12, 기력 −4)', () => {
   const { s, u } = scene({ yoon: [7, 0] }, [['munyeo', 2, 4, 6], ['dallae_boss', 0, 7]]);
   const ev = Core.enemyAct(s, 'dallae_boss');
   const heal = ev.find((e) => e.type === 'heal');

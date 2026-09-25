@@ -39,7 +39,7 @@ test('소속·칭호·기력 (보충 S6, S2)', () => {
   assert.deepEqual([u('munyeo').faction, u('munyeo').title, u('munyeo').ki], ['신당회', '—', null]);
   assert.equal(u('dokkaebi_p').faction, '신당회 (정화된 요괴)');
   assert.deepEqual([u('dallae_boss').faction, u('dallae_boss').title], ['신당회', '신당회 만신']);
-  assert.deepEqual([u('dallae_boss').ki, u('dallae_boss').maxKi, u('dallae_boss').skill], [6, 10, '생명수']);
+  assert.deepEqual([u('dallae_boss').ki, u('dallae_boss').maxKi, u('dallae_boss').skill], [6, 10, '정화수']);
 });
 
 test('1장 요괴 표시는 그대로', () => {

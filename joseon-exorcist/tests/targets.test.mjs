@@ -57,7 +57,7 @@ test('공격 스킬 대상 = 기본공격 대상', () => {
   assert.deepEqual(names(Core.skillTargets(s, hg)), names(Core.attackTargets(s, hg)));
 });
 
-test('생명수: 거리 2 안 아군, 자기 포함, 적 제외', () => {
+test('정화수: 거리 2 안 아군, 자기 포함, 적 제외', () => {
   const s = Core.newBattle();
   // 달래 (6,3): 윤무겸(7,2)=2, 한결(7,3)=1, 여울(7,4)=2, 소운(7,5)=3
   const dal = Core.getUnit(s, 'dallae');
