@@ -316,6 +316,38 @@
     font-weight: 700;
   }
 
+  /* ── 맵 에디터 ── */
+  #editor-app { max-width: 480px; margin: 0 auto; padding: 8px; }
+  .ed-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0 8px; }
+  .ed-head h1 { font-size: 17px; margin: 0; }
+  .ed-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0; font-size: 13px; }
+  .ed-row input[type="text"] {
+    flex: 1; min-width: 0; height: 36px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid #3a3f4d; background: var(--panel); color: var(--text); font: inherit;
+  }
+  .stepper { display: inline-flex; align-items: center; gap: 4px; }
+  .stepper b { min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; }
+  .small-btn {
+    min-height: 36px; min-width: 36px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid #3a3f4d; background: var(--panel); color: var(--text);
+    font: inherit; font-size: 13px; font-weight: 600; touch-action: manipulation;
+  }
+  .small-btn:disabled { opacity: .35; }
+  .small-btn:focus-visible, .btns button:focus-visible, .tool:focus-visible { outline: 2px solid #f5c542; outline-offset: 1px; }
+  #ed-board {
+    position: relative;
+    margin: 0 auto;
+    display: grid;
+    gap: 2px;
+    background: #07080b;
+    padding: 2px;
+    border-radius: 6px;
+    touch-action: none; /* 끌어 칠하기 */
+    max-width: 100%;
+  }
+  #ed-board .cell.warn { box-shadow: inset 0 0 0 2px #f5c542; }
+  #open-editor { display: block; margin: 14px auto 0; background: none; border: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; }
+
   #legend {
     display: flex;
     justify-content: center;
@@ -360,23 +392,42 @@
     </div>
     <div class="btns"><button id="btn-end">턴 종료</button></div>
     <div id="phase-note"></div>
+    <button id="open-editor" type="button">🛠 맵 에디터</button>
   </div>
-</div>
 
-<div id="scene" hidden>
-  <div class="card">
-    <div class="portrait" id="scene-face"></div>
-    <div style="flex: 1">
-      <div class="who" id="scene-who"></div>
-      <div class="line" id="scene-line"></div>
-      <div class="next">▼ 눌러서 계속</div>
+  <!-- 대사·결과 화면은 게임 안에 둔다: 에디터로 가면 함께 숨는다 -->
+  <div id="scene" hidden>
+    <div class="card">
+      <div class="portrait" id="scene-face"></div>
+      <div style="flex: 1">
+        <div class="who" id="scene-who"></div>
+        <div class="line" id="scene-line"></div>
+        <div class="next">▼ 눌러서 계속</div>
+      </div>
     </div>
   </div>
+  <div id="result" hidden>
+    <div class="title" id="result-text"></div>
+    <button id="btn-retry">다시하기</button>
+  </div>
 </div>
 
-<div id="result" hidden>
-  <div class="title" id="result-text"></div>
-  <button id="btn-retry">다시하기</button>
+<div id="editor-app" hidden>
+  <div class="ed-head">
+    <h1>🛠 맵 에디터</h1>
+    <button class="small-btn" id="ed-back" type="button">게임으로</button>
+  </div>
+  <div class="ed-row">
+    <label for="ed-name">맵 이름</label>
+    <input type="text" id="ed-name" maxlength="30">
+  </div>
+  <div class="ed-row">
+    <span>행</span>
+    <span class="stepper"><button class="small-btn" id="ed-rows-dec" type="button">−</button><b id="ed-rows"></b><button class="small-btn" id="ed-rows-inc" type="button">+</button></span>
+    <span>열</span>
+    <span class="stepper"><button class="small-btn" id="ed-cols-dec" type="button">−</button><b id="ed-cols"></b><button class="small-btn" id="ed-cols-inc" type="button">+</button></span>
+  </div>
+  <div id="ed-board"></div>
 </div>
 
 <!-- 규칙: 화면(DOM)과 Math.random 을 쓰지 않는다. tests/ 가 Node 로 검사한다 (ADR 1번) -->
@@ -1677,6 +1728,107 @@ var Core = (function () {
   Core.startAllyPhase(state, Math.random);
   render();
   startBattle();
+})();
+</script>
+
+<!-- 맵 에디터 화면 (specs/editor.md). 편집 규칙은 Core.paintStage 등 core 가 맡는다 -->
+<script id="editor">
+(function () {
+  'use strict';
+
+  var TERRAIN_CLASS = { '.': 't-dirt', 'D': 't-rock', 'M': 't-shrine', 'K': 't-spring' };
+  var TERRAIN_MARK = { 'D': '🛖', 'M': '🏮', 'K': '💧' };
+
+  var stage = JSON.parse(Core.encodeStage(Core.STAGES.ch1)); // 1장 맵으로 시작
+  var app = document.getElementById('editor-app');
+  var game = document.getElementById('app');
+  var board = document.getElementById('ed-board');
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function unitAt(r, c) {
+    var all = stage.allies.map(function (a) { return { u: a, side: 'ally' }; })
+      .concat(stage.enemies.map(function (e) { return { u: e, side: 'enemy' }; }));
+    for (var i = 0; i < all.length; i++) if (all[i].u.r === r && all[i].u.c === c) return all[i];
+    return null;
+  }
+
+  function unitTile(x) {
+    var d = x.side === 'ally' ? Core.ALLY_DEFS[x.u.id] : Core.ENEMY_TYPES[x.u.type];
+    var cls = x.side === 'enemy' ? 'f-enemy' : (d.guest ? 'f-guest' : 'f-bs');
+    var tile = el('div', 'unit ' + cls, d.emoji);
+    if (d.guest) tile.appendChild(el('span', 'badge', '객'));
+    return tile;
+  }
+
+  // 맵 폭: 화면 폭과 높이(58vh) 중 작은 쪽에 맞추되, 칸 모양은 정사각형을 유지한다
+  function sizeBoard() {
+    var byHeight = window.innerHeight * 0.58 * stage.cols / stage.rows;
+    var w = Math.min(window.innerWidth - 16, byHeight, 464);
+    board.style.width = w + 'px';
+    board.style.height = (w * stage.rows / stage.cols) + 'px';
+    board.style.gridTemplateColumns = 'repeat(' + stage.cols + ', 1fr)';
+    board.style.gridTemplateRows = 'repeat(' + stage.rows + ', 1fr)';
+  }
+
+  function render() {
+    document.getElementById('ed-name').value = stage.name || '';
+    document.getElementById('ed-rows').textContent = stage.rows;
+    document.getElementById('ed-cols').textContent = stage.cols;
+    document.getElementById('ed-rows-dec').disabled = stage.rows <= Core.ROWS_MIN;
+    document.getElementById('ed-rows-inc').disabled = stage.rows >= Core.ROWS_MAX;
+    document.getElementById('ed-cols-dec').disabled = stage.cols <= Core.COLS_MIN;
+    document.getElementById('ed-cols-inc').disabled = stage.cols >= Core.COLS_MAX;
+    sizeBoard();
+    board.innerHTML = '';
+    for (var r = 0; r < stage.rows; r++) {
+      for (var c = 0; c < stage.cols; c++) {
+        var t = stage.map[r].charAt(c);
+        var cell = el('div', 'cell ' + TERRAIN_CLASS[t]);
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        if (TERRAIN_MARK[t]) cell.appendChild(el('span', 'mark', TERRAIN_MARK[t]));
+        var x = unitAt(r, c);
+        if (x) cell.appendChild(unitTile(x));
+        board.appendChild(cell);
+      }
+    }
+  }
+
+  function resize(dr, dc) {
+    stage = Core.resizeStage(stage, stage.rows + dr, stage.cols + dc);
+    render();
+  }
+
+  document.getElementById('ed-rows-dec').addEventListener('click', function () { resize(-1, 0); });
+  document.getElementById('ed-rows-inc').addEventListener('click', function () { resize(1, 0); });
+  document.getElementById('ed-cols-dec').addEventListener('click', function () { resize(0, -1); });
+  document.getElementById('ed-cols-inc').addEventListener('click', function () { resize(0, 1); });
+  document.getElementById('ed-name').addEventListener('input', function (e) { stage.name = e.target.value; });
+
+  // #editor 이면 에디터, 아니면 게임
+  function route() {
+    var editing = location.hash === '#editor';
+    app.hidden = !editing;
+    game.hidden = editing;
+    if (editing) render();
+  }
+  document.getElementById('open-editor').addEventListener('click', function () {
+    location.hash = 'editor';
+    route();
+  });
+  document.getElementById('ed-back').addEventListener('click', function () {
+    location.hash = '';
+    route();
+  });
+  window.addEventListener('hashchange', route);
+  window.addEventListener('resize', function () { if (!app.hidden) sizeBoard(); });
+  route();
 })();
 </script>
 </body>
