@@ -74,3 +74,37 @@ test('최대 공적 = 8 (일반 5 + 흑린 3)', () => {
   }
   assert.equal(s.merit, 8);
 });
+
+// ── 사람을 베어도 공적 (specs/chapter2.md 7-3) ──
+test('신당회 사람(무녀·달래)을 벽사청이 쓰러뜨려도 공적, 그 몫을 따로 센다', () => {
+  const s = Core.newBattle(Core.STAGES.ch2);
+  const yoon = Core.getUnit(s, 'yoon');
+  const m = Core.getUnit(s, 'munyeo1');
+  yoon.r = m.r; yoon.c = m.c + 1; m.hp = 1; // 무녀 (1,1) 오른쪽 (1,2)
+  const ev = Core.attack(s, 'yoon', 'munyeo1');
+  assert.equal(s.merit, 1);
+  assert.equal(s.humanMerit, 1);
+  assert.equal(ev.find((e) => e.type === 'defeat').human, true);
+});
+
+test('정화된 요괴는 사람이 아니다', () => {
+  const s = Core.newBattle(Core.STAGES.ch2);
+  const yoon = Core.getUnit(s, 'yoon');
+  const d = Core.getUnit(s, 'jangsan_p');
+  yoon.r = d.r; yoon.c = d.c + 1; d.hp = 1;
+  Core.attack(s, 'yoon', 'jangsan_p');
+  assert.deepEqual([s.merit, s.humanMerit], [1, 0]);
+});
+
+test('객장이 사람을 쓰러뜨리면 공적도 사람 몫도 없다', () => {
+  const s = Core.newBattle(Core.STAGES.ch2);
+  const y = Core.getUnit(s, 'yeoul');
+  const m = Core.getUnit(s, 'munyeo1');
+  y.r = m.r; y.c = m.c + 1; m.hp = 1;
+  Core.attack(s, 'yeoul', 'munyeo1');
+  assert.deepEqual([s.merit, s.humanMerit], [0, 0]);
+});
+
+test('1장 요괴는 사람이 아니다', () => {
+  assert.equal(Core.newBattle().units.some((u) => u.human), false);
+});

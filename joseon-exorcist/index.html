@@ -665,13 +665,13 @@ var Core = (function () {
       title: '요괴의 수장', ai: 'hold' },
     // 2장 (specs/chapter2.md 2-2, 보충 S6)
     munyeo: { name: '신당회 무녀', emoji: '🪭', hp: 20, atk: 9, def: 4, mov: 3, rng: 2, elem: '없음',
-      faction: '신당회', ai: 'archer' },
+      faction: '신당회', ai: 'archer', human: true },
     dokkaebi_p: { name: '정화된 도깨비', emoji: '👹', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '목',
       faction: '신당회 (정화된 요괴)' },
     jangsan_p: { name: '정화된 장산범', emoji: '🐅', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '토',
       faction: '신당회 (정화된 요괴)' },
     dallae_boss: { name: '달래', emoji: '🔔', hp: 40, atk: 9, def: 6, mov: 4, rng: 1, elem: '없음', boss: true,
-      faction: '신당회', title: '신당회 만신', skill: '생명수', ai: 'flee' }
+      faction: '신당회', title: '신당회 만신', skill: '생명수', ai: 'flee', human: true }
   };
   var ENEMY_ORDER = ['dokkaebi', 'jangsan', 'bulgasari', 'heuklin', 'munyeo', 'dokkaebi_p', 'jangsan_p', 'dallae_boss'];
   var KI_MAX = 10;
@@ -688,6 +688,7 @@ var Core = (function () {
       title: d.title || '—',
       boss: !!d.boss,
       ai: d.ai || null,
+      human: !!d.human, // 사람(신당회). 요괴가 아니다 (specs/chapter2.md 7-3)
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: d.skill || null,
       // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
@@ -774,6 +775,7 @@ var Core = (function () {
     var ids = enemyIds(stage.enemies);
     var state = {
       turn: 1, maxTurn: stage.maxTurn || 10, weather: '흐림', merit: 0, phase: 'ally', result: null,
+      humanMerit: 0, // 공적 중 사람을 쓰러뜨려 얻은 몫
       rows: stage.rows, cols: stage.cols, map: stage.map.slice(),
       units: stage.allies.map(function (a) { return makeUnit(ALLY_DEFS[a.id], a.id, 'ally', a.r, a.c); })
         .concat(stage.enemies.map(function (e, i) { return makeUnit(ENEMY_TYPES[e.type], ids[i], 'enemy', e.r, e.c); }))
@@ -999,10 +1001,11 @@ var Core = (function () {
     if (target.side === 'enemy' && attacker.faction === '벽사청') {
       merit = target.boss ? MERIT_BOSS : MERIT_NORMAL;
       state.merit += merit;
+      if (target.human) state.humanMerit += merit;
     }
     events.push({
       type: target.side === 'enemy' ? 'defeat' : 'retreat',
-      attackerId: attacker.id, targetId: target.id, merit: merit
+      attackerId: attacker.id, targetId: target.id, merit: merit, human: target.human
     });
     updateResult(state, events);
   }
@@ -1674,7 +1677,11 @@ var Core = (function () {
       { pause: FADE_MS, run: function () { ui.orb = { r: boss.r, c: boss.c }; render(); } },
       { who: '소운', face: '🧙', text: '여의주는 되찾았는데, 표정이 왜 그렇소?' },
       { who: '윤무겸', face: '🗡️', text: '…도문에서 이걸 탐내는 자가 있다고 들었다.' }
-    ];
+    ].concat(state.humanMerit > 0 ? [
+      // 벽사청은 정의의 퇴마단이 아니다 (specs/chapter2.md 7-3)
+      { who: '한결', face: '🏹', text: '사람을 베어도 공적입니까?' },
+      { who: '윤무겸', face: '🗡️', text: '조정에서 적이라 정했으면 적이다.' }
+    ] : []);
   }
 
   var CHAPTERS = {
