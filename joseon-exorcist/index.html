@@ -164,6 +164,38 @@
   @keyframes flash { 0% { color: #f5c542; } 100% { color: var(--text); } }
   #btn-end { background: #2a1f24; border-color: #5a3440; }
   #phase-note { text-align: center; font-size: 12px; color: var(--muted); min-height: 16px; margin-top: 6px; }
+  .ghost {
+    position: absolute;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: left .08s linear, top .08s linear;
+  }
+  .ghost .unit { width: 86%; height: 86%; }
+  .step-dot {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: dotfade .6s ease-out forwards;
+  }
+  .step-dot::before {
+    content: "";
+    width: 22%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--enemy);
+    box-shadow: 0 0 6px var(--enemy);
+  }
+  @keyframes dotfade { from { opacity: .9; } to { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .ghost { transition: none; }
+    .float, .step-dot, .unit.fading { animation-duration: .01s; }
+  }
   .unit.acted { filter: grayscale(1) brightness(.55); }
 
   #panel { margin-top: 8px; min-height: 120px; }
@@ -1191,9 +1223,17 @@ var Core = (function () {
       var isBlue = Core.moveTargets(state, Core.getUnit(state, ui.id))
         .some(function (p) { return p.r === r && p.c === c; });
       if (isBlue) {
-        Core.moveUnit(state, ui.id, r, c);
+        var mover = ui.id;
+        var path = Core.pathTo(state, Core.getUnit(state, mover), r, c);
+        Core.moveUnit(state, mover, r, c);
         ui.step = 'menu';
-        ui.infoId = ui.id;
+        ui.infoId = mover;
+        ui.busy = true; // 미끄러지는 동안 입력 잠금
+        slide(mover, path, function () {
+          ui.busy = false;
+          render();
+        });
+        return;
       } else if (selectable(u)) {
         ui.id = u.id;
       } else if (!u) {
@@ -1244,6 +1284,51 @@ var Core = (function () {
     }
   }
 
+  var SLIDE_MS = 80; // 칸당 이동 시간 (specs/effects.md 2장)
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function placeOver(elm, r, c) {
+    var cell = cellAt(r, c);
+    elm.style.left = cell.offsetLeft + 'px';
+    elm.style.top = cell.offsetTop + 'px';
+    elm.style.width = cell.offsetWidth + 'px';
+    elm.style.height = cell.offsetHeight + 'px';
+  }
+
+  // 유닛 타일을 path 를 따라 한 칸씩 옮기는 연출. 화면(DOM)은 아직 이동 전 모습이어야 한다.
+  // 끝나면 done. 동작 줄이기 설정이거나 제자리면 바로 done.
+  function slide(unitId, path, done) {
+    var tile = board.querySelector('.unit[data-id="' + unitId + '"]');
+    if (!tile || !path || path.length < 2 || reduceMotion) return done();
+    var ghost = el('div', 'ghost');
+    ghost.appendChild(tile.cloneNode(true));
+    placeOver(ghost, path[0].r, path[0].c);
+    board.appendChild(ghost);
+    tile.style.visibility = 'hidden';
+    var i = 1;
+    function step() {
+      if (i >= path.length) {
+        setTimeout(function () { board.removeChild(ghost); done(); }, SLIDE_MS);
+        return;
+      }
+      placeOver(ghost, path[i].r, path[i].c);
+      i++;
+      setTimeout(step, SLIDE_MS);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // 요괴가 지나간 칸에 보라 점을 잠깐 남긴다 (도착 칸 제외)
+  function footprints(path) {
+    if (!path) return;
+    path.slice(0, -1).forEach(function (p) {
+      var dot = el('div', 'step-dot');
+      placeOver(dot, p.r, p.c);
+      board.appendChild(dot);
+      setTimeout(function () { if (dot.parentNode) dot.parentNode.removeChild(dot); }, 650);
+    });
+  }
+
   function markActing(id) {
     var tile = board.querySelector('.unit[data-id="' + id + '"]');
     if (tile) tile.classList.add('acting');
@@ -1268,9 +1353,13 @@ var Core = (function () {
       }
       var id = order[i++];
       var events = Core.enemyAct(state, id);
-      showEvents(events);
-      if (events.length) markActing(id);
-      setTimeout(next, events.length ? ENEMY_STEP_MS : 0);
+      var move = events.filter(function (e) { return e.type === 'move'; })[0];
+      slide(id, move && move.path, function () {
+        showEvents(events);
+        if (move) footprints(move.path);
+        if (events.length) markActing(id);
+        setTimeout(next, events.length ? ENEMY_STEP_MS : 0);
+      });
     }
     setTimeout(next, ENEMY_STEP_MS);
   }
