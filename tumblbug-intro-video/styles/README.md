@@ -27,6 +27,24 @@
 | 39~44초 | HIGH SCORE — 실제 누적 수치 |
 | 44~48초 | 엔딩 — 텀블벅 / 0에서 1을 만드는 사람들 / tumblbug.com |
 
+## 시안 B 풀 버전 — 종이 위 손그림 스토리 (48초)
+`samples/B_paper_full.mp4`, `samples/B_paper_full_storyboard.jpg` (스크립트: `full_b_paper.py`)
+
+| 시간 | 장면 |
+|---|---|
+| 0~4초 | 어느 날, 작은 아이디어가 떠올랐어요 |
+| 4~8초 | 만들고 싶은 것들이 하나둘 그려졌어요 (보드게임·그림책·캐릭터 굿즈 스케치) |
+| 8~12초 | 나의 첫 번째 프로젝트 체크리스트 |
+| 12~16초 | 혼자서는 막막했지만 → 응원이 모이기 시작 |
+| 16~20초 | 후원자들의 응원 말풍선 |
+| 20~24초 | 그리고 마침내, 목표 달성 + '펀딩 성공' 도장 |
+| 24~28초 | 약속한 선물을 정성껏 만들어 보냈어요 |
+| 28~32초 | 후원자들에게도 설레는 선물이 도착 |
+| 32~36초 | 여기엔 이런 이야기들이 모여요 (카테고리 종이 태그) |
+| 36~40초 | 지금까지 함께 만든 이야기 (실제 누적 수치 포스트잇) |
+| 40~44초 | 텀블벅 크라프트지 라벨 + 0에서 1을 만드는 사람들 |
+| 44~48초 | 다음 이야기의 주인공은 당신이에요 / tumblbug.com |
+
 ## 다시 만들기 (tumblbug-intro-video 폴더에서)
 ```
 python3 styles/style_a_kinetic.py
@@ -34,4 +52,5 @@ python3 styles/style_b_paper.py
 python3 styles/style_c_pixel.py
 python3 styles/style_d_shortform.py
 python3 styles/full_c_pixel.py   # 시안 C 풀 버전
+python3 styles/full_b_paper.py   # 시안 B 풀 버전
 ```
