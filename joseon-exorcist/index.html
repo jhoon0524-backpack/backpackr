@@ -301,6 +301,34 @@
     padding: 24px;
     text-align: center;
   }
+  #title {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    background: radial-gradient(ellipse at 50% 30%, #1d1a2a 0%, var(--bg) 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px 16px;
+    text-align: center;
+  }
+  #title h1 { margin: 0; font-size: 34px; letter-spacing: .12em; }
+  #title .sub { color: var(--muted); font-size: 13px; margin-top: -6px; }
+  #title .prog { font-size: 14px; line-height: 1.6; min-height: 22px; }
+  #title .prog b { color: #f5c542; }
+  #title .note { font-size: 12px; color: var(--muted); max-width: 300px; }
+  .big-btn {
+    min-width: 200px; min-height: 48px; border-radius: 10px;
+    border: 1px solid #5a3440; background: #2a1f24; color: var(--text);
+    font: inherit; font-size: 16px; font-weight: 700; touch-action: manipulation;
+  }
+  .big-btn.plain { background: var(--panel); border-color: #3a3f4d; font-size: 14px; }
+  .big-btn:focus-visible { outline: 2px solid #f5c542; outline-offset: 2px; }
+  .orb { position: absolute; z-index: 2; font-size: clamp(16px, 5.6vw, 28px); animation: orb 1.2s ease-out; }
+  @keyframes orb { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
+  #result .sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
   #result .title { font-size: 22px; font-weight: 800; line-height: 1.4; word-break: keep-all; }
   #result .title.win { color: #f5c542; }
   #result .title.lose { color: #c9b6e8; }
@@ -427,6 +455,16 @@
     <button id="open-editor" type="button">🛠 맵 에디터</button>
   </div>
 
+  <!-- 첫 화면 (specs/chapter2.md 1-3, 보충 S7) -->
+  <div id="title">
+    <h1>조선 퇴마전</h1>
+    <div class="sub">벽사청 루트</div>
+    <div class="prog" id="title-prog"></div>
+    <button class="big-btn" id="btn-continue" type="button">이어하기</button>
+    <button class="big-btn plain" id="btn-new" type="button">처음부터</button>
+    <div class="note" id="title-note"></div>
+  </div>
+
   <!-- 대사·결과 화면은 게임 안에 둔다: 에디터로 가면 함께 숨는다 -->
   <div id="scene" hidden>
     <div class="card">
@@ -440,7 +478,10 @@
   </div>
   <div id="result" hidden>
     <div class="title" id="result-text"></div>
-    <button id="btn-retry">다시하기</button>
+    <div class="sub" id="result-sub"></div>
+    <button class="big-btn" id="btn-next" type="button">다음 장으로</button>
+    <button class="big-btn" id="btn-retry" type="button">다시하기</button>
+    <button class="big-btn plain" id="btn-home" type="button">처음 화면으로</button>
   </div>
 </div>
 
@@ -1476,7 +1517,7 @@ var Core = (function () {
   var WEATHER_ICON = { '맑음': '☀️', '강풍': '🌬️', '비': '🌧️', '흐림': '☁️' };
   var ENEMY_STEP_MS = 500; // 요괴 한 마리씩 행동하는 간격 (기획서 14장)
 
-  // 대사 (specs/screens.md 6장). 문구는 기획자가 정한다 — 고치지 않는다
+  // 대사·문구 (1장 specs/screens.md 6·7장, 2장 specs/chapter2.md 3장). 문구는 기획자가 정한다 — 고치지 않는다
   var INTRO = [
     { who: '흑린', face: '🐍', text: '천 년을 기다렸다. 오늘 밤 이 마을을 삼키고 하늘로 오르리라.' },
     { who: '윤무겸', face: '🗡️', text: '벽사청의 명이다. 요괴는 벤다.' },
@@ -1485,9 +1526,8 @@ var Core = (function () {
     { who: '달래', face: '🔔', text: '베기 전에 저 원한부터 들어보시지요.' }
   ];
   var FADE_MS = 1600;
-  var LOSE_TEXT = '날이 밝았다. 흑린이 용이 되어 승천했다.';
 
-  // 승리 후 대사. 달래가 맵에 있으면 첫 줄 뒤 달래 유닛이 서서히 사라진다
+  // 1장 승리 후 대사. 달래가 맵에 있으면 첫 줄 뒤 달래 유닛이 서서히 사라진다
   function victoryLines() {
     var lines = [{ who: '달래', face: '🔔', text: '원한이 풀렸네. 이제 편히 가시게.' }];
     if (Core.getUnit(state, 'dallae').alive) {
@@ -1499,11 +1539,68 @@ var Core = (function () {
     ]);
   }
 
+  // 2장 승리 후 대사. 달래가 사라진 자리에 여의주 🔮 가 남는다
+  function ch2VictoryLines() {
+    var boss = Core.getUnit(state, 'dallae_boss');
+    return [
+      { who: '달래', face: '🔔', text: '…오늘은 여기까지. 다음엔 베기 전에 들어주시오.' },
+      { pause: FADE_MS, run: function () { ui.orb = { r: boss.r, c: boss.c }; render(); } },
+      { who: '소운', face: '🧙', text: '여의주는 되찾았는데, 표정이 왜 그렇소?' },
+      { who: '윤무겸', face: '🗡️', text: '…도문에서 이걸 탐내는 자가 있다고 들었다.' }
+    ];
+  }
+
+  var CHAPTERS = {
+    ch1: {
+      label: '1장',
+      title: '1장 흑린 토벌',
+      intro: function () { return INTRO; },
+      outro: victoryLines,
+      lose: '날이 밝았다. 흑린이 용이 되어 승천했다.'
+    },
+    ch2: {
+      label: '2장',
+      title: '2장 사라진 여의주',
+      intro: function () {
+        return [
+          { who: '윤무겸', face: '🗡️', text: '여의주가 사라졌다. 신당회 짓이다.' },
+          { who: '한결', face: '🏹', text: '달래님이 정말… 우리를 속인 겁니까.' },
+          { who: '여울', face: '🥷', text: '봉인하지 않은 힘은 결국 누군가 쥐게 되어 있소.' },
+          { who: '달래', face: '🔔', text: '여의주는 원한 많은 넋들 몫이오. 관아 창고에 둘 물건이 아니지요.' }
+        ];
+      },
+      outro: ch2VictoryLines,
+      lose: '달래가 산속으로 사라졌다.'
+    }
+  };
+
+  // ── 진행 저장 (이 브라우저에만) ──
+  var PROGRESS_KEY = 'joseon-exorcist.progress';
+  var canStore = true;
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(PROGRESS_KEY);
+      return (raw && Core.checkProgress(JSON.parse(raw))) || Core.newProgress();
+    } catch (e) {
+      canStore = false;
+      return Core.newProgress();
+    }
+  }
+  function saveProgress() {
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    } catch (e) {
+      canStore = false;
+    }
+  }
+  var progress = loadProgress();
+  var chapterId = 'ch1';
+
   var state = Core.newBattle();
   var board = document.getElementById('board');
   var cells = [];
   // 조작 상태. step: 'none' 선택 없음 / 'move' 파란 칸 고르는 중 / 'menu' 이동 후 행동 고르는 중
-  var ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false };
+  var ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false, orb: null };
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -1518,6 +1615,8 @@ var Core = (function () {
     board.style.gridTemplateColumns = 'repeat(' + state.cols + ', 1fr)';
     board.style.gridTemplateRows = 'repeat(' + state.rows + ', 1fr)';
     board.style.aspectRatio = state.cols + ' / ' + state.rows;
+    // 세로로 긴 맵(2장 10×8)도 한 화면에: 폭을 화면 높이 58% 에 맞춘 값으로도 제한한다
+    board.style.width = 'min(calc(100vw - 16px), ' + (58 * state.cols / state.rows).toFixed(1) + 'vh, 464px)';
     for (var r = 0; r < state.rows; r++) {
       for (var c = 0; c < state.cols; c++) {
         var t = Core.terrainAt(state, r, c);
@@ -1556,7 +1655,7 @@ var Core = (function () {
   }
 
   function renderTop() {
-    document.getElementById('top-turn').textContent = '턴 ' + state.turn + '/' + state.maxTurn;
+    document.getElementById('top-turn').textContent = CHAPTERS[chapterId].label + ' · 턴 ' + state.turn + '/' + state.maxTurn;
     document.getElementById('top-weather').textContent = WEATHER_ICON[state.weather] + ' ' + state.weather;
     document.getElementById('top-merit').textContent = '공적 ' + state.merit;
   }
@@ -1623,7 +1722,10 @@ var Core = (function () {
       if (m) cell.className += ' hl ' + m;
       var oldTag = cell.querySelector('.tag');
       if (oldTag) cell.removeChild(oldTag);
+      var oldOrb = cell.querySelector('.orb');
+      if (oldOrb) cell.removeChild(oldOrb);
     });
+    if (ui.orb) cellAt(ui.orb.r, ui.orb.c).appendChild(el('span', 'orb', '🔮'));
     state.units.forEach(function (u) {
       if (!u.alive) return;
       var tile = unitTile(u);
@@ -1675,8 +1777,8 @@ var Core = (function () {
     var skill = document.getElementById('btn-skill');
     skill.disabled = !Core.canSkill(state, u);
     skill.innerHTML = '';
-    skill.appendChild(document.createTextNode(u.skill));
-    skill.appendChild(el('small', '', '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')'));
+    skill.appendChild(document.createTextNode(u.skill || '스킬'));
+    skill.appendChild(el('small', '', u.skill ? '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')' : '없음')); // 관군은 스킬 없음
   }
 
   function marksHas(marks, u) {
@@ -1900,11 +2002,45 @@ var Core = (function () {
     show();
   }
 
-  function startBattle() {
-    playScene(INTRO, function () {
+  // 장 시작: 공적 누계로 품계·관군을 정하고 시작 대사부터
+  function startChapter(id) {
+    chapterId = id;
+    document.getElementById('result').hidden = true;
+    document.getElementById('title').hidden = true;
+    state = Core.newBattle(Core.STAGES[id], { merit: progress.merit });
+    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false, orb: null };
+    buildBoard();
+    Core.startAllyPhase(state, Math.random);
+    render();
+    playScene(CHAPTERS[id].intro(), function () {
       ui.busy = false;
       render();
     });
+  }
+
+  // 첫 화면: 누계·품계와 이어서 할 장
+  var armedNew = false;
+  function showTitle() {
+    document.getElementById('result').hidden = true;
+    document.getElementById('scene').hidden = true;
+    document.getElementById('title').hidden = false;
+    armedNew = false;
+    var next = Core.nextStage(progress);
+    var started = progress.cleared.length > 0;
+    var prog = document.getElementById('title-prog');
+    prog.innerHTML = '';
+    if (started) {
+      prog.appendChild(document.createTextNode('공적 누계 '));
+      prog.appendChild(el('b', '', String(progress.merit)));
+      prog.appendChild(document.createTextNode(' · 품계 '));
+      prog.appendChild(el('b', '', Core.rankFor(progress.merit).name));
+    }
+    var cont = document.getElementById('btn-continue');
+    cont.hidden = !started;
+    cont.textContent = next ? '이어하기 · ' + CHAPTERS[next].title : '이어하기 · 3장 준비 중';
+    cont.disabled = !next;
+    document.getElementById('btn-new').textContent = started ? '처음부터' : '시작하기';
+    document.getElementById('title-note').textContent = canStore ? '' : '이 브라우저에는 진행이 저장되지 않습니다.';
   }
 
   // 전투 끝: 승리면 승리 후 대사 → 승리 화면, 패배면 바로 패배 화면
@@ -1913,31 +2049,63 @@ var Core = (function () {
     clearSelection();
     render();
     if (state.result === 'win') {
-      setTimeout(function () { playScene(victoryLines(), showResult); }, 900); // 마지막 피해 숫자를 본 뒤
+      setTimeout(function () { playScene(CHAPTERS[chapterId].outro(), showResult); }, 900); // 마지막 피해 숫자를 본 뒤
     } else {
       setTimeout(showResult, 900);
     }
   }
 
+  // 결과 화면: 이기면 누계에 더해 저장하고 다음 장 안내, 지면 다시하기
   function showResult() {
-    var t = document.getElementById('result-text');
+    var ch = CHAPTERS[chapterId];
     var win = state.result === 'win';
+    var before = Core.rankFor(progress.merit).name;
+    if (win) {
+      progress = Core.applyResult(progress, chapterId, 'win', state.merit);
+      saveProgress();
+    }
+    var next = Core.nextStage(progress);
+    var t = document.getElementById('result-text');
     t.className = 'title ' + (win ? 'win' : 'lose');
-    t.textContent = win ? '1장 흑린 토벌 완료 · 공적 ' + state.merit + ' / 8' : LOSE_TEXT;
+    t.textContent = win
+      ? ch.title + ' 완료 · 공적 ' + state.merit + ' / ' + Core.maxMerit(Core.STAGES[chapterId])
+      : ch.lose;
+    var sub = '';
+    if (win) {
+      var after = Core.rankFor(progress.merit).name;
+      sub = '공적 누계 ' + progress.merit + ' · 품계 ' + after + (after !== before ? ' (승진!)' : '');
+      if (!next) sub += '\n3장은 준비 중입니다.';
+    }
+    var subEl = document.getElementById('result-sub');
+    subEl.textContent = sub;
+    subEl.style.whiteSpace = 'pre-line';
+    document.getElementById('btn-next').hidden = !(win && next);
+    document.getElementById('btn-retry').hidden = win;
     document.getElementById('result').hidden = false;
   }
 
-  // 다시하기: 새 전투 상태로 시작 대사부터
-  function restart() {
-    document.getElementById('result').hidden = true;
-    state = Core.newBattle();
-    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false };
-    Core.startAllyPhase(state, Math.random);
-    render();
-    startBattle();
-  }
-
-  document.getElementById('btn-retry').addEventListener('click', restart);
+  document.getElementById('btn-retry').addEventListener('click', function () { startChapter(chapterId); });
+  document.getElementById('btn-next').addEventListener('click', function () {
+    var next = Core.nextStage(progress);
+    if (next) startChapter(next);
+  });
+  document.getElementById('btn-home').addEventListener('click', showTitle);
+  document.getElementById('btn-continue').addEventListener('click', function () {
+    var next = Core.nextStage(progress);
+    if (next) startChapter(next);
+  });
+  // 처음부터: 진행이 있으면 두 번 눌러야 누계가 지워진다 (확인 창을 쓸 수 없는 환경 대비)
+  document.getElementById('btn-new').addEventListener('click', function () {
+    var b = document.getElementById('btn-new');
+    if (progress.cleared.length > 0 && !armedNew) {
+      armedNew = true;
+      b.textContent = '정말 처음부터? (공적 누계가 지워집니다)';
+      return;
+    }
+    progress = Core.newProgress();
+    saveProgress();
+    startChapter('ch1');
+  });
 
   document.getElementById('btn-end').addEventListener('click', function () {
     if (ui.busy) return;
@@ -1974,9 +2142,8 @@ var Core = (function () {
   });
 
   buildBoard();
-  Core.startAllyPhase(state, Math.random);
   render();
-  startBattle();
+  showTitle();
 })();
 </script>
 
