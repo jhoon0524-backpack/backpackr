@@ -10,7 +10,7 @@ function finish(attackerId, targetId) {
   const a = Core.getUnit(s, attackerId);
   const t = Core.getUnit(s, targetId);
   const spot = [[t.r + 1, t.c], [t.r, t.c - 1], [t.r, t.c + 1], [t.r - 1, t.c]]
-    .find(([r, c]) => Core.isPassable(r, c) && !Core.unitAt(s, r, c));
+    .find(([r, c]) => Core.isPassable(s, r, c) && !Core.unitAt(s, r, c));
   a.r = spot[0]; a.c = spot[1];
   t.hp = 1;
   const ev = Core.attack(s, attackerId, targetId);
@@ -68,7 +68,7 @@ test('최대 공적 = 8 (일반 5 + 흑린 3)', () => {
     yoon.acted = false;
     // 적 바로 옆 빈칸으로 순간이동시켜 공격
     const spot = [[t.r + 1, t.c], [t.r, t.c - 1], [t.r, t.c + 1], [t.r - 1, t.c]]
-      .find(([r, c]) => Core.isPassable(r, c) && (!Core.unitAt(s, r, c) || Core.unitAt(s, r, c) === yoon));
+      .find(([r, c]) => Core.isPassable(s, r, c) && (!Core.unitAt(s, r, c) || Core.unitAt(s, r, c) === yoon));
     yoon.r = spot[0]; yoon.c = spot[1];
     Core.attack(s, 'yoon', t.id);
   }

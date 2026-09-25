@@ -31,7 +31,7 @@ test('전투가 끝난 뒤 불변 조건: HP 는 0~최대, 기력은 0~10, 살�
     assert.ok(u.hp >= 0 && u.hp <= u.maxHp, u.name);
     if (u.side === 'ally') assert.ok(u.ki >= 0 && u.ki <= 10, u.name);
     if (!u.alive) continue;
-    assert.equal(Core.isPassable(u.r, u.c), true, u.name);
+    assert.equal(Core.isPassable(s, u.r, u.c), true, u.name);
     assert.equal(Core.unitAt(s, u.r, u.c), u, `${u.name} 칸 겹침`);
   }
 });

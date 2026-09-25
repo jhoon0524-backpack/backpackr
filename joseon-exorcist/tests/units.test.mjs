@@ -58,7 +58,7 @@ test('모든 유닛은 통과 가능한 서로 다른 칸에서 시작한다', (
   const s = Core.newBattle();
   const seen = new Set();
   for (const u of s.units) {
-    assert.equal(Core.isPassable(u.r, u.c), true, u.name);
+    assert.equal(Core.isPassable(s, u.r, u.c), true, u.name);
     const key = `${u.r},${u.c}`;
     assert.equal(seen.has(key), false, `${key} 겹침`);
     seen.add(key);

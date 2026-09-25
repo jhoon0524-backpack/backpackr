@@ -23,7 +23,7 @@ test('예시 2: 윤무겸 벽사검 → 도깨비(흐림) = 20', () => {
 
 test('예시 3: 소운 화염부 → 흑린(서낭당, 맑음) = 6', () => {
   const { s, u } = setup('맑음');
-  assert.equal(Core.isShrine(u('heuklin').r, u('heuklin').c), true);
+  assert.equal(Core.isShrine(s, u('heuklin').r, u('heuklin').c), true);
   assert.equal(Core.damage(s, u('soun'), u('heuklin'), true), 6);
 });
 

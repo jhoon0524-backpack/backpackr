@@ -339,68 +339,93 @@
 var Core = (function () {
   'use strict';
 
-  // ── 맵 (specs/battle.md 1장) ─────────────────────────
-  var SIZE = 8;
-  // . 흙길  D 초가집·바위(통과 불가)  M 서낭당(받는 피해 ×0.8)  K 약수터(페이즈 시작 HP +10)
-  var MAP = [
-    '...MM...',
-    '.D....D.',
-    '.D....D.',
-    '...K....',
-    '.....D..',
-    '.DD..D..',
-    '........',
-    '........'
-  ];
+  // ── 스테이지 (specs/battle.md 1·2장, ADR 2) ──────────
+  // 한 전투 = 맵 크기·지형·유닛 배치. 맵 에디터의 "맵 코드"와 같은 모양이다.
+  // 지형 글자: . 흙길  D 초가집·바위(통과 불가)  M 서낭당(받는 피해 ×0.8)  K 약수터(페이즈 시작 HP +10)
+  // 아군은 배열 순서가 동률 판정 순서, 요괴는 배열 순서가 행동 순서다.
+  var STAGES = {
+    ch1: {
+      v: 1,
+      name: '1장 흑린 토벌',
+      rows: 8,
+      cols: 8,
+      map: [
+        '...MM...',
+        '.D....D.',
+        '.D....D.',
+        '...K....',
+        '.....D..',
+        '.DD..D..',
+        '........',
+        '........'
+      ],
+      allies: [
+        { id: 'yoon', r: 7, c: 2 },
+        { id: 'hangyeol', r: 7, c: 3 },
+        { id: 'yeoul', r: 7, c: 4 },
+        { id: 'soun', r: 7, c: 5 },
+        { id: 'dallae', r: 6, c: 3 }
+      ],
+      enemies: [
+        { type: 'dokkaebi', r: 0, c: 1 },
+        { type: 'dokkaebi', r: 0, c: 6 },
+        { type: 'jangsan', r: 1, c: 3 },
+        { type: 'jangsan', r: 1, c: 4 },
+        { type: 'bulgasari', r: 2, c: 4 },
+        { type: 'heuklin', r: 0, c: 3 }
+      ]
+    }
+  };
+  var TERRAINS = ['.', 'D', 'M', 'K'];
 
-  function inBounds(r, c) {
-    return r >= 0 && r < SIZE && c >= 0 && c < SIZE;
+  function inBounds(state, r, c) {
+    return r >= 0 && r < state.rows && c >= 0 && c < state.cols;
   }
-  function terrainAt(r, c) {
-    return inBounds(r, c) ? MAP[r].charAt(c) : null;
+  function terrainAt(state, r, c) {
+    return inBounds(state, r, c) ? state.map[r].charAt(c) : null;
   }
-  function isPassable(r, c) {
-    var t = terrainAt(r, c);
+  function isPassable(state, r, c) {
+    var t = terrainAt(state, r, c);
     return t !== null && t !== 'D';
   }
-  function isShrine(r, c) {
-    return terrainAt(r, c) === 'M';
+  function isShrine(state, r, c) {
+    return terrainAt(state, r, c) === 'M';
   }
-  function isSpring(r, c) {
-    return terrainAt(r, c) === 'K';
+  function isSpring(state, r, c) {
+    return terrainAt(state, r, c) === 'K';
   }
 
-  // ── 유닛 (specs/battle.md 2장) ────────────────────────
-  // 배열 순서가 곧 동률 판정 순서(아군)이고 행동 순서(요괴)다
-  var ALLIES = [
-    { id: 'yoon', name: '윤무겸', faction: '벽사청', guest: false, title: '벽사청 종사관', emoji: '🗡️',
-      hp: 30, atk: 12, def: 6, mov: 3, rng: 1, elem: '금', skill: '벽사검', r: 7, c: 2 },
-    { id: 'hangyeol', name: '한결', faction: '벽사청', guest: false, title: '벽사청 궁수', emoji: '🏹',
-      hp: 24, atk: 10, def: 4, mov: 3, rng: 2, elem: '목', skill: '파사궁', r: 7, c: 3 },
-    { id: 'yeoul', name: '여울', faction: '청운 도문', guest: true, title: '축지의 도인', emoji: '🥷',
-      hp: 34, atk: 11, def: 7, mov: 5, rng: 1, elem: '토', skill: '축지격', r: 7, c: 4 },
-    { id: 'soun', name: '소운', faction: '청운 도문', guest: true, title: '청운 도문 도사', emoji: '🧙',
-      hp: 22, atk: 11, def: 3, mov: 3, rng: 2, elem: '화', skill: '화염부', r: 7, c: 5 },
-    { id: 'dallae', name: '달래', faction: '신당회', guest: true, title: '신당회 만신', emoji: '🔔',
-      hp: 26, atk: 7, def: 5, mov: 4, rng: 1, elem: '없음', skill: '생명수', r: 6, c: 3 }
-  ];
-  var ENEMIES = [
-    { id: 'dokkaebi1', name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목', r: 0, c: 1 },
-    { id: 'dokkaebi2', name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목', r: 0, c: 6 },
-    { id: 'jangsan1', name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토', r: 1, c: 3 },
-    { id: 'jangsan2', name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토', r: 1, c: 4 },
-    { id: 'bulgasari', name: '불가사리', emoji: '🐗', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '금', r: 2, c: 4 },
-    { id: 'heuklin', name: '흑린', emoji: '🐍', hp: 50, atk: 13, def: 8, mov: 2, rng: 1, elem: '수', r: 0, c: 3, boss: true }
-  ];
+  // ── 유닛 수치 (specs/battle.md 2장) ───────────────────
+  // 수치는 기획자가 정한다. 위치는 스테이지가 정한다.
+  var ALLY_DEFS = {
+    yoon: { name: '윤무겸', faction: '벽사청', guest: false, title: '벽사청 종사관', emoji: '🗡️',
+      hp: 30, atk: 12, def: 6, mov: 3, rng: 1, elem: '금', skill: '벽사검' },
+    hangyeol: { name: '한결', faction: '벽사청', guest: false, title: '벽사청 궁수', emoji: '🏹',
+      hp: 24, atk: 10, def: 4, mov: 3, rng: 2, elem: '목', skill: '파사궁' },
+    yeoul: { name: '여울', faction: '청운 도문', guest: true, title: '축지의 도인', emoji: '🥷',
+      hp: 34, atk: 11, def: 7, mov: 5, rng: 1, elem: '토', skill: '축지격' },
+    soun: { name: '소운', faction: '청운 도문', guest: true, title: '청운 도문 도사', emoji: '🧙',
+      hp: 22, atk: 11, def: 3, mov: 3, rng: 2, elem: '화', skill: '화염부' },
+    dallae: { name: '달래', faction: '신당회', guest: true, title: '신당회 만신', emoji: '🔔',
+      hp: 26, atk: 7, def: 5, mov: 4, rng: 1, elem: '없음', skill: '생명수' }
+  };
+  var ALLY_ORDER = ['yoon', 'hangyeol', 'yeoul', 'soun', 'dallae'];
+  var ENEMY_TYPES = {
+    dokkaebi: { name: '도깨비', emoji: '👹', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '목' },
+    jangsan: { name: '장산범', emoji: '🐅', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '토' },
+    bulgasari: { name: '불가사리', emoji: '🐗', hp: 22, atk: 10, def: 5, mov: 3, rng: 1, elem: '금' },
+    heuklin: { name: '흑린', emoji: '🐍', hp: 50, atk: 13, def: 8, mov: 2, rng: 1, elem: '수', boss: true }
+  };
+  var ENEMY_ORDER = ['dokkaebi', 'jangsan', 'bulgasari', 'heuklin'];
   var KI_MAX = 10;
   var KI_START = 6;
   var SKILL_COST = 4;
   var HEAL_SKILL = '생명수';
 
-  function makeUnit(d, side) {
+  function makeUnit(d, id, side, r, c) {
     var ally = side === 'ally';
     return {
-      id: d.id, name: d.name, side: side, emoji: d.emoji,
+      id: id, name: d.name, side: side, emoji: d.emoji,
       faction: ally ? d.faction : '요괴 세력',
       guest: ally ? d.guest : false,
       title: ally ? d.title : (d.boss ? '요괴의 수장' : '—'),
@@ -408,16 +433,30 @@ var Core = (function () {
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: ally ? d.skill : null,
       maxKi: ally ? KI_MAX : null, ki: ally ? KI_START : null,
-      r: d.r, c: d.c, alive: true, acted: false,
+      r: r, c: c, alive: true, acted: false,
       from: null // 이동했지만 아직 행동 전일 때 이동 전 위치 (취소용)
     };
   }
 
-  function newBattle() {
+  // 요괴 id: 같은 종류가 여럿이면 종류+번호(dokkaebi1, dokkaebi2), 하나면 종류 그대로(heuklin)
+  function enemyIds(enemies) {
+    var total = {}, seen = {};
+    enemies.forEach(function (e) { total[e.type] = (total[e.type] || 0) + 1; });
+    return enemies.map(function (e) {
+      seen[e.type] = (seen[e.type] || 0) + 1;
+      return total[e.type] > 1 ? e.type + seen[e.type] : e.type;
+    });
+  }
+
+  // 스테이지로 새 전투 상태를 만든다. 스테이지를 안 주면 1장.
+  function newBattle(stage) {
+    stage = stage || STAGES.ch1;
+    var ids = enemyIds(stage.enemies);
     return {
-      turn: 1, maxTurn: 10, weather: '흐림', merit: 0, phase: 'ally', result: null,
-      units: ALLIES.map(function (d) { return makeUnit(d, 'ally'); })
-        .concat(ENEMIES.map(function (d) { return makeUnit(d, 'enemy'); }))
+      turn: 1, maxTurn: stage.maxTurn || 10, weather: '흐림', merit: 0, phase: 'ally', result: null,
+      rows: stage.rows, cols: stage.cols, map: stage.map.slice(),
+      units: stage.allies.map(function (a) { return makeUnit(ALLY_DEFS[a.id], a.id, 'ally', a.r, a.c); })
+        .concat(stage.enemies.map(function (e, i) { return makeUnit(ENEMY_TYPES[e.type], ids[i], 'enemy', e.r, e.c); }))
     };
   }
 
@@ -452,7 +491,7 @@ var Core = (function () {
       if (d >= limit) continue;
       for (var i = 0; i < DIRS.length; i++) {
         var r = cur[0] + DIRS[i][0], c = cur[1] + DIRS[i][1], key = r + ',' + c;
-        if (costs[key] !== undefined || !isPassable(r, c)) continue;
+        if (costs[key] !== undefined || !isPassable(state, r, c)) continue;
         var other = unitAt(state, r, c);
         if (other && other !== unit) continue;
         costs[key] = d + 1;
@@ -532,7 +571,7 @@ var Core = (function () {
     } else {
       v = Math.max(1, attacker.atk - target.def);
     }
-    if (isShrine(target.r, target.c)) v *= SHRINE_FACTOR;
+    if (isShrine(state, target.r, target.c)) v *= SHRINE_FACTOR;
     // 1e-9: 0.5 경계가 부동소수점 오차로 내림되는 것을 막는다
     return Math.max(1, Math.round(v + 1e-9));
   }
@@ -680,7 +719,7 @@ var Core = (function () {
   // 약수터 위에 있는 side 유닛을 HP +10 (최대 HP 까지)
   function springHeal(state, side, events) {
     livingUnits(state, side).forEach(function (u) {
-      if (!isSpring(u.r, u.c)) return;
+      if (!isSpring(state, u.r, u.c)) return;
       var amount = Math.min(SPRING_HEAL, u.maxHp - u.hp);
       u.hp += amount;
       events.push({ type: 'spring', targetId: u.id, amount: amount });
@@ -726,12 +765,12 @@ var Core = (function () {
   function approachMap(state, mover, target) {
     var dist = {}, queue = [];
     function free(r, c) {
-      if (!isPassable(r, c)) return false;
+      if (!isPassable(state, r, c)) return false;
       var o = unitAt(state, r, c);
       return !o || o === mover;
     }
-    for (var r = 0; r < SIZE; r++) {
-      for (var c = 0; c < SIZE; c++) {
+    for (var r = 0; r < state.rows; r++) {
+      for (var c = 0; c < state.cols; c++) {
         var d = distance({ r: r, c: c }, target);
         if (d >= 1 && d <= mover.rng && free(r, c)) {
           dist[r + ',' + c] = 0;
@@ -843,8 +882,12 @@ var Core = (function () {
   }
 
   return {
-    SIZE: SIZE,
-    MAP: MAP,
+    STAGES: STAGES,
+    TERRAINS: TERRAINS,
+    ALLY_DEFS: ALLY_DEFS,
+    ALLY_ORDER: ALLY_ORDER,
+    ENEMY_TYPES: ENEMY_TYPES,
+    ENEMY_ORDER: ENEMY_ORDER,
     inBounds: inBounds,
     terrainAt: terrainAt,
     isPassable: isPassable,
@@ -938,9 +981,12 @@ var Core = (function () {
   function buildBoard() {
     board.innerHTML = '';
     cells = [];
-    for (var r = 0; r < Core.SIZE; r++) {
-      for (var c = 0; c < Core.SIZE; c++) {
-        var t = Core.terrainAt(r, c);
+    board.style.gridTemplateColumns = 'repeat(' + state.cols + ', 1fr)';
+    board.style.gridTemplateRows = 'repeat(' + state.rows + ', 1fr)';
+    board.style.aspectRatio = state.cols + ' / ' + state.rows;
+    for (var r = 0; r < state.rows; r++) {
+      for (var c = 0; c < state.cols; c++) {
+        var t = Core.terrainAt(state, r, c);
         var cell = el('div', 'cell ' + TERRAIN_CLASS[t]);
         cell.dataset.r = r;
         cell.dataset.c = c;
@@ -972,7 +1018,7 @@ var Core = (function () {
   }
 
   function cellAt(r, c) {
-    return cells[r * Core.SIZE + c];
+    return cells[r * state.cols + c];
   }
 
   function renderTop() {
