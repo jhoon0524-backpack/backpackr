@@ -143,6 +143,37 @@
   }
   .float.heal { color: #6dff9a; font-size: 24px; }
   .unit.healed { animation: healed .7s ease-out; }
+  /* 정화수: 맑은 물이 번지는 푸른 파문 (specs/lore.md 8장) */
+  .water {
+    position: absolute; z-index: 4; pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .water::before, .water::after {
+    content: ""; position: absolute; width: 40%; aspect-ratio: 1; border-radius: 50%;
+    border: 2px solid #7fd4ff; box-shadow: 0 0 8px #7fd4ff;
+    animation: ripple .8s ease-out forwards;
+  }
+  .water::after { animation-delay: .18s; opacity: 0; }
+  @keyframes ripple { 0% { transform: scale(.3); opacity: .95; } 100% { transform: scale(2.3); opacity: 0; } }
+  /* 기술 이름 글자 (정화수·무령) 0.8초 */
+  .skill-label {
+    position: absolute; z-index: 6; pointer-events: none; white-space: nowrap;
+    font-size: 12px; font-weight: 800; letter-spacing: .05em;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(8, 10, 16, .85); color: #cfefff; border: 1px solid #7fd4ff;
+    transform: translate(-50%, -100%);
+    animation: label .8s ease-out forwards;
+  }
+  .skill-label.bell { color: #f1d7ff; border-color: #c69cf0; }
+  @keyframes label { 0% { opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+  /* 무령: 방울 소리 파문이 목표로 날아간다 */
+  .bell-wave {
+    position: absolute; z-index: 5; pointer-events: none;
+    width: 34%; aspect-ratio: 1; border-radius: 50%;
+    border: 2px solid #c69cf0; box-shadow: 0 0 10px #c69cf0, inset 0 0 6px #c69cf0;
+    transform: translate(-50%, -50%);
+    transition: left .32s ease-in, top .32s ease-in, opacity .2s ease .32s;
+  }
   @keyframes healed {
     0% { box-shadow: 0 0 0 3px #6dff9a, 0 0 16px 6px rgba(109, 255, 154, .8); }
     100% { box-shadow: 0 0 0 0 rgba(109, 255, 154, 0); }
@@ -215,6 +246,8 @@
   @media (prefers-reduced-motion: reduce) {
     .ghost { transition: none; }
     .float, .step-dot, .unit.fading, .dying, .unit.hit, .unit.healed { animation-duration: .01s; }
+    .water::before, .water::after, .skill-label { animation-duration: .01s; }
+    .bell-wave { transition: none; }
   }
   .unit.acted { filter: grayscale(1) brightness(.55); }
 
@@ -2133,6 +2166,7 @@ var Core = (function () {
     ghostDeaths(events || []);
     render();
     showFloats(events || []);
+    skillEffects(events || []);
     flashHits(events || []);
     if (state.result !== null) return finish();
     if (Core.allActed(state)) {
@@ -2157,6 +2191,62 @@ var Core = (function () {
     });
   }
 
+  // ── 기술 연출: 정화수·무령 (specs/lore.md 8장) ──
+  var LABELED = { '정화수': 'water', '무령': 'bell' };
+
+  function cellCenter(r, c) {
+    var cell = cellAt(r, c);
+    return { x: cell.offsetLeft + cell.offsetWidth / 2, y: cell.offsetTop + cell.offsetHeight / 2, cell: cell };
+  }
+
+  function removeLater(node, ms) {
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, ms);
+  }
+
+  // 기술 이름을 칸 위에 0.8초
+  function skillLabel(name, r, c, kind) {
+    var p = cellCenter(r, c);
+    var label = el('div', 'skill-label' + (kind === 'bell' ? ' bell' : ''), name);
+    label.style.left = p.x + 'px';
+    label.style.top = p.cell.offsetTop + 'px';
+    board.appendChild(label);
+    removeLater(label, 850);
+  }
+
+  function skillEffects(events) {
+    events.forEach(function (e) {
+      var kind = LABELED[e.name];
+      if (!kind || (e.type !== 'damage' && e.type !== 'heal')) return;
+      var from = Core.getUnit(state, e.attackerId);
+      var to = Core.getUnit(state, e.targetId);
+      if (kind === 'water') {
+        // 정화수: 받는 쪽에 푸른 파문 + 글자
+        var w = el('div', 'water');
+        placeOver(w, to.r, to.c);
+        board.appendChild(w);
+        removeLater(w, 1000);
+        skillLabel(e.name, to.r, to.c, kind);
+      } else {
+        // 무령: 쏘는 쪽 위에 글자, 방울 파문이 목표로 날아간다
+        skillLabel(e.name, from.r, from.c, kind);
+        var a = cellCenter(from.r, from.c), b = cellCenter(to.r, to.c);
+        var wave = el('div', 'bell-wave');
+        wave.style.left = a.x + 'px';
+        wave.style.top = a.y + 'px';
+        wave.style.width = a.cell.offsetWidth * 0.34 + 'px';
+        board.appendChild(wave);
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            wave.style.left = b.x + 'px';
+            wave.style.top = b.y + 'px';
+            wave.style.opacity = '0';
+          });
+        });
+        removeLater(wave, 700);
+      }
+    });
+  }
+
   // 맞은 유닛 번쩍·흔들림. render() 뒤에 붙인다 (render 가 타일을 새로 만들기 때문)
   function flashHits(events) {
     events.forEach(function (e) {
@@ -2171,6 +2261,7 @@ var Core = (function () {
     ghostDeaths(events);
     render();
     showFloats(events);
+    skillEffects(events);
     flashHits(events);
     if (events.some(function (e) { return e.type === 'weather'; })) {
       var top = document.getElementById('top');
