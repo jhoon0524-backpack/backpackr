@@ -364,6 +364,16 @@
   #ed-warns { margin: 8px 0 0; padding: 0; list-style: none; font-size: 12px; }
   #ed-warns li { color: #f5c542; padding: 2px 0; }
   #ed-warns li.ok { color: #6fcf6a; }
+  .ed-section { margin-top: 14px; border-top: 1px solid #2c303c; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .ed-section h2 { font-size: 13px; margin: 0; color: var(--muted); font-weight: 600; }
+  #ed-code {
+    width: 100%; min-height: 64px; resize: vertical; border-radius: 8px; padding: 8px;
+    border: 1px solid #3a3f4d; background: #0a0c11; color: var(--text);
+    font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all;
+    user-select: text; -webkit-user-select: text;
+  }
+  #ed-msg { font-size: 12px; min-height: 16px; color: #6fcf6a; }
+  #ed-msg.bad { color: #ff7a7a; }
   #open-editor { display: block; margin: 14px auto 0; background: none; border: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; }
 
   #legend {
@@ -449,6 +459,17 @@
   <div class="tools" id="ed-tools"></div>
   <div id="ed-tool-name"></div>
   <ul id="ed-warns"></ul>
+  <div class="ed-section">
+    <h2>맵 코드</h2>
+    <div class="ed-row">
+      <button class="small-btn" id="ed-copy" type="button">코드 복사</button>
+      <button class="small-btn" id="ed-paste" type="button">코드 붙여넣기</button>
+      <button class="small-btn" id="ed-load" type="button" hidden>불러오기</button>
+      <button class="small-btn" id="ed-paste-cancel" type="button" hidden>그만두기</button>
+    </div>
+    <textarea id="ed-code" readonly spellcheck="false" aria-label="맵 코드"></textarea>
+    <div id="ed-msg" role="status"></div>
+  </div>
 </div>
 
 <!-- 규칙: 화면(DOM)과 Math.random 을 쓰지 않는다. tests/ 가 Node 로 검사한다 (ADR 1번) -->
@@ -1825,7 +1846,69 @@ var Core = (function () {
       if (cell) cell.classList.add('warn');
     });
     renderWarnings(problems);
+    if (!pasting) document.getElementById('ed-code').value = Core.encodeStage(stage);
   }
+
+  // ── 맵 코드 복사·붙여넣기 ──
+  var pasting = false;
+  var codeBox = document.getElementById('ed-code');
+
+  function say(text, bad) {
+    var m = document.getElementById('ed-msg');
+    m.textContent = text;
+    m.className = bad ? 'bad' : '';
+  }
+
+  function setPasting(on) {
+    pasting = on;
+    codeBox.readOnly = !on;
+    document.getElementById('ed-load').hidden = !on;
+    document.getElementById('ed-paste-cancel').hidden = !on;
+    document.getElementById('ed-copy').hidden = on;
+    document.getElementById('ed-paste').hidden = on;
+    if (on) {
+      codeBox.value = '';
+      codeBox.placeholder = '받은 맵 코드를 여기에 붙여 넣으세요';
+      codeBox.focus();
+    } else {
+      codeBox.placeholder = '';
+      codeBox.value = Core.encodeStage(stage);
+    }
+  }
+
+  function selectCode() {
+    codeBox.focus();
+    codeBox.select();
+    codeBox.setSelectionRange(0, codeBox.value.length);
+  }
+
+  document.getElementById('ed-copy').addEventListener('click', function () {
+    codeBox.value = Core.encodeStage(stage);
+    var fallback = function () {
+      selectCode();
+      say('자동 복사가 막혀 있어 코드를 선택해 두었습니다. 길게 눌러(또는 Ctrl+C) 복사하세요.', true);
+    };
+    if (!navigator.clipboard || !navigator.clipboard.writeText) return fallback();
+    navigator.clipboard.writeText(codeBox.value).then(function () {
+      say('맵 코드를 복사했습니다.');
+    }, fallback);
+  });
+  document.getElementById('ed-paste').addEventListener('click', function () {
+    say('');
+    setPasting(true);
+  });
+  document.getElementById('ed-paste-cancel').addEventListener('click', function () {
+    say('');
+    setPasting(false);
+  });
+  document.getElementById('ed-load').addEventListener('click', function () {
+    var result = Core.decodeStage(codeBox.value);
+    if (result.error) return say(result.error, true); // 지금 맵은 그대로
+    stage = result.stage;
+    setPasting(false);
+    render();
+    say('불러왔습니다: ' + (stage.name || '이름 없는 맵'));
+  });
 
   // 도구 줄: 지형 4 · 아군 5 · 요괴 4 · 지우개
   var TOOL_GROUPS = [
