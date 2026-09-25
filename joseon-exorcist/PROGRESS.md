@@ -11,9 +11,10 @@
 - 거리와 대상 찾기 — Core.distance/attackTargets/skillTargets(pos 로 미리 보기 가능), tests/targets.test.mjs
 - 오행 상성 배율 — Core.elementMultiplier, tests/element.test.mjs
 - 피해 계산 — Core.damage/weatherMultiplier/WEATHERS, 검산 예시 5개 + 날씨·반올림 테스트 (tests/damage.test.mjs)
+- 행동 실행 — Core.moveUnit/cancelMove/attack/useSkill/wait/canAttack/canSkill. 행동 함수는 이벤트 배열을 돌려준다(화면 연출용), tests/actions.test.mjs
 
 ## 다음에 진행할 작업
-- [규칙] 행동 실행
+- [규칙] HP 0 처리와 공적
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.

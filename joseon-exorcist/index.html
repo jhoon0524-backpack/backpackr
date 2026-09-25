@@ -100,7 +100,8 @@ var Core = (function () {
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: ally ? d.skill : null,
       maxKi: ally ? KI_MAX : null, ki: ally ? KI_START : null,
-      r: d.r, c: d.c, alive: true, acted: false
+      r: d.r, c: d.c, alive: true, acted: false,
+      from: null // 이동했지만 아직 행동 전일 때 이동 전 위치 (취소용)
     };
   }
 
@@ -228,6 +229,95 @@ var Core = (function () {
     return Math.max(1, Math.round(v + 1e-9));
   }
 
+  // ── 아군 행동 (specs/battle.md 3·4·9장) ───────────────
+  var HEAL_AMOUNT = 12;
+
+  function canCommand(state, unit) {
+    return !!unit && unit.alive && unit.side === 'ally' && !unit.acted
+      && state.phase === 'ally' && state.result === null;
+  }
+
+  // 이동. 이동 전 위치를 unit.from 에 남겨 취소할 수 있게 한다. 성공하면 true.
+  function moveUnit(state, id, r, c) {
+    var u = getUnit(state, id);
+    if (!canCommand(state, u) || u.from) return false;
+    var ok = moveTargets(state, u).some(function (p) { return p.r === r && p.c === c; });
+    if (!ok) return false;
+    u.from = { r: u.r, c: u.c };
+    u.r = r; u.c = c;
+    return true;
+  }
+
+  // 취소: 이동 전 위치로 되돌린다. 행동 완료가 아니다.
+  function cancelMove(state, id) {
+    var u = getUnit(state, id);
+    if (!canCommand(state, u) || !u.from) return false;
+    u.r = u.from.r; u.c = u.from.c;
+    u.from = null;
+    return true;
+  }
+
+  function finishAction(u) {
+    u.acted = true;
+    u.from = null;
+  }
+
+  function canAttack(state, unit) {
+    return attackTargets(state, unit).length > 0;
+  }
+  function canSkill(state, unit) {
+    return unit.ki !== null && unit.ki >= SKILL_COST && skillTargets(state, unit).length > 0;
+  }
+
+  // 피해를 입히고 이벤트 목록에 남긴다. HP 는 0 밑으로 내려가지 않는다.
+  function hit(state, attacker, target, useSkill, events) {
+    var amount = damage(state, attacker, target, useSkill);
+    target.hp = Math.max(0, target.hp - amount);
+    events.push({ type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount });
+    return events;
+  }
+
+  function inList(list, id) {
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  }
+
+  // 결과: 이벤트 배열. 못 하는 행동이면 null.
+  function attack(state, id, targetId) {
+    var u = getUnit(state, id);
+    if (!canCommand(state, u)) return null;
+    var t = inList(attackTargets(state, u), targetId);
+    if (!t) return null;
+    var events = hit(state, u, t, false, []);
+    finishAction(u);
+    return events;
+  }
+
+  function useSkill(state, id, targetId) {
+    var u = getUnit(state, id);
+    if (!canCommand(state, u) || u.ki < SKILL_COST) return null;
+    var t = inList(skillTargets(state, u), targetId);
+    if (!t) return null;
+    u.ki -= SKILL_COST;
+    var events;
+    if (u.skill === HEAL_SKILL) {
+      var amount = Math.min(HEAL_AMOUNT, t.maxHp - t.hp);
+      t.hp += amount;
+      events = [{ type: 'heal', attackerId: u.id, targetId: t.id, amount: amount }];
+    } else {
+      events = hit(state, u, t, true, []);
+    }
+    finishAction(u);
+    return events;
+  }
+
+  function wait(state, id) {
+    var u = getUnit(state, id);
+    if (!canCommand(state, u)) return null;
+    finishAction(u);
+    return [];
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -252,7 +342,15 @@ var Core = (function () {
     elementMultiplier: elementMultiplier,
     WEATHERS: WEATHERS,
     weatherMultiplier: weatherMultiplier,
-    damage: damage
+    damage: damage,
+    canCommand: canCommand,
+    moveUnit: moveUnit,
+    cancelMove: cancelMove,
+    canAttack: canAttack,
+    canSkill: canSkill,
+    attack: attack,
+    useSkill: useSkill,
+    wait: wait
   };
 })();
 </script>
