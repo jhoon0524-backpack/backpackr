@@ -42,7 +42,7 @@ test('관군은 벽사청이라 마지막 일격이 공적이 된다', () => {
   const s = Core.newBattle(ch2, { merit: 3 });
   const g = Core.getUnit(s, 'gwangun1');
   const t = Core.getUnit(s, 'jangsan_p');
-  g.r = 5; g.c = 4; t.hp = 1; // 장산범 (4,4) 바로 아래
+  g.r = t.r; g.c = t.c + 1; t.hp = 1; // 장산범 바로 오른쪽
   Core.attack(s, 'gwangun1', 'jangsan_p');
   assert.equal(s.merit, 1);
 });

@@ -63,3 +63,22 @@ test('유닛 위치 경고: 초가집 위, 맵 밖, 같은 칸, 두 번 배치, 
   const rock = p.find((x) => /초가집/.test(x.msg));
   assert.deepEqual([rock.r, rock.c], [1, 1], '경고에 칸 위치가 붙는다');
 });
+
+test('탈출로 지형 E: 지나갈 수 있고, 맵 코드에서 읽힌다', () => {
+  const s = clone(ch1);
+  s.map[7] = 'E.......';
+  const r = Core.decodeStage(JSON.stringify(s));
+  assert.equal(r.error, undefined);
+  const b = Core.newBattle(r.stage);
+  assert.equal(Core.isEscape(b, 7, 0), true);
+  assert.equal(Core.isPassable(b, 7, 0), true);
+  assert.equal(Core.isEscape(b, 7, 1), false);
+});
+
+test('달래(도망 보스)가 있는데 탈출로가 없으면 경고', () => {
+  const s = clone(ch1);
+  s.enemies = s.enemies.filter((e) => e.type !== 'heuklin').concat([{ type: 'dallae_boss', r: 3, c: 0 }]);
+  assert.ok(msgs(Core.validateStage(s)).includes('탈출로가 없으면 달래가 도망칠 곳이 없습니다'));
+  s.map[0] = 'E..MM...';
+  assert.equal(msgs(Core.validateStage(s)).includes('탈출로가 없으면 달래가 도망칠 곳이 없습니다'), false);
+});

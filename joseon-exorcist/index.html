@@ -14,6 +14,7 @@
     --rock: #121212;
     --shrine: #3a2327;
     --spring: #1d3140;
+    --escape: #1f3324;
     --bs: #d9443a;      /* 벽사청 */
     --guest: #9a9a9a;   /* 객장 */
     --enemy: #a35ad8;   /* 요괴 */
@@ -58,6 +59,7 @@
   .t-rock   { background: var(--rock); }
   .t-shrine { background: var(--shrine); }
   .t-spring { background: var(--spring); }
+  .t-escape { background: var(--escape); box-shadow: inset 0 0 0 1px #3f6b48; }
   .mark {
     position: absolute;
     font-size: clamp(12px, 4.5vw, 22px);
@@ -387,6 +389,7 @@
   .tool.t-rock { background: var(--rock); }
   .tool.t-shrine { background: var(--shrine); }
   .tool.t-spring { background: var(--spring); }
+  .tool.t-escape { background: var(--escape); }
   .tool.on { border-color: #f5c542; box-shadow: 0 0 0 1px #f5c542; }
   #ed-tool-name { font-size: 12px; color: var(--muted); min-height: 16px; }
   #ed-warns { margin: 8px 0 0; padding: 0; list-style: none; font-size: 12px; }
@@ -441,6 +444,7 @@
     <span style="--c: var(--shrine)">서낭당 · 받는 피해 −20%</span>
     <span style="--c: var(--spring)">약수터 · 턴 시작 HP +10</span>
     <span style="--c: var(--rock)">초가집·바위 · 못 지나감</span>
+    <span style="--c: var(--escape)" id="legend-escape" hidden>🌲 탈출로 · 달래가 닿으면 패배</span>
   </div>
   <div id="panel">
     <div id="info" hidden></div>
@@ -532,6 +536,7 @@ var Core = (function () {
   // ── 스테이지 (specs/battle.md 1·2장, ADR 2) ──────────
   // 한 전투 = 맵 크기·지형·유닛 배치. 맵 에디터의 "맵 코드"와 같은 모양이다.
   // 지형 글자: . 흙길  D 초가집·바위(통과 불가)  M 서낭당(받는 피해 ×0.8)  K 약수터(페이즈 시작 HP +10)
+  //            E 탈출로(2장: 달래가 닿으면 패배, 누구나 지나가고 설 수 있음)
   // 아군은 배열 순서가 동률 판정 순서, 요괴는 배열 순서가 행동 순서다.
   var STAGES = {
     ch1: {
@@ -565,7 +570,9 @@ var Core = (function () {
         { type: 'heuklin', r: 0, c: 3 }
       ]
     },
-    // AI 임시 맵 (specs/chapter2.md 보충 S8). 기획자가 에디터로 그린 맵 코드가 오면 map·배치를 바꾼다
+    // AI 임시 맵 (specs/chapter2.md 보충 S8, 7장). 기획자가 에디터로 그린 맵 코드가 오면 map·배치를 바꾼다
+    // 달래는 왼쪽 위 골짜기에서 출발해 아래로 돌아 오른쪽 두 갈래 길(5열·7열)로 올라가 탈출로(오른쪽 위 🌲)를 노린다.
+    // 아군은 아래에서 출발해 가운데 목(5행 4~5열)을 막거나 쫓는다.
     ch2: {
       v: 1,
       name: '2장 사라진 여의주',
@@ -573,14 +580,14 @@ var Core = (function () {
       cols: 8,
       maxTurn: 12,
       map: [
-        'D.M..M.D',
-        '...MM...',
-        '.D....D.',
-        '..D..D..',
-        '........',
-        '.DD..DD.',
-        '...K....',
-        'D......D',
+        'DDDDDMEE',
+        'M...D...',
+        '.DD.D.D.',
+        '.D.MD.D.',
+        '.D.DD.D.',
+        '...D....',
+        '.D...D..',
+        '.D.K.D..',
         '........',
         '........'
       ],
@@ -592,15 +599,15 @@ var Core = (function () {
       ],
       enemies: [
         { type: 'munyeo', r: 1, c: 1 },
-        { type: 'munyeo', r: 1, c: 6 },
-        { type: 'dokkaebi_p', r: 3, c: 1 },
-        { type: 'dokkaebi_p', r: 3, c: 6 },
-        { type: 'jangsan_p', r: 4, c: 4 },
-        { type: 'dallae_boss', r: 1, c: 3 }
+        { type: 'munyeo', r: 5, c: 5 },
+        { type: 'dokkaebi_p', r: 3, c: 2 },
+        { type: 'dokkaebi_p', r: 6, c: 6 },
+        { type: 'jangsan_p', r: 5, c: 1 },
+        { type: 'dallae_boss', r: 2, c: 0 }
       ]
     }
   };
-  var TERRAINS = ['.', 'D', 'M', 'K'];
+  var TERRAINS = ['.', 'D', 'M', 'K', 'E'];
 
   function inBounds(state, r, c) {
     return r >= 0 && r < state.rows && c >= 0 && c < state.cols;
@@ -617,6 +624,9 @@ var Core = (function () {
   }
   function isSpring(state, r, c) {
     return terrainAt(state, r, c) === 'K';
+  }
+  function isEscape(state, r, c) {
+    return terrainAt(state, r, c) === 'E';
   }
 
   // ── 유닛 수치 (specs/battle.md 2장) ───────────────────
@@ -1300,6 +1310,9 @@ var Core = (function () {
     if (bosses === 0) warn('보스(흑린·달래)가 없으면 이길 수 없습니다');
     if (bosses > 1) warn('보스는 한 마리만 둘 수 있습니다');
     if (st.allies.length === 0) warn('아군이 한 명도 없습니다');
+    var fleeing = st.enemies.some(function (e) { return ENEMY_TYPES[e.type].ai === 'flee'; });
+    var hasEscape = st.map.some(function (row) { return row.indexOf('E') !== -1; });
+    if (fleeing && !hasEscape) warn('탈출로가 없으면 달래가 도망칠 곳이 없습니다');
     return out;
   }
 
@@ -1449,6 +1462,7 @@ var Core = (function () {
     isPassable: isPassable,
     isShrine: isShrine,
     isSpring: isSpring,
+    isEscape: isEscape,
     KI_MAX: KI_MAX,
     KI_START: KI_START,
     SKILL_COST: SKILL_COST,
@@ -1512,8 +1526,8 @@ var Core = (function () {
 (function () {
   'use strict';
 
-  var TERRAIN_CLASS = { '.': 't-dirt', 'D': 't-rock', 'M': 't-shrine', 'K': 't-spring' };
-  var TERRAIN_MARK = { 'D': '🛖', 'M': '🏮', 'K': '💧' };
+  var TERRAIN_CLASS = { '.': 't-dirt', 'D': 't-rock', 'M': 't-shrine', 'K': 't-spring', 'E': 't-escape' };
+  var TERRAIN_MARK = { 'D': '🛖', 'M': '🏮', 'K': '💧', 'E': '🌲' };
   var WEATHER_ICON = { '맑음': '☀️', '강풍': '🌬️', '비': '🌧️', '흐림': '☁️' };
   var ENEMY_STEP_MS = 500; // 요괴 한 마리씩 행동하는 간격 (기획서 14장)
 
@@ -1615,6 +1629,7 @@ var Core = (function () {
     board.style.gridTemplateColumns = 'repeat(' + state.cols + ', 1fr)';
     board.style.gridTemplateRows = 'repeat(' + state.rows + ', 1fr)';
     board.style.aspectRatio = state.cols + ' / ' + state.rows;
+    document.getElementById('legend-escape').hidden = !state.map.some(function (row) { return row.indexOf('E') !== -1; });
     // 세로로 긴 맵(2장 10×8)도 한 화면에: 폭을 화면 높이 58% 에 맞춘 값으로도 제한한다
     board.style.width = 'min(calc(100vw - 16px), ' + (58 * state.cols / state.rows).toFixed(1) + 'vh, 464px)';
     for (var r = 0; r < state.rows; r++) {
@@ -2152,8 +2167,8 @@ var Core = (function () {
 (function () {
   'use strict';
 
-  var TERRAIN_CLASS = { '.': 't-dirt', 'D': 't-rock', 'M': 't-shrine', 'K': 't-spring' };
-  var TERRAIN_MARK = { 'D': '🛖', 'M': '🏮', 'K': '💧' };
+  var TERRAIN_CLASS = { '.': 't-dirt', 'D': 't-rock', 'M': 't-shrine', 'K': 't-spring', 'E': 't-escape' };
+  var TERRAIN_MARK = { 'D': '🛖', 'M': '🏮', 'K': '💧', 'E': '🌲' };
 
   var stage = JSON.parse(Core.encodeStage(Core.STAGES.ch1)); // 1장 맵으로 시작
   var app = document.getElementById('editor-app');
@@ -2365,7 +2380,8 @@ var Core = (function () {
       { kind: 'terrain', t: '.', name: '흙길', cls: 't-dirt' },
       { kind: 'terrain', t: 'D', name: '초가집·바위', cls: 't-rock', mark: '🛖' },
       { kind: 'terrain', t: 'M', name: '서낭당', cls: 't-shrine', mark: '🏮' },
-      { kind: 'terrain', t: 'K', name: '약수터', cls: 't-spring', mark: '💧' }
+      { kind: 'terrain', t: 'K', name: '약수터', cls: 't-spring', mark: '💧' },
+      { kind: 'terrain', t: 'E', name: '탈출로 (달래가 닿으면 패배)', cls: 't-escape', mark: '🌲' }
     ] },
     { label: '아군', tools: Core.ALLY_ORDER.map(function (id) {
       return { kind: 'ally', id: id, name: Core.ALLY_DEFS[id].name, mark: Core.ALLY_DEFS[id].emoji };
