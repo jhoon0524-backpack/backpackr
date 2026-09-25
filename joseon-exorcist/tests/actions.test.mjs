@@ -51,7 +51,7 @@ test('기본공격: 사거리 안 적만, HP 감소, 행동 완료', () => {
   u('yoon').r = 3; u('yoon').c = 4;
   assert.equal(Core.canAttack(s, u('yoon')), true);
   const ev = Core.attack(s, 'yoon', 'bulgasari');
-  assert.deepEqual(ev, [{ type: 'damage', attackerId: 'yoon', targetId: 'bulgasari', amount: 7 }]);
+  assert.deepEqual(ev, [{ type: 'damage', attackerId: 'yoon', targetId: 'bulgasari', amount: 7, mult: 1 }]);
   assert.equal(u('bulgasari').hp, 15);
   assert.equal(u('yoon').acted, true);
   assert.equal(u('yoon').ki, 6, '기본공격은 기력을 안 쓴다');
@@ -121,4 +121,19 @@ test('요괴·퇴각 유닛·요괴 페이즈에는 명령 불가', () => {
   assert.equal(Core.moveUnit(s, 'soun', 6, 5), false);
   s.phase = 'enemy';
   assert.equal(Core.moveUnit(s, 'yoon', 6, 1), false);
+});
+
+test('피해 이벤트의 mult: 스킬은 상성 배율, 기본공격은 1', () => {
+  const s = Core.newBattle();
+  const u = (id) => Core.getUnit(s, id);
+  u('yoon').r = 0; u('yoon').c = 0;
+  assert.equal(Core.useSkill(s, 'yoon', 'dokkaebi1')[0].mult, 1.5, '금 → 목 유리');
+  const s2 = Core.newBattle();
+  const soun = Core.getUnit(s2, 'soun');
+  soun.r = 1; soun.c = 3; Core.getUnit(s2, 'jangsan1').alive = false; // 흑린 (0,3) 옆
+  assert.equal(Core.useSkill(s2, 'soun', 'heuklin')[0].mult, 0.7, '화 → 수 불리');
+  const s3 = Core.newBattle();
+  const y3 = Core.getUnit(s3, 'yoon');
+  y3.r = 0; y3.c = 0;
+  assert.equal(Core.attack(s3, 'yoon', 'dokkaebi1')[0].mult, 1, '기본공격은 상성 없음');
 });

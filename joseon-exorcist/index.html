@@ -128,6 +128,17 @@
     animation: rise .9s ease-out forwards;
   }
   .float.dmg { color: #ff4a4a; }
+  .float.dmg.good { font-size: 28px; color: #ff3030; }
+  .float.dmg.good small { display: block; font-size: 10px; color: #f5c542; margin-top: -2px; }
+  .float.dmg.bad { font-size: 15px; color: #c98a8a; }
+  .unit.hit { animation: hit .35s ease-out; }
+  @keyframes hit {
+    0% { filter: brightness(3) saturate(0); transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-2px); filter: brightness(1.6); }
+    100% { filter: none; transform: translateX(0); }
+  }
   .float.heal { color: #5ef08a; }
   @keyframes rise {
     0% { transform: translateY(0); opacity: 0; }
@@ -679,7 +690,10 @@ var Core = (function () {
   function hit(state, attacker, target, useSkill, events) {
     var amount = damage(state, attacker, target, useSkill);
     target.hp = Math.max(0, target.hp - amount);
-    events.push({ type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount });
+    events.push({
+      type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount,
+      mult: useSkill ? elementMultiplier(attacker.elem, target.elem) : 1 // 상성 배율 (화면 연출용)
+    });
     if (target.hp === 0) knockOut(state, attacker, target, events);
     return events;
   }
@@ -1125,6 +1139,12 @@ var Core = (function () {
       var t = Core.getUnit(state, e.targetId);
       var cell = cellAt(t.r, t.c);
       var f = el('div', 'float ' + (e.type === 'damage' ? 'dmg' : 'heal'), (e.type === 'damage' ? '-' : '+') + e.amount);
+      if (e.type === 'damage' && e.mult > 1) {
+        f.className += ' good';
+        f.appendChild(el('small', '', '유리!'));
+      } else if (e.type === 'damage' && e.mult < 1) {
+        f.className += ' bad';
+      }
       f.style.left = cell.offsetLeft + 'px';
       f.style.top = cell.offsetTop + 'px';
       f.style.width = cell.offsetWidth + 'px';
@@ -1265,6 +1285,7 @@ var Core = (function () {
     clearSelection();
     render();
     showFloats(events || []);
+    flashHits(events || []);
     if (state.result !== null) return finish();
     if (Core.allActed(state)) {
       ui.busy = true;
@@ -1273,9 +1294,19 @@ var Core = (function () {
     }
   }
 
+  // 맞은 유닛 번쩍·흔들림. render() 뒤에 붙인다 (render 가 타일을 새로 만들기 때문)
+  function flashHits(events) {
+    events.forEach(function (e) {
+      if (e.type !== 'damage') return;
+      var tile = board.querySelector('.unit[data-id="' + e.targetId + '"]');
+      if (tile) tile.classList.add('hit');
+    });
+  }
+
   function showEvents(events) {
     render();
     showFloats(events);
+    flashHits(events);
     if (events.some(function (e) { return e.type === 'weather'; })) {
       var top = document.getElementById('top');
       top.classList.remove('flash');
