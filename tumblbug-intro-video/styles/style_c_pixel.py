@@ -197,12 +197,12 @@ def music():
     for k, n in enumerate([67, 72, 76, 79, 84]):  # 엔딩 징글
         tr.add(S.square(n, 0.16 if k < 4 else 1.8, 0.25, 0 if k < 4 else 1.0), 13.0 + k * 0.14, 0.13)
     tr.add(S.triangle(36, 2.0), 13.56, 0.4)
-    tr.save("styles/out/c.wav", fade_out=1.0)
+    tr.save("styles/samples/c.wav", fade_out=1.0)
 
 
 if __name__ == "__main__":
     import os
-    os.makedirs("styles/out", exist_ok=True)
+    os.makedirs("styles/samples", exist_ok=True)
     music()
     storyboard(render, [(1.5, "타이틀 화면 (PRESS START)"), (5.5, "달리며 후원 하트 모으기"), (7.6, "게이지 거의 가득"),
                         (9.3, "STAGE CLEAR! 펀딩 성공"), (11.8, "다음 스테이지 = 카테고리"), (14.8, "INSERT COIN 엔딩")],
@@ -210,4 +210,4 @@ if __name__ == "__main__":
                ["8비트 게임처럼 창작자 캐릭터가 달리며 '후원 하트'를 모아 펀딩 게이지를 채우는 스타일",
                 "톤: 유쾌함·게임 감성 | 음악: 칩튠(8비트) | 추천 용도: 게임·보드게임 창작자 모집, 게임 행사 부스, SNS 광고"],
                "C_pixel_storyboard.jpg")
-    encode(render, LW * SCALE, LH * SCALE, DUR, "styles/out/c.wav", "C_pixel.mp4")
+    encode(render, LW * SCALE, LH * SCALE, DUR, "styles/samples/c.wav", "C_pixel.mp4")

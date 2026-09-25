@@ -94,11 +94,11 @@ def music():
     tr.save(f"{OUT_WAV}", fade_out=1.5)
 
 
-OUT_WAV = "styles/out/a.wav"
+OUT_WAV = "styles/samples/a.wav"
 
 if __name__ == "__main__":
     import os
-    os.makedirs("styles/out", exist_ok=True)
+    os.makedirs("styles/samples", exist_ok=True)
     music()
     storyboard(render, [(1.1, "만들고 싶은 게 있다."), (2.5, "근데, 혼자서?"), (3.5, "아니. 함께."),
                         (5.3, "장르 속사포 (반 박자마다)"), (9.6, "누적 펀딩 5,000억 원"), (14.2, "텀블벅 엔딩")],

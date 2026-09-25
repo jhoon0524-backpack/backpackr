@@ -174,12 +174,12 @@ def music():
     tr.add(S.kick(150, 5), 12.0, 0.9)  # 엔딩
     tr.add(S.pad([62, 65, 69, 74], 4.0, 2000), 12.0, 0.5)
     tr.add(S.bass(38, 3.0, 1.5, 1.0), 12.0, 0.45)
-    tr.save("styles/out/d.wav", fade_out=1.5)
+    tr.save("styles/samples/d.wav", fade_out=1.5)
 
 
 if __name__ == "__main__":
     import os
-    os.makedirs("styles/out", exist_ok=True)
+    os.makedirs("styles/samples", exist_ok=True)
     music()
     storyboard(render, [(2.0, "훅: 첫 2초 자막"), (4.6, "알림이 쌓이기 시작"), (T100 + 0.6, "100% 목표 달성"),
                         (9.3, "248% 달성 (예시)"), (11.6, "실제 누적 수치"), (15.0, "엔딩 + 행동 유도 버튼")],
@@ -187,4 +187,4 @@ if __name__ == "__main__":
                ["후원 알림이 쉴 새 없이 쌓이며 달성률 링이 차오르는 9:16 세로 영상 (알림 속 이름·금액은 가상 예시)",
                 "톤: 속도감·기대감 | 음악: 경쾌한 팝 | 추천 용도: 인스타 릴스, 유튜브 쇼츠, 틱톡 광고"],
                "D_shortform_storyboard.jpg", vertical=True)
-    encode(render, W, H, DUR, "styles/out/d.wav", "D_shortform.mp4")
+    encode(render, W, H, DUR, "styles/samples/d.wav", "D_shortform.mp4")

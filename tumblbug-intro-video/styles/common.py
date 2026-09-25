@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from make_video import (ACCENTS, CORAL, CREAM, DARK, GRAY, WHITE, clamp, ease_back,  # noqa: E402,F401
                         ease_in_out, ease_out, emoji, font, lerp, mix, paste_center, prog, text)
 
-OUT = "styles/out"
+OUT = "styles/samples"
 FPS = 30
 
 

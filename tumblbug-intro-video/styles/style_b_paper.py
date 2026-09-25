@@ -191,12 +191,12 @@ def music():
             tr.add(S.piano(notes[[0, 1, 2, 3, 2, 1][k % 6]] + 12, 1.5), t0 + k * step, 0.22 if bar < 2 else 0.18,
                    (-0.3, 0.3)[k % 2])
     tr.add(S.piano(77, 3.5), 12.0, 0.3)  # 마지막 장 멜로디 포인트
-    tr.save("styles/out/b.wav", fade_out=2.0)
+    tr.save("styles/samples/b.wav", fade_out=2.0)
 
 
 if __name__ == "__main__":
     import os
-    os.makedirs("styles/out", exist_ok=True)
+    os.makedirs("styles/samples", exist_ok=True)
     music()
     storyboard(render, [(3.6, "어느 날, 아이디어가 떠오르다"), (5.6, "혼자서는 막막했지만"), (7.8, "응원이 모이기 시작"),
                         (10.2, "게이지를 크레파스로 채움"), (11.6, "'펀딩 성공' 도장 쾅"), (15.2, "크라프트지 라벨 엔딩")],
@@ -204,4 +204,4 @@ if __name__ == "__main__":
                ["종이 질감 위에 연필 낙서와 손글씨로 창작자 한 명의 이야기를 따뜻하게 풀어내는 스타일",
                 "톤: 따뜻함·진정성 | 음악: 잔잔한 피아노 | 추천 용도: 창작자 모집, 브랜드 필름, 연말 회고 영상"],
                "B_paper_storyboard.jpg")
-    encode(render, W, H, DUR, "styles/out/b.wav", "B_paper.mp4")
+    encode(render, W, H, DUR, "styles/samples/b.wav", "B_paper.mp4")
