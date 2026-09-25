@@ -1,9 +1,9 @@
 """텀블벅 소개영상 배경음악 (직접 합성한 오리지널 곡, 저작권 걱정 없음)
 
-120 BPM, 46초(23마디). 코드 진행: C - G - Am - F (밝고 희망찬 느낌)
+120 BPM, 52초(26마디). 코드 진행: C - G - Am - F (밝고 희망찬 느낌)
  - 0~8초   : 잔잔한 인트로 (패드 + 벨 아르페지오), 끝에 상승음
- - 8~40초  : 킥·베이스·하이햇이 들어오는 본편
- - 40~46초 : 마지막 코드가 울리며 페이드아웃
+ - 8~46초  : 킥·베이스·하이햇이 들어오는 본편
+ - 46~52초 : 마지막 코드가 울리며 페이드아웃
 """
 import wave
 import numpy as np
@@ -13,7 +13,7 @@ SR = 44100
 BPM = 120
 BEAT = 60 / BPM          # 0.5초
 BAR = BEAT * 4           # 2초
-TOTAL = 46.0
+TOTAL = 52.0
 N = int(SR * TOTAL)
 
 rng = np.random.default_rng(7)
@@ -138,16 +138,16 @@ HAT_C, HAT_O = hat(), hat(True)
 # ARP 패턴(16분음표 대신 8분음표): 코드음을 위아래로
 ARP = [0, 1, 2, 1, 0, 2, 1, 2]
 
-for bar in range(23):
+for bar in range(26):
     t0 = bar * BAR
     ci = bar % 4
     chord = CHORDS[ci]
-    final = bar >= 20
+    final = bar >= 23
 
     # 패드: 인트로·본편 내내, 마지막은 길게 울림
-    if bar < 20:
+    if bar < 23:
         add(pad(chord, BAR + 0.4), t0, 0.55)
-    elif bar == 20:
+    elif bar == 23:
         add(pad(CHORDS[0] + [72], 6.0), t0, 0.6)
 
     # 벨 아르페지오
@@ -163,7 +163,7 @@ for bar in range(23):
         add(riser(BAR), t0, 0.35)
 
     # 본편: 킥 / 베이스 / 하이햇 / 클랩
-    if 4 <= bar < 20:
+    if 4 <= bar < 23:
         for b in range(4):
             add(KICK, t0 + b * BEAT, 0.9)
             add(HAT_C, t0 + b * BEAT + BEAT / 2, 0.22, 0.4)
@@ -171,11 +171,11 @@ for bar in range(23):
                 add(CLAP, t0 + b * BEAT, 0.35)
         for k in range(8):
             add(bass(ROOTS[ci], BEAT / 2 - 0.01), t0 + k * BEAT / 2, 0.45)
-        if bar == 19:  # 엔딩 직전 필인
+        if bar == 22:  # 엔딩 직전 필인
             add(riser(BAR), t0, 0.25)
 
     # 엔딩 히트
-    if bar == 20:
+    if bar == 23:
         add(KICK, t0, 1.0)
         add(HAT_O, t0, 0.3)
         add(bass(ROOTS[0], 3.0), t0, 0.5)
