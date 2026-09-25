@@ -1032,6 +1032,10 @@ var Core = (function () {
     livingUnits(state, 'ally').forEach(function (u) { u.from = null; });
     state.phase = 'enemy';
     springHeal(state, 'enemy', events);
+    // 기력 있는 적(2장 달래)은 아군과 같은 규칙: 2턴부터 페이즈 시작마다 +1 (보충 S2)
+    livingUnits(state, 'enemy').forEach(function (u) {
+      if (u.ki !== null && state.turn >= 2) u.ki = Math.min(u.maxKi, u.ki + 1);
+    });
     return events;
   }
 

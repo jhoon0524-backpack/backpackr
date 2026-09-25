@@ -43,9 +43,10 @@
 - [v0.3] 2장 유닛 정의 — ALLY_DEFS.gwangun(에디터 목록 제외), ENEMY_TYPES munyeo·dokkaebi_p·jangsan_p·dallae_boss(보스, 생명수, 기력), 적 소속·칭호를 정의표에서. 스킬 없는 유닛은 canSkill/useSkill 불가. 화면 스킬 버튼이 관군에서 'null' 로 보일 것 — 2장 유닛 표시 작업에서 처리
 - [v0.3] 2장 임시 스테이지 — Core.STAGES.ch2(10×8, maxTurn 12, 무녀2·정화 도깨비2·정화 장산범1·달래), 맵 코드에 maxTurn 유지·검사(1~30). tests/ch2-stage.test.mjs
 - [v0.3] 품계와 관군 — Core.RANKS·rankFor, newBattle(stage, { merit }) → state.rank, 윤무겸 칭호 앞 품계, 관군 0~2명(reserveCells: 윤무겸에서 가까운 빈 칸 BFS, 아군 목록 끝). tests/rank.test.mjs
+- [v0.3] 적 기력 — endAllyPhase(요괴 페이즈 시작)에서 기력 있는 적 +1 (2턴부터, 최대 10). tests/turn.test.mjs
 
 ## 다음에 진행할 작업
-- [v0.3 규칙] 적 기력
+- [v0.3 규칙] 무녀 AI
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.

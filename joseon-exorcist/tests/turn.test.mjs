@@ -117,3 +117,16 @@ test('요괴 페이즈에는 아군 페이즈를 다시 끝낼 수 없다', () =
   assert.deepEqual(Core.endAllyPhase(s), []);
   assert.equal(s.phase, 'enemy');
 });
+
+test('기력 있는 적(달래)은 2턴부터 요괴 페이즈 시작마다 +1, 최대 10', () => {
+  const s = Core.newBattle(Core.STAGES.ch2);
+  const d = Core.getUnit(s, 'dallae_boss');
+  const kis = [];
+  for (let t = 1; t <= 6; t++) {
+    s.turn = t; s.phase = 'ally';
+    Core.endAllyPhase(s);
+    kis.push(d.ki);
+  }
+  assert.deepEqual(kis, [6, 7, 8, 9, 10, 10]);
+  assert.equal(Core.getUnit(s, 'munyeo1').ki, null, '스킬 없는 적은 기력 없음');
+});
