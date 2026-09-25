@@ -46,9 +46,10 @@
 - [v0.3] 적 기력 — endAllyPhase(요괴 페이즈 시작)에서 기력 있는 적 +1 (2턴부터, 최대 10). tests/turn.test.mjs
 - [v0.3] 무녀 AI — 유닛 ai 필드(hold/archer/flee), archer 는 공격 칸을 가장 가까운 아군과 먼 칸부터(= 거리 2), 칠 수 없으면 1장 접근
 - [v0.3] 달래 AI — fleeAct: 기력 4↑·HP 절반 이하 동료(자기 포함, HP 비율 순) → 거리 2 안 먼 칸에서 생명수, 아니면 가장 먼 칸으로 도망, 공격 안 함. 무녀·달래 함께 tests/ch2-ai.test.mjs (한 커밋)
+- [v0.3] 진행 계산 — Core.CAMPAIGN·newProgress·applyResult(이긴 장만, 한 번만 누계)·nextStage(모두 깨면 null)·checkProgress(저장 값 검사). tests/progress.test.mjs
 
 ## 다음에 진행할 작업
-- [v0.3 규칙] 진행 계산
+- [v0.3 규칙] 2장 끝까지 돌려보기
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.

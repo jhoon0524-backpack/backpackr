@@ -62,7 +62,7 @@
 - [x] 적 기력 — 기력 있는 적은 2턴부터 요괴 페이즈 시작에 +1 + 테스트
 - [x] 무녀 AI — 거리 2 에서 쏘기(S5) + 테스트
 - [x] 달래 AI — 도망·생명수(S3·S4), 공격 안 함 + 테스트
-- [ ] 진행 계산 — `Core.applyResult(progress, stageId, result, merit)`·다음 장 결정(S7·S9) + 테스트
+- [x] 진행 계산 — `Core.applyResult(progress, stageId, result, merit)`·다음 장 결정(S7·S9) + 테스트
 - [ ] 2장 끝까지 돌려보기 — 대기만 하면 패배, 무한 반복 없음, 자동 플레이어 결과를 PROGRESS 에 기록
 
 ## [v0.3 화면]

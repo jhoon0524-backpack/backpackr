@@ -1364,6 +1364,38 @@ var Core = (function () {
     return st;
   }
 
+  // ── 진행 (specs/chapter2.md 1-3, 보충 S7·S9) ──────────
+  var CAMPAIGN = ['ch1', 'ch2']; // 장 순서
+
+  function newProgress() {
+    return { v: 1, cleared: [], merit: 0 };
+  }
+
+  // 장 결과를 반영한 새 진행 상태. 이긴 장만 공적이 누계에 더해진다 (같은 장은 한 번만).
+  function applyResult(progress, stageId, result, merit) {
+    var p = { v: 1, cleared: progress.cleared.slice(), merit: progress.merit };
+    if (result === 'win' && p.cleared.indexOf(stageId) === -1) {
+      p.cleared.push(stageId);
+      p.merit += merit;
+    }
+    return p;
+  }
+
+  // 다음에 할 장 id. 모두 깼으면 null (= 준비 중)
+  function nextStage(progress) {
+    for (var i = 0; i < CAMPAIGN.length; i++) {
+      if (progress.cleared.indexOf(CAMPAIGN[i]) === -1) return CAMPAIGN[i];
+    }
+    return null;
+  }
+
+  // 저장해 둔 진행 상태가 올바른지. 잘못됐으면 null
+  function checkProgress(p) {
+    if (!p || p.v !== 1 || !Array.isArray(p.cleared) || typeof p.merit !== 'number' || p.merit < 0) return null;
+    if (!p.cleared.every(function (id) { return CAMPAIGN.indexOf(id) !== -1; })) return null;
+    return { v: 1, cleared: p.cleared.slice(), merit: p.merit };
+  }
+
   return {
     STAGES: STAGES,
     TERRAINS: TERRAINS,
@@ -1424,7 +1456,12 @@ var Core = (function () {
     encodeStage: encodeStage,
     decodeStage: decodeStage,
     paintStage: paintStage,
-    resizeStage: resizeStage
+    resizeStage: resizeStage,
+    CAMPAIGN: CAMPAIGN,
+    newProgress: newProgress,
+    applyResult: applyResult,
+    nextStage: nextStage,
+    checkProgress: checkProgress
   };
 })();
 </script>
