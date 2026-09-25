@@ -346,6 +346,24 @@
     max-width: 100%;
   }
   #ed-board .cell.warn { box-shadow: inset 0 0 0 2px #f5c542; }
+  .tools { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .tool-group { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  .tool-group > span { width: 34px; font-size: 11px; color: var(--muted); }
+  .tool {
+    width: 40px; height: 40px; border-radius: 8px; border: 2px solid #2c303c;
+    background: var(--panel); color: var(--text); font-size: 20px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center; touch-action: manipulation;
+  }
+  .tool.sw { font-size: 16px; }
+  .tool.t-dirt { background: var(--dirt); }
+  .tool.t-rock { background: var(--rock); }
+  .tool.t-shrine { background: var(--shrine); }
+  .tool.t-spring { background: var(--spring); }
+  .tool.on { border-color: #f5c542; box-shadow: 0 0 0 1px #f5c542; }
+  #ed-tool-name { font-size: 12px; color: var(--muted); min-height: 16px; }
+  #ed-warns { margin: 8px 0 0; padding: 0; list-style: none; font-size: 12px; }
+  #ed-warns li { color: #f5c542; padding: 2px 0; }
+  #ed-warns li.ok { color: #6fcf6a; }
   #open-editor { display: block; margin: 14px auto 0; background: none; border: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; }
 
   #legend {
@@ -428,6 +446,9 @@
     <span class="stepper"><button class="small-btn" id="ed-cols-dec" type="button">−</button><b id="ed-cols"></b><button class="small-btn" id="ed-cols-inc" type="button">+</button></span>
   </div>
   <div id="ed-board"></div>
+  <div class="tools" id="ed-tools"></div>
+  <div id="ed-tool-name"></div>
+  <ul id="ed-warns"></ul>
 </div>
 
 <!-- 규칙: 화면(DOM)과 Math.random 을 쓰지 않는다. tests/ 가 Node 로 검사한다 (ADR 1번) -->
@@ -1798,7 +1819,86 @@ var Core = (function () {
         board.appendChild(cell);
       }
     }
+    var problems = Core.validateStage(stage);
+    problems.forEach(function (p) {
+      var cell = p.r !== undefined && board.querySelector('.cell[data-r="' + p.r + '"][data-c="' + p.c + '"]');
+      if (cell) cell.classList.add('warn');
+    });
+    renderWarnings(problems);
   }
+
+  // 도구 줄: 지형 4 · 아군 5 · 요괴 4 · 지우개
+  var TOOL_GROUPS = [
+    { label: '지형', tools: [
+      { kind: 'terrain', t: '.', name: '흙길', cls: 't-dirt' },
+      { kind: 'terrain', t: 'D', name: '초가집·바위', cls: 't-rock', mark: '🛖' },
+      { kind: 'terrain', t: 'M', name: '서낭당', cls: 't-shrine', mark: '🏮' },
+      { kind: 'terrain', t: 'K', name: '약수터', cls: 't-spring', mark: '💧' }
+    ] },
+    { label: '아군', tools: Core.ALLY_ORDER.map(function (id) {
+      return { kind: 'ally', id: id, name: Core.ALLY_DEFS[id].name, mark: Core.ALLY_DEFS[id].emoji };
+    }) },
+    { label: '요괴', tools: Core.ENEMY_ORDER.map(function (type) {
+      return { kind: 'enemy', type: type, name: Core.ENEMY_TYPES[type].name, mark: Core.ENEMY_TYPES[type].emoji };
+    }) },
+    { label: '기타', tools: [{ kind: 'erase', name: '지우개 (유닛 → 지형 순서로 지움)', mark: '🧽' }] }
+  ];
+  var tool = TOOL_GROUPS[0].tools[1]; // 처음엔 초가집·바위
+
+  function buildTools() {
+    var box = document.getElementById('ed-tools');
+    box.innerHTML = '';
+    TOOL_GROUPS.forEach(function (g) {
+      var row = el('div', 'tool-group');
+      row.appendChild(el('span', '', g.label));
+      g.tools.forEach(function (t) {
+        var b = el('button', 'tool' + (t.cls ? ' sw ' + t.cls : ''), t.mark || '');
+        b.type = 'button';
+        b.title = t.name;
+        b.setAttribute('aria-label', t.name);
+        if (t === tool) b.className += ' on';
+        b.addEventListener('click', function () { tool = t; buildTools(); });
+        row.appendChild(b);
+      });
+      box.appendChild(row);
+    });
+    document.getElementById('ed-tool-name').textContent = '선택: ' + tool.name;
+  }
+
+  // 경고 (core 의 validateStage). 문제가 있어도 저장·복사는 된다
+  function renderWarnings(problems) {
+    var list = document.getElementById('ed-warns');
+    list.innerHTML = '';
+    if (!problems.length) list.appendChild(el('li', 'ok', '✓ 문제없음 — 이 맵으로 전투를 만들 수 있습니다'));
+    problems.forEach(function (p) {
+      list.appendChild(el('li', '', '⚠ ' + p.msg + (p.r !== undefined ? ' (' + (p.r + 1) + '행 ' + (p.c + 1) + '열)' : '')));
+    });
+  }
+
+  // 칠하기: 누른 칸을 칠하고, 지형 도구면 끌고 가는 칸도 칠한다
+  var dragging = false, lastKey = null;
+  function paintAt(target) {
+    var cell = target && target.closest && target.closest('#ed-board .cell');
+    if (!cell) return;
+    var key = cell.dataset.r + ',' + cell.dataset.c;
+    if (key === lastKey) return;
+    lastKey = key;
+    stage = Core.paintStage(stage, tool, +cell.dataset.r, +cell.dataset.c);
+    render();
+  }
+  board.addEventListener('pointerdown', function (e) {
+    // 터치는 누른 칸에 포인터가 붙잡히는데, 칠할 때마다 칸을 새로 그리므로 풀어 둔다
+    if (e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId)) e.target.releasePointerCapture(e.pointerId);
+    dragging = tool.kind === 'terrain';
+    lastKey = null;
+    paintAt(e.target);
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    paintAt(document.elementFromPoint(e.clientX, e.clientY));
+  });
+  window.addEventListener('pointerup', function () { dragging = false; });
+  window.addEventListener('pointercancel', function () { dragging = false; });
 
   function resize(dr, dc) {
     stage = Core.resizeStage(stage, stage.rows + dr, stage.cols + dc);
@@ -1826,6 +1926,7 @@ var Core = (function () {
     location.hash = '';
     route();
   });
+  buildTools();
   window.addEventListener('hashchange', route);
   window.addEventListener('resize', function () { if (!app.hidden) sizeBoard(); });
   route();
