@@ -365,6 +365,53 @@ var Core = (function () {
     return [];
   }
 
+  // ── 턴 진행 (specs/battle.md 3·6·9장) ─────────────────
+  var WEATHER_TURNS = [4, 7, 10];
+  var SPRING_HEAL = 10;
+
+  // 약수터 위에 있는 side 유닛을 HP +10 (최대 HP 까지)
+  function springHeal(state, side, events) {
+    livingUnits(state, side).forEach(function (u) {
+      if (!isSpring(u.r, u.c)) return;
+      var amount = Math.min(SPRING_HEAL, u.maxHp - u.hp);
+      u.hp += amount;
+      events.push({ type: 'spring', targetId: u.id, amount: amount });
+    });
+  }
+
+  // 아군 페이즈 시작. 1턴 포함 매 턴 부른다.
+  // rng: 0 이상 1 미만을 돌려주는 함수. 날씨가 바뀌는 턴에만 한 번 부른다.
+  function startAllyPhase(state, rng) {
+    var events = [];
+    if (WEATHER_TURNS.indexOf(state.turn) !== -1) {
+      state.weather = WEATHERS[Math.floor(rng() * WEATHERS.length)];
+      events.push({ type: 'weather', weather: state.weather });
+    }
+    springHeal(state, 'ally', events);
+    livingUnits(state, 'ally').forEach(function (u) {
+      if (state.turn >= 2) u.ki = Math.min(u.maxKi, u.ki + 1);
+      u.acted = false;
+      u.from = null;
+    });
+    state.phase = 'ally';
+    return events;
+  }
+
+  function allActed(state) {
+    return livingUnits(state, 'ally').every(function (u) { return u.acted; });
+  }
+
+  // [턴 종료] 또는 전원 행동 끝 → 요괴 페이즈 시작 (요괴 약수터 회복).
+  // 이동만 하고 행동하지 않은 유닛은 그 자리에 머문다.
+  function endAllyPhase(state) {
+    var events = [];
+    if (state.phase !== 'ally' || state.result !== null) return events;
+    livingUnits(state, 'ally').forEach(function (u) { u.from = null; });
+    state.phase = 'enemy';
+    springHeal(state, 'enemy', events);
+    return events;
+  }
+
   return {
     SIZE: SIZE,
     MAP: MAP,
@@ -398,7 +445,10 @@ var Core = (function () {
     attack: attack,
     useSkill: useSkill,
     wait: wait,
-    endEnemyPhase: endEnemyPhase
+    endEnemyPhase: endEnemyPhase,
+    startAllyPhase: startAllyPhase,
+    allActed: allActed,
+    endAllyPhase: endAllyPhase
   };
 })();
 </script>
