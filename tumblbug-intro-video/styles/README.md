@@ -12,10 +12,26 @@
 - 실제 수치(누적 5,000억 원+, 1,000만 건+, 약 8만 개)는 2026년 6월 29일 기준 텀블벅 발표. 그 외 달성률·후원자 이름·금액은 연출용 가상 예시.
 - 폰트: Pretendard, 나눔펜(손글씨), 갈무리(픽셀) — 모두 SIL OFL 1.1 (`../fonts/`)
 
+## 시안 C 풀 버전 — CREATOR QUEST (48초)
+`samples/C_pixel_full.mp4`, `samples/C_pixel_full_storyboard.jpg` (스크립트: `full_c_pixel.py`)
+
+| 시간 | 장면 |
+|---|---|
+| 0~4초 | 타이틀 (PRESS START) |
+| 4~10초 | STAGE 1 아이디어를 꺼내라 — ? 블록에서 전구 획득 |
+| 10~16초 | STAGE 2 프로젝트를 공개하라 — 간판 세우고 OPEN! |
+| 16~26초 | STAGE 3 응원을 모아라 — 후원 하트 모으기, FEVER TIME, 게이지 100% |
+| 26~29초 | STAGE CLEAR! 펀딩 성공 (※ 목표 금액을 달성해야만 결제) |
+| 29~35초 | STAGE 4 선물을 전하라 — 후원자들에게 선물 배달 |
+| 35~39초 | SELECT WORLD — 카테고리 8개 |
+| 39~44초 | HIGH SCORE — 실제 누적 수치 |
+| 44~48초 | 엔딩 — 텀블벅 / 0에서 1을 만드는 사람들 / tumblbug.com |
+
 ## 다시 만들기 (tumblbug-intro-video 폴더에서)
 ```
 python3 styles/style_a_kinetic.py
 python3 styles/style_b_paper.py
 python3 styles/style_c_pixel.py
 python3 styles/style_d_shortform.py
+python3 styles/full_c_pixel.py   # 시안 C 풀 버전
 ```
