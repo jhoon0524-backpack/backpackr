@@ -200,6 +200,46 @@
   .btns button:disabled { opacity: .35; }
   .btns button:not(:disabled):active { background: #262a36; }
 
+  /* 대사 장면: 맵이 비쳐 보이게 옅게 덮고, 아래에 초상화 + 말풍선 */
+  #scene {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(4, 5, 8, .45);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+  }
+  #scene .card {
+    width: 100%;
+    max-width: 464px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #f1ead8;
+    color: #1d1a14;
+    border: 2px solid #3b2d1c;
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .6);
+  }
+  #scene .portrait {
+    flex: none;
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    line-height: 1;
+    background: #2a2620;
+    border-radius: 10px;
+  }
+  #scene .who { font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+  #scene .line { font-size: 16px; line-height: 1.45; word-break: keep-all; }
+  #scene .next { text-align: right; font-size: 11px; color: #7a6e58; margin-top: 6px; }
+
   #legend {
     display: flex;
     justify-content: center;
@@ -244,6 +284,17 @@
     </div>
     <div class="btns"><button id="btn-end">턴 종료</button></div>
     <div id="phase-note"></div>
+  </div>
+</div>
+
+<div id="scene" hidden>
+  <div class="card">
+    <div class="portrait" id="scene-face"></div>
+    <div style="flex: 1">
+      <div class="who" id="scene-who"></div>
+      <div class="line" id="scene-line"></div>
+      <div class="next">▼ 눌러서 계속</div>
+    </div>
   </div>
 </div>
 
@@ -812,6 +863,15 @@ var Core = (function () {
   var WEATHER_ICON = { '맑음': '☀️', '강풍': '🌬️', '비': '🌧️', '흐림': '☁️' };
   var ENEMY_STEP_MS = 500; // 요괴 한 마리씩 행동하는 간격 (기획서 14장)
 
+  // 대사 (specs/screens.md 6장). 문구는 기획자가 정한다 — 고치지 않는다
+  var INTRO = [
+    { who: '흑린', face: '🐍', text: '천 년을 기다렸다. 오늘 밤 이 마을을 삼키고 하늘로 오르리라.' },
+    { who: '윤무겸', face: '🗡️', text: '벽사청의 명이다. 요괴는 벤다.' },
+    { who: '소운', face: '🧙', text: '닭이 울기 전에 끝냅시다. 난 아침잠이 많아서.' },
+    { who: '여울', face: '🥷', text: '관군과 한편이라니, 오늘 밤만이오.' },
+    { who: '달래', face: '🔔', text: '베기 전에 저 원한부터 들어보시지요.' }
+  ];
+
   var state = Core.newBattle();
   var board = document.getElementById('board');
   var cells = [];
@@ -1089,6 +1149,42 @@ var Core = (function () {
     setTimeout(next, ENEMY_STEP_MS);
   }
 
+  // 대사를 한 줄씩 보여 주고, 다 넘기면 done 을 부른다. 그동안 맵 입력은 잠근다.
+  // 줄 대신 { pause: 밀리초, run: 함수 } 를 넣으면 연출을 돌리고 그 시간 동안 기다린다.
+  function playScene(lines, done) {
+    var scene = document.getElementById('scene');
+    var i = 0;
+    ui.busy = true;
+    render();
+    function show() {
+      if (i >= lines.length) {
+        scene.hidden = true;
+        scene.onclick = null;
+        return done();
+      }
+      var line = lines[i++];
+      if (line.pause) {
+        scene.hidden = true;
+        scene.onclick = null;
+        line.run();
+        return setTimeout(show, line.pause);
+      }
+      document.getElementById('scene-face').textContent = line.face;
+      document.getElementById('scene-who').textContent = line.who;
+      document.getElementById('scene-line').textContent = line.text;
+      scene.hidden = false;
+      scene.onclick = show;
+    }
+    show();
+  }
+
+  function startBattle() {
+    playScene(INTRO, function () {
+      ui.busy = false;
+      render();
+    });
+  }
+
   // 전투 끝. 승패 화면은 뒤 작업에서 붙인다
   function finish() {
     ui.busy = true;
@@ -1132,6 +1228,7 @@ var Core = (function () {
   buildBoard();
   Core.startAllyPhase(state, Math.random);
   render();
+  startBattle();
 })();
 </script>
 </body>
