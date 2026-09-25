@@ -240,6 +240,37 @@
   #scene .line { font-size: 16px; line-height: 1.45; word-break: keep-all; }
   #scene .next { text-align: right; font-size: 11px; color: #7a6e58; margin-top: 6px; }
 
+  .unit.fading { animation: fadeaway 1.6s ease-in forwards; }
+  @keyframes fadeaway { to { opacity: 0; transform: translateY(-20%) scale(.9); filter: blur(2px); } }
+
+  #result {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: rgba(4, 5, 8, .88);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 24px;
+    text-align: center;
+  }
+  #result .title { font-size: 22px; font-weight: 800; line-height: 1.4; word-break: keep-all; }
+  #result .title.win { color: #f5c542; }
+  #result .title.lose { color: #c9b6e8; }
+  #result button {
+    min-width: 160px;
+    min-height: 48px;
+    border-radius: 10px;
+    border: 1px solid #5a3440;
+    background: #2a1f24;
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
   #legend {
     display: flex;
     justify-content: center;
@@ -296,6 +327,11 @@
       <div class="next">▼ 눌러서 계속</div>
     </div>
   </div>
+</div>
+
+<div id="result" hidden>
+  <div class="title" id="result-text"></div>
+  <button id="btn-retry">다시하기</button>
 </div>
 
 <!-- 규칙: 화면(DOM)과 Math.random 을 쓰지 않는다. tests/ 가 Node 로 검사한다 (ADR 1번) -->
@@ -871,12 +907,26 @@ var Core = (function () {
     { who: '여울', face: '🥷', text: '관군과 한편이라니, 오늘 밤만이오.' },
     { who: '달래', face: '🔔', text: '베기 전에 저 원한부터 들어보시지요.' }
   ];
+  var FADE_MS = 1600;
+  var LOSE_TEXT = '날이 밝았다. 흑린이 용이 되어 승천했다.';
+
+  // 승리 후 대사. 달래가 맵에 있으면 첫 줄 뒤 달래 유닛이 서서히 사라진다
+  function victoryLines() {
+    var lines = [{ who: '달래', face: '🔔', text: '원한이 풀렸네. 이제 편히 가시게.' }];
+    if (Core.getUnit(state, 'dallae').alive) {
+      lines.push({ pause: FADE_MS, run: function () { ui.dallaeGone = true; render(); } });
+    }
+    return lines.concat([
+      { who: '윤무겸', face: '🗡️', text: '여의주는 어디 있소?' },
+      { who: '한결', face: '🏹', text: '…달래님이 안 보입니다.' }
+    ]);
+  }
 
   var state = Core.newBattle();
   var board = document.getElementById('board');
   var cells = [];
   // 조작 상태. step: 'none' 선택 없음 / 'move' 파란 칸 고르는 중 / 'menu' 이동 후 행동 고르는 중
-  var ui = { step: 'none', id: null, busy: false, infoId: null };
+  var ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false };
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -993,6 +1043,7 @@ var Core = (function () {
       var tile = unitTile(u);
       if (u.id === ui.id) tile.className += ' selected';
       if (u.side === 'ally' && u.acted) tile.className += ' acted';
+      if (u.id === 'dallae' && ui.dallaeGone) tile.className += ' fading';
       cellAt(u.r, u.c).appendChild(tile);
       var tag = u.side !== 'ally' || ui.kind === 'skill' ? affinityTag(u) : null;
       if (tag && marksHas(marks, u)) cellAt(u.r, u.c).appendChild(tag);
@@ -1185,11 +1236,37 @@ var Core = (function () {
     });
   }
 
-  // 전투 끝. 승패 화면은 뒤 작업에서 붙인다
+  // 전투 끝: 승리면 승리 후 대사 → 승리 화면, 패배면 바로 패배 화면
   function finish() {
     ui.busy = true;
+    clearSelection();
     render();
+    if (state.result === 'win') {
+      setTimeout(function () { playScene(victoryLines(), showResult); }, 900); // 마지막 피해 숫자를 본 뒤
+    } else {
+      setTimeout(showResult, 900);
+    }
   }
+
+  function showResult() {
+    var t = document.getElementById('result-text');
+    var win = state.result === 'win';
+    t.className = 'title ' + (win ? 'win' : 'lose');
+    t.textContent = win ? '1장 흑린 토벌 완료 · 공적 ' + state.merit + ' / 8' : LOSE_TEXT;
+    document.getElementById('result').hidden = false;
+  }
+
+  // 다시하기: 새 전투 상태로 시작 대사부터
+  function restart() {
+    document.getElementById('result').hidden = true;
+    state = Core.newBattle();
+    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false };
+    Core.startAllyPhase(state, Math.random);
+    render();
+    startBattle();
+  }
+
+  document.getElementById('btn-retry').addEventListener('click', restart);
 
   document.getElementById('btn-end').addEventListener('click', function () {
     if (ui.busy) return;
