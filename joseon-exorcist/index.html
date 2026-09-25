@@ -31,7 +31,46 @@
 var Core = (function () {
   'use strict';
 
-  return {};
+  // ── 맵 (specs/battle.md 1장) ─────────────────────────
+  var SIZE = 8;
+  // . 흙길  D 초가집·바위(통과 불가)  M 서낭당(받는 피해 ×0.8)  K 약수터(페이즈 시작 HP +10)
+  var MAP = [
+    '...MM...',
+    '.D....D.',
+    '.D....D.',
+    '...K....',
+    '.....D..',
+    '.DD..D..',
+    '........',
+    '........'
+  ];
+
+  function inBounds(r, c) {
+    return r >= 0 && r < SIZE && c >= 0 && c < SIZE;
+  }
+  function terrainAt(r, c) {
+    return inBounds(r, c) ? MAP[r].charAt(c) : null;
+  }
+  function isPassable(r, c) {
+    var t = terrainAt(r, c);
+    return t !== null && t !== 'D';
+  }
+  function isShrine(r, c) {
+    return terrainAt(r, c) === 'M';
+  }
+  function isSpring(r, c) {
+    return terrainAt(r, c) === 'K';
+  }
+
+  return {
+    SIZE: SIZE,
+    MAP: MAP,
+    inBounds: inBounds,
+    terrainAt: terrainAt,
+    isPassable: isPassable,
+    isShrine: isShrine,
+    isSpring: isSpring
+  };
 })();
 </script>
 

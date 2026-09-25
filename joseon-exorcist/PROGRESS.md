@@ -5,9 +5,10 @@
   `TASKS.md` 에 작업 24개를 만들었다. 코드는 아직 없다.
 - 2026-09-25 **(보충)** 항목 8개를 기획자가 그대로 확정했다.
 - index.html 뼈대와 tests/html.test.mjs (문법·외부 주소·core 로딩·core 에 document/window/Math.random 금지). 검사 명령을 `node --test` 로 바꿨다 (Node 22 는 폴더 경로 인자를 못 받음)
+- 맵 데이터 — Core.MAP 과 terrainAt/isPassable/isShrine/isSpring, tests/map.test.mjs
 
 ## 다음에 진행할 작업
-- [규칙] 맵 데이터
+- [규칙] 유닛 데이터
 
 ## 확인하지 못한 것
 여기가 이 문서에서 가장 중요하다.
