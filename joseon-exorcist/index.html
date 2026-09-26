@@ -800,6 +800,7 @@
     <button class="big-btn plain" id="btn-new" type="button">처음부터</button>
     <button class="big-btn plain" id="lore-open-title" type="button">📖 벽사록</button>
     <button class="big-btn plain" id="playlog-open-title" type="button" hidden>🧪 플레이 기록</button>
+    <button class="big-btn plain" id="btn-test4" type="button" hidden>🧪 4장 바로 시험</button>
     <div class="note" id="title-note"></div>
     <!-- 처음부터 확인 (specs/chapter2.md 7-4): 폰 오터치로 기록이 지워지지 않게 -->
     <div class="confirm" id="new-confirm" hidden>
@@ -5083,6 +5084,18 @@ var Core = (function () {
   document.getElementById('playlog-open-title').hidden = !DEV;
   document.getElementById('playlog-open-battle').hidden = !DEV;
   document.getElementById('playlog-open-title').addEventListener('click', openPlayLog);
+  // 🧪 4장 바로 시험: 3장까지 깬 상태(공적 13·수련점 2)로 지도를 연다. 실제 게임 주소에서는 ?dev=1 일 때만 보인다
+  // (시험용 사본 — claude.ai 링크 등 — 에서는 늘 보인다). 기존 진행을 덮으므로 한 번 묻는다
+  document.getElementById('btn-test4').hidden = !DEV && location.hostname === 'joseon-exorcist.vercel.app';
+  document.getElementById('btn-test4').addEventListener('click', function () {
+    ask('3장까지 깬 상태로 바꾸고 지도로 갑니다.\n지금 이 브라우저의 진행은 덮어씁니다.', function () {
+      progress = Core.checkProgress({ v: 1, cleared: ['ch1', 'ch2', 'ch3'], merit: 13, training: {} });
+      saveProgress();
+      ['news:ch1', 'news:ch2', 'news:ch3', 'news:ch3b'].forEach(function (id) { if (worldSeen.indexOf(id) === -1) worldSeen.push(id); });
+      saveWorld();
+      showWorld();
+    }, function () {}, { yes: '4장 시험 시작', no: '취소', yesFirst: true });
+  });
   document.getElementById('playlog-open-battle').addEventListener('click', openPlayLog);
   document.getElementById('playlog-close').addEventListener('click', function () { document.getElementById('playlog').hidden = true; });
   document.getElementById('playlog-copy').addEventListener('click', function () {
