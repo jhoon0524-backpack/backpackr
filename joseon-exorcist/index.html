@@ -83,12 +83,15 @@
   .f-bs    { border-color: var(--bs); }
   .f-guest { border-color: var(--guest); }
   .f-enemy { border-color: var(--enemy); }
-  .f-neutral { border-color: #e2c26b; box-shadow: 0 0 6px rgba(226, 194, 107, .45); } /* 3장 서낭신: 적색이 아닌 중립 */
+  .f-neutral { border-color: #e2c26b; box-shadow: 0 0 6px rgba(226, 194, 107, .45); } /* 3장 서낭신: 진실 뒤 금색 신령 */
+  .f-unknown { border-color: #6b6b6b; } /* 3장 서낭신: 진실 전에는 정체 모름 (회색·먹색) */
+  #ask { position: fixed; inset: 0; z-index: 44; background: rgba(4, 5, 8, .75); display: flex; align-items: center; justify-content: center; padding: 20px; }
+  #ask .card { max-width: 340px; width: 100%; background: var(--panel); border: 1px solid #e2c26b; border-radius: 10px; padding: 18px 16px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
+  #ask p { margin: 0 0 4px; font-size: 15px; line-height: 1.6; word-break: keep-all; }
   /* 3장 지점 표시 (칸 왼쪽 위 작은 글자) */
   .pt {
     position: absolute; left: 1px; top: 1px; z-index: 2; pointer-events: none;
-    font-size: 10px; font-weight: 800; line-height: 1; padding: 2px 3px; border-radius: 3px;
-    font-family: "Nanum Myeongjo", "AppleMyungjo", serif;
+    font-size: 9px; font-weight: 800; line-height: 1; padding: 2px 3px; border-radius: 3px; letter-spacing: -.02em;
   }
   .pt.clue { background: #e0b04a; color: #1d1a14; }
   .pt.done { background: #4a4f5c; color: #d8d4c8; }
@@ -882,6 +885,15 @@
     <button class="big-btn plain" id="btn-home" type="button">처음 화면으로</button>
   </div>
   <div id="toasts" aria-live="polite"></div>
+
+  <!-- 전투 중 확인창 (3장: 진실 뒤 서낭신 공격) -->
+  <div id="ask" hidden role="dialog" aria-modal="true">
+    <div class="card">
+      <p id="ask-text"></p>
+      <button class="big-btn" id="ask-no" type="button">그만둔다</button>
+      <button class="big-btn plain" id="ask-yes" type="button">그래도 공격한다</button>
+    </div>
+  </div>
 
   <!-- 개발자용 플레이 기록 (?dev=1, specs/playtest.md 2장) -->
   <div id="playlog" hidden role="dialog" aria-modal="true" aria-labelledby="playlog-title">
@@ -3030,8 +3042,12 @@ var Core = (function () {
     }
   }
 
+  // 진실(봉인 단계) 전인가 — 3장 서낭신의 정체를 화면이 먼저 말하지 않게
+  function seonangHidden() {
+    return !!state.objective && state.objective.phase === 'investigate';
+  }
   function factionClass(u) {
-    if (u.side === 'neutral') return 'f-neutral';
+    if (u.side === 'neutral') return seonangHidden() ? 'f-unknown' : 'f-neutral';
     if (u.side === 'enemy') return 'f-enemy';
     return u.guest ? 'f-guest' : 'f-bs';
   }
@@ -3144,15 +3160,16 @@ var Core = (function () {
   }
 
   // ── 3장 지점 표시·임무 줄 (specs/chapter3.md 3장) ──
-  // 조사 단계: 조사할 곳 '?' (한 곳은 '·'), 봉인 단계: 봉인할 곳 '封'(붉게 깜빡) → 복구 '✓', 조사한 돌무덤은 '怨'(원한 지점)
+  // 조사 단계: 조사할 곳 '조사' (한 곳은 '조사함'), 봉인 단계: 봉인할 곳 '봉인'(붉게 깜빡) → 복구 '완료', 조사한 돌무덤은 '원한'
+  // (한자 표시는 뜻이 안 읽혀 한글로 바꿨다 — 기획자 피드백 2026-09-26)
   function pointMark(p) {
     var o = state.objective;
     if (o.phase === 'investigate') {
       if (!p.investigate) return null;
-      return o.investigated.indexOf(p.id) === -1 ? ['clue', '?'] : ['done', p.respawn ? '怨' : '·'];
+      return o.investigated.indexOf(p.id) === -1 ? ['clue', '조사'] : ['done', p.respawn ? '원한' : '조사함'];
     }
-    if (p.seal) return o.repaired.indexOf(p.id) === -1 ? ['seal', '封'] : ['sealed', '✓'];
-    if (p.respawn) return ['grudge', '怨'];
+    if (p.seal) return o.repaired.indexOf(p.id) === -1 ? ['seal', '봉인'] : ['sealed', '완료'];
+    if (p.respawn) return ['grudge', '원한'];
     return null;
   }
   function renderPoints() {
@@ -3184,15 +3201,15 @@ var Core = (function () {
     var o = state.objective;
     if (o.phase === 'investigate') {
       if (!p.investigate) return null;
-      if (o.investigated.indexOf(p.id) === -1) return { mark: '?', name: '수상한 흔적', text: '아군이 이 칸에 서면 조사한다.' };
-      return { mark: '·', name: p.investigate.title, text: p.investigate.text };
+      if (o.investigated.indexOf(p.id) === -1) return { mark: '🔍', name: '수상한 흔적', text: '아군이 이 칸에 서면 조사한다.' };
+      return { mark: '🔍', name: p.investigate.title, text: p.investigate.text };
     }
     if (p.seal) {
       return o.repaired.indexOf(p.id) === -1
-        ? { mark: '封', name: '봉인 지점 · ' + p.name, text: '이 칸에 선 아군이 [봉인 복구]를 할 수 있다.' }
-        : { mark: '✓', name: p.name + ' · 복구됨', text: p.seal.done };
+        ? { mark: '🪢', name: '봉인 지점 · ' + p.name, text: '이 칸에 선 아군이 [봉인 복구]를 할 수 있다.' }
+        : { mark: '✅', name: p.name + ' · 복구됨', text: p.seal.done };
     }
-    if (p.respawn) return { mark: '怨', name: '원한 지점 · ' + p.name, text: '쓰러진 원귀가 이곳에서 다시 나타난다.' };
+    if (p.respawn) return { mark: '👻', name: '원한 지점 · ' + p.name, text: '쓰러진 원귀가 이곳에서 다시 나타난다.' };
     return null;
   }
 
@@ -3224,7 +3241,9 @@ var Core = (function () {
     var name = el('div', 'name', u.name);
     if (u.guest) name.appendChild(el('span', 'guest', '객장'));
     text.appendChild(name);
-    text.appendChild(el('div', 'sub', u.faction + ' · ' + u.title));
+    text.appendChild(el('div', 'sub', u.side === 'neutral'
+      ? (seonangHidden() ? '정체를 알 수 없다' : u.faction + ' · 원귀를 막고 있는 신령')
+      : u.faction + ' · ' + u.title));
     text.appendChild(el('div', 'stats',
       'HP ' + u.hp + '/' + u.maxHp +
       ' · 기력 ' + (u.ki === null ? '—' : u.ki + '/' + u.maxKi) +
@@ -3395,10 +3414,12 @@ var Core = (function () {
       if (!target) {
         ui.step = 'menu'; // 대상 밖을 누르면 메뉴로 돌아간다
       } else {
-        var from = startPos(ui.id), actor = ui.id;
-        var events = ui.kind === 'skill' ? Core.useSkill(state, ui.id, target.id) : Core.attack(state, ui.id, target.id);
-        logAllyAction(actor, from, events);
-        afterAction(events);
+        // 3장: 진실을 안 뒤 서낭신을 치려 하면 한 번 묻는다 (진실 전 공격은 그대로 — 오해도 경험이다)
+        if (target.side === 'neutral' && !seonangHidden() && !ui.askedSeonang) {
+          ui.askedSeonang = true;
+          return ask('서낭신은 원귀가 마을로 내려가지 못하게 막고 있다.\n정말 공격할까?', function () { strike(target); }, function () { ui.step = 'menu'; render(); });
+        }
+        strike(target);
         return;
       }
     } else if (ui.step === 'none') {
@@ -3410,6 +3431,21 @@ var Core = (function () {
       }
     }
     render();
+  }
+
+  function strike(target) {
+    var from = startPos(ui.id), actor = ui.id;
+    var events = ui.kind === 'skill' ? Core.useSkill(state, ui.id, target.id) : Core.attack(state, ui.id, target.id);
+    logAllyAction(actor, from, events);
+    afterAction(events);
+  }
+  function ask(text, onYes, onNo) {
+    var box = document.getElementById('ask');
+    document.getElementById('ask-text').textContent = text;
+    document.getElementById('ask-text').style.whiteSpace = 'pre-line';
+    box.hidden = false;
+    document.getElementById('ask-yes').onclick = function () { box.hidden = true; onYes(); };
+    document.getElementById('ask-no').onclick = function () { box.hidden = true; onNo(); };
   }
 
   // 3장: 이동을 마친 칸이 조사 지점이면 자동 조사 → 짧은 글, 2곳째면 진실 대사 → 임무 갱신
@@ -3473,7 +3509,20 @@ var Core = (function () {
       ui.busy = true;
       render();
       setTimeout(endTurn, ENEMY_STEP_MS);
+      return;
     }
+    autoSelect();
+  }
+  // 행동이 끝나면 다음 아군을 자동으로 고른다 (기획자 피드백 2026-09-26). 다른 유닛을 누르면 그쪽으로 바뀐다
+  function autoSelect() {
+    if (state.phase !== 'ally' || state.result !== null || ui.busy) return;
+    var next = Core.livingUnits(state, 'ally').filter(selectable)[0];
+    if (!next) return;
+    ui.step = 'move';
+    ui.id = next.id;
+    ui.infoId = next.id;
+    ui.infoCell = null;
+    render();
   }
 
   // 3장 목표 알림: 봉인 복구·임무 완료, 원귀 재등장, 봉인 약화
@@ -3689,6 +3738,7 @@ var Core = (function () {
         if (state.result !== null) { Core.logEvents(playLog, state, end); render(); return finish(); }
         ui.busy = false;
         showEvents(end.concat(Core.startAllyPhase(state, Math.random)));
+        autoSelect(); // 새 턴도 첫 아군부터
         return;
       }
       var id = order[i++];
@@ -4165,7 +4215,7 @@ var Core = (function () {
     document.getElementById('world').hidden = true;
     state = Core.newBattle(Core.STAGES[id], { merit: progress.merit });
     playLog = Core.newPlayLog(state, id, playStore.restarts[id] || 0);
-    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, seonangWarned: false };
+    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, seonangWarned: false, askedSeonang: false };
     buildBoard();
     Core.startAllyPhase(state, Math.random);
     render();
@@ -4174,6 +4224,7 @@ var Core = (function () {
       render();
       discover(Core.loreTokensForBattle(state, id)); // 이 장에서 만난 세력·귀물
       terrainTips();
+      autoSelect();
     });
   }
 
