@@ -1153,6 +1153,7 @@ var Core = (function () {
     events.push({
       type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount,
       name: useSkill ? attacker.skill : attacker.attackName, // 화면에 띄울 기술 이름 (없으면 null)
+      skill: !!useSkill, // 스킬인지 기본공격인지 (플레이 로그용)
       mult: useSkill ? elementMultiplier(attacker.elem, target.elem) : 1 // 상성 배율 (화면 연출용)
     });
     if (target.hp === 0) knockOut(state, attacker, target, events);
@@ -1529,6 +1530,102 @@ var Core = (function () {
       events = events.concat(enemyAct(state, id));
     });
     return events.concat(endEnemyPhase(state));
+  }
+
+  // ── 플레이 로그 (v0.5, specs/playtest.md 1장) ─────────
+  // 처음 하는 사람의 플레이를 숫자로 남긴다. 화면·저장소는 모른다: 화면이 이벤트를 넘기고, 끝난 로그를 저장한다.
+  // 자동 플레이(tests/sim-report.mjs)도 같은 함수를 써서 계산을 검증한다.
+  function bump(map, key, n) { map[key] = (map[key] || 0) + (n === undefined ? 1 : n); }
+
+  function dalraeOf(state) {
+    return state.units.filter(function (u) { return u.side === 'enemy' && u.ai === 'flee'; })[0] || null;
+  }
+  // 달래 → 탈출로 실제 칸 수. 달래가 없거나 쓰러졌거나 길이 막혔으면 null
+  function dalraeDistance(state) {
+    var d = dalraeOf(state);
+    if (!d || !d.alive) return null;
+    var v = escapeMap(state, d)[d.r + ',' + d.c];
+    return v === undefined ? null : v;
+  }
+  function trackDalrae(log, state) {
+    var d = dalraeOf(state);
+    if (!d || !d.alive) return;
+    var last = log.dalraeTrail[log.dalraeTrail.length - 1];
+    var dist = dalraeDistance(state);
+    if (last && last.r === d.r && last.c === d.c && last.dist === dist) return;
+    log.dalraeTrail.push({ turn: state.turn, r: d.r, c: d.c, dist: dist });
+  }
+
+  function newPlayLog(state, chapter, restartCount) {
+    var names = {};
+    state.units.forEach(function (u) { names[u.id] = u.name; });
+    var log = {
+      v: 1, chapter: chapter, result: null, totalTurns: 0,
+      rank: state.rank || rankFor(0).name,
+      soldierCount: state.units.filter(function (u) { return u.type === 'gwangun'; }).length,
+      unitMoves: {}, attacks: {}, skillsByUnit: {}, skills: {}, damageDealt: {}, damageTaken: {},
+      healing: {}, springHealing: {}, defeatedUnits: [], meritEarned: 0,
+      dalraeHealCount: 0, dalraeEscapeDistance: null, dalraeTrail: [], restartCount: restartCount || 0,
+      moves: [], hits: [], heals: [], healFollowUps: [], names: names
+    };
+    trackDalrae(log, state);
+    return log;
+  }
+
+  // 아군 이동은 행동을 마칠 때 화면이 알려 준다 (취소한 이동은 세지 않는다)
+  function logMove(log, state, id, from, to) {
+    if (from.r === to.r && from.c === to.c) return;
+    bump(log.unitMoves, id);
+    log.moves.push({ turn: state.turn, id: id, from: { r: from.r, c: from.c }, to: { r: to.r, c: to.c } });
+  }
+
+  function logEvents(log, state, events) {
+    (events || []).forEach(function (e) {
+      if (e.type === 'move') {
+        logMove(log, state, e.unitId, e.from, e.to);
+      } else if (e.type === 'damage') {
+        bump(e.skill ? log.skillsByUnit : log.attacks, e.attackerId);
+        if (e.skill) bump(log.skills, e.name);
+        bump(log.damageDealt, e.attackerId, e.amount);
+        bump(log.damageTaken, e.targetId, e.amount);
+        log.hits.push({ turn: state.turn, by: e.attackerId, target: e.targetId, amount: e.amount, name: e.name, skill: e.skill });
+      } else if (e.type === 'heal') {
+        bump(log.skillsByUnit, e.attackerId);
+        bump(log.skills, e.name);
+        bump(log.healing, e.attackerId, e.amount);
+        if (getUnit(state, e.attackerId).ai === 'flee') log.dalraeHealCount++;
+        log.heals.push({ turn: state.turn, by: e.attackerId, target: e.targetId, amount: e.amount, at: log.hits.length });
+      } else if (e.type === 'spring') {
+        bump(log.springHealing, e.targetId, e.amount);
+      } else if (e.type === 'defeat' || e.type === 'retreat') {
+        var t = getUnit(state, e.targetId);
+        log.defeatedUnits.push({
+          turn: state.turn, id: t.id, name: t.name, side: t.side,
+          how: e.type === 'retreat' ? '퇴각' : DEFEAT_TYPES[e.defeatType], by: e.attackerId, merit: e.merit
+        });
+      }
+    });
+    trackDalrae(log, state);
+  }
+
+  // 전투가 끝나면 결과를 채우고, 회복마다 그 뒤를 정리한다 (H3: 회복된 적을 다시 쳤나, 얼마나 버텼나)
+  function finishPlayLog(log, state) {
+    log.result = state.result;
+    log.totalTurns = state.turn;
+    log.meritEarned = state.merit;
+    log.dalraeEscapeDistance = dalraeDistance(state);
+    log.healFollowUps = log.heals.map(function (h) {
+      var target = getUnit(state, h.target);
+      var down = log.defeatedUnits.filter(function (d) { return d.id === h.target; })[0];
+      var later = log.hits.slice(h.at).filter(function (x) {
+        return x.target === h.target && getUnit(state, x.by).side !== target.side;
+      });
+      return {
+        target: h.target, turn: h.turn, attackedAgain: later.length > 0,
+        survivedTurns: (down ? down.turn : state.turn) - h.turn, defeated: !!down
+      };
+    });
+    return log;
   }
 
   // ── 맵 에디터용: 스테이지 검사·코드·편집 (specs/editor.md) ──
@@ -1976,6 +2073,10 @@ var Core = (function () {
     loreTokensForBattle: loreTokensForBattle,
     newlyUnlockedLore: newlyUnlockedLore,
     migrateLore: migrateLore,
+    newPlayLog: newPlayLog,
+    logMove: logMove,
+    logEvents: logEvents,
+    finishPlayLog: finishPlayLog,
     GLOSSARY: GLOSSARY
   };
 })();

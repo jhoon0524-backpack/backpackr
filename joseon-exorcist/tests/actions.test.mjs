@@ -51,7 +51,7 @@ test('기본공격: 사거리 안 적만, HP 감소, 행동 완료', () => {
   u('yoon').r = 3; u('yoon').c = 4;
   assert.equal(Core.canAttack(s, u('yoon')), true);
   const ev = Core.attack(s, 'yoon', 'bulgasari');
-  assert.deepEqual(ev, [{ type: 'damage', attackerId: 'yoon', targetId: 'bulgasari', amount: 7, mult: 1, name: null }]);
+  assert.deepEqual(ev, [{ type: 'damage', attackerId: 'yoon', targetId: 'bulgasari', amount: 7, mult: 1, name: null, skill: false }]);
   assert.equal(u('bulgasari').hp, 15);
   assert.equal(u('yoon').acted, true);
   assert.equal(u('yoon').ki, 6, '기본공격은 기력을 안 쓴다');

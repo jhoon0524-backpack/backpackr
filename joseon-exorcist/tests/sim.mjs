@@ -61,21 +61,30 @@ function greedyAlly(s, u, chase = true) {
 }
 
 // 한 판을 끝까지. mode: 'greedy'(도망 보스를 쫓음) | 'nearest'(가까운 적만 침) | 'idle'(아군은 대기만). stage·merit(누계)로 장·품계를 고른다.
-export function playBattle({ seed = 1, mode = 'greedy', stage, merit } = {}) {
+// 플레이 로그(Core.newPlayLog …)도 화면과 같은 방식으로 채워 s.log 에 둔다 (specs/playtest.md)
+export function playBattle({ seed = 1, mode = 'greedy', stage, merit, chapter = 'ch1' } = {}) {
   const rng = seeded(seed);
   const s = Core.newBattle(stage, merit === undefined ? undefined : { merit });
+  const log = Core.newPlayLog(s, chapter, 0);
   let guard = 0;
   while (s.result === null) {
     if (++guard > 50) throw new Error('전투가 끝나지 않는다');
-    Core.startAllyPhase(s, rng);
+    Core.logEvents(log, s, Core.startAllyPhase(s, rng));
     for (const u of Core.livingUnits(s, 'ally')) {
       if (s.result !== null) break;
-      if (mode === 'idle') Core.wait(s, u.id);
-      else greedyAlly(s, u, mode !== 'nearest');
+      const from = { r: u.r, c: u.c };
+      const events = mode === 'idle' ? Core.wait(s, u.id) : greedyAlly(s, u, mode !== 'nearest');
+      Core.logMove(log, s, u.id, from, { r: u.r, c: u.c });
+      Core.logEvents(log, s, events);
     }
     if (s.result !== null) break;
-    Core.endAllyPhase(s);
-    Core.runEnemyPhase(s);
+    Core.logEvents(log, s, Core.endAllyPhase(s));
+    for (const id of Core.enemyOrder(s)) {
+      if (s.result !== null) break;
+      Core.logEvents(log, s, Core.enemyAct(s, id));
+    }
+    Core.logEvents(log, s, Core.endEnemyPhase(s));
   }
+  s.log = Core.finishPlayLog(log, s);
   return s;
 }
