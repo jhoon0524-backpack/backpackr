@@ -2096,10 +2096,14 @@ var Core = (function () {
     });
     if (added) writeLore();
   }
-  // 이전 저장(벽사록 없던 때)의 깬 장도 밝힘으로 친다 — 마이그레이션 없이 호환. 깬 장은 시작도 한 장이다
+  // 이전 저장(벽사록 없던 때)의 깬 장도 밝힘으로 친다 — 깬 장은 시작했고 그 장의 적도 모두 만난 장이다
   function loreTokens() {
-    return loreSeen.concat(progress.cleared.map(function (id) { return 'clear:' + id; }),
-      progress.cleared.map(function (id) { return 'stage:' + id; }));
+    var extra = [];
+    progress.cleared.forEach(function (id) {
+      extra.push('clear:' + id);
+      extra = extra.concat(Core.loreTokensForBattle(Core.newBattle(Core.STAGES[id]), id));
+    });
+    return loreSeen.concat(extra);
   }
   // 본 것을 기록하고, 새로 밝혀진 항목이 있으면 토스트로 알린다 (specs/immersion.md 7장)
   function discover(tokens) {
@@ -2301,16 +2305,18 @@ var Core = (function () {
   var toastQueue = [];
   var toastSeq = 0;
   var toastTimer = null;
+  var toastCurrent = null; // 지금 보이는 알림 { node, rank }
   function toast(lines, kind, ms, rank) {
     toastQueue.push({ lines: lines, kind: kind, ms: ms || 2800, rank: rank || TOAST_RANK.other, seq: toastSeq++ });
     if (!toastTimer) nextToast();
   }
   function nextToast() {
     toastTimer = null;
+    toastCurrent = null;
     if (!toastQueue.length) return;
     toastQueue.sort(function (a, b) { return a.rank - b.rank || a.seq - b.seq; });
     var item = toastQueue.shift();
-    showToast(item.lines, item.kind, item.ms);
+    toastCurrent = { node: showToast(item.lines, item.kind, item.ms), rank: item.rank };
     toastTimer = setTimeout(nextToast, item.ms + 150); // 앞 알림이 사라진 뒤 다음
   }
   // 장을 새로 시작하면 지난 판의 알림은 버린다
@@ -2336,6 +2342,7 @@ var Core = (function () {
     });
     document.getElementById('toasts').appendChild(t);
     removeLater(t, ms);
+    return t;
   }
 
   // 처음 만난 특수 지형을 전투 시작 때 한 번 알려 준다 (본 지형은 이 브라우저에 기록)
@@ -2814,6 +2821,14 @@ var Core = (function () {
 
   // 전투 끝: 승리면 승리 후 대사 → 승리 화면, 패배면 바로 패배 화면
   function finish() {
+    // 전투가 끝나면 밀린 쓰러짐 알림은 버리고 마지막 일격(흑린·달래)의 알림만 바로 보인다. 벽사록 알림은 남긴다
+    var others = toastQueue.filter(function (t) { return t.rank === TOAST_RANK.other; });
+    toastQueue = toastQueue.filter(function (t) { return t.rank < TOAST_RANK.other; }).concat(others.slice(-1));
+    if (toastCurrent && toastCurrent.rank === TOAST_RANK.other && others.length) {
+      if (toastCurrent.node.parentNode) toastCurrent.node.parentNode.removeChild(toastCurrent.node);
+      clearTimeout(toastTimer);
+      nextToast();
+    }
     ui.busy = true;
     clearSelection();
     render();
