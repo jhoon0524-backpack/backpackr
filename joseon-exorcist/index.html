@@ -264,6 +264,9 @@
   #phase-note.aim b { color: #f5c542; font-size: 17px; }
   #btn-skill { font-size: 16px; font-weight: 800; letter-spacing: .04em; }
   #btn-skill:not(:disabled) { color: #f5c542; }
+  /* v0.9.3 추적·교란 능동 행동: 기술(금색)과 다른 청록색 */
+  #btn-control { font-weight: 800; font-size: 14px; letter-spacing: -.03em; white-space: nowrap; padding-left: 2px; padding-right: 2px; }
+  #btn-control:not(:disabled) { color: #6fd6c4; border-color: #2f6b62; }
   .skill-label small { font-size: 10px; font-weight: 600; margin-left: 1px; opacity: .85; }
   .ghost {
     position: absolute;
@@ -782,6 +785,7 @@
     <div id="menu" class="btns" hidden>
       <button id="btn-attack">공격</button>
       <button id="btn-skill">스킬</button>
+      <button id="btn-control" hidden>견제사격</button>
       <button id="btn-seal" hidden>봉인 복구</button>
       <button id="btn-barrier" hidden>결계</button>
       <button id="btn-lamp" hidden>봉인등 밝히기</button>
@@ -1460,7 +1464,7 @@ var Core = (function () {
   function barrierBlocks(state, unit, r, c) {
     return unit.side === 'enemy' && barrierAt(state, r, c);
   }
-  // 이번 차례 이동력: 추적에 맞았으면 −1 (최소 1)
+  // 이번 차례 이동력: 추적 견제사격에 맞았으면 −2 (최소 1)
   function movOf(unit) {
     return unit.slow ? Math.max(1, unit.mov - CHUJEOK_SLOW) : unit.mov;
   }
@@ -1763,7 +1767,6 @@ var Core = (function () {
     var t = inList(attackTargets(state, u), targetId);
     if (!t) return null;
     var events = hit(state, u, t, false, []);
-    trainingOnHit(state, u, t, events); // 추적·교란은 기본공격에도 (기획자 확정 2026-09-26)
     finishAction(u);
     return events;
   }
@@ -1800,7 +1803,8 @@ var Core = (function () {
 
   // ── 수련 효과 (v0.8, specs/growth.md) ─────────────────
   var SASU_BONUS = 1;       // 사수: 움직이지 않은 차례 파사궁 사거리 +1
-  var CHUJEOK_SLOW = 1;     // 추적: 다음 차례 이동력 −1 (최소 1, 중첩 없음)
+  var CHUJEOK_SLOW = 2;     // 추적 견제사격: 다음 차례 이동력 −2 (최소 1, 중첩 없음) — v0.9.3
+  var CONTROL_RATE = 0.5;   // 견제사격·밀어내기: 기본 공격 피해의 50%
   var BUBEOP_RATE = 0.5;    // 부법: 옆 적에게 50%
   var GISUP_MIN_MOVE = 3;   // 기습: 3칸 이상 이동한 뒤
   var GISUP_FACTOR = 1.5;
@@ -1824,7 +1828,6 @@ var Core = (function () {
 
   function trainingAfterSkill(state, u, t, spread, events) {
     var tr = u.training;
-    trainingOnHit(state, u, t, events);
     if (tr === 'bubeop' && spread && spread.alive && state.result === null) {
       var amount = Math.max(1, Math.round(damage(state, u, spread, true) * BUBEOP_RATE + 1e-9));
       events.push({ type: 'training', unitId: u.id, kind: 'bubeop', targetId: spread.id });
@@ -1835,24 +1838,47 @@ var Core = (function () {
       events.push({ type: 'training', unitId: u.id, kind: 'jiphaeng' });
     }
   }
-  // 추적·교란: 기본공격이든 기술이든 적중하면 (대상이 살아 있을 때)
-  function trainingOnHit(state, u, t, events) {
-    var tr = u.training;
-    if (tr === 'chujeok' && t.alive && hostile(u, t)) {
-      t.slow = true;
-      events.push({ type: 'training', unitId: u.id, kind: 'chujeok', targetId: t.id });
+  // ── 추적·교란: 능동 행동 (v0.9.3 기획자 지시 — 적중 시 자동 발동은 폐기) ──
+  // 추적 = [견제사격]: 기본 공격 사거리, 피해 50%, 다음 차례 이동 −2. 교란 = [밀어내기]: 사거리 1, 피해 50%, 1칸 밀기.
+  // 기력을 쓰지 않고, 쓰면 그 인물 행동 끝. 적대 대상에게만
+  var CONTROL_ACTIONS = { chujeok: '견제사격', gyoran: '밀어내기' };
+  function controlAction(u) {
+    return (u && CONTROL_ACTIONS[u.training]) || null;
+  }
+  function controlTargets(state, u, pos) {
+    if (!controlAction(u)) return [];
+    var at = pos || u;
+    return attackTargets(state, u, pos).filter(function (t) {
+      return hostile(u, t) && (u.training !== 'gyoran' || distance(at, t) === 1);
+    });
+  }
+  function canControl(state, u) {
+    return canCommand(state, u) && controlTargets(state, u).length > 0;
+  }
+  function control(state, id, targetId) {
+    var u = getUnit(state, id);
+    if (!canCommand(state, u) || !controlAction(u)) return null;
+    var t = inList(controlTargets(state, u), targetId);
+    if (!t) return null;
+    var amount = Math.max(1, Math.round(damage(state, u, t, false) * CONTROL_RATE + 1e-9));
+    var events = [{ type: 'training', unitId: u.id, kind: u.training, targetId: t.id }];
+    dealDamage(state, u, t, amount, { name: controlAction(u), skill: false, mult: 1 }, events);
+    if (t.alive && state.result === null) {
+      if (u.training === 'chujeok') t.slow = true; // 중첩 없음 — 이미 걸려 있어도 −2 그대로
+      else pushAway(state, u, t, events);
     }
-    if (tr === 'gyoran' && t.alive && hostile(u, t) && state.result === null) {
-      // 강제 이동은 도착하자마자 발동하는 탈출·패배 조건을 일으키지 않는다 (기획자 확정 2026-09-26).
-      // 탈출로로 밀려난 달래는 자기 차례에 행동한 뒤에야 탈출한다 (fleeAct)
-      var to = { r: t.r + Math.sign(t.r - u.r), c: t.c + Math.sign(t.c - u.c) };
-      if (isPassable(state, to.r, to.c) && !unitAt(state, to.r, to.c) && !barrierAt(state, to.r, to.c)) {
-        var from = { r: t.r, c: t.c };
-        t.r = to.r; t.c = to.c;
-        events.push({ type: 'push', attackerId: u.id, targetId: t.id, from: from, to: to, name: '교란' });
-        events.push({ type: 'training', unitId: u.id, kind: 'gyoran', targetId: t.id });
-      }
-    }
+    finishAction(u);
+    return events;
+  }
+  // 1칸 밀기: 맵 밖·통행 불가·다른 유닛·결계 칸이면 그대로 (피해는 이미 들어갔다).
+  // 강제 이동은 도착하자마자 발동하는 탈출·패배 조건을 일으키지 않는다 (기획자 확정 2026-09-26).
+  // 탈출로로 밀려난 달래는 자기 차례에 행동한 뒤에야 탈출한다 (fleeAct)
+  function pushAway(state, u, t, events) {
+    var to = { r: t.r + Math.sign(t.r - u.r), c: t.c + Math.sign(t.c - u.c) };
+    if (!isPassable(state, to.r, to.c) || unitAt(state, to.r, to.c) || barrierAt(state, to.r, to.c)) return;
+    var from = { r: t.r, c: t.c };
+    t.r = to.r; t.c = to.c;
+    events.push({ type: 'push', attackerId: u.id, targetId: t.id, from: from, to: to, name: '교란' });
   }
 
   // 집행·벽사: 행동 뒤 1칸만 다시 움직인다. 공격·임무 행동은 다시 못 한다
@@ -2921,7 +2947,7 @@ var Core = (function () {
     ],
     hangyeol: [
       { id: 'sasu', name: '사수', role: '멀리서 핵심 표적을 노리는 저격수', desc: '움직이지 않은 차례에는 파사궁 사거리가 2에서 3이 된다.' },
-      { id: 'chujeok', name: '추적', role: '도망치는 적의 발을 묶는 추격자', desc: '기본 공격이나 파사궁에 맞은 적은 다음 차례 이동력 −1 (최소 1).' }
+      { id: 'chujeok', name: '추적', role: '도망치는 적의 발을 묶는 추격자', desc: '[견제사격] 기력 없이 약하게 쏜다 (기본 공격 피해의 절반). 맞은 적은 다음 차례 이동력 −2 (최소 1).' }
     ],
     soun: [
       { id: 'bubeop', name: '부법', role: '여럿을 한꺼번에 태우는 술법 공격수', desc: '화염부가 대상 옆의 적 1명에게 절반 피해로 번진다.' },
@@ -2929,7 +2955,7 @@ var Core = (function () {
     ],
     yeoul: [
       { id: 'gisup', name: '기습', role: '거리를 벌렸다 파고드는 돌격수', desc: '3칸 이상 달려와 축지격을 쓰면 피해 ×1.5.' },
-      { id: 'gyoran', name: '교란', role: '적의 위치를 흐트러뜨리는 전장 교란자', desc: '기본 공격이나 축지격에 맞은 적을 1칸 밀어낸다.' }
+      { id: 'gyoran', name: '교란', role: '적의 위치를 흐트러뜨리는 전장 교란자', desc: '[밀어내기] 기력 없이 옆의 적을 약하게 치고 (기본 공격 피해의 절반) 1칸 밀어낸다.' }
     ]
   };
   var TRAINING_POINTS = { ch3: 2, ch4: 1 }; // 3장 2 — 4명 중 2명만 첫 수련, 4장 +1 — 세 번째 인물
@@ -3318,6 +3344,11 @@ var Core = (function () {
     isSpawn: isSpawn,
     spreadTargets: spreadTargets,
     reMoveTargets: reMoveTargets,
+    controlAction: controlAction,
+    controlTargets: controlTargets,
+    canControl: canControl,
+    control: control,
+    CHUJEOK_SLOW: CHUJEOK_SLOW,
     reMove: reMove,
     barrierCells: barrierCells,
     canBarrier: canBarrier,
@@ -3752,6 +3783,7 @@ var Core = (function () {
 
   function currentTargets() {
     var u = Core.getUnit(state, ui.id);
+    if (ui.kind === 'control') return Core.controlTargets(state, u);
     return ui.kind === 'skill' ? Core.skillTargets(state, u) : Core.attackTargets(state, u);
   }
 
@@ -3816,7 +3848,7 @@ var Core = (function () {
       if (u.side === 'ally' && u.acted) tile.className += ' acted';
       if (u.id === 'dallae' && ui.dallaeGone) tile.className += ' fading';
       cellAt(u.r, u.c).appendChild(tile);
-      if (u.slow) cellAt(u.r, u.c).appendChild(el('span', 'threat', '−1')); // 추적: 다음 차례 이동 −1
+      if (u.slow) cellAt(u.r, u.c).appendChild(el('span', 'threat', '−' + Core.CHUJEOK_SLOW)); // 추적: 다음 차례 이동 −2
       var tag = u.side !== 'ally' || ui.kind === 'skill' ? affinityTag(u) : null;
       if (tag && marksHas(marks, u)) cellAt(u.r, u.c).appendChild(tag);
     });
@@ -3981,7 +4013,7 @@ var Core = (function () {
       ' · 속성 ' + u.elem));
     var tr = u.training && Core.trainingDef(u.id, u.training);
     if (tr) text.appendChild(el('div', 'sub', '수련 · ' + tr.name + ' — ' + tr.desc));
-    if (u.slow) text.appendChild(el('div', 'sub', '추적에 걸림 — 다음 차례 이동 −1'));
+    if (u.slow) text.appendChild(el('div', 'sub', '추적에 걸림 — 다음 차례 이동 −' + Core.CHUJEOK_SLOW));
     var under = Core.terrainAt(state, u.r, u.c);
     if (under !== 'D' && TERRAIN_INFO[under]) {
       text.appendChild(el('div', 'sub', TERRAIN_MARK[under] + ' ' + TERRAIN_INFO[under].name + ' 위 · ' + TERRAIN_INFO[under].text));
@@ -4079,7 +4111,8 @@ var Core = (function () {
       // 대상 고르는 중: 무엇을 쓰는지 크게 (specs/immersion.md 9장)
       note.className = 'aim';
       note.innerHTML = '';
-      note.appendChild(el('b', '', ui.kind === 'skill' ? Core.getUnit(state, ui.id).skill : '공격'));
+      note.appendChild(el('b', '', ui.kind === 'skill' ? Core.getUnit(state, ui.id).skill
+        : ui.kind === 'control' ? Core.controlAction(Core.getUnit(state, ui.id)) : '공격'));
       note.appendChild(document.createTextNode(' — 대상을 고르세요'));
       return;
     }
@@ -4106,6 +4139,14 @@ var Core = (function () {
     skill.innerHTML = '';
     skill.appendChild(document.createTextNode(u.skill || '스킬'));
     skill.appendChild(el('small', '', u.skill ? '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')' : '없음')); // 관군은 스킬 없음
+    var control = document.getElementById('btn-control'); // v0.9.3 추적 견제사격 / 교란 밀어내기
+    control.hidden = !Core.controlAction(u);
+    if (!control.hidden) {
+      control.disabled = !Core.canControl(state, u);
+      control.innerHTML = '';
+      control.appendChild(document.createTextNode(Core.controlAction(u)));
+      control.appendChild(el('small', '', u.training === 'chujeok' ? '이동 −' + Core.CHUJEOK_SLOW : '1칸 밀기'));
+    }
     document.getElementById('btn-seal').hidden = !Core.repairablePoint(state, u); // 3장 봉인 칸에 섰을 때만
     document.getElementById('btn-lamp').hidden = !Core.lightableLamp(state, u); // 4장 꺼진 등 위에 섰을 때만
     var barrier = document.getElementById('btn-barrier');
@@ -4224,7 +4265,8 @@ var Core = (function () {
       render();
       return;
     }
-    var events = ui.kind === 'skill' ? Core.useSkill(state, ui.id, target.id, { spreadId: spreadId }) : Core.attack(state, ui.id, target.id);
+    var events = ui.kind === 'skill' ? Core.useSkill(state, ui.id, target.id, { spreadId: spreadId })
+      : ui.kind === 'control' ? Core.control(state, ui.id, target.id) : Core.attack(state, ui.id, target.id);
     logAllyAction(actor, from, events);
     afterAction(events);
   }
@@ -5426,6 +5468,12 @@ var Core = (function () {
     if (ui.step !== 'menu') return;
     ui.step = 'target';
     ui.kind = 'skill';
+    render();
+  });
+  document.getElementById('btn-control').addEventListener('click', function () {
+    if (ui.step !== 'menu') return;
+    ui.step = 'target';
+    ui.kind = 'control';
     render();
   });
 

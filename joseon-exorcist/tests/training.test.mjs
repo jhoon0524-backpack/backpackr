@@ -168,27 +168,47 @@ test('사수가 아니면 사거리 2', () => {
   assert.deepEqual(Core.skillTargets(s, h), []);
 });
 
-test('추적: 맞은 적은 다음 차례 이동력 −1, 중첩 없음, 그 차례가 끝나면 풀린다', () => {
-  const s = arena([['dokkaebi', 1, 2], ['dokkaebi', 0, 7]], { hangyeol: 'chujeok' });
-  put(s, 'hangyeol', 3, 2);
-  const d = U(s, 'dokkaebi1');
-  d.hp = 99; d.maxHp = 99;
-  const ev = Core.useSkill(s, 'hangyeol', 'dokkaebi1');
+test('v0.9.3 견제사격: 추적 수련 한결에게만 있다 (무수련·사수 한결, 다른 인물에게는 없음)', () => {
+  const s = arena([['dokkaebi', 5, 2]], { hangyeol: 'chujeok' });
+  assert.equal(Core.controlAction(U(s, 'hangyeol')), '견제사격');
+  for (const tr of [{}, { hangyeol: 'sasu' }]) {
+    const s2 = arena([['dokkaebi', 5, 2]], tr);
+    assert.equal(Core.controlAction(U(s2, 'hangyeol')), null);
+    assert.equal(Core.control(s2, 'hangyeol', 'dokkaebi'), null, '무수련은 쓸 수 없다');
+  }
+  for (const id of ['yoon', 'soun', 'yeoul']) assert.equal(Core.controlAction(U(s, id)), null, id);
+  assert.equal(Core.canControl(s, U(s, 'hangyeol')), true, '거리 2 — 기본 공격 사거리');
+  put(s, 'dokkaebi', 4, 2);
+  assert.equal(Core.canControl(s, U(s, 'hangyeol')), false, '거리 3 은 안 된다');
+});
+
+test('v0.9.3 견제사격: 기력 그대로, 기본 공격 피해의 50%, 이동 −2, 최소 1, 중첩 없음, 다음 자기 차례가 끝나면 풀림, 행동 끝', () => {
+  const s = arena([['dokkaebi', 5, 2], ['dokkaebi', 0, 7]], { hangyeol: 'chujeok' });
+  const h = U(s, 'hangyeol'), d = U(s, 'dokkaebi1');
+  d.hp = d.maxHp = 99;
+  const ki = h.ki, full = Core.damage(s, h, d, false);
+  const ev = Core.control(s, 'hangyeol', 'dokkaebi1');
+  assert.equal(h.ki, ki, '기력 소비 없음');
+  assert.equal(99 - d.hp, Math.round(full * 0.5), '기본 공격의 절반 (' + full + ' → ' + Math.round(full * 0.5) + ')');
   assert.ok(ev.some((e) => e.type === 'training' && e.kind === 'chujeok'));
+  assert.ok(ev.some((e) => e.type === 'damage' && e.name === '견제사격' && e.skill === false));
   assert.equal(d.slow, true);
-  assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 2, '이동 3 → 2');
+  assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 1, '이동 3 → 1');
+  assert.equal(h.acted, true, '행동 끝');
+  assert.equal(Core.control(s, 'hangyeol', 'dokkaebi1'), null, '다시 못 쓴다');
+  h.acted = false;
+  Core.control(s, 'hangyeol', 'dokkaebi1');
+  assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 1, '중첩 없음 (−4 가 아님)');
   Core.endAllyPhase(s);
   Core.runEnemyPhase(s);
-  assert.equal(d.slow, false, '적 차례가 끝나면 해제');
+  assert.equal(d.slow, false, '맞은 적의 다음 차례가 끝나면 해제');
 });
-
-test('추적: 최소 이동력 1', () => {
+test('v0.9.3 추적: 이동력 −2 라도 최소 1', () => {
   const s = arena([['dokkaebi', 1, 2]], { hangyeol: 'chujeok' });
   const d = U(s, 'dokkaebi');
-  d.mov = 1; d.slow = true;
+  d.mov = 2; d.slow = true;
   assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 1);
 });
-
 // ── 소운 ───────────────────────────────────────────
 test('부법: 옆 칸의 적이 하나면 그 적에게 50% 피해로 번진다', () => {
   const s = arena([['dokkaebi', 2, 3], ['dokkaebi', 2, 4], ['dokkaebi', 0, 0]], { soun: 'bubeop' });
@@ -314,50 +334,72 @@ test('기습: 3칸 이상 이동한 뒤 축지격 피해 ×1.5, 2칸이면 그�
   assert.ok(!ev2.some((e) => e.type === 'training'));
 });
 
-test('교란: 축지격에 맞은 적을 1칸 밀어낸다 (피해는 정상)', () => {
+test('v0.9.3 밀어내기: 교란 수련 여울에게만, 사거리 1, 기력 그대로, 기본 공격 피해의 50%, 여울 반대쪽으로 1칸, 행동 끝', () => {
+  for (const tr of [{}, { yeoul: 'gisup' }]) {
+    const s0 = arena([['dokkaebi', 6, 4]], tr);
+    assert.equal(Core.controlAction(U(s0, 'yeoul')), null);
+    assert.equal(Core.control(s0, 'yeoul', 'dokkaebi'), null);
+  }
   const s = arena([['dokkaebi', 3, 4]], { yeoul: 'gyoran' });
-  put(s, 'yeoul', 4, 4);
-  const d = U(s, 'dokkaebi');
-  d.hp = 99;
-  const ev = Core.useSkill(s, 'yeoul', 'dokkaebi');
-  assert.deepEqual([d.r, d.c], [2, 4]);
-  assert.equal(ev[0].type, 'damage');
+  const y = put(s, 'yeoul', 4, 4), d = U(s, 'dokkaebi');
+  assert.equal(Core.controlAction(y), '밀어내기');
+  d.hp = d.maxHp = 99;
+  const ki = y.ki, full = Core.damage(s, y, d, false);
+  const ev = Core.control(s, 'yeoul', 'dokkaebi');
+  assert.deepEqual([d.r, d.c], [2, 4], '위로 1칸');
+  assert.equal(99 - d.hp, Math.round(full * 0.5 + 1e-9));
+  assert.equal(y.ki, ki);
+  assert.equal(y.acted, true);
   assert.ok(ev.some((e) => e.type === 'push' && e.name === '교란'));
-});
-
-test('교란: 바위·맵 밖·다른 유닛 쪽이면 밀리지 않는다 (피해는 정상). 기본공격에도 밀린다', () => {
-  const map = ['........', '........', '....D...', '........', '........', '........', '........', '........'];
-  const s = arena([['dokkaebi', 3, 4], ['dokkaebi', 0, 1]], { yeoul: 'gyoran' }, map);
-  put(s, 'yeoul', 4, 4);
-  U(s, 'dokkaebi1').hp = 99;
-  Core.useSkill(s, 'yeoul', 'dokkaebi1');
-  assert.deepEqual([U(s, 'dokkaebi1').r, U(s, 'dokkaebi1').c], [3, 4], '바위');
-  const s2 = arena([['dokkaebi', 0, 4]], { yeoul: 'gyoran' });
-  put(s2, 'yeoul', 1, 4);
-  U(s2, 'dokkaebi').hp = 99;
-  Core.useSkill(s2, 'yeoul', 'dokkaebi');
-  assert.deepEqual([U(s2, 'dokkaebi').r, U(s2, 'dokkaebi').c], [0, 4], '맵 밖');
-  const s3 = arena([['dokkaebi', 3, 4], ['dokkaebi', 2, 4]], { yeoul: 'gyoran' });
+  assert.ok(ev.some((e) => e.type === 'training' && e.kind === 'gyoran'));
+  // 옆으로도 민다 (여울 반대 방향)
+  const s2 = arena([['dokkaebi', 4, 5]], { yeoul: 'gyoran' });
+  put(s2, 'yeoul', 4, 4); U(s2, 'dokkaebi').hp = 99;
+  Core.control(s2, 'yeoul', 'dokkaebi');
+  assert.deepEqual([U(s2, 'dokkaebi').r, U(s2, 'dokkaebi').c], [4, 6]);
+  // 사거리 1: 두 칸 떨어진 적은 안 된다
+  const s3 = arena([['dokkaebi', 2, 4]], { yeoul: 'gyoran' });
   put(s3, 'yeoul', 4, 4);
-  U(s3, 'dokkaebi1').hp = 99;
-  Core.useSkill(s3, 'yeoul', 'dokkaebi1');
-  assert.deepEqual([U(s3, 'dokkaebi1').r, U(s3, 'dokkaebi1').c], [3, 4], '다른 유닛');
-  const s4 = arena([['dokkaebi', 3, 4]], { yeoul: 'gyoran' });
-  put(s4, 'yeoul', 4, 4);
-  U(s4, 'dokkaebi').hp = 99;
-  const hp4 = U(s4, 'dokkaebi').hp;
-  const ev4 = Core.attack(s4, 'yeoul', 'dokkaebi');
-  assert.deepEqual([U(s4, 'dokkaebi').r, U(s4, 'dokkaebi').c], [2, 4], '기본공격에도 (기획자 확정 2026-09-26)');
-  assert.ok(ev4.some((e) => e.type === 'training' && e.kind === 'gyoran'));
-  assert.ok(U(s4, 'dokkaebi').hp < hp4);
+  assert.deepEqual(Core.controlTargets(s3, U(s3, 'yeoul')), []);
+});
+test('v0.9.3 밀어내기: 바위·맵 밖·다른 유닛 쪽이면 밀리지 않고 피해만 들어간다', () => {
+  const map = ['........', '........', '....D...', '........', '........', '........', '........', '........'];
+  const cases = [
+    ['바위', arena([['dokkaebi', 3, 4], ['dokkaebi', 0, 1]], { yeoul: 'gyoran' }, map), 'dokkaebi1', [4, 4], [3, 4]],
+    ['맵 밖', arena([['dokkaebi', 0, 4]], { yeoul: 'gyoran' }), 'dokkaebi', [1, 4], [0, 4]],
+    ['다른 유닛', arena([['dokkaebi', 3, 4], ['dokkaebi', 2, 4]], { yeoul: 'gyoran' }), 'dokkaebi1', [4, 4], [3, 4]]
+  ];
+  for (const [why, s, id, at, stay] of cases) {
+    put(s, 'yeoul', ...at);
+    const d = U(s, id); d.hp = d.maxHp = 99;
+    const ev = Core.control(s, 'yeoul', id);
+    assert.deepEqual([d.r, d.c], stay, why);
+    assert.ok(d.hp < 99, why + ': 피해는 들어간다');
+    assert.ok(!ev.some((e) => e.type === 'push'), why);
+  }
 });
 
-test('교란: 강제 이동은 탈출 판정을 바로 일으키지 않는다 — 탈출로로 밀린 달래는 자기 차례에 행동한 뒤 탈출', () => {
+test('v0.9.3 기본공격·기술로는 더 이상 추적·교란이 걸리지 않는다 (자동 발동 폐기)', () => {
+  const s = arena([['dokkaebi', 5, 2]], { hangyeol: 'chujeok' });
+  const d = U(s, 'dokkaebi'); d.hp = d.maxHp = 99;
+  Core.attack(s, 'hangyeol', 'dokkaebi');
+  U(s, 'hangyeol').acted = false;
+  Core.useSkill(s, 'hangyeol', 'dokkaebi');
+  assert.equal(d.slow, false);
+  const s2 = arena([['dokkaebi', 6, 4]], { yeoul: 'gyoran' });
+  const e = U(s2, 'dokkaebi'); e.hp = e.maxHp = 99;
+  const ev = Core.attack(s2, 'yeoul', 'dokkaebi');
+  U(s2, 'yeoul').acted = false;
+  const ev2 = Core.useSkill(s2, 'yeoul', 'dokkaebi');
+  assert.deepEqual([e.r, e.c], [6, 4]);
+  assert.ok(!ev.concat(ev2).some((x) => x.type === 'training' || x.type === 'push'));
+});
+test('v0.9.3 밀어내기: 강제 이동은 탈출 판정을 바로 일으키지 않는다 — 탈출로로 밀린 달래는 자기 차례에 행동한 뒤 탈출', () => {
   const s = Core.newBattle(Core.STAGES.ch2, { merit: 0, training: { yeoul: 'gyoran' } });
   const d = put(s, 'dallae_boss', 1, 7);
   d.hp = d.maxHp = 99;
   put(s, 'yeoul', 2, 7);
-  const ev = Core.useSkill(s, 'yeoul', 'dallae_boss');
+  const ev = Core.control(s, 'yeoul', 'dallae_boss');
   assert.deepEqual([d.r, d.c], [0, 7], '탈출로 칸으로 밀 수는 있다');
   assert.ok(Core.isEscape(s, 0, 7));
   assert.equal(s.result, null, '밀려서 바로 지지 않는다');
@@ -366,7 +408,6 @@ test('교란: 강제 이동은 탈출 판정을 바로 일으키지 않는다 �
   Core.runEnemyPhase(s);
   assert.deepEqual([s.result, s.loseReason], ['lose', 'escape'], '자기 차례에 탈출');
 });
-
 test('수련 효과는 적대 대상에게만 — 중립(서낭신)에게는 추적·교란·부법이 걸리지 않는다', () => {
   const s = Core.newBattle(Core.STAGES.ch3, { merit: 0, training: { hangyeol: 'chujeok', yeoul: 'gyoran', soun: 'bubeop' } });
   const g = U(s, 'seonang');
@@ -400,40 +441,25 @@ test('역할 문구: 기획자 확정 8개', () => {
   ]);
 });
 
-test('추적(기본공격): 맞은 적은 다음 차례 이동 −1, 중첩 없음, 최소 1, 차례가 끝나면 풀림. 비적대에는 없음', () => {
-  const s = arena([['dokkaebi', 1, 2]], { hangyeol: 'chujeok' });
-  put(s, 'hangyeol', 3, 2);
-  const d = U(s, 'dokkaebi');
-  d.hp = d.maxHp = 99;
-  const ev = Core.attack(s, 'hangyeol', 'dokkaebi');
-  assert.ok(ev.some((e) => e.type === 'training' && e.kind === 'chujeok'));
-  assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 2);
-  U(s, 'hangyeol').acted = false;
-  Core.attack(s, 'hangyeol', 'dokkaebi');
-  assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 2, '중첩 없음');
-  Core.endAllyPhase(s); Core.runEnemyPhase(s);
-  assert.equal(d.slow, false);
-  const s2 = Core.newBattle(Core.STAGES.ch3, { merit: 0, training: { hangyeol: 'chujeok', yeoul: 'gyoran' } });
-  const g = U(s2, 'seonang'); g.hp = g.maxHp = 999;
-  put(s2, 'hangyeol', g.r + 2, g.c);
-  Core.attack(s2, 'hangyeol', 'seonang');
-  const at = [g.r, g.c];
-  put(s2, 'yeoul', g.r + 1, g.c);
-  Core.attack(s2, 'yeoul', 'seonang');
-  assert.deepEqual([g.slow, g.r, g.c], [false, ...at], '서낭신에게는 기본공격으로도 안 걸린다');
+test('v0.9.3 견제사격·밀어내기는 적대 대상에게만 — 서낭신(중립)은 대상이 아니다', () => {
+  const s = Core.newBattle(Core.STAGES.ch3, { merit: 0, training: { hangyeol: 'chujeok', yeoul: 'gyoran' } });
+  const g = U(s, 'seonang'); g.hp = g.maxHp = 999;
+  s.units.filter((u) => u.side === 'enemy').forEach((u) => { u.alive = false; });
+  put(s, 'hangyeol', g.r + 2, g.c);
+  put(s, 'yeoul', g.r + 1, g.c);
+  assert.ok(Core.attackTargets(s, U(s, 'hangyeol')).includes(g), '기본 공격은 된다 (확인창)');
+  assert.deepEqual(Core.controlTargets(s, U(s, 'hangyeol')), []);
+  assert.deepEqual(Core.controlTargets(s, U(s, 'yeoul')), []);
+  assert.equal(Core.control(s, 'hangyeol', 'seonang'), null);
+  assert.equal(Core.control(s, 'yeoul', 'seonang'), null);
+  assert.equal(g.hp, 999);
 });
-
-test('교란(기본공격): 달래를 탈출로로 밀어도 바로 지지 않는다', () => {
-  const s = Core.newBattle(Core.STAGES.ch2, { merit: 0, training: { yeoul: 'gyoran' } });
-  const d = put(s, 'dallae_boss', 1, 7);
-  d.hp = d.maxHp = 99;
-  put(s, 'yeoul', 2, 7);
-  Core.attack(s, 'yeoul', 'dallae_boss');
-  assert.deepEqual([d.r, d.c, s.result], [0, 7, null]);
-  Core.endAllyPhase(s); Core.runEnemyPhase(s);
-  assert.equal(s.loseReason, 'escape', '자기 차례에 탈출');
+test('v0.9.3 이미 추적·교란을 고른 저장도 새 행동이 그대로 보인다 (저장 형식 그대로)', () => {
+  const saved = Core.checkProgress({ v: 1, cleared: ['ch1', 'ch2', 'ch3'], merit: 13, training: { hangyeol: 'chujeok', yeoul: 'gyoran' } });
+  assert.deepEqual(saved.training, { hangyeol: 'chujeok', yeoul: 'gyoran' });
+  const s = Core.newBattle(Core.STAGES.ch4, { merit: saved.merit, training: saved.training });
+  assert.deepEqual([Core.controlAction(U(s, 'hangyeol')), Core.controlAction(U(s, 'yeoul'))], ['견제사격', '밀어내기']);
 });
-
 // ── 기록과 회귀 ────────────────────────────────────
 test('플레이 기록: 고른 수련과 발동 횟수가 남는다', () => {
   const s = arena([['dokkaebi', 3, 3], ['dokkaebi', 0, 7]], { yoon: 'jiphaeng', hangyeol: 'chujeok' });

@@ -107,7 +107,9 @@ function run4(mode, training, merit) {
     재점등: f1(avg(logs.map((s) => s.log.sealLampsLit.filter((l) => l.relight).length))),
     귀화접근: f1(avg(logs.map((s) => s.log.gwihwaApproaches || 0))),
     받은피해: f1(avg(logs.map(taken))),
-    수련발동: Object.entries(acts).map(([k, v]) => k + ' ' + f1(v / N4)).join(', ') || '-'
+    수련발동: Object.entries(acts).map(([k, v]) => k + ' ' + f1(v / N4)).join(', ') || '-',
+    // v0.9.3: 견제사격·밀어내기로 '다음 적 차례에 등까지 오던 귀화'를 못 오게 만든 횟수 (쓰기 전 계산 — 예측)
+    제어로막음: f1(avg(logs.map((s) => s.log.controlPrevented || 0)))
   };
 }
 const rows4 = [];

@@ -128,6 +128,29 @@ function fireDistance(s, f, block) {
   }
   return dist[K(f)] ?? 99;
 }
+// 견제사격·밀어내기를 쓰면 그 귀화가 다음 적 차례에 등까지 못 오게 되는 자리·대상 (자동 검증 전용)
+function reachAfter(s, f, u) {
+  const mov = (f.slow ? Math.max(1, f.mov - Core.CHUJEOK_SLOW) : f.mov);
+  if (u.training === 'chujeok') return fireDistance(s, f) <= Math.max(1, f.mov - Core.CHUJEOK_SLOW);
+  const to = { r: f.r + Math.sign(f.r - u.r), c: f.c + Math.sign(f.c - u.c) };
+  if (!Core.isPassable(s, to.r, to.c) || Core.unitAt(s, to.r, to.c) || Core.barrierAt(s, to.r, to.c)) return fireDistance(s, f) <= mov;
+  const at = [f.r, f.c];
+  [f.r, f.c] = [to.r, to.c];
+  const d = fireDistance(s, f);
+  [f.r, f.c] = at;
+  return d <= mov;
+}
+function controlFor(s, u, cells, targets) {
+  let best = null;
+  for (const c of cells) {
+    const saved = [u.r, u.c]; u.r = c.r; u.c = c.c;
+    for (const t of Core.controlTargets(s, u).filter((x) => targets.includes(x))) {
+      if (!reachAfter(s, t, u) && (!best || c.cost < best.cell.cost)) best = { cell: c, t };
+    }
+    [u.r, u.c] = saved;
+  }
+  return best;
+}
 function fires(s) { return Core.livingUnits(s, 'enemy').filter((e) => e.ai === 'lamp'); }
 function afterReMove(s, u, active, log) {
   if (!u.reMove) return;
@@ -171,9 +194,6 @@ function lampAlly(s, u, log, active) {
       [u.r, u.c] = saved;
       for (const x of opts) {
         let score = (x.dmg >= x.t.hp ? 100 : 0) + x.dmg - x.t.hp * 0.1 - c.cost * 0.2;
-        const survives = x.dmg < x.t.hp;
-        if (survives && u.training === 'gyoran') score += 30; // 밀어내기·늦추기는 죽이지 않아도 효과 (기본공격도)
-        if (survives && u.training === 'chujeok' && !x.t.slow) score += 20;
         if (active && u.training === 'gisup' && x.kind === 'skill' && c.cost >= 3) score += 20;
         if (!best || score > best.score) best = { ...x, cell: c, score };
       }
@@ -191,6 +211,17 @@ function lampAlly(s, u, log, active) {
   if (dark.length) { Core.moveUnit(s, u.id, dark[0].r, dark[0].c); return finish(Core.lightLamp(s, u.id)); }
   // 3. 곧 끌 귀화를 친다
   if (imminent.length) { const b = strikeFor(imminent); if (b) return doIt(b); }
+  // v0.9.3 활용형 (기획자 지시 8장): 견제사격(이동 −2)·밀어내기(1칸)로 다가오는 귀화가 다음 적 차례에
+  // 등(칸 또는 옆 칸)까지 못 오게 만들 수 있으면 그것을 먼저 쓴다 (기력을 아끼고 기술은 다른 곳에).
+  // 못 막으면 쓰지 않고 평소대로 친다 — 발동 횟수를 늘리려고 억지로 쓰지 않는다
+  if (active && Core.controlAction(u) && incoming.length) {
+    const plan = controlFor(s, u, cells, incoming);
+    if (plan) {
+      Core.moveUnit(s, u.id, plan.cell.r, plan.cell.c);
+      if (log) log.controlPrevented = (log.controlPrevented || 0) + 1;
+      return finish(Core.control(s, u.id, plan.t.id));
+    }
+  }
   // 진법(활용형): 다가오는 귀화의 길을 가장 길게 만드는 칸에 결계
   if (active && u.training === 'jinbeop' && u.ki >= Core.SKILL_COST && incoming.length) {
     let plan = null;
@@ -255,7 +286,7 @@ export function playBattle({ seed = 1, mode = 'greedy', stage, merit, chapter = 
     // 4장: 이번 적 차례에 등(칸 또는 옆 칸)까지 올 수 있는 귀화 수 = 귀화 접근 (자동 검증 전용 지표)
     if (s.lamps && s.objective.phase === 'lamps') {
       log.gwihwaApproaches = (log.gwihwaApproaches || 0)
-        + fires(s).filter((f) => fireDistance(s, f) <= (f.slow ? Math.max(1, f.mov - 1) : f.mov)).length;
+        + fires(s).filter((f) => fireDistance(s, f) <= (f.slow ? Math.max(1, f.mov - Core.CHUJEOK_SLOW) : f.mov)).length;
     }
     for (const u of Core.livingUnits(s, 'ally')) {
       if (s.result !== null) break;

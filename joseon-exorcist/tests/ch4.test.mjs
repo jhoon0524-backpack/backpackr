@@ -159,7 +159,7 @@ test('귀화: 밀려서 옆 칸에 와도(강제 이동) 그 자체로는 꺼지
   clearEnemies(s);
   const g = put(s, 'gwihwa1', 6, 7); g.alive = true; g.hp = g.maxHp = 99;
   put(s, 'yeoul', 7, 7); // 아래에서 위로 밀면 (5,7) — 등(3,7) 옆 칸은 아님
-  Core.useSkill(s, 'yeoul', 'gwihwa1');
+  Core.control(s, 'yeoul', 'gwihwa1'); // v0.9.3 밀어내기
   assert.deepEqual([g.r, g.c], [5, 7]);
   g.r = 4; g.c = 7; // 옆 칸에 놓여도
   assert.equal(lamp(s, 'east').lit, true, '행동하기 전에는 켜져 있다');
@@ -177,13 +177,13 @@ test('귀화: 대각선은 닿은 것이 아니다. 등 위에 선 아군은 소
   assert.equal(lamp(s, 'east').lit, false, '등 위의 윤무겸은 막지 못한다');
 });
 
-test('교란(기본공격): 등으로 가던 귀화를 밀어내면 이번 차례에 닿지 못한다 / 추적(기본공격): 늦추면 닿지 못한다', () => {
+test('v0.9.3 밀어내기: 등으로 가던 귀화를 밀어내면 이번 차례에 닿지 못한다 / 견제사격: 늦추면 닿지 못한다 (귀화는 살아남는다)', () => {
   const s = fresh({ training: { yeoul: 'gyoran' } });
   clearEnemies(s);
   const g = put(s, 'gwihwa1', 8, 7); g.alive = true; // 동쪽 등 옆 칸(4,7)까지 4칸 — 이동 4 로 닿는다
-  put(s, 'yeoul', 7, 7); // 위에서 아래로 민다 — 기본공격(9)으로는 죽지 않는다
-  Core.attack(s, 'yeoul', 'gwihwa1');
-  assert.deepEqual([g.r, g.c], [9, 7], '기본공격으로도 밀린다');
+  put(s, 'yeoul', 7, 7); // 위에서 아래로 민다
+  Core.control(s, 'yeoul', 'gwihwa1');
+  assert.deepEqual([g.r, g.c, g.alive], [9, 7, true], '밀어내기 피해로는 죽지 않는다');
   s.phase = 'enemy';
   Core.enemyAct(s, 'gwihwa1');
   assert.equal(lamp(s, 'east').lit, true, '5칸이 되어 이번 차례에는 못 끈다');
@@ -191,13 +191,12 @@ test('교란(기본공격): 등으로 가던 귀화를 밀어내면 이번 차�
   clearEnemies(s2);
   const f = put(s2, 'gwihwa2', 8, 7); f.alive = true; // 동쪽 등 옆 칸(4,7)까지 4칸
   put(s2, 'hangyeol', 8, 5);
-  Core.attack(s2, 'hangyeol', 'gwihwa2'); // 기본공격 8 — 살아남는다
-  assert.equal(f.slow, true, '기본공격으로도 추적');
+  Core.control(s2, 'hangyeol', 'gwihwa2');
+  assert.deepEqual([f.slow, f.alive], [true, true]);
   s2.phase = 'enemy';
   Core.enemyAct(s2, 'gwihwa2');
-  assert.equal(lamp(s2, 'east').lit, true, '이동 3 으로는 닿지 못한다');
+  assert.equal(lamp(s2, 'east').lit, true, '이동 2 로는 닿지 못한다');
 });
-
 test('봉인 유지: 세 등이 모두 켜진 채 적 차례를 2번 버티면 승리, 하나라도 꺼지면 0 으로', () => {
   const s = fresh();
   clearEnemies(s);
