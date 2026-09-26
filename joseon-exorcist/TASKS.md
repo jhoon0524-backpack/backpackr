@@ -111,7 +111,7 @@
 
 ## [v0.5 플레이테스트] (`specs/playtest.md`)
 - [x] 플레이 로그 계산 — `Core.newPlayLog`·`logMove`·`logEvents`·`finishPlayLog`, 피해 이벤트에 `skill` 표시 + 테스트
-- [ ] 2장 시뮬레이션 리포트 — `tests/sim-report.mjs` (품계 3 × 자동 플레이 2 × 100판), 결과를 PROGRESS 에
+- [x] 2장 시뮬레이션 리포트 — `tests/sim-report.mjs` (품계 3 × 자동 플레이 2 × 100판), 결과를 PROGRESS 에
 - [ ] 로그 저장과 개발자 화면 — 매 전투 기록, `?dev=1` [🧪 플레이 기록]·요약·JSON 복사·지우기
 - [ ] 플레이테스트 문서 — QA.md 관찰·종료 질문 5개·진행 원칙·BUG/DESIGN·수정 게이트·분석 형식·3장 시작 조건, 2장 가설 주석
 - [ ] 통합 확인·배포
