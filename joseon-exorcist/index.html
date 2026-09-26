@@ -83,6 +83,30 @@
   .f-bs    { border-color: var(--bs); }
   .f-guest { border-color: var(--guest); }
   .f-enemy { border-color: var(--enemy); }
+  .f-neutral { border-color: #e2c26b; box-shadow: 0 0 6px rgba(226, 194, 107, .45); } /* 3장 서낭신: 적색이 아닌 중립 */
+  /* 3장 지점 표시 (칸 왼쪽 위 작은 글자) */
+  .pt {
+    position: absolute; left: 1px; top: 1px; z-index: 2; pointer-events: none;
+    font-size: 10px; font-weight: 800; line-height: 1; padding: 2px 3px; border-radius: 3px;
+    font-family: "Nanum Myeongjo", "AppleMyungjo", serif;
+  }
+  .pt.clue { background: #e0b04a; color: #1d1a14; }
+  .pt.done { background: #4a4f5c; color: #d8d4c8; }
+  .pt.seal { background: #b0302a; color: #fbf6ea; animation: pt-pulse 1.6s ease-in-out infinite; }
+  .pt.sealed { background: #e2c26b; color: #1d1a14; }
+  .pt.grudge { background: #5b3a78; color: #eadcff; }
+  @keyframes pt-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(176, 48, 42, .8); } 50% { box-shadow: 0 0 0 4px rgba(176, 48, 42, 0); } }
+  .cell.goal { box-shadow: inset 0 0 0 2px rgba(176, 48, 42, .8); }
+  #objective {
+    margin: -4px auto 6px; max-width: 464px; padding: 4px 8px; border-radius: 6px; font-size: 13px; line-height: 1.4;
+    background: rgba(226, 194, 107, .12); border: 1px solid rgba(226, 194, 107, .5); text-align: center;
+  }
+  #objective b { color: #e2c26b; }
+  .toast.mission { background: rgba(60, 20, 18, .97); border-color: #b0302a; }
+  .toast.mission b { color: #f5c542; font-size: 17px; }
+  .toast.mission s { color: #8a8778; }
+  .unit.respawned { animation: respawn .9s ease-out; }
+  @keyframes respawn { 0% { opacity: 0; transform: scale(.6); } 100% { opacity: 1; transform: none; } }
   .badge {
     position: absolute;
     top: -1px;
@@ -705,12 +729,14 @@
     <span id="top-merit"></span>
     <button class="lore-open" id="lore-open-battle" type="button" aria-label="벽사록 열기">📖</button>
   </header>
+  <div id="objective" hidden></div>
   <div id="board"></div>
   <div id="panel">
     <div id="info" hidden></div>
     <div id="menu" class="btns" hidden>
       <button id="btn-attack">공격</button>
       <button id="btn-skill">스킬</button>
+      <button id="btn-seal" hidden>봉인 복구</button>
       <button id="btn-wait">대기</button>
       <button id="btn-cancel">취소</button>
     </div>
@@ -2475,7 +2501,7 @@ var Core = (function () {
   var MISSIONS = {
     ch1: { title: '흑린 토벌', text: '흑석촌에서 가축과 사람들이 잇달아 사라지고 있다.' },
     ch2: { title: '사라진 여의주', text: '여우골에서 달래의 흔적을 찾았다.' },
-    ch3: { title: '서낭고개', text: '서낭고개의 괴변 원인을 확인하라.' }
+    ch3: { title: '괴변의 원인 조사', text: '서낭고개의 괴변 원인을 확인하라.' }
   };
   function currentMission(progress) {
     var ch = nextStage(progress);
@@ -2821,6 +2847,47 @@ var Core = (function () {
       },
       outro: ch2VictoryLines,
       lose: '달래가 여의주를 가지고 산속으로 사라졌다.' // 탈출로 도착·12턴 모두 (specs/chapter2.md 7-1)
+    },
+    // 3장 (specs/chapter3.md 8장). 대사는 기획서 그대로
+    ch3: {
+      label: '3장',
+      title: '제3장 — 서낭고개',
+      intro: function () {
+        return [
+          { who: '윤무겸', face: '🗡️', text: '사흘째 금줄이 끊겼다고?' },
+          { who: '한결', face: '🏹', text: '사람들은 서낭신이 노했다고 합니다.' },
+          { who: '소운', face: '🧙', text: '신령이 노한 것인지, 사람이 겁먹은 것인지는 직접 봐야 알겠지요.' },
+          { who: '윤무겸', face: '🗡️', text: '괴변의 원인부터 찾는다.' }
+        ];
+      },
+      outro: function () {
+        return [
+          { who: '한결', face: '🏹', text: '서낭신이 사람을 해친 게 아니었군요.' },
+          { who: '윤무겸', face: '🗡️', text: '우리가 먼저 베었을 수도 있겠군.' },
+          { who: '소운', face: '🧙', text: '괴이한 것과 사악한 것은 같은 말이 아니오.' },
+          { who: '윤무겸', face: '🗡️', text: '……기록해 두지.' },
+          { who: '윤무겸', face: '🗡️', text: '베지 않아도 끝나는 일이 있군.' },
+          { who: '소운', face: '🧙', text: '베지 말아야 끝나는 일도 있소.' }
+        ];
+      },
+      lose: {
+        wipe: '벽사청 일행이 고개에서 물러났다.',
+        guardian: '고개를 지키던 마지막 힘이 사라졌다.',
+        time: '원한이 고개를 넘어 마을로 흘러들었다.'
+      },
+      truth: [
+        { who: '소운', face: '🧙', text: '잠깐. 이 금줄은 안의 것을 가둔 게 아니오.' },
+        { who: '윤무겸', face: '🗡️', text: '무슨 뜻이지?' },
+        { who: '소운', face: '🧙', text: '밖으로 나오려는 것을 막은 흔적이오.' },
+        { who: '한결', face: '🏹', text: '그럼 저 신령은….' },
+        { who: '여울', face: '🥷', text: '우릴 막은 게 아니었군.' },
+        { who: '서낭신', face: '👴', text: '금줄을 다시 세워라.' },
+        { who: '서낭신', face: '👴', text: '내 힘으로는 오래 버티지 못한다.' }
+      ],
+      firstStrike: [
+        { who: '서낭신', face: '👴', text: '눈앞의 것만 보는구나.' },
+        { who: '소운', face: '🧙', text: '…잠깐. 저것이 우리를 노리고 있지는 않소.' }
+      ]
     }
   };
 
@@ -2964,6 +3031,7 @@ var Core = (function () {
   }
 
   function factionClass(u) {
+    if (u.side === 'neutral') return 'f-neutral';
     if (u.side === 'enemy') return 'f-enemy';
     return u.guest ? 'f-guest' : 'f-bs';
   }
@@ -3059,6 +3127,7 @@ var Core = (function () {
       if (oldOrb) cell.removeChild(oldOrb);
     });
     if (ui.orb) cellAt(ui.orb.r, ui.orb.c).appendChild(el('span', 'orb', '🔮'));
+    renderPoints();
     state.units.forEach(function (u) {
       if (!u.alive) return;
       var tile = unitTile(u);
@@ -3074,9 +3143,76 @@ var Core = (function () {
     renderPhase();
   }
 
+  // ── 3장 지점 표시·임무 줄 (specs/chapter3.md 3장) ──
+  // 조사 단계: 조사할 곳 '?' (한 곳은 '·'), 봉인 단계: 봉인할 곳 '封'(붉게 깜빡) → 복구 '✓', 조사한 돌무덤은 '怨'(원한 지점)
+  function pointMark(p) {
+    var o = state.objective;
+    if (o.phase === 'investigate') {
+      if (!p.investigate) return null;
+      return o.investigated.indexOf(p.id) === -1 ? ['clue', '?'] : ['done', p.respawn ? '怨' : '·'];
+    }
+    if (p.seal) return o.repaired.indexOf(p.id) === -1 ? ['seal', '封'] : ['sealed', '✓'];
+    if (p.respawn) return ['grudge', '怨'];
+    return null;
+  }
+  function renderPoints() {
+    cells.forEach(function (cell) {
+      var old = cell.querySelector('.pt');
+      if (old) cell.removeChild(old);
+      cell.classList.remove('goal');
+    });
+    var box = document.getElementById('objective');
+    box.hidden = !state.objective;
+    if (!state.objective) return;
+    var o = state.objective;
+    state.points.forEach(function (p) {
+      var m = pointMark(p);
+      if (!m) return;
+      var cell = cellAt(p.r, p.c);
+      cell.appendChild(el('span', 'pt ' + m[0], m[1]));
+      if (m[0] === 'seal') cell.classList.add('goal');
+    });
+    var goal = CHAPTERS[chapterId] && Core.STAGES[chapterId].objective;
+    box.innerHTML = '';
+    box.appendChild(el('b', '', '임무 '));
+    box.appendChild(document.createTextNode(o.phase === 'investigate'
+      ? goal.before + ' (조사 ' + o.investigated.length + '/' + o.need + ')'
+      : goal.after + ' (복구 ' + o.repaired.length + '/' + Core.STAGES[chapterId].points.filter(function (p) { return p.seal; }).length + ')'));
+  }
+  // 지점 칸을 눌렀을 때의 설명
+  function pointInfo(p) {
+    var o = state.objective;
+    if (o.phase === 'investigate') {
+      if (!p.investigate) return null;
+      if (o.investigated.indexOf(p.id) === -1) return { mark: '?', name: '수상한 흔적', text: '아군이 이 칸에 서면 조사한다.' };
+      return { mark: '·', name: p.investigate.title, text: p.investigate.text };
+    }
+    if (p.seal) {
+      return o.repaired.indexOf(p.id) === -1
+        ? { mark: '封', name: '봉인 지점 · ' + p.name, text: '이 칸에 선 아군이 [봉인 복구]를 할 수 있다.' }
+        : { mark: '✓', name: p.name + ' · 복구됨', text: p.seal.done };
+    }
+    if (p.respawn) return { mark: '怨', name: '원한 지점 · ' + p.name, text: '쓰러진 원귀가 이곳에서 다시 나타난다.' };
+    return null;
+  }
+
   // 정보창: 이름 / 소속 / 칭호 / HP / 기력 / 속성. 빈 특수 지형 칸을 눌렀으면 지형 설명 카드
   function renderInfo() {
     var box = document.getElementById('info');
+    var pt = ui.infoCell && state.objective && Core.pointAt(state, ui.infoCell.r, ui.infoCell.c);
+    var pInfo = pt && pointInfo(pt);
+    if (pInfo) {
+      box.hidden = false;
+      box.innerHTML = '';
+      box.appendChild(el('div', 'face', pInfo.mark));
+      var t = el('div');
+      t.appendChild(el('div', 'name', pInfo.name));
+      var body = el('div', 'stats', pInfo.text);
+      body.style.whiteSpace = 'pre-line';
+      t.appendChild(body);
+      box.appendChild(t);
+      return;
+    }
     var cellInfo = ui.infoCell && TERRAIN_INFO[Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c)];
     if (cellInfo) return renderTerrainInfo(box, Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c));
     var u = ui.infoId && Core.getUnit(state, ui.infoId);
@@ -3112,7 +3248,7 @@ var Core = (function () {
 
   // 화면 아래에 잠깐 뜨는 알림. lines: [{ b: 굵게, small: 작게, text: 보통 }], kind: 'lore' 면 한지 색.
   // 한 번에 하나만 보이고, 기다리는 알림은 우선순위(rank) 순 → 같은 순위는 들어온 순 (specs/immersion.md 11장)
-  var TOAST_RANK = { lore: 1, terrain: 2, other: 3 };
+  var TOAST_RANK = { mission: 0, lore: 1, terrain: 2, other: 3 };
   var toastQueue = [];
   var toastSeq = 0;
   var toastTimer = null;
@@ -3147,6 +3283,10 @@ var Core = (function () {
         t.appendChild(b);
       } else if (line.small) {
         t.appendChild(el('small', '', line.small));
+      } else if (line.html) {
+        var old = el('div');
+        old.appendChild(el('s', '', line.html)); // 바뀌기 전 목표 (줄 긋기)
+        t.appendChild(old);
       } else {
         t.appendChild(el('div', '', line.text));
       }
@@ -3204,6 +3344,7 @@ var Core = (function () {
     skill.innerHTML = '';
     skill.appendChild(document.createTextNode(u.skill || '스킬'));
     skill.appendChild(el('small', '', u.skill ? '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')' : '없음')); // 관군은 스킬 없음
+    document.getElementById('btn-seal').hidden = !Core.repairablePoint(state, u); // 3장 봉인 칸에 섰을 때만
   }
 
   function marksHas(marks, u) {
@@ -3240,6 +3381,7 @@ var Core = (function () {
         slide(mover, path, function () {
           ui.busy = false;
           render();
+          arrival(mover);
         });
         return;
       } else if (selectable(u)) {
@@ -3270,9 +3412,47 @@ var Core = (function () {
     render();
   }
 
+  // 3장: 이동을 마친 칸이 조사 지점이면 자동 조사 → 짧은 글, 2곳째면 진실 대사 → 임무 갱신
+  function arrival(id) {
+    var events = Core.arrive(state, id);
+    if (!events.length) return;
+    Core.logEvents(playLog, state, events);
+    var lines = [];
+    events.forEach(function (e) {
+      if (e.type === 'investigate') {
+        var p = Core.pointById(state, e.pointId);
+        discover(['point:' + p.id]);
+        lines.push({ who: '조사 — ' + p.investigate.title, face: '🔍', text: p.investigate.text });
+      }
+    });
+    var truth = events.some(function (e) { return e.type === 'truth'; });
+    if (truth) {
+      lines = lines.concat(CHAPTERS[chapterId].truth.slice(0, 5));
+      lines.push({ pause: 900, run: guardianShowcase });
+      lines = lines.concat(CHAPTERS[chapterId].truth.slice(5));
+    }
+    playScene(lines, function () {
+      ui.busy = false;
+      render();
+      if (truth) {
+        var goal = Core.STAGES[chapterId].objective;
+        toast([{ b: '임무 갱신' }, { html: goal.before }, { text: goal.after }], 'mission', 3200, 0);
+      }
+    });
+  }
+  // 진실 공개 중 서낭신이 원귀 하나를 밀어내는 짧은 장면 (가까운 원귀가 없으면 기술 이름만)
+  function guardianShowcase() {
+    var g = Core.getUnit(state, 'seonang');
+    if (!g || !g.alive) return;
+    skillLabel('금역', g.r, g.c, 'plain');
+    var tile = board.querySelector('.unit[data-id="seonang"]');
+    if (tile) tile.classList.add('acting');
+  }
+
   // 행동이 끝난 뒤 공통 처리: 승리면 끝, 전원 행동했으면 잠시 뒤 자동으로 턴 종료
   function afterAction(events) {
     clearSelection();
+    objectiveToasts(events || []);
     defeatToasts(events || []);
     ghostDeaths(events || []);
     render();
@@ -3280,11 +3460,51 @@ var Core = (function () {
     skillEffects(events || []);
     flashHits(events || []);
     if (state.result !== null) return finish();
+    // 3장: 서낭신을 처음 친 뒤 한 번 (게임이 막지는 않는다)
+    var struck = (events || []).some(function (e) { return e.type === 'damage' && Core.getUnit(state, e.targetId).side === 'neutral'; });
+    if (struck && !ui.seonangWarned && CHAPTERS[chapterId].firstStrike) {
+      ui.seonangWarned = true;
+      return playScene(CHAPTERS[chapterId].firstStrike, function () { ui.busy = false; render(); continueTurn(); });
+    }
+    continueTurn();
+  }
+  function continueTurn() {
     if (Core.allActed(state)) {
       ui.busy = true;
       render();
       setTimeout(endTurn, ENEMY_STEP_MS);
     }
+  }
+
+  // 3장 목표 알림: 봉인 복구·임무 완료, 원귀 재등장, 봉인 약화
+  function objectiveToasts(events) {
+    events.forEach(function (e) {
+      if (e.type === 'seal') {
+        discover(['point:' + e.pointId]);
+        toast([{ text: Core.pointById(state, e.pointId).seal.done }, { small: '봉인 복구 · 공적 +' + e.merit }], '', 2400);
+      } else if (e.type === 'objective') {
+        toast([{ b: '바람이 멎었다.' }, { small: '임무 완료 · 공적 +' + e.merit }], 'mission', 2600, 0);
+        fadeWraiths();
+      } else if (e.type === 'respawn') {
+        toast([{ text: '원한이 남아 다시 모습을 드러냈다.' }], '', 2400);
+      } else if (e.type === 'weakened') {
+        toast([{ text: '봉인이 크게 약해졌다.' }, { small: '원귀가 더 빨리 돌아온다' }], '', 2800);
+      }
+    });
+  }
+  // 마지막 봉인: 남은 원귀가 희미해지며 사라진다
+  function fadeWraiths() {
+    Core.livingUnits(state, 'enemy').forEach(function (u) {
+      if (u.type !== 'wongwi') return;
+      var tile = board.querySelector('.unit[data-id="' + u.id + '"]');
+      if (!tile) return;
+      var ghost = el('div', 'ghost dying');
+      ghost.appendChild(tile.cloneNode(true));
+      placeOver(ghost, u.r, u.c);
+      board.appendChild(ghost);
+      u.alive = false; // 화면에서만 지운다 (전투는 이미 끝났다)
+      setTimeout(function () { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 900);
+    });
   }
 
   // 쓰러진 적을 문장으로: 사람은 제압, 요괴는 퇴치. 2장 달래는 여의주를 떨어뜨리고 물러난다 (specs/immersion.md 4장)
@@ -3328,7 +3548,8 @@ var Core = (function () {
     var p = cellCenter(r, c);
     var label = el('div', 'skill-label ' + kind, name);
     var entry = Core.LORE.filter(function (e) { return e.name === name && e.hanja; })[0];
-    if (entry) label.appendChild(el('small', '', entry.hanja));
+    var hanja = entry ? entry.hanja : { '금역': '禁域' }[name];
+    if (hanja) label.appendChild(el('small', '', hanja));
     label.style.left = p.x + 'px';
     label.style.top = p.cell.offsetTop + 'px';
     board.appendChild(label);
@@ -3383,12 +3604,18 @@ var Core = (function () {
 
   function showEvents(events) {
     Core.logEvents(playLog, state, events);
+    objectiveToasts(events);
     defeatToasts(events);
     ghostDeaths(events);
     render();
     showFloats(events);
     skillEffects(events);
     flashHits(events);
+    events.forEach(function (e) {
+      if (e.type !== 'respawn') return;
+      var tile = board.querySelector('.unit[data-id="' + e.unitId + '"]');
+      if (tile) tile.classList.add('respawned');
+    });
     if (events.some(function (e) { return e.type === 'weather'; })) {
       var top = document.getElementById('top');
       top.classList.remove('flash');
@@ -3467,7 +3694,12 @@ var Core = (function () {
       var id = order[i++];
       var events = Core.enemyAct(state, id);
       var move = events.filter(function (e) { return e.type === 'move'; })[0];
-      slide(id, move && move.path, function () {
+      var push = events.filter(function (e) { return e.type === 'push'; })[0]; // 3장 금역: 밀려난 원귀가 미끄러진다
+      if (push) {
+        skillLabel(push.name || '금역', Core.getUnit(state, id).r, Core.getUnit(state, id).c, 'plain');
+        markActing(id);
+      }
+      slide(push ? push.targetId : id, push ? [push.from, push.to] : move && move.path, function () {
         showEvents(events);
         if (move) footprints(move.path);
         if (events.length) markActing(id);
@@ -3719,18 +3951,19 @@ var Core = (function () {
       sheet.appendChild(stats);
       sheetButton(row, '📖 벽사록', '', openLore);
       sheetButton(row, '현재 임무', '', showMission);
-    } else if (st === 'EXORCISM_REQUIRED' && r.chapter && worldOverride[id]) {
+    } else if (r.chapter && worldOverride[id]) {
       // ?dev=1 임시 상태에서는 출동하지 않는다 — 진행 저장이 장 순서와 어긋나지 않게
       sheet.appendChild(el('div', 'note', 'DEV 임시 상태입니다. [되돌리기] 후 출동하세요.'));
-    } else if (st === 'EXORCISM_REQUIRED' && r.chapter) {
-      sheetButton(row, '출동', 'go', function () { closeRegion(); startChapter(r.chapter); });
+    } else if (Core.sortieChapter(progress, id) && st !== 'STABILIZED') {
+      // 다음 장의 무대: [출동] (3장 서낭고개는 [조사한다] — 성격이 다른 임무)
+      sheetButton(row, r.action || '출동', 'go', function () { closeRegion(); startChapter(r.chapter); });
     } else if (st === 'STABILIZED' && r.record) {
       var rec = sheetButton(row, '기록 보기', '', function () {
         sheet.insertBefore(el('div', 'record', r.record), row);
         row.removeChild(rec); // 한 번 보면 버튼은 사라진다
       });
-    } else if (r.note) {
-      sheet.appendChild(el('div', 'note', r.note));
+    } else if (Core.regionNote(r, st)) {
+      sheet.appendChild(el('div', 'note', Core.regionNote(r, st)));
     }
     if (row.childNodes.length) sheet.appendChild(row);
     sheet.hidden = false;
@@ -3932,7 +4165,7 @@ var Core = (function () {
     document.getElementById('world').hidden = true;
     state = Core.newBattle(Core.STAGES[id], { merit: progress.merit });
     playLog = Core.newPlayLog(state, id, playStore.restarts[id] || 0);
-    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null };
+    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, seonangWarned: false };
     buildBoard();
     Core.startAllyPhase(state, Math.random);
     render();
@@ -4001,7 +4234,7 @@ var Core = (function () {
     t.className = 'title ' + (win ? 'win' : 'lose');
     t.textContent = win
       ? ch.title + ' 완료 · 공적 ' + state.merit + ' / ' + Core.maxMerit(Core.STAGES[chapterId])
-      : ch.lose;
+      : (typeof ch.lose === 'string' ? ch.lose : ch.lose[state.loseReason] || ch.lose.wipe);
     var sub = '';
     if (win) {
       var after = Core.rankFor(progress.merit).name;
@@ -4083,6 +4316,14 @@ var Core = (function () {
     Core.cancelMove(state, ui.id);
     clearSelection();
     render();
+  });
+  document.getElementById('btn-seal').addEventListener('click', function () {
+    if (ui.step !== 'menu') return;
+    var from = startPos(ui.id), actor = ui.id;
+    var events = Core.repairSeal(state, ui.id);
+    if (!events) return;
+    logAllyAction(actor, from, events);
+    afterAction(events);
   });
   document.getElementById('btn-attack').addEventListener('click', function () {
     if (ui.step !== 'menu') return;

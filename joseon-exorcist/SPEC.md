@@ -56,6 +56,8 @@
 | `specs/playtest.md` | v0.5 플레이 로그·개발자 기록 화면·2장 가설·시뮬레이션 |
 | `specs/proposal-growth.md` | 성장 전달 수정안 (제안, 구현 보류) |
 | `specs/worldmap.md` | v0.6 월드맵 청령현 — 8지역·상태 계산·급보·출동 흐름 |
+| `specs/worldmap-polish.md` | v0.6.1 지도 시각 정리 |
+| `specs/chapter3.md` | v0.7 3장 서낭고개 — 서낭신·원귀·조사·봉인 복구 |
 
 ## 이후 장 (참고용, 지금 구현하지 않음)
 | 장 | 사건 | 적 |

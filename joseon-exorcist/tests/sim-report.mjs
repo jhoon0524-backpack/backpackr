@@ -51,3 +51,26 @@ for (const c of CONDITIONS) {
 
 console.log(`2장 시뮬레이션 — 조건마다 ${N}판 (날씨 seed 1~${N})`);
 console.table(rows);
+
+// ── 3장 서낭고개: 섬멸형(가까운 적을 계속 침) vs 목표형(조사 → 봉인) (specs/chapter3.md 11장) ──
+// 성공 조건: 섬멸형은 15턴 안에 이기기 어렵고, 목표형은 이긴다
+const rows3 = [];
+for (const c of CONDITIONS) {
+  for (const m of [{ key: 'nearest', label: 'A 섬멸형' }, { key: 'objective', label: 'B 목표형' }]) {
+    const logs = [];
+    for (let seed = 1; seed <= N; seed++) logs.push(playBattle({ seed, mode: m.key, stage: Core.STAGES.ch3, merit: c.merit, chapter: 'ch3' }));
+    const wins = logs.filter((s) => s.result === 'win');
+    const reasons = {};
+    logs.filter((s) => s.result === 'lose').forEach((s) => { reasons[s.loseReason] = (reasons[s.loseReason] || 0) + 1; });
+    rows3.push({
+      조건: c.label, 자동: m.label, 승률: Math.round((wins.length / N) * 100) + '%',
+      '평균턴(승)': wins.length ? f1(avg(wins.map((s) => s.turn))) : '-',
+      패배이유: JSON.stringify(reasons),
+      원귀물리침: f1(avg(logs.map((s) => s.log.wongwiDefeated))), 재등장: f1(avg(logs.map((s) => s.log.wongwiRespawns))),
+      조사: f1(avg(logs.map((s) => s.log.investigations.length))), 봉인: f1(avg(logs.map((s) => s.log.sealRepairs.length))),
+      서낭신피해: f1(avg(logs.map((s) => s.log.seonangDamageTaken)))
+    });
+  }
+}
+console.log(`\n3장 시뮬레이션 — 조건마다 ${N}판`);
+console.table(rows3);
