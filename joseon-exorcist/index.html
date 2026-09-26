@@ -165,6 +165,7 @@
     animation: label .8s ease-out forwards;
   }
   .skill-label.bell { color: #f1d7ff; border-color: #c69cf0; }
+  .skill-label.plain { color: #ffe9a8; border-color: #f5c542; }
   @keyframes label { 0% { opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
   /* 무령: 방울 소리 파문이 목표로 날아간다 */
   .bell-wave {
@@ -213,6 +214,11 @@
   @keyframes flash { 0% { color: #f5c542; } 100% { color: var(--text); } }
   #btn-end { background: #2a1f24; border-color: #5a3440; }
   #phase-note { text-align: center; font-size: 12px; color: var(--muted); min-height: 16px; margin-top: 6px; }
+  #phase-note.aim { font-size: 15px; color: var(--text); }
+  #phase-note.aim b { color: #f5c542; font-size: 17px; }
+  #btn-skill { font-size: 16px; font-weight: 800; letter-spacing: .04em; }
+  #btn-skill:not(:disabled) { color: #f5c542; }
+  .skill-label small { font-size: 10px; font-weight: 600; margin-left: 3px; opacity: .85; }
   .ghost {
     position: absolute;
     z-index: 4;
@@ -2306,8 +2312,17 @@ var Core = (function () {
   function renderPhase() {
     var canEnd = state.phase === 'ally' && !ui.busy && state.result === null;
     document.getElementById('btn-end').disabled = !canEnd;
-    document.getElementById('phase-note').textContent =
-      state.phase === 'enemy' ? enemyTurnLabel() : (canEnd ? '아군 차례 — 유닛을 눌러 움직이세요' : '');
+    var note = document.getElementById('phase-note');
+    note.className = '';
+    if (ui.step === 'target' && canEnd) {
+      // 대상 고르는 중: 무엇을 쓰는지 크게 (specs/immersion.md 9장)
+      note.className = 'aim';
+      note.innerHTML = '';
+      note.appendChild(el('b', '', ui.kind === 'skill' ? Core.getUnit(state, ui.id).skill : '공격'));
+      note.appendChild(document.createTextNode(' — 대상을 고르세요'));
+      return;
+    }
+    note.textContent = state.phase === 'enemy' ? enemyTurnLabel() : (canEnd ? '아군 차례 — 유닛을 눌러 움직이세요' : '');
   }
 
   function renderMenu() {
@@ -2442,10 +2457,12 @@ var Core = (function () {
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, ms);
   }
 
-  // 기술 이름을 칸 위에 0.8초
+  // 기술 이름을 칸 위에 0.8초. 벽사록에 한자가 있으면 작게 붙인다 (정화수 井華水, 무령 巫鈴)
   function skillLabel(name, r, c, kind) {
     var p = cellCenter(r, c);
-    var label = el('div', 'skill-label' + (kind === 'bell' ? ' bell' : ''), name);
+    var label = el('div', 'skill-label ' + kind, name);
+    var entry = Core.LORE.filter(function (e) { return e.name === name && e.hanja; })[0];
+    if (entry) label.appendChild(el('small', '', entry.hanja));
     label.style.left = p.x + 'px';
     label.style.top = p.cell.offsetTop + 'px';
     board.appendChild(label);
@@ -2455,10 +2472,11 @@ var Core = (function () {
   function skillEffects(events) {
     discover(events.filter(function (e) { return e.name; }).map(function (e) { return 'skill:' + e.name; }));
     events.forEach(function (e) {
+      if (!e.name || (e.type !== 'damage' && e.type !== 'heal')) return;
       var kind = LABELED[e.name];
-      if (!kind || (e.type !== 'damage' && e.type !== 'heal')) return;
       var from = Core.getUnit(state, e.attackerId);
       var to = Core.getUnit(state, e.targetId);
+      if (!kind) return skillLabel(e.name, to.r, to.c, 'plain'); // 다른 스킬은 글자만
       if (kind === 'water') {
         // 정화수: 받는 쪽에 푸른 파문 + 글자
         var w = el('div', 'water');
