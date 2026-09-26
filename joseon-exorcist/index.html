@@ -1895,6 +1895,91 @@ var Core = (function () {
     return { v: 1, cleared: p.cleared.slice(), merit: p.merit };
   }
 
+  // ── 월드맵: 청령현 (v0.6, specs/worldmap.md) ─────────
+  // 지역 상태는 저장하지 않고 진행(깬 장)에서 계산한다 — 저장과 지도가 어긋날 수 없다.
+  var REGION_STATUS = {
+    HQ: '본진', PEACEFUL: '평온', UNKNOWN: '미확인', OMEN: '이상 징후',
+    EXORCISM_REQUIRED: '괴변 발생', // 기획서의 '퇴마 필요' — 화면에 '퇴마'를 쓰지 않는다 (기획자 결정 2026-09-26)
+    STABILIZED: '안정됨', LOCKED: '봉쇄', BLOCKED: '통행 불가'
+  };
+  // x·y 는 지도(가로 100 × 세로 130) 위 위치. chapter 가 있으면 그 장의 무대. lore 는 훗날 벽사록 '지역' 항목 id 자리
+  // desc: 상태별 설명(없으면 default). note: 카드 아래 한 줄. record: 안정된 뒤 [기록 보기]
+  var REGIONS = [
+    { id: 'hq', name: '벽사청', title: '辟邪廳 벽사청', mark: '辟', x: 50, y: 95, links: ['heukseok', 'naru'], lore: null,
+      desc: { default: '사특한 것을 막는 조정의 비밀 관청.' } },
+    { id: 'heukseok', name: '흑석촌', mark: '村', x: 50, y: 74, chapter: 'ch1', links: ['hq', 'yeougol'], lore: 'region:heukseok',
+      desc: {
+        default: '산 아래 자리한 작은 마을.\n최근 가축과 사람들이 잇달아 산에서 사라지고 있다.',
+        STABILIZED: '흑린의 위협이 사라졌다.\n주민들이 다시 산길을 오가기 시작했다.'
+      },
+      record: '1장 흑린 토벌 — 흑린을 퇴치했다.' },
+    { id: 'yeougol', name: '여우골', mark: '谷', x: 50, y: 52, chapter: 'ch2', links: ['heukseok', 'seonang', 'sangil', 'keungoeul'], lore: 'region:yeougol',
+      desc: {
+        UNKNOWN: '산 너머 마을.\n아직 보고가 들어오지 않았다.',
+        default: '여의주를 가져간 달래가\n이곳에서 목격되었다.',
+        STABILIZED: '여의주는 회수했다.\n그러나 신당회 사람들은 이미 모습을 감췄다.'
+      },
+      record: '2장 사라진 여의주 — 달래가 여의주를 떨어뜨리고 물러났다.' },
+    { id: 'keungoeul', name: '큰고을', mark: '邑', x: 84, y: 50, links: ['yeougol'], lore: 'region:keungoeul',
+      desc: { default: '청령현의 관아와 장시가 있는 큰 고을.\n아직 겉으로 드러난 괴변은 없다.' } },
+    { id: 'seonang', name: '서낭고개', mark: '嶺', x: 50, y: 31, links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
+      desc: { default: '고개를 넘은 사람들이 밤마다 같은 꿈을 꾼다고 한다.\n서낭당의 금줄도 며칠째 끊어져 있다.' },
+      note: '조사 준비 중' },
+    { id: 'pyesachal', name: '폐사찰', mark: '寺', x: 50, y: 11, links: ['seonang'], lore: 'region:pyesachal',
+      desc: { default: '오래전 버려진 절.\n최근 밤마다 불빛이 보인다는 소문이 돈다.' },
+      note: '산길이 막혀 있다.' },
+    { id: 'sangil', name: '봉쇄된 산길', mark: '路', x: 16, y: 50, links: ['yeougol'], lore: 'region:sangil',
+      desc: { default: '산사태로 길이 끊겼다.\n그런데 무너진 바위 아래에서 사람 목소리가 들린다는 소문이 있다.' },
+      note: '지금은 지나갈 수 없다.' },
+    { id: 'naru', name: '나루터', mark: '津', x: 50, y: 117, links: ['hq'], lore: 'region:naru',
+      desc: { default: '강을 건너 다른 고을로 향하는 나루.' },
+      note: '아직 강을 건널 때가 아니다.' }
+  ];
+  var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol' };
+
+  function regionById(id) { return REGIONS.filter(function (r) { return r.id === id; })[0] || null; }
+
+  // 진행 → 지역 상태 { id: 코드 }
+  function worldState(progress) {
+    var cleared = function (ch) { return progress.cleared.indexOf(ch) !== -1; };
+    return {
+      hq: 'HQ',
+      heukseok: cleared('ch1') ? 'STABILIZED' : 'EXORCISM_REQUIRED',
+      yeougol: cleared('ch2') ? 'STABILIZED' : (cleared('ch1') ? 'EXORCISM_REQUIRED' : 'UNKNOWN'),
+      keungoeul: 'PEACEFUL',
+      seonang: 'OMEN',
+      pyesachal: 'LOCKED',
+      sangil: 'BLOCKED',
+      naru: 'PEACEFUL'
+    };
+  }
+
+  function regionDesc(region, status) {
+    return region.desc[status] || region.desc.default || '';
+  }
+
+  // 급보: 장을 깬 뒤 처음 지도를 볼 때 한 번. seen 은 이미 본 급보 id 목록
+  var WORLD_NEWS = [
+    { id: 'news:ch1', after: 'ch1', region: 'yeougol', title: '📜 새로운 급보가 도착했습니다.',
+      text: '벽사청으로 급보가 도착했다.\n여의주를 가지고 사라진 달래가 산 너머 마을에서 목격되었다.' },
+    { id: 'news:ch2', after: 'ch2', region: 'seonang', title: '📜 새로운 보고',
+      text: '서낭고개에서 새로운 보고가 올라오고 있다.' }
+  ];
+  function worldNews(progress, seen) {
+    return WORLD_NEWS.filter(function (n) { return progress.cleared.indexOf(n.after) !== -1 && seen.indexOf(n.id) === -1; });
+  }
+
+  // 현재 임무: 다음 장의 지역. 다 깼으면 조사 준비 중인 서낭고개
+  var MISSIONS = {
+    ch1: { title: '흑린 토벌', text: '흑석촌에서 가축과 사람들이 잇달아 사라지고 있다.' },
+    ch2: { title: '사라진 여의주', text: '여우골에서 달래의 흔적을 찾았다.' }
+  };
+  function currentMission(progress) {
+    var ch = nextStage(progress);
+    if (ch) return { region: REGION_BY_CHAPTER[ch], chapter: ch, title: MISSIONS[ch].title, text: MISSIONS[ch].text, ready: true };
+    return { region: 'seonang', chapter: null, title: '조사 준비 중', text: '서낭고개에서 새로운 보고가 올라오고 있다.', ready: false };
+  }
+
   // ── 벽사록: 도감 + 세계관 사전 (specs/lore.md 9~13장) ─────────────
   // grade: 고증 등급 A 사료 / B 민속·무속 / C 창작. text 는 역사·민속 설명, note 는 게임에서의 재해석.
   // 역사적 사실과 게임 설정을 섞어 사실처럼 쓰지 않는다. 사료 인용 수치는 기획자 제공 내용 (AI 원문 대조 전).
@@ -2116,6 +2201,13 @@ var Core = (function () {
     loreTokensForBattle: loreTokensForBattle,
     newlyUnlockedLore: newlyUnlockedLore,
     migrateLore: migrateLore,
+    REGION_STATUS: REGION_STATUS,
+    REGIONS: REGIONS,
+    regionById: regionById,
+    regionDesc: regionDesc,
+    worldState: worldState,
+    worldNews: worldNews,
+    currentMission: currentMission,
     newPlayLog: newPlayLog,
     logMove: logMove,
     logEvents: logEvents,
