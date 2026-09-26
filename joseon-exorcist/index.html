@@ -5081,8 +5081,10 @@ var Core = (function () {
     renderPlayLog();
     document.getElementById('playlog').hidden = false;
   }
-  document.getElementById('playlog-open-title').hidden = !DEV;
-  document.getElementById('playlog-open-battle').hidden = !DEV;
+  // 실제 게임 주소에서는 개발자 주소(?dev=1)에서만. 시험판(아티팩트 등)에서는 늘 보인다 — 기획자가 기록을 복사해 전달
+  var SHOW_PLAYLOG = DEV || location.hostname !== 'joseon-exorcist.vercel.app';
+  document.getElementById('playlog-open-title').hidden = !SHOW_PLAYLOG;
+  document.getElementById('playlog-open-battle').hidden = !SHOW_PLAYLOG;
   document.getElementById('playlog-open-title').addEventListener('click', openPlayLog);
   // 🧪 4장 바로 시험: 3장까지 깬 상태(공적 13·수련점 2)로 지도를 연다. 실제 게임 주소에서는 ?dev=1 일 때만 보인다
   // (시험용 사본 — claude.ai 링크 등 — 에서는 늘 보인다). 기존 진행을 덮으므로 한 번 묻는다
