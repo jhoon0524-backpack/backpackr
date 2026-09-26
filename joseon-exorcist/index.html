@@ -1642,7 +1642,9 @@ var Core = (function () {
         var t = getUnit(state, e.targetId);
         log.defeatedUnits.push({
           turn: state.turn, id: t.id, name: t.name, side: t.side,
-          how: e.type === 'retreat' ? '퇴각' : DEFEAT_TYPES[e.defeatType], by: e.attackerId, merit: e.merit
+          // 2장 달래(사람 보스)는 화면 문구처럼 '물러남' (defeatMessage)
+          how: e.type === 'retreat' ? '퇴각' : (t.boss && t.human ? '물러남' : DEFEAT_TYPES[e.defeatType]),
+          by: e.attackerId, merit: e.merit
         });
       }
     });

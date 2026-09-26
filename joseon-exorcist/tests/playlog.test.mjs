@@ -69,7 +69,7 @@ test('끝난 로그: 결과·턴·공적이 전투 상태와 같다, 달래를 �
   Core.logEvents(log, s, Core.attack(s, 'yoon', 'dallae_boss'));
   Core.finishPlayLog(log, s);
   assert.deepEqual([log.result, log.totalTurns, log.meritEarned, log.dalraeEscapeDistance], ['win', 1, 3, null]);
-  assert.equal(log.defeatedUnits[0].how, '제압');
+  assert.equal(log.defeatedUnits[0].how, '물러남', '화면 문구와 같게');
 });
 
 // 자동 플레이 여러 판으로 로그 합계가 서로 맞는지 (계산 누락·중복 탐지)

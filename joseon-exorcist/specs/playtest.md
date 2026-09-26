@@ -23,7 +23,7 @@
 | skills | 스킬 이름 → 사용 수 (정화수 포함, 아군·적 모두) |
 | damageDealt / damageTaken | 유닛 id → 준 피해 / 받은 피해 합 (계산된 피해 그대로 — 남은 HP 보다 큰 마지막 일격도 전부 셈) |
 | healing | 유닛 id → 정화수로 채운 HP 합. **(보충)** 약수터 회복은 `springHealing`(유닛 id → 합)에 따로 |
-| defeatedUnits | [{ turn, id, name, side, how: 제압·퇴치·퇴각, by, merit }] |
+| defeatedUnits | [{ turn, id, name, side, how: 제압·퇴치·물러남(2장 달래)·퇴각, by, merit }] |
 | meritEarned | 이번 판에 얻은 공적 |
 | dalraeHealCount | 2장 달래(보스)의 정화수 횟수 |
 | dalraeEscapeDistance | 끝났을 때 달래 → 탈출로 실제 칸 수 (길이 막혔으면 null, 달래가 없으면 null) |
