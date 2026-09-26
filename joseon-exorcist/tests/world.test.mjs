@@ -89,3 +89,10 @@ test('장 무대 지역: 흑석촌 1장, 여우골 2장, 나머지는 전투 없
   assert.deepEqual(Core.REGIONS.filter((r) => r.chapter).map((r) => [r.id, r.chapter]), [['heukseok', 'ch1'], ['yeougol', 'ch2']]);
   for (const r of Core.REGIONS.filter((x) => x.chapter)) assert.ok(Core.STAGES[r.chapter], r.id);
 });
+
+test('권역: 청령현 하나, 지역 8곳이 모두 청령현 소속 (6~10 지역 유지)', () => {
+  assert.deepEqual(Core.PROVINCES.map((p) => [p.id, p.name]), [['cheongryeong', '청령현']]);
+  assert.deepEqual(Core.PROVINCES[0].regions, Core.REGIONS.map((r) => r.id));
+  for (const r of Core.REGIONS) assert.equal(r.province, 'cheongryeong', r.id);
+  assert.ok(Core.PROVINCES[0].regions.length >= 6 && Core.PROVINCES[0].regions.length <= 10);
+});

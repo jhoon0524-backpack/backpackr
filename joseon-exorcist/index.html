@@ -565,15 +565,24 @@
   #world .w-dev { margin-top: 6px; font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; }
   #world .w-dev button { font: inherit; font-size: 11px; padding: 2px 6px; border: 1px solid #6b5f48; background: #f7f1e3; border-radius: 3px; }
   #world .w-map {
+    transition: transform .25s ease;
     position: relative; flex: none; aspect-ratio: 100 / 160; /* 세로로 늘려 노드 사이 여유 (좌표는 100×130 기준 그대로) */
     width: min(calc(100vw - 16px), calc((100vh - 150px) * 100 / 160), 440px);
   }
   #world .w-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  #world .ridge path { fill: none; stroke: #3b3326; stroke-width: .5; stroke-linejoin: round; opacity: .55; }
-  #world .ridge.faint path { opacity: .3; }
+  #world .ridge path { fill: none; stroke: #3b3326; stroke-width: .5; stroke-linejoin: round; opacity: .3; }
+  #world .peak .m-fill { fill: #ebe1c9; stroke: none; }
+  #world .peak .m-line { fill: none; stroke: #3b3326; stroke-width: .6; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+  #world .stream { fill: none; stroke: #7f98a3; stroke-width: .8; opacity: .6; stroke-linecap: round; }
+  #world .paddy rect { fill: #e2d8b6; stroke: #8a7a55; stroke-width: .3; }
+  #world .roof path { fill: #4a4034; opacity: .8; }
+  #world .road-edge { fill: none; stroke: #cdb98f; stroke-width: 2.6; stroke-linecap: round; }
+  #world .road { fill: none; stroke: #8a6f4a; stroke-width: 1; stroke-linecap: round; opacity: .9; }
+  #world .shut .road-edge, #world .shut .road { opacity: .4; }
+  #world .rock { fill: #8f8a80; stroke: #3b3326; stroke-width: .3; }
+  #world .rope { fill: none; stroke: #6b5f48; stroke-width: .6; }
+  #world .rope-tab { fill: #fbf6ea; stroke: #6b5f48; stroke-width: .2; }
   #world .river { fill: none; stroke: #7f98a3; stroke-width: 4; opacity: .35; stroke-linecap: round; }
-  #world .road { stroke: #6b5f48; stroke-width: .7; stroke-dasharray: 1.6 1.1; opacity: .8; }
-  #world .road.shut { opacity: .3; }
   #world .node {
     position: absolute; transform: translate(-50%, -50%); background: none; border: none; padding: 0;
     display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; color: #1d1a14;
@@ -590,14 +599,14 @@
   /* 본진: 붉은 네모 인장, 조금 크게 */
   #world .st-HQ .seal { width: 46px; height: 46px; border-radius: 4px; border: 3px double #b0302a; color: #b0302a; transform: rotate(-4deg); font-size: 24px; }
   /* 평온·안정됨: 창문 불빛 */
-  #world .st-PEACEFUL .seal::after, #world .st-STABILIZED .seal::after {
+  #world .st-PEACEFUL .seal::after {
     content: ""; position: absolute; right: -2px; bottom: 2px; width: 7px; height: 7px; border-radius: 50%;
     background: #f5c542; box-shadow: 0 0 6px 2px rgba(245, 197, 66, .7);
   }
   #world .st-STABILIZED .seal { background: #fbf6ea; border-color: #4a5a52; color: #2d3a33; }
   /* 이상 징후: 옅은 안개와 느린 회색 파동 */
-  #world .st-OMEN .seal { border-color: #8a8270; color: #5d5646; box-shadow: 0 0 0 6px rgba(160, 150, 130, .25), 0 0 14px 6px rgba(200, 192, 170, .6); }
-  #world .st-OMEN .seal::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(140, 130, 110, .6); animation: w-omen 3.2s ease-out infinite; }
+  #world .st-OMEN .seal { border-color: #a8894a; color: #6e5a2e; box-shadow: 0 0 0 6px rgba(214, 178, 96, .18), 0 0 14px 6px rgba(230, 214, 170, .55); }
+  #world .st-OMEN .seal::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1.5px solid rgba(214, 170, 80, .7); animation: w-omen 3.2s ease-out infinite; }
   @keyframes w-omen { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
   /* 괴변 발생: 붉은 인장 + 검은 연기 + 느린 호흡 (가장 눈에 띈다) */
   #world .st-EXORCISM_REQUIRED .seal { background: #b0302a; border-color: #6e1b17; color: #f7f1e3; animation: w-breath 2.4s ease-in-out infinite; }
@@ -607,6 +616,7 @@
     animation: w-smoke 2.8s ease-out infinite;
   }
   #world .st-EXORCISM_REQUIRED .label { color: #8f231d; }
+  #world .st-EXORCISM_REQUIRED .seal::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid rgba(176, 48, 42, .7); animation: w-omen 1.8s ease-out infinite; }
   @keyframes w-breath { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(176, 48, 42, .45); } 50% { transform: scale(1.06); box-shadow: 0 0 0 7px rgba(176, 48, 42, 0); } }
   @keyframes w-smoke { 0% { transform: translateY(4px) scale(.7); opacity: .9; } 100% { transform: translateY(-14px) scale(1.5); opacity: 0; } }
   /* 미확인·봉쇄·통행 불가: 흐리게, 금줄 */
@@ -757,20 +767,48 @@
     </header>
     <div class="w-map" id="world-map">
       <svg viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true">
-        <g class="ridge">
-          <path d="M-2 22 L8 10 L14 16 L22 5 L31 15 L37 9 L44 18"/>
-          <path d="M56 18 L63 8 L70 15 L78 4 L86 13 L93 7 L102 17"/>
-          <path d="M-2 40 L6 33 L11 38 L17 30 L25 41"/>
-          <path d="M75 40 L82 32 L88 37 L95 29 L102 36"/>
-          <path d="M-2 70 L5 63 L10 68 L16 60 L24 71"/>
-          <path d="M77 72 L84 64 L90 69 L96 62 L102 70"/>
-        </g>
+        <defs>
+          <radialGradient id="w-wash" cx="50%" cy="60%" r="60%">
+            <stop offset="0%" stop-color="#3b3326" stop-opacity=".22"/><stop offset="100%" stop-color="#3b3326" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- 먼 산 두 줄만 (배경) -->
         <g class="ridge faint">
-          <path d="M20 28 L27 22 L33 27"/><path d="M66 28 L72 23 L79 28"/>
-          <path d="M26 88 L32 82 L38 87"/><path d="M62 86 L68 80 L75 86"/>
+          <path d="M-2 30 L6 24 L12 28"/><path d="M88 28 L95 22 L102 27"/>
         </g>
+        <!-- 폐사찰: 깊은 산 — 봉우리 여러 개와 먹 번짐 -->
+        <ellipse cx="58" cy="8" rx="30" ry="10" fill="url(#w-wash)"/>
+        <g class="peak">
+          <path class="m-fill" d="M30 20 Q34 12 38 9 Q41 12 44 14 Q48 5 53 2 Q57 8 60 11 Q64 5 68 4 Q72 9 76 13 Q81 8 86 7 Q90 13 94 20 Z"/><path class="m-line" d="M30 20 Q34 12 38 9 Q41 12 44 14 Q48 5 53 2 Q57 8 60 11 Q64 5 68 4 Q72 9 76 13 Q81 8 86 7 Q90 13 94 20"/>
+        </g>
+        <!-- 강 (나루터) -->
         <path class="river" d="M-2 108 C15 102 30 113 46 107 S78 100 102 110"/>
         <g id="world-roads"></g>
+        <!-- 길 위에 겹쳐 그리는 지형: 길이 산 뒤로 사라졌다 나타난다 -->
+        <g class="peak">
+          <!-- 서낭고개: 두 산 사이 좁은 고개 -->
+          <path class="m-fill" d="M23 39 Q27 31 31 26 Q36 31 41 37 Z"/><path class="m-line" d="M23 39 Q27 31 31 26 Q36 31 41 37"/>
+          <path class="m-fill" d="M51 37 Q56 29 61 23 Q67 30 73 38 Z"/><path class="m-line" d="M51 37 Q56 29 61 23 Q67 30 73 38"/>
+          <!-- 여우골: 양쪽 산 사이 계곡 -->
+          <path class="m-fill" d="M30 61 Q33 54 37 49 Q41 54 45 59 Z"/><path class="m-line" d="M30 61 Q33 54 37 49 Q41 54 45 59"/>
+          <path class="m-fill" d="M61 58 Q64 52 68 47 Q72 53 76 61 Z"/><path class="m-line" d="M61 58 Q64 52 68 47 Q72 53 76 61"/>
+          <!-- 흑석촌 옆 작은 언덕 (길이 뒤로 숨는다) -->
+          <path class="m-fill" d="M40 67 Q45 61 51 67 Z"/><path class="m-line" d="M40 67 Q45 61 51 67"/>
+        </g>
+        <!-- 여우골 물줄기 -->
+        <path class="stream" d="M54 56 C51 61 57 64 55 69 S52 76 56 82"/>
+        <!-- 큰고을: 평지 — 논밭과 관아 지붕 -->
+        <g class="paddy">
+          <rect x="74" y="56" width="6" height="4"/><rect x="81" y="56" width="6" height="4"/><rect x="88" y="56" width="6" height="4"/>
+          <rect x="77" y="61" width="6" height="4"/><rect x="84" y="61" width="6" height="4"/>
+        </g>
+        <g class="roof">
+          <path d="M68 46 Q72 43 76 46 L74.5 46 L74.5 48 L69.5 48 L69.5 46 Z"/>
+          <path d="M89 41 Q93 38 97 41 L95.5 41 L95.5 43 L90.5 43 L90.5 41 Z"/>
+          <!-- 폐사찰 절 지붕 -->
+          <path d="M67 6 Q71 3 75 6 L73.5 6 L73.5 8 L68.5 8 L68.5 6 Z"/>
+        </g>
+        <g id="world-marks"></g>
       </svg>
       <div id="world-nodes"></div>
     </div>
@@ -2055,13 +2093,13 @@ var Core = (function () {
   var REGIONS = [
     { id: 'hq', name: '벽사청', title: '辟邪廳 벽사청', mark: '辟', x: 50, y: 95, links: ['heukseok', 'naru'], lore: null,
       desc: { default: '사특한 것을 막는 조정의 비밀 관청.' } },
-    { id: 'heukseok', name: '흑석촌', mark: '村', x: 50, y: 74, chapter: 'ch1', links: ['hq', 'yeougol'], lore: 'region:heukseok',
+    { id: 'heukseok', name: '흑석촌', mark: '村', x: 46, y: 74, chapter: 'ch1', links: ['hq', 'yeougol'], lore: 'region:heukseok',
       desc: {
         default: '산 아래 자리한 작은 마을.\n최근 가축과 사람들이 잇달아 산에서 사라지고 있다.',
         STABILIZED: '흑린의 위협이 사라졌다.\n주민들이 다시 산길을 오가기 시작했다.'
       },
       record: '1장 흑린 토벌 — 흑린을 퇴치했다.' },
-    { id: 'yeougol', name: '여우골', mark: '谷', x: 50, y: 52, chapter: 'ch2', links: ['heukseok', 'seonang', 'sangil', 'keungoeul'], lore: 'region:yeougol',
+    { id: 'yeougol', name: '여우골', mark: '谷', x: 53, y: 52, chapter: 'ch2', links: ['heukseok', 'seonang', 'sangil', 'keungoeul'], lore: 'region:yeougol',
       desc: {
         UNKNOWN: '산 너머 마을.\n아직 보고가 들어오지 않았다.',
         default: '여의주를 가져간 달래가\n이곳에서 목격되었다.',
@@ -2070,10 +2108,10 @@ var Core = (function () {
       record: '2장 사라진 여의주 — 달래가 여의주를 떨어뜨리고 물러났다.' },
     { id: 'keungoeul', name: '큰고을', mark: '邑', x: 84, y: 50, links: ['yeougol'], lore: 'region:keungoeul',
       desc: { default: '청령현의 관아와 장시가 있는 큰 고을.\n아직 겉으로 드러난 괴변은 없다.' } },
-    { id: 'seonang', name: '서낭고개', mark: '嶺', x: 50, y: 31, links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
+    { id: 'seonang', name: '서낭고개', mark: '嶺', x: 46, y: 31, links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
       desc: { default: '고개를 넘은 사람들이 밤마다 같은 꿈을 꾼다고 한다.\n서낭당의 금줄도 며칠째 끊어져 있다.' },
       note: '조사 준비 중' },
-    { id: 'pyesachal', name: '폐사찰', mark: '寺', x: 50, y: 11, links: ['seonang'], lore: 'region:pyesachal',
+    { id: 'pyesachal', name: '폐사찰', mark: '寺', x: 58, y: 11, links: ['seonang'], lore: 'region:pyesachal',
       desc: { default: '오래전 버려진 절.\n최근 밤마다 불빛이 보인다는 소문이 돈다.' },
       note: '산길이 막혀 있다.' },
     { id: 'sangil', name: '봉쇄된 산길', mark: '路', x: 16, y: 50, links: ['yeougol'], lore: 'region:sangil',
@@ -2084,6 +2122,12 @@ var Core = (function () {
       note: '아직 강을 건널 때가 아니다.' }
   ];
   var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol' };
+  // 조선 전체 → 권역 → 지역 (specs/worldmap-polish.md 4장). 지금 화면 전체가 청령현 권역맵이다.
+  // 권역 하나는 6~10 지역으로 두고, 권역 이야기가 끝나면 나루터로 다음 권역맵 (권역 이동 화면은 아직 없다)
+  var PROVINCES = [
+    { id: 'cheongryeong', name: '청령현', hanja: '靑嶺縣', regions: REGIONS.map(function (r) { return r.id; }) }
+  ];
+  REGIONS.forEach(function (r) { r.province = 'cheongryeong'; });
 
   function regionById(id) { return REGIONS.filter(function (r) { return r.id === id; })[0] || null; }
 
@@ -2353,6 +2397,7 @@ var Core = (function () {
     migrateLore: migrateLore,
     REGION_STATUS: REGION_STATUS,
     REGIONS: REGIONS,
+    PROVINCES: PROVINCES,
     regionById: regionById,
     regionDesc: regionDesc,
     worldState: worldState,
@@ -3224,6 +3269,23 @@ var Core = (function () {
   var worldSelected = null;
   var STATUS_DOT = { EXORCISM_REQUIRED: '🔴', OMEN: '🟡', STABILIZED: '🔵', PEACEFUL: '⚪', UNKNOWN: '🔒', LOCKED: '🔒', BLOCKED: '⛔', HQ: '' };
 
+  // 지역 사이 길 (지도 좌표 100×130). 산을 돌아가게 굽혔다. 키는 두 지역 id
+  var ROAD_PATHS = {
+    'hq-heukseok': 'M50 95 C43 89 51 81 46 74',
+    'heukseok-yeougol': 'M46 74 C38 67 60 63 53 52',
+    'yeougol-seonang': 'M53 52 C58 45 41 41 46 31',
+    'seonang-pyesachal': 'M46 31 C40 24 62 20 58 11',
+    'yeougol-keungoeul': 'M53 52 C63 59 72 43 84 50',
+    'yeougol-sangil': 'M53 52 C42 59 29 43 16 50',
+    'hq-naru': 'M50 95 C57 102 43 110 50 117'
+  };
+  function svgEl(tag, cls, attrs) {
+    var n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    if (cls) n.setAttribute('class', cls);
+    Object.keys(attrs || {}).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    return n;
+  }
+
   function regionStatus(id) {
     return worldOverride[id] || Core.worldState(progress)[id];
   }
@@ -3239,20 +3301,31 @@ var Core = (function () {
     mission.innerHTML = '';
     mission.appendChild(el('small', '', '현재 임무'));
     mission.appendChild(document.createTextNode((STATUS_DOT[regionStatus(m.region)] || '') + ' ' + Core.regionById(m.region).name + ' — ' + m.title));
-    // 길
+    // 길: 손으로 그린 굽은 산길. 막힌 곳(미확인·봉쇄·통행 불가)으로 가는 길은 흐리게
     var roads = document.getElementById('world-roads');
     roads.innerHTML = '';
-    Core.REGIONS.forEach(function (a) {
-      a.links.forEach(function (bid) {
-        var b = Core.regionById(bid);
-        if (a.id > b.id) return; // 한 번만
-        var shut = ['LOCKED', 'BLOCKED', 'UNKNOWN'].indexOf(regionStatus(a.id)) !== -1 || ['LOCKED', 'BLOCKED', 'UNKNOWN'].indexOf(regionStatus(b.id)) !== -1;
-        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y); line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
-        line.setAttribute('class', 'road' + (shut ? ' shut' : ''));
-        roads.appendChild(line);
-      });
+    var shutSt = ['LOCKED', 'BLOCKED', 'UNKNOWN'];
+    Object.keys(ROAD_PATHS).forEach(function (key) {
+      var ends = key.split('-');
+      var g = svgEl('g', shutSt.indexOf(regionStatus(ends[0])) !== -1 || shutSt.indexOf(regionStatus(ends[1])) !== -1 ? 'shut' : '');
+      g.appendChild(svgEl('path', 'road-edge', { d: ROAD_PATHS[key] }));
+      g.appendChild(svgEl('path', 'road', { d: ROAD_PATHS[key] }));
+      roads.appendChild(g);
     });
+    // 길 위의 막힘: 봉쇄된 산길의 무너진 바위, 폐사찰 길의 금줄 (상태가 풀리면 사라진다)
+    var marks = document.getElementById('world-marks');
+    marks.innerHTML = '';
+    if (regionStatus('sangil') === 'BLOCKED') {
+      [[27, 48, 2.2], [29.5, 49.6, 1.6], [25, 50, 1.4], [28.6, 46.4, 1.2]].forEach(function (q) {
+        marks.appendChild(svgEl('circle', 'rock', { cx: q[0], cy: q[1], r: q[2] }));
+      });
+    }
+    if (regionStatus('pyesachal') === 'LOCKED') {
+      marks.appendChild(svgEl('path', 'rope', { d: 'M46 20 Q52 23 58 19' }));
+      [[49, 21.2], [52, 21.8], [55, 20.9]].forEach(function (q) {
+        marks.appendChild(svgEl('rect', 'rope-tab', { x: q[0] - 0.6, y: q[1], width: 1.2, height: 2.2 }));
+      });
+    }
     // 노드
     var nodes = document.getElementById('world-nodes');
     nodes.innerHTML = '';
@@ -3265,7 +3338,8 @@ var Core = (function () {
       b.style.top = (r.y / 130 * 100) + '%';
       b.appendChild(el('span', 'seal', r.mark));
       b.appendChild(el('span', 'label', r.name));
-      if (st !== 'HQ') b.appendChild(el('span', 'state', Core.REGION_STATUS[st]));
+      // 안전한 곳은 조용하게: 평온·본진은 상태 글자 없음 (specs/worldmap-polish.md 3장)
+      if (st !== 'HQ' && st !== 'PEACEFUL') b.appendChild(el('span', 'state', Core.REGION_STATUS[st]));
       b.setAttribute('aria-label', r.name + ' ' + Core.REGION_STATUS[st]);
       b.addEventListener('click', function (ev) { ev.stopPropagation(); openRegion(r.id); });
       nodes.appendChild(b);
@@ -3324,11 +3398,22 @@ var Core = (function () {
     if (row.childNodes.length) sheet.appendChild(row);
     sheet.hidden = false;
     renderWorld();
+    liftMapFor(id);
   }
   function closeRegion() {
     worldSelected = null;
     document.getElementById('world-sheet').hidden = true;
+    document.getElementById('world-map').style.transform = '';
     renderWorld();
+  }
+  // 고른 지역이 카드에 가려지면 지도를 그만큼 위로 올린다 (본진·나루터처럼 아래쪽 노드)
+  function liftMapFor(id) {
+    var map = document.getElementById('world-map');
+    map.style.transform = '';
+    var node = document.querySelector('#world-nodes .node[data-id="' + id + '"]');
+    var sheetTop = document.getElementById('world-sheet').getBoundingClientRect().top;
+    var over = node.getBoundingClientRect().bottom + 8 - sheetTop;
+    if (over > 0) map.style.transform = 'translateY(' + (-over) + 'px)';
   }
 
   // 본진 [현재 임무] → 임무 카드, [지도에서 보기] 로 그 지역
