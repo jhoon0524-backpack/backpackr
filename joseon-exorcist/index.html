@@ -515,25 +515,23 @@
   #lore .back { margin-top: 4px; min-height: 32px; padding: 0 10px; border-radius: 4px; border: 1px solid #b9a984; background: #f7f1e3; font: inherit; font-size: 13px; color: #1d1a14; }
   #lore button:focus-visible { outline: 2px solid #b0302a; outline-offset: 1px; }
 
-  #legend {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 6px;
+  /* 토스트: 맵을 가리지 않게 화면 아래에 잠깐 (specs/immersion.md 2·4·7장) */
+  #toasts {
+    position: fixed; left: 0; right: 0; bottom: 12px; z-index: 45; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 12px;
   }
-  #legend span::before {
-    content: "";
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-right: 4px;
-    vertical-align: -1px;
-    border-radius: 2px;
-    background: var(--c);
+  .toast {
+    width: 100%; max-width: 440px; padding: 8px 12px; border-radius: 8px;
+    background: rgba(24, 27, 36, .96); border: 1px solid #3a3f4d; box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+    font-size: 13px; line-height: 1.5; text-align: center; word-break: keep-all;
+    animation: toast var(--ms, 2800ms) ease forwards;
   }
+  .toast b { display: block; font-size: 15px; }
+  .toast small { display: block; color: var(--muted); font-size: 11px; }
+  .toast.lore { background: rgba(239, 230, 210, .97); color: #1d1a14; border-color: #b9a984; }
+  .toast.lore small { color: #6b5f48; }
+  .toast.lore b small { display: inline; font-size: 12px; margin-left: 4px; }
+  @keyframes toast { 0% { opacity: 0; transform: translateY(8px); } 8% { opacity: 1; transform: none; } 88% { opacity: 1; } 100% { opacity: 0; } }
 </style>
 </head>
 <body>
@@ -545,12 +543,6 @@
     <button class="lore-open" id="lore-open-battle" type="button" aria-label="벽사록 열기">📖</button>
   </header>
   <div id="board"></div>
-  <div id="legend">
-    <span style="--c: var(--shrine)">서낭당 · 받는 피해 −20%</span>
-    <span style="--c: var(--spring)">약수터 · 턴 시작 HP +10</span>
-    <span style="--c: var(--rock)">초가집·바위 · 못 지나감</span>
-    <span style="--c: var(--escape)" id="legend-escape" hidden>🌲 탈출로 · 달래가 닿으면 패배</span>
-  </div>
   <div id="panel">
     <div id="info" hidden></div>
     <div id="menu" class="btns" hidden>
@@ -615,6 +607,7 @@
     <button class="big-btn" id="btn-retry" type="button">다시하기</button>
     <button class="big-btn plain" id="btn-home" type="button">처음 화면으로</button>
   </div>
+  <div id="toasts" aria-live="polite"></div>
 </div>
 
 <div id="editor-app" hidden>
@@ -1927,6 +1920,14 @@ var Core = (function () {
   var TERRAIN_CLASS = { '.': 't-dirt', 'D': 't-rock', 'M': 't-shrine', 'K': 't-spring', 'E': 't-escape' };
   var TERRAIN_MARK = { 'D': '🛖', 'M': '🏮', 'K': '💧', 'E': '🌲' };
   var WEATHER_ICON = { '맑음': '☀️', '강풍': '🌬️', '비': '🌧️', '흐림': '☁️' };
+  // 지형 칸을 누르면 보이는 설명 (specs/immersion.md 2장). 흙길은 설명 없음
+  var TERRAIN_INFO = {
+    'M': { name: '서낭당', text: '받는 피해 20% 감소' },
+    'K': { name: '약수터', text: '턴 시작 시 HP +10' },
+    'E': { name: '탈출로', text: '달래가 이 칸에 도착하면 패배합니다.' },
+    'D': { name: '초가집·바위', text: '지나갈 수 없습니다.' }
+  };
+  var TIP_TERRAINS = ['M', 'K', 'E']; // 처음 만나면 한 번 알려 주는 특수 지형
   var ENEMY_STEP_MS = 500; // 요괴 한 마리씩 행동하는 간격 (기획서 14장)
 
   // 대사·문구 (1장 specs/screens.md 6·7장, 2장 specs/chapter2.md 3장). 문구는 기획자가 정한다 — 고치지 않는다
@@ -2035,7 +2036,7 @@ var Core = (function () {
   var board = document.getElementById('board');
   var cells = [];
   // 조작 상태. step: 'none' 선택 없음 / 'move' 파란 칸 고르는 중 / 'menu' 이동 후 행동 고르는 중
-  var ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false, orb: null };
+  var ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null };
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -2050,7 +2051,6 @@ var Core = (function () {
     board.style.gridTemplateColumns = 'repeat(' + state.cols + ', 1fr)';
     board.style.gridTemplateRows = 'repeat(' + state.rows + ', 1fr)';
     board.style.aspectRatio = state.cols + ' / ' + state.rows;
-    document.getElementById('legend-escape').hidden = !state.map.some(function (row) { return row.indexOf('E') !== -1; });
     // 세로로 긴 맵(2장 10×8)도 한 화면에: 폭을 화면 높이 58% 에 맞춘 값으로도 제한한다
     board.style.width = 'min(calc(100vw - 16px), ' + (58 * state.cols / state.rows).toFixed(1) + 'vh, 464px)';
     for (var r = 0; r < state.rows; r++) {
@@ -2177,9 +2177,11 @@ var Core = (function () {
     renderPhase();
   }
 
-  // 정보창: 이름 / 소속 / 칭호 / HP / 기력 / 속성
+  // 정보창: 이름 / 소속 / 칭호 / HP / 기력 / 속성. 빈 특수 지형 칸을 눌렀으면 지형 설명 카드
   function renderInfo() {
     var box = document.getElementById('info');
+    var cellInfo = ui.infoCell && TERRAIN_INFO[Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c)];
+    if (cellInfo) return renderTerrainInfo(box, Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c));
     var u = ui.infoId && Core.getUnit(state, ui.infoId);
     box.hidden = !u || !u.alive;
     if (box.hidden) return;
@@ -2194,7 +2196,56 @@ var Core = (function () {
       'HP ' + u.hp + '/' + u.maxHp +
       ' · 기력 ' + (u.ki === null ? '—' : u.ki + '/' + u.maxKi) +
       ' · 속성 ' + u.elem));
+    var under = Core.terrainAt(state, u.r, u.c);
+    if (under !== 'D' && TERRAIN_INFO[under]) {
+      text.appendChild(el('div', 'sub', TERRAIN_MARK[under] + ' ' + TERRAIN_INFO[under].name + ' 위 · ' + TERRAIN_INFO[under].text));
+    }
     box.appendChild(text);
+  }
+
+  function renderTerrainInfo(box, t) {
+    box.hidden = false;
+    box.innerHTML = '';
+    box.appendChild(el('div', 'face', TERRAIN_MARK[t]));
+    var text = el('div');
+    text.appendChild(el('div', 'name', TERRAIN_INFO[t].name));
+    text.appendChild(el('div', 'stats', TERRAIN_INFO[t].text));
+    box.appendChild(text);
+  }
+
+  // 화면 아래에 잠깐 뜨는 알림. lines: [{ b: 굵게, small: 작게, text: 보통 }], kind: 'lore' 면 한지 색
+  function toast(lines, kind, ms) {
+    ms = ms || 2800;
+    var t = el('div', 'toast' + (kind ? ' ' + kind : ''));
+    t.style.setProperty('--ms', ms + 'ms');
+    lines.forEach(function (line) {
+      if (line.b) {
+        var b = el('b', '', line.b);
+        if (line.hanja) b.appendChild(el('small', '', line.hanja));
+        t.appendChild(b);
+      } else if (line.small) {
+        t.appendChild(el('small', '', line.small));
+      } else {
+        t.appendChild(el('div', '', line.text));
+      }
+    });
+    document.getElementById('toasts').appendChild(t);
+    removeLater(t, ms);
+  }
+
+  // 처음 만난 특수 지형을 전투 시작 때 한 번 알려 준다 (본 지형은 이 브라우저에 기록)
+  var TIPS_KEY = 'joseon-exorcist.tips';
+  function terrainTips() {
+    var seen = [];
+    try { seen = JSON.parse(localStorage.getItem(TIPS_KEY) || '[]'); } catch (e) { /* 저장이 막혀 있으면 매번 알려 준다 */ }
+    if (!Array.isArray(seen)) seen = [];
+    var fresh = TIP_TERRAINS.filter(function (t) {
+      return seen.indexOf(t) === -1 && state.map.some(function (row) { return row.indexOf(t) !== -1; });
+    });
+    if (!fresh.length) return;
+    toast(fresh.map(function (t) { return { text: TERRAIN_MARK[t] + ' ' + TERRAIN_INFO[t].name + ' · ' + TERRAIN_INFO[t].text }; })
+      .concat([{ small: '지형 칸을 누르면 다시 볼 수 있습니다.' }]), '', 4200);
+    try { localStorage.setItem(TIPS_KEY, JSON.stringify(seen.concat(fresh))); } catch (e) { /* 무시 */ }
   }
 
   // 적 차례 문구: 귀물만 있으면 '귀물의 차례', 사람(신당회)이 섞이면 '상대의 차례' (specs/lore.md 보충 L5)
@@ -2242,6 +2293,7 @@ var Core = (function () {
     if (ui.busy || state.phase !== 'ally') return;
     var u = Core.unitAt(state, r, c);
     if (u) ui.infoId = u.id;
+    ui.infoCell = u ? null : { r: r, c: c }; // 빈 칸이면 지형 설명
     if (ui.step === 'move') {
       var isBlue = Core.moveTargets(state, Core.getUnit(state, ui.id))
         .some(function (p) { return p.r === r && p.c === c; });
@@ -2251,6 +2303,7 @@ var Core = (function () {
         Core.moveUnit(state, mover, r, c);
         ui.step = 'menu';
         ui.infoId = mover;
+        ui.infoCell = null;
         ui.busy = true; // 미끄러지는 동안 입력 잠금
         slide(mover, path, function () {
           ui.busy = false;
@@ -2588,7 +2641,7 @@ var Core = (function () {
     document.getElementById('result').hidden = true;
     document.getElementById('title').hidden = true;
     state = Core.newBattle(Core.STAGES[id], { merit: progress.merit });
-    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, dallaeGone: false, orb: null };
+    ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null };
     buildBoard();
     Core.startAllyPhase(state, Math.random);
     seeLore(Core.loreTokensForBattle(state)); // 전투에서 만난 귀물
@@ -2596,6 +2649,7 @@ var Core = (function () {
     playScene(CHAPTERS[id].intro(), function () {
       ui.busy = false;
       render();
+      terrainTips();
     });
   }
 
