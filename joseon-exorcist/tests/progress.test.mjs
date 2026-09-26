@@ -32,7 +32,9 @@ test('같은 장을 두 번 이겨도 한 번만 더한다', () => {
 test('모든 장을 깨면 다음 장은 없음 (준비 중)', () => {
   let p = Core.applyResult(Core.newProgress(), 'ch1', 'win', 6);
   p = Core.applyResult(p, 'ch2', 'win', 4);
-  assert.equal(p.merit, 10);
+  assert.equal(Core.nextStage(p), 'ch3', 'v0.7: 2장 뒤 3장');
+  p = Core.applyResult(p, 'ch3', 'win', 6);
+  assert.equal(p.merit, 16);
   assert.equal(Core.nextStage(p), null);
 });
 
@@ -59,7 +61,7 @@ test('이전 판(사람 공적이 있던 때)의 누계는 다시 계산하지 �
   const p = Core.checkProgress(JSON.parse(JSON.stringify(old)));
   assert.deepEqual(p, old);
   assert.equal(Core.rankFor(p.merit).name, '종8품');
-  assert.equal(Core.nextStage(p), null, '3장 준비 중');
+  assert.equal(Core.nextStage(p), 'ch3', '2장까지 깬 이전 저장은 3장으로 이어진다');
 });
 
 test('깬 장을 다시 이겨도 누계·진행은 줄지도 늘지도 않는다', () => {

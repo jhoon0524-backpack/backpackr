@@ -33,7 +33,8 @@ test('10턴 요괴 페이즈가 끝났을 때 흑린 생존 → 패배', () => {
   s.turn = 10;
   s.phase = 'enemy';
   const ev = Core.endEnemyPhase(s);
-  assert.deepEqual(ev, [{ type: 'result', result: 'lose' }]);
+  assert.deepEqual(ev, [{ type: 'result', result: 'lose', reason: 'time' }]);
+  assert.equal(s.loseReason, 'time');
   assert.equal(s.result, 'lose');
   assert.equal(s.phase, 'over');
   assert.equal(s.turn, 10);

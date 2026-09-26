@@ -998,6 +998,57 @@ var Core = (function () {
       ],
       // 관군 자리: 탈출로로 가는 두 갈래(5열·7열) 중간. 정9품이면 5열, 종8품이면 7열까지 막는다 (7-2)
       reserves: [{ r: 3, c: 5 }, { r: 3, c: 7 }]
+    },
+    // 3장 서낭고개 (specs/chapter3.md 2장). 위쪽 서낭당(M) 앞에 서낭신, 가운데 돌무덤(원한 지점)
+    // points: 조사 지점(investigate)·봉인 지점(seal)·원귀가 다시 나타나는 곳(respawn). 지형 글자가 아니라 따로 둔다
+    ch3: {
+      v: 1,
+      name: '3장 서낭고개',
+      rows: 10,
+      cols: 8,
+      maxTurn: 15,
+      map: [
+        'DD.MM.DD',
+        'D......D',
+        '........',
+        '.D.DD.D.',
+        '........',
+        '.DD..DD.',
+        '........',
+        '..D..D..',
+        '........',
+        '........'
+      ],
+      allies: [
+        { id: 'yoon', r: 9, c: 3 },
+        { id: 'hangyeol', r: 9, c: 2 },
+        { id: 'yeoul', r: 9, c: 4 },
+        { id: 'soun', r: 9, c: 5 }
+      ],
+      enemies: [
+        { type: 'seonang', r: 1, c: 4 },
+        { type: 'wongwi', r: 3, c: 2 },
+        { type: 'wongwi', r: 3, c: 5 },
+        { type: 'wongwi', r: 4, c: 1 },
+        { type: 'wongwi', r: 4, c: 6 }
+      ],
+      reserves: [{ r: 8, c: 2 }, { r: 8, c: 5 }],
+      points: [
+        { id: 'geumjul', name: '금줄', r: 2, c: 1,
+          investigate: { title: '끊어진 금줄', text: '누군가 안에서 밖으로 찢고 나온 흔적은 아니다.\n밖에서 힘을 받아 끊어진 것 같다.' },
+          seal: { done: '끊어진 금줄을 다시 이었다.' } },
+        { id: 'doltap', name: '돌탑', r: 2, c: 6,
+          investigate: { title: '무너진 돌탑', text: '돌 아래에 오래된 부적 조각이 묻혀 있다.' },
+          seal: { done: '흩어진 돌을 다시 쌓았다.' } },
+        { id: 'dolmudeom', name: '돌무덤', r: 4, c: 4, respawn: true,
+          investigate: { title: '오래된 돌무덤', text: '희미한 울음소리가 땅 아래에서 들린다.' } },
+        { id: 'seonangmok', name: '서낭목', r: 7, c: 4,
+          seal: { done: '서낭목에 금줄과 천을 다시 걸었다.' } }
+      ],
+      objective: {
+        investigateNeed: 2, sealMerit: 1, clearMerit: 3,
+        before: '서낭고개의 괴변 원인을 확인하라.', after: '봉인 지점 3곳을 복구하라.'
+      }
     }
   };
   var TERRAINS = ['.', 'D', 'M', 'K', 'E'];
@@ -1056,7 +1107,13 @@ var Core = (function () {
     jangsan_p: { name: '정화된 장산범', emoji: '🐅', hp: 18, atk: 8, def: 4, mov: 3, rng: 1, elem: '토',
       faction: '신당회 (정화된 요괴)', entityType: 'YOGOE' },
     dallae_boss: { name: '달래', emoji: '🔔', hp: 40, atk: 9, def: 6, mov: 4, rng: 1, elem: '없음', boss: true,
-      faction: '신당회', title: '신당회 만신', skill: '정화수', ai: 'flee', human: true, entityType: 'HUMAN' }
+      faction: '신당회', title: '신당회 만신', skill: '정화수', ai: 'flee', human: true, entityType: 'HUMAN' },
+    // 3장 (specs/chapter3.md 5·6장). 서낭신은 적도 아군도 아닌 중립 — 사람을 치지 않고 원귀를 밀어낸다
+    seonang: { name: '서낭신', emoji: '👴', hp: 35, atk: 0, def: 6, mov: 0, rng: 2, elem: '없음', neutral: true,
+      faction: '서낭고개', title: '고개의 신령', ai: 'guardian', skillName: '금역', entityType: 'SINRYEONG' },
+    // 떠도는 원귀: 쓰러져도 respawn 턴 뒤 원한 지점에서 다시 나타난다 (미련). 공적 없음
+    wongwi: { name: '떠도는 원귀', emoji: '👻', hp: 16, atk: 8, def: 3, mov: 3, rng: 1, elem: '없음',
+      faction: '귀물', ai: 'wraith', respawn: 2, entityType: 'WONGWI', defeatLine: '원귀를 물리쳤다.' }
   };
   // ── 존재 분류·고증 등급 (specs/lore.md 1·6장). 게임용 분류이며 역사적 공식 분류가 아니다 ──
   var ENTITY_TYPES = {
@@ -1078,6 +1135,8 @@ var Core = (function () {
     return {
       id: id, type: type || id, name: d.name, side: side, emoji: d.emoji, // type: 정의표 키 (요괴 종류·아군 id)
       faction: d.faction || '요괴 세력',
+      respawn: d.respawn || 0, // 쓰러진 뒤 다시 나타나기까지 턴 (3장 원귀). 0 이면 다시 나타나지 않는다
+      respawnTurn: null,
       guest: !!d.guest,
       title: d.title || '—',
       boss: !!d.boss,
@@ -1173,8 +1232,20 @@ var Core = (function () {
       turn: 1, maxTurn: stage.maxTurn || 10, weather: '흐림', merit: 0, phase: 'ally', result: null,
       rows: stage.rows, cols: stage.cols, map: stage.map.slice(),
       units: stage.allies.map(function (a) { return makeUnit(ALLY_DEFS[a.id], a.id, 'ally', a.r, a.c); })
-        .concat(stage.enemies.map(function (e, i) { return makeUnit(ENEMY_TYPES[e.type], ids[i], 'enemy', e.r, e.c, e.type); }))
+        .concat(stage.enemies.map(function (e, i) {
+          var d = ENEMY_TYPES[e.type];
+          return makeUnit(d, ids[i], d.neutral ? 'neutral' : 'enemy', e.r, e.c, e.type);
+        }))
     };
+    // 목표형 장 (3장): 조사 → 봉인 복구. 보스 대신 목표로 이긴다 (specs/chapter3.md 3장)
+    if (stage.objective) {
+      state.points = stage.points.map(function (p) { return JSON.parse(JSON.stringify(p)); });
+      state.objective = {
+        phase: 'investigate', investigated: [], repaired: [], changedTurn: null, weakened: false,
+        need: stage.objective.investigateNeed, sealMerit: stage.objective.sealMerit, clearMerit: stage.objective.clearMerit
+      };
+    }
+    state.loseReason = null;
     if (opts && opts.merit !== undefined) {
       var rank = rankFor(opts.merit);
       state.rank = rank.name;
@@ -1403,6 +1474,7 @@ var Core = (function () {
   // 벽사청 유닛의 마지막 일격만 공적이 된다. 사람 제압은 공적이 아니다 (장 보스는 예외, specs/immersion.md 5장)
   function meritFor(attacker, target) {
     if (target.side !== 'enemy' || attacker.faction !== '벽사청') return 0;
+    if (target.respawn) return 0; // 돌아오는 원귀는 공적이 아니다 (막타 파밍 방지, specs/chapter3.md 7장)
     if (target.boss) return MERIT_BOSS;
     return target.human ? 0 : MERIT_NORMAL;
   }
@@ -1410,6 +1482,8 @@ var Core = (function () {
   // 쓰러짐 알림 문장 (specs/immersion.md 4·11장). 공적 줄은 이벤트의 실제 지급값으로만 만든다
   function defeatMessage(state, ev) {
     var t = getUnit(state, ev.targetId);
+    if (t.side === 'neutral') return { line: '서낭신이 모습을 감췄다.', merit: '공적 없음' };
+    if (ENEMY_TYPES[t.type] && ENEMY_TYPES[t.type].defeatLine) return { line: ENEMY_TYPES[t.type].defeatLine, merit: ev.merit > 0 ? '공적 +' + ev.merit : '공적 없음' };
     var line = t.boss && t.human
       ? josa(t.name, '이', '가') + ' 여의주를 떨어뜨리고 물러났다.'
       : josa(t.name, '을', '를') + ' ' + DEFEAT_TYPES[ev.defeatType] + '했다.';
@@ -1419,6 +1493,8 @@ var Core = (function () {
   // 적은 사라지고, 아군은 퇴각해 사라진다
   function knockOut(state, attacker, target, events) {
     target.alive = false;
+    if (target.side === 'neutral') return guardianDown(state, attacker, target, events);
+    if (target.respawn) target.respawnTurn = state.turn + (state.objective && state.objective.weakened ? 1 : target.respawn);
     var merit = meritFor(attacker, target);
     state.merit += merit;
     var ev = { type: target.side === 'enemy' ? 'defeat' : 'retreat', attackerId: attacker.id, targetId: target.id, merit: merit, human: target.human };
@@ -1427,10 +1503,28 @@ var Core = (function () {
     updateResult(state, events);
   }
 
+  // 서낭신이 쓰러짐: 원귀에게면 패배, 아군에게면 봉인이 약해질 뿐 (원귀가 더 빨리 돌아온다)
+  function guardianDown(state, attacker, target, events) {
+    events.push({ type: 'defeat', attackerId: attacker.id, targetId: target.id, merit: 0, human: false, neutral: true });
+    if (attacker.side === 'enemy') return lose(state, 'guardian', events);
+    if (state.objective) state.objective.weakened = true;
+    events.push({ type: 'weakened' });
+  }
+
+  function lose(state, reason, events) {
+    if (state.result !== null) return;
+    state.result = 'lose';
+    state.loseReason = reason;
+    state.phase = 'over';
+    events.push({ type: 'result', result: 'lose', reason: reason });
+  }
+
   // ── 승패 (specs/battle.md 13장) ───────────────────────
   // 보스(1장 흑린, 2장 달래) 격파 → 즉시 승리. 아군 전원 퇴각 → 즉시 패배. 끝나면 phase 는 'over'.
   function updateResult(state, events) {
     if (state.result !== null) return;
+    if (livingUnits(state, 'ally').length === 0) return lose(state, 'wipe', events);
+    if (state.objective) return; // 목표형 장은 봉인 복구로 이긴다 (repairSeal)
     var boss = state.units.filter(function (u) { return u.boss; })[0];
     if (!boss.alive) state.result = 'win';
     else if (livingUnits(state, 'ally').length === 0) state.result = 'lose';
@@ -1444,9 +1538,7 @@ var Core = (function () {
     var events = [];
     if (state.result !== null) return events;
     if (state.turn >= state.maxTurn) {
-      state.result = 'lose';
-      state.phase = 'over';
-      events.push({ type: 'result', result: 'lose' });
+      lose(state, 'time', events);
       return events;
     }
     state.turn += 1;
@@ -1538,6 +1630,7 @@ var Core = (function () {
     if (state.phase !== 'ally' || state.result !== null) return events;
     livingUnits(state, 'ally').forEach(function (u) { u.from = null; });
     state.phase = 'enemy';
+    respawnWraiths(state, events);
     springHeal(state, 'enemy', events);
     // 기력 있는 적(2장 달래)은 아군과 같은 규칙: 2턴부터 페이즈 시작마다 +1 (보충 S2)
     livingUnits(state, 'enemy').forEach(function (u) {
@@ -1726,26 +1819,210 @@ var Core = (function () {
     }
     if (!healed) relocate(state, e, cells.sort(order)[0], events);
     if (isEscape(state, e.r, e.c) && state.result === null) {
-      state.result = 'lose';
-      state.phase = 'over';
       events.push({ type: 'escape', unitId: e.id });
-      events.push({ type: 'result', result: 'lose' });
+      lose(state, 'escape', events);
     }
+    return events;
+  }
+
+  // ── 3장 서낭고개: 조사 → 봉인 복구 (specs/chapter3.md) ──
+  function pointAt(state, r, c) {
+    return (state.points || []).filter(function (p) { return p.r === r && p.c === c; })[0] || null;
+  }
+  function pointById(state, id) {
+    return (state.points || []).filter(function (p) { return p.id === id; })[0] || null;
+  }
+  function sealPoints(state) {
+    return (state.points || []).filter(function (p) { return p.seal; });
+  }
+  function openSeals(state) {
+    var o = state.objective;
+    return sealPoints(state).filter(function (p) { return o.repaired.indexOf(p.id) === -1; });
+  }
+
+  // 아군이 이동을 마치고 조사 지점에 서면 자동 조사 (행동을 쓰지 않는다). 2곳째에 진실 → 봉인 단계
+  function arrive(state, id) {
+    var u = getUnit(state, id), o = state.objective, events = [];
+    if (!o || !u || !u.alive || u.side !== 'ally' || o.phase !== 'investigate' || state.result !== null) return events;
+    var p = pointAt(state, u.r, u.c);
+    if (!p || !p.investigate || o.investigated.indexOf(p.id) !== -1) return events;
+    o.investigated.push(p.id);
+    events.push({ type: 'investigate', pointId: p.id, unitId: u.id });
+    if (o.investigated.length >= o.need) {
+      o.phase = 'seal';
+      o.changedTurn = state.turn;
+      events.push({ type: 'truth' });
+    }
+    return events;
+  }
+
+  // 지금 이 유닛이 복구할 수 있는 봉인 지점 (봉인 단계 + 복구 안 된 봉인 칸에 서 있음)
+  function repairablePoint(state, unit) {
+    var o = state.objective;
+    if (!o || o.phase !== 'seal' || !canCommand(state, unit)) return null;
+    var p = pointAt(state, unit.r, unit.c);
+    return p && p.seal && o.repaired.indexOf(p.id) === -1 ? p : null;
+  }
+
+  // [봉인 복구]: 누가 복구하든 +1, 세 곳 모두면 임무 완료 +3 과 즉시 승리
+  function repairSeal(state, id) {
+    var u = getUnit(state, id), p = u && repairablePoint(state, u);
+    if (!p) return null;
+    var o = state.objective, events = [];
+    o.repaired.push(p.id);
+    state.merit += o.sealMerit;
+    events.push({ type: 'seal', pointId: p.id, unitId: u.id, merit: o.sealMerit });
+    finishAction(u);
+    if (!openSeals(state).length) {
+      state.merit += o.clearMerit;
+      events.push({ type: 'objective', merit: o.clearMerit });
+      state.result = 'win';
+      state.phase = 'over';
+      events.push({ type: 'result', result: 'win' });
+    }
+    return events;
+  }
+
+  // 원귀가 다시 나타나는 칸: 원한 지점, 차 있으면 가장 가까운 빈 칸 (위 → 아래 → 왼쪽 → 오른쪽)
+  function respawnCell(state) {
+    var home = (state.points || []).filter(function (p) { return p.respawn; })[0];
+    if (!home) return null;
+    var seen = {}, queue = [[home.r, home.c]];
+    seen[home.r + ',' + home.c] = true;
+    while (queue.length) {
+      var cur = queue.shift();
+      if (isPassable(state, cur[0], cur[1]) && !unitAt(state, cur[0], cur[1])) return { r: cur[0], c: cur[1] };
+      for (var i = 0; i < DIRS.length; i++) {
+        var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
+        if (seen[key] || !inBounds(state, nr, nc)) continue;
+        seen[key] = true;
+        queue.push([nr, nc]);
+      }
+    }
+    return null;
+  }
+
+  // 적 차례 시작: 돌아올 때가 된 원귀가 원한 지점에서 HP 가득 다시 나타난다
+  function respawnWraiths(state, events) {
+    state.units.forEach(function (u) {
+      if (u.alive || !u.respawn || u.respawnTurn === null || state.turn < u.respawnTurn) return;
+      var cell = respawnCell(state);
+      if (!cell) return;
+      u.alive = true; u.hp = u.maxHp; u.r = cell.r; u.c = cell.c; u.respawnTurn = null;
+      events.push({ type: 'respawn', unitId: u.id, r: cell.r, c: cell.c });
+    });
+  }
+
+  // 서낭신 금역: 자기와 거리 rng 안의 원귀 중 가장 가까운 하나를 자기에게서 먼 쪽으로 한 칸 민다 (피해 없음)
+  function guardianAct(state, g) {
+    var near = livingUnits(state, 'enemy').filter(function (w) { return w.ai === 'wraith' && distance(g, w) <= g.rng; })
+      .sort(function (a, b) { return distance(g, a) - distance(g, b); });
+    for (var i = 0; i < near.length; i++) {
+      var w = near[i], dr = Math.sign(w.r - g.r), dc = Math.sign(w.c - g.c);
+      var tries = Math.abs(w.r - g.r) >= Math.abs(w.c - g.c) ? [[dr, 0], [0, dc]] : [[0, dc], [dr, 0]];
+      for (var k = 0; k < tries.length; k++) {
+        if (!tries[k][0] && !tries[k][1]) continue;
+        var to = { r: w.r + tries[k][0], c: w.c + tries[k][1] };
+        if (!isPassable(state, to.r, to.c) || unitAt(state, to.r, to.c)) continue;
+        var from = { r: w.r, c: w.c };
+        w.r = to.r; w.c = to.c;
+        return [{ type: 'push', attackerId: g.id, targetId: w.id, from: from, to: to, name: ENEMY_TYPES[g.type].skillName || null }];
+      }
+    }
+    return [];
+  }
+
+  // 칸들(goals)까지 mover 가 걸어가는 칸 수 지도. mover 자신의 칸은 비어 있다고 본다
+  function goalMap(state, mover, goals) {
+    var dist = {}, queue = [];
+    function free(r, c) {
+      if (!isPassable(state, r, c)) return false;
+      var o = unitAt(state, r, c);
+      return !o || o === mover;
+    }
+    goals.forEach(function (g) {
+      if (free(g.r, g.c) && dist[g.r + ',' + g.c] === undefined) { dist[g.r + ',' + g.c] = 0; queue.push([g.r, g.c]); }
+    });
+    while (queue.length) {
+      var cur = queue.shift();
+      var base = dist[cur[0] + ',' + cur[1]];
+      for (var i = 0; i < DIRS.length; i++) {
+        var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
+        if (dist[key] !== undefined || !free(nr, nc)) continue;
+        dist[key] = base + 1;
+        queue.push([nr, nc]);
+      }
+    }
+    return dist;
+  }
+
+  // 원귀가 칠 대상 (이 칸에서): 서낭신 먼저, 그다음 HP 낮은 아군
+  function wraithTarget(state, e, pos) {
+    var t = attackTargets(state, e, pos).sort(function (a, b) {
+      return (a.side === 'neutral' ? 0 : 1) - (b.side === 'neutral' ? 0 : 1) || a.hp - b.hp;
+    });
+    return t[0] || null;
+  }
+
+  // 떠도는 원귀: ① 복구 안 된 봉인 지점(이미 서 있으면 머문다) ② 서낭신 ③ 가까운 아군 (specs/chapter3.md 6장)
+  // 봉인을 부수지는 않는다 — 봉인 칸을 차지해 복구를 막는다
+  function wraithAct(state, e) {
+    var events = [];
+    // 봉인 지점은 진실이 밝혀진 뒤(봉인 단계)에만 노린다. 조사 단계에는 서낭신 → 아군 (보충: 조사 칸을 처음부터 막지 않게)
+    var seals = state.objective && state.objective.phase === 'seal' ? openSeals(state) : [];
+    var onSeal = seals.some(function (p) { return p.r === e.r && p.c === e.c; });
+    var cells = moveTargets(state, e);
+    var dest = null;
+    if (!onSeal) {
+      var reach = cells.filter(function (c) { return seals.some(function (p) { return p.r === c.r && p.c === c.c; }); }).sort(byCell);
+      if (reach.length) dest = reach[0];
+    }
+    if (!onSeal && !dest) {
+      // 이동해서 칠 수 있으면 친다 (서낭신 > HP 낮은 아군), 아니면 목표 쪽으로
+      var best = null;
+      cells.forEach(function (c) {
+        var t = wraithTarget(state, e, c);
+        if (!t) return;
+        var score = (t.side === 'neutral' ? 0 : 1000) + t.hp * 10 + c.cost;
+        if (!best || score < best.score || (score === best.score && byCell(c, best.cell) < 0)) best = { score: score, cell: c, target: t };
+      });
+      if (best) {
+        relocate(state, e, best.cell, events);
+        return hit(state, e, best.target, false, events);
+      }
+      var goals = seals.length ? seals
+        : livingUnits(state, 'neutral').length ? livingUnits(state, 'neutral').map(function (g) { return { r: g.r, c: g.c }; })
+          : livingUnits(state, 'ally').map(function (a) { return { r: a.r, c: a.c }; });
+      // 유닛이 선 칸은 목표로 삼을 수 없으니 그 둘레를 목표로
+      var ring = [];
+      goals.forEach(function (g) {
+        if (!unitAt(state, g.r, g.c) || (g.r === e.r && g.c === e.c)) ring.push(g);
+        else DIRS.forEach(function (d) { ring.push({ r: g.r + d[0], c: g.c + d[1] }); });
+      });
+      var map = goalMap(state, e, ring);
+      dest = cells.slice().sort(function (a, b) { return stepsFrom(map, a) - stepsFrom(map, b) || byCell(a, b); })[0];
+    }
+    if (dest) relocate(state, e, dest, events);
+    var t = wraithTarget(state, e);
+    if (t) return hit(state, e, t, false, events);
     return events;
   }
 
   // 요괴 한 마리 행동. 화면은 이것을 0.5초 간격으로 부른다.
   function enemyAct(state, id) {
     var e = getUnit(state, id);
-    if (!e || !e.alive || e.side !== 'enemy' || state.phase !== 'enemy' || state.result !== null) return [];
+    if (!e || !e.alive || e.side === 'ally' || state.phase !== 'enemy' || state.result !== null) return [];
+    if (e.ai === 'guardian') return guardianAct(state, e);
+    if (e.ai === 'wraith') return wraithAct(state, e);
     if (e.ai === 'hold') return bossAct(state, e);
     if (e.ai === 'flee') return fleeAct(state, e);
     return normalEnemyAct(state, e); // 1장 요괴, 2장 정화된 요괴·무녀(archer)
   }
 
   // 이번 요괴 페이즈에 행동할 요괴 id (표 순서)
+  // 중립(3장 서낭신)이 먼저 움직인다
   function enemyOrder(state) {
-    return livingUnits(state, 'enemy').map(function (u) { return u.id; });
+    return livingUnits(state, 'neutral').concat(livingUnits(state, 'enemy')).map(function (u) { return u.id; });
   }
 
   // 요괴 페이즈 전체를 한 번에 돈다 (테스트·시뮬레이션용. 화면은 enemyOrder + enemyAct + endEnemyPhase 로 나눠 부른다).
@@ -1793,7 +2070,9 @@ var Core = (function () {
       unitMoves: {}, attacks: {}, skillsByUnit: {}, skills: {}, damageDealt: {}, damageTaken: {},
       healing: {}, springHealing: {}, defeatedUnits: [], meritEarned: 0,
       dalraeHealCount: 0, dalraeEscapeDistance: null, dalraeTrail: [], restartCount: restartCount || 0,
-      moves: [], hits: [], heals: [], healFollowUps: [], names: names
+      moves: [], hits: [], heals: [], healFollowUps: [], names: names,
+      // 3장 (specs/chapter3.md 10장)
+      investigations: [], sealRepairs: [], wongwiDefeated: 0, wongwiRespawns: 0, seonangDamageTaken: 0, objectiveChangedTurn: null
     };
     trackDalrae(log, state);
     return log;
@@ -1815,6 +2094,7 @@ var Core = (function () {
         if (e.skill) bump(log.skills, e.name);
         bump(log.damageDealt, e.attackerId, e.amount);
         bump(log.damageTaken, e.targetId, e.amount);
+        if (getUnit(state, e.targetId).side === 'neutral') log.seonangDamageTaken += e.amount;
         log.hits.push({ turn: state.turn, by: e.attackerId, target: e.targetId, amount: e.amount, name: e.name, skill: e.skill });
       } else if (e.type === 'heal') {
         bump(log.skillsByUnit, e.attackerId);
@@ -1822,14 +2102,24 @@ var Core = (function () {
         bump(log.healing, e.attackerId, e.amount);
         if (getUnit(state, e.attackerId).ai === 'flee') log.dalraeHealCount++;
         log.heals.push({ turn: state.turn, by: e.attackerId, target: e.targetId, amount: e.amount, at: log.hits.length });
+      } else if (e.type === 'investigate') {
+        log.investigations.push({ turn: state.turn, point: e.pointId, by: e.unitId });
+      } else if (e.type === 'truth') {
+        log.objectiveChangedTurn = state.turn;
+      } else if (e.type === 'seal') {
+        log.sealRepairs.push({ turn: state.turn, point: e.pointId, by: e.unitId });
+      } else if (e.type === 'respawn') {
+        log.wongwiRespawns++;
       } else if (e.type === 'spring') {
         bump(log.springHealing, e.targetId, e.amount);
       } else if (e.type === 'defeat' || e.type === 'retreat') {
         var t = getUnit(state, e.targetId);
+        if (t.respawn) log.wongwiDefeated++;
         log.defeatedUnits.push({
           turn: state.turn, id: t.id, name: t.name, side: t.side,
           // 2장 달래(사람 보스)는 화면 문구처럼 '물러남' (defeatMessage)
-          how: e.type === 'retreat' ? '퇴각' : (t.boss && t.human ? '물러남' : DEFEAT_TYPES[e.defeatType]),
+          how: e.type === 'retreat' ? '퇴각' : t.side === 'neutral' ? '모습을 감춤' : t.respawn ? '물리침'
+            : (t.boss && t.human ? '물러남' : DEFEAT_TYPES[e.defeatType]),
           by: e.attackerId, merit: e.merit
         });
       }
@@ -1922,6 +2212,7 @@ var Core = (function () {
 
   // 공적 최대 = 보스 아닌 적 수 × 1 + 보스 3 (specs/chapter2.md S11)
   function maxMerit(st) {
+    if (st.objective) return st.points.filter(function (p) { return p.seal; }).length * st.objective.sealMerit + st.objective.clearMerit;
     // 사람(제압)은 공적이 아니므로 세지 않는다 (specs/immersion.md 5장)
     return st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss && !ENEMY_TYPES[e.type].human; }).length * MERIT_NORMAL + MERIT_BOSS;
   }
@@ -2050,7 +2341,7 @@ var Core = (function () {
   }
 
   // ── 진행 (specs/chapter2.md 1-3, 보충 S7·S9) ──────────
-  var CAMPAIGN = ['ch1', 'ch2']; // 장 순서
+  var CAMPAIGN = ['ch1', 'ch2', 'ch3']; // 장 순서
 
   function newProgress() {
     return { v: 1, cleared: [], merit: 0 };
@@ -2108,12 +2399,16 @@ var Core = (function () {
       record: '2장 사라진 여의주 — 달래가 여의주를 떨어뜨리고 물러났다.' },
     { id: 'keungoeul', name: '큰고을', mark: '邑', x: 84, y: 50, links: ['yeougol'], lore: 'region:keungoeul',
       desc: { default: '청령현의 관아와 장시가 있는 큰 고을.\n아직 겉으로 드러난 괴변은 없다.' } },
-    { id: 'seonang', name: '서낭고개', mark: '嶺', x: 46, y: 31, links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
-      desc: { default: '고개를 넘은 사람들이 밤마다 같은 꿈을 꾼다고 한다.\n서낭당의 금줄도 며칠째 끊어져 있다.' },
-      note: '조사 준비 중' },
+    { id: 'seonang', name: '서낭고개', mark: '嶺', x: 46, y: 31, chapter: 'ch3', action: '조사한다', links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
+      desc: {
+        default: '고개를 넘은 사람들이\n밤마다 같은 꿈을 꾸고 있다.\n\n서낭당의 금줄이 끊어졌다.',
+        STABILIZED: '안개가 걷혔다.\n고개를 넘는 사람들이 다시 늘기 시작했다.' // (보충) AI 초안
+      },
+      note: { OMEN: '조사 준비 중' },
+      record: '3장 서낭고개 — 끊어진 봉인을 복구했다.' },
     { id: 'pyesachal', name: '폐사찰', mark: '寺', x: 58, y: 11, links: ['seonang'], lore: 'region:pyesachal',
       desc: { default: '오래전 버려진 절.\n최근 밤마다 불빛이 보인다는 소문이 돈다.' },
-      note: '산길이 막혀 있다.' },
+      note: { LOCKED: '산길이 막혀 있다.', OMEN: '조사 준비 중' } },
     { id: 'sangil', name: '봉쇄된 산길', mark: '路', x: 16, y: 50, links: ['yeougol'], lore: 'region:sangil',
       desc: { default: '산사태로 길이 끊겼다.\n그런데 무너진 바위 아래에서 사람 목소리가 들린다는 소문이 있다.' },
       note: '지금은 지나갈 수 없다.' },
@@ -2121,7 +2416,7 @@ var Core = (function () {
       desc: { default: '강을 건너 다른 고을로 향하는 나루.' },
       note: '아직 강을 건널 때가 아니다.' }
   ];
-  var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol' };
+  var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol', ch3: 'seonang' };
   // 조선 전체 → 권역 → 지역 (specs/worldmap-polish.md 4장). 지금 화면 전체가 청령현 권역맵이다.
   // 권역 하나는 6~10 지역으로 두고, 권역 이야기가 끝나면 나루터로 다음 권역맵 (권역 이동 화면은 아직 없다)
   var PROVINCES = [
@@ -2139,8 +2434,8 @@ var Core = (function () {
       heukseok: cleared('ch1') ? 'STABILIZED' : 'EXORCISM_REQUIRED',
       yeougol: cleared('ch2') ? 'STABILIZED' : (cleared('ch1') ? 'EXORCISM_REQUIRED' : 'UNKNOWN'),
       keungoeul: 'PEACEFUL',
-      seonang: 'OMEN',
-      pyesachal: 'LOCKED',
+      seonang: cleared('ch3') ? 'STABILIZED' : 'OMEN',
+      pyesachal: cleared('ch3') ? 'OMEN' : 'LOCKED', // 3장 뒤 새 떡밥 (4장 전투는 아직 없다)
       sangil: 'BLOCKED',
       naru: 'PEACEFUL'
     };
@@ -2149,13 +2444,26 @@ var Core = (function () {
   function regionDesc(region, status) {
     return region.desc[status] || region.desc.default || '';
   }
+  function regionNote(region, status) {
+    if (!region.note) return '';
+    return typeof region.note === 'string' ? region.note : (region.note[status] || '');
+  }
+  // 지금 이 지역으로 출동(조사)할 수 있으면 그 장 — 다음 장의 무대일 때만
+  function sortieChapter(progress, regionId) {
+    var r = regionById(regionId);
+    return r && r.chapter && r.chapter === nextStage(progress) ? r.chapter : null;
+  }
 
   // 급보: 장을 깬 뒤 처음 지도를 볼 때 한 번. seen 은 이미 본 급보 id 목록
   var WORLD_NEWS = [
     { id: 'news:ch1', after: 'ch1', region: 'yeougol', title: '📜 새로운 급보가 도착했습니다.',
       text: '벽사청으로 급보가 도착했다.\n여의주를 가지고 사라진 달래가 산 너머 마을에서 목격되었다.' },
-    { id: 'news:ch2', after: 'ch2', region: 'seonang', title: '📜 새로운 보고',
-      text: '서낭고개에서 새로운 보고가 올라오고 있다.' }
+    { id: 'news:ch2', after: 'ch2', region: 'seonang', title: '📜 새로운 급보가 도착했습니다.',
+      text: '청령현 북쪽 고개에서 급보가 올라왔다.\n고개를 넘은 사람들이 밤마다 같은 꿈을 꾸고 있다.\n서낭당의 금줄도 사흘째 끊어진 채라고 한다.' },
+    { id: 'news:ch3', after: 'ch3', region: 'seonang', title: '📜 보고',
+      text: '서낭고개의 통행이 다시 시작되었다.' },
+    { id: 'news:ch3b', after: 'ch3', region: 'pyesachal', title: '📜 새로운 급보가 도착했습니다.',
+      text: '서낭고개 너머 폐사찰에서\n밤마다 불빛이 보인다는 보고가 올라왔다.' }
   ];
   // 가장 최근에 깬 장의 급보만 보여 준다 — 이전 저장으로 처음 지도를 열 때 이미 지난 급보(안정된 곳을 가리키는)가 뜨지 않게
   function worldNews(progress, seen) {
@@ -2166,12 +2474,13 @@ var Core = (function () {
   // 현재 임무: 다음 장의 지역. 다 깼으면 조사 준비 중인 서낭고개
   var MISSIONS = {
     ch1: { title: '흑린 토벌', text: '흑석촌에서 가축과 사람들이 잇달아 사라지고 있다.' },
-    ch2: { title: '사라진 여의주', text: '여우골에서 달래의 흔적을 찾았다.' }
+    ch2: { title: '사라진 여의주', text: '여우골에서 달래의 흔적을 찾았다.' },
+    ch3: { title: '서낭고개', text: '서낭고개의 괴변 원인을 확인하라.' }
   };
   function currentMission(progress) {
     var ch = nextStage(progress);
     if (ch) return { region: REGION_BY_CHAPTER[ch], chapter: ch, title: MISSIONS[ch].title, text: MISSIONS[ch].text, ready: true };
-    return { region: 'seonang', chapter: null, title: '조사 준비 중', text: '서낭고개에서 새로운 보고가 올라오고 있다.', ready: false };
+    return { region: 'pyesachal', chapter: null, title: '조사 준비 중', text: '서낭고개 너머 폐사찰에서 밤마다 불빛이 보인다는 보고가 올라왔다.', ready: false };
   }
 
   // ── 벽사록: 도감 + 세계관 사전 (specs/lore.md 9~13장) ─────────────
@@ -2215,6 +2524,15 @@ var Core = (function () {
       lore: '흰 털에 사람 목소리를 흉내 내어 사람을 꾀어낸다는 산짐승 모습의 괴이.',
       note: '장산범은 부산 장산 일대의 현대 괴담에서 퍼진 존재로, 조선 시대 기록이나 전통 민속 자료에서 확인되지 않는다. 게임에서는 토(土) 속성의 요괴로 차용했다.' },
 
+    { id: 'seonangsin', cat: '귀물', name: '서낭신', hanja: '城隍神', grade: 'B', entityType: 'SINRYEONG', unlock: ['enemy:seonang'],
+      characterNotes: { yoon: '괴변이 있다고 모두 귀물의 소행은 아니다.' },
+      lore: '마을이나 고개를 지키는 서낭과 관련된 신령. 사람들은 서낭당과 돌무더기, 나무 등에 소원을 빌고 마을의 안녕을 기원하였다.',
+      note: '게임 설정: 청령현 서낭고개의 신령은 오랫동안 고개 아래 원한을 막아 왔다. 금역 같은 힘은 창작이다.' },
+    { id: 'wongwi', cat: '귀물', name: '원귀', hanja: '怨鬼', grade: 'B', entityType: 'WONGWI', unlock: ['enemy:wongwi'],
+      characterNotes: { yoon: '칼로 베었는데도 다시 일어났다.\n죽은 것을 다시 죽일 수는 없는 모양이다.' },
+      lore: '강한 원한이나 미련을 남긴 혼. 벽사청에서는 같은 귀물이라도 단순한 잡귀와 구분하여 기록한다.',
+      note: '원한을 품고 죽은 이의 혼이라는 관념은 민간 신앙에 널리 있다. 잡귀·원귀 같은 체계적 분류와 다시 나타나는 성질은 게임 설정이다.' },
+
     // 의식 — 1장 승리 후 벽사청의 뿌리로 밝혀진다
     { id: 'narye', cat: '의식', name: '나례', hanja: '儺禮', grade: 'A', unlock: ['clear:ch1'],
       characterNotes: { yoon: '궁에서는 해마다 귀를 쫓는 의례를 치른다. 벽사청은 그 의례가 닿지 않는 곳을 맡는다.' },
@@ -2228,6 +2546,12 @@ var Core = (function () {
       characterNotes: { yoon: '네 눈의 가면을 쓴 자가 누구인지는 아무도 묻지 않는다.' },
       lore: '궁궐의 나례에서 역귀를 쫓는 역할을 맡은 존재. 『국조오례의』에는 황금빛 네 눈의 가면을 쓰고 곰가죽을 두른 채 창과 방패를 든 모습이 기록되어 있다.',
       note: '게임에서는 벽사청의 축귀 장비로 재해석했다.' },
+
+    // (보충) 서낭당 기록·윤무겸의 기록은 AI 초안 — 기획자 확인 필요
+    { id: 'seonangdang', cat: '의식', name: '서낭당', hanja: '城隍堂', grade: 'B', unlock: ['stage:ch3'],
+      characterNotes: { yoon: '지나다니며 돌 하나 얹는 것을 미신이라 여겼다. 그 돌이 무엇을 누르고 있었는지는 몰랐다.' },
+      lore: '마을 어귀나 고갯마루에 돌무더기와 나무, 작은 당집으로 모신 서낭의 자리. 길을 떠나는 사람은 돌을 얹고 지나며 길의 안녕을 빌었다.',
+      note: '게임에서는 서낭고개의 봉인이 걸린 장소다. 서낭당이 원한을 막는 봉인이라는 설정은 창작이다.' },
 
     // 물건 — 데이터와 벽사록 항목만. 인벤토리·사용은 아직 없다 (specs/lore.md 17장)
     { id: 'jeonghwasu', cat: '물건', name: '정화수', hanja: '井華水', grade: 'B', item: 'ITEM_001', faction: '신당회', unlock: ['skill:정화수'],
@@ -2263,7 +2587,12 @@ var Core = (function () {
     { id: 'muryeong', cat: '물건', name: '무령', hanja: '巫鈴', grade: 'B', item: 'ITEM_010', faction: '신당회', unlock: ['skill:무령'],
       characterNotes: { yoon: '방울 소리가 들리면 저쪽이 먼저 우리를 알아챈 것이다.' },
       lore: '신을 청하고 잡귀를 쫓을 때 흔드는 방울. 무당이 굿과 점에서 쓴다.',
-      note: '게임에서는 신당회 무녀의 원거리 공격 이름이다. 숨은 혼령을 느끼는 도구로 쓰는 것은 후속 장 예정.' }
+      note: '게임에서는 신당회 무녀의 원거리 공격 이름이다. 숨은 혼령을 느끼는 도구로 쓰는 것은 후속 장 예정.' },
+    // (보충) 금줄 기록·윤무겸의 기록은 AI 초안. 아이템(ITEM_)이 아니다
+    { id: 'geumjul', cat: '물건', name: '금줄', grade: 'B', faction: '공통', unlock: ['point:geumjul'],
+      characterNotes: { yoon: '끊어진 줄 하나에 고개 전체가 흔들렸다.' },
+      lore: '부정한 것이 들지 못하게 대문이나 장독, 서낭당과 당산나무 등에 쳐 두는 새끼줄. 왼새끼로 꼬아 숯·고추·한지 등을 끼웠다.',
+      note: '게임에서는 서낭고개 봉인의 한 축이다. 금줄이 봉인을 이룬다는 효과는 창작이다.' }
   ];
 
   // 본 것(seen: 'enemy:종류', 'clear:장', 'skill:이름' 목록)으로 항목이 밝아졌는지
@@ -2274,7 +2603,7 @@ var Core = (function () {
 
   // 전투 시작 때 본 것을 벽사록 토큰으로: 어느 장인지(stageId 가 있으면), 등장한 적 종류. 쓰인 기술은 화면이 'skill:이름' 으로 더한다
   function loreTokensForBattle(state, stageId) {
-    return (stageId ? ['stage:' + stageId] : []).concat(state.units.filter(function (u) { return u.side === 'enemy'; })
+    return (stageId ? ['stage:' + stageId] : []).concat(state.units.filter(function (u) { return u.side !== 'ally'; })
       .map(function (u) { return 'enemy:' + u.type; })
       .filter(function (t, i, all) { return all.indexOf(t) === i; }));
   }
@@ -2401,9 +2730,17 @@ var Core = (function () {
     regionById: regionById,
     regionDesc: regionDesc,
     worldState: worldState,
+    regionNote: regionNote,
+    sortieChapter: sortieChapter,
     worldNews: worldNews,
     currentMission: currentMission,
     newPlayLog: newPlayLog,
+    arrive: arrive,
+    repairablePoint: repairablePoint,
+    repairSeal: repairSeal,
+    pointAt: pointAt,
+    pointById: pointById,
+    openSeals: openSeals,
     logMove: logMove,
     logEvents: logEvents,
     finishPlayLog: finishPlayLog,

@@ -79,14 +79,16 @@ test('급보: 장을 깬 뒤 한 번, 본 급보는 다시 안 나온다', () =>
     '2장까지 깬 이전 저장은 최근 급보만 — 이미 안정된 여우골을 가리키는 지난 급보는 뜨지 않는다');
 });
 
-test('현재 임무: 흑석촌 → 여우골 → 서낭고개 조사 준비 중', () => {
+test('현재 임무: 흑석촌 → 여우골 → 서낭고개 → 폐사찰 조사 준비 중', () => {
   assert.deepEqual([Core.currentMission(fresh).region, Core.currentMission(fresh).ready], ['heukseok', true]);
   assert.deepEqual([Core.currentMission(after1).region, Core.currentMission(after1).title], ['yeougol', '사라진 여의주']);
-  assert.deepEqual([Core.currentMission(after2).region, Core.currentMission(after2).ready], ['seonang', false]);
+  assert.deepEqual([Core.currentMission(after2).region, Core.currentMission(after2).ready], ['seonang', true]);
+  const after3 = { v: 1, cleared: ['ch1', 'ch2', 'ch3'], merit: 13 };
+  assert.deepEqual([Core.currentMission(after3).region, Core.currentMission(after3).ready], ['pyesachal', false]);
 });
 
-test('장 무대 지역: 흑석촌 1장, 여우골 2장, 나머지는 전투 없음', () => {
-  assert.deepEqual(Core.REGIONS.filter((r) => r.chapter).map((r) => [r.id, r.chapter]), [['heukseok', 'ch1'], ['yeougol', 'ch2']]);
+test('장 무대 지역: 흑석촌 1장, 여우골 2장, 서낭고개 3장, 나머지는 전투 없음', () => {
+  assert.deepEqual(Core.REGIONS.filter((r) => r.chapter).map((r) => [r.id, r.chapter]), [['heukseok', 'ch1'], ['yeougol', 'ch2'], ['seonang', 'ch3']]);
   for (const r of Core.REGIONS.filter((x) => x.chapter)) assert.ok(Core.STAGES[r.chapter], r.id);
 });
 

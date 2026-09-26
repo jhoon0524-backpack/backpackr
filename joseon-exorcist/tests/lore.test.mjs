@@ -83,11 +83,11 @@ test('달래의 회복(아군·적 모두)은 정화수', () => {
 const ids = Core.LORE.map((e) => e.id);
 const byId = Object.fromEntries(Core.LORE.map((e) => [e.id, e]));
 
-test('카테고리 6개, 초기 항목: 세력 3·귀물 3·의식 3·물건 10', () => {
+test('카테고리 6개, 항목: 세력 3·귀물 5·의식 4·물건 11 (v0.7 서낭신·원귀·서낭당·금줄)', () => {
   assert.deepEqual(Core.LORE_CATEGORIES, ['인물', '세력', '귀물', '의식', '물건', '기록']);
   const count = {};
   for (const e of Core.LORE) count[e.cat] = (count[e.cat] || 0) + 1;
-  assert.deepEqual(count, { 세력: 3, 귀물: 3, 의식: 3, 물건: 10 });
+  assert.deepEqual(count, { 세력: 3, 귀물: 5, 의식: 4, 물건: 11 });
   assert.equal(new Set(ids).size, ids.length, 'id 중복 없음');
 });
 
@@ -109,8 +109,8 @@ test('세 세력은 모두 창작(C) 조직이고, 실제 역사에 있었다고
   assert.match(byId.byeoksacheong.note, /실제 역사에 없던/);
 });
 
-test('물건 10개는 ITEM_001~010 순서, 명세의 등급', () => {
-  const items = Core.LORE.filter((e) => e.cat === '물건');
+test('아이템 10개는 ITEM_001~010 순서, 명세의 등급 (금줄은 물건 기록이지만 아이템이 아니다)', () => {
+  const items = Core.LORE.filter((e) => e.cat === '물건' && e.item);
   assert.deepEqual(items.map((e) => e.item), Array.from({ length: 10 }, (_, i) => 'ITEM_' + String(i + 1).padStart(3, '0')));
   assert.deepEqual(items.map((e) => e.name), ['정화수', '방상시탈', '도판', '도봉', '문배', '세화', '천중적부', '동지팥', '신칼', '무령']);
   assert.equal(byId.bangsangsital.grade, 'A');
@@ -143,7 +143,8 @@ test('밝힘: 벽사청만 처음부터, 도문 1장·신당회 2장, 귀물은 
   assert.ok(on(['skill:무령']).includes('muryeong'));
   assert.ok(on(ch2).includes('dokkaebi'), '정화된 도깨비도 도깨비');
   assert.ok(on(['skill:정화수']).includes('jeonghwasu'));
-  const everything = [...after1, ...ch2, 'skill:정화수', 'skill:무령', 'clear:ch2'];
+  const everything = [...after1, ...ch2, 'skill:정화수', 'skill:무령', 'clear:ch2',
+    ...Core.loreTokensForBattle(Core.newBattle(Core.STAGES.ch3), 'ch3'), 'point:geumjul'];
   assert.deepEqual(Core.LORE.filter((e) => !Core.loreUnlocked(e, everything)).map((e) => e.id),
     ['dopan', 'dobong', 'munbae', 'sehwa', 'cheonjungjeokbu', 'dongjipat'], '후속 장 물건 6개만 잠김');
 });
