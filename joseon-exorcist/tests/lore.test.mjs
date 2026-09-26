@@ -196,3 +196,43 @@ test('화면 문구·대사·벽사록에 피할 말이 없다 (제목 「조선
     assert.equal(html.includes(g.avoid), false, `"${g.avoid}" 대신 ${g.use.join('·')}`);
   }
 });
+
+// ── 벽사록 저장 이관 (specs/immersion.md 11장) ──
+const onIds = (tokens) => Core.LORE.filter((e) => Core.loreUnlocked(e, tokens)).map((e) => e.id);
+
+test('새 저장: 저장이 없으면 빈 기록, 벽사청만 보인다', () => {
+  const s = Core.migrateLore(null);
+  assert.deepEqual(s, { v: 2, tokens: [] });
+  assert.deepEqual(onIds(s.tokens), ['byeoksacheong']);
+});
+
+test('새 형식은 그대로 (무녀를 만나기만 한 기록은 무령을 밝히지 않는다)', () => {
+  const s = Core.migrateLore({ v: 2, tokens: ['stage:ch2', 'enemy:munyeo', 3] });
+  assert.deepEqual(s.tokens, ['stage:ch2', 'enemy:munyeo']);
+  assert.equal(onIds(s.tokens).includes('muryeong'), false);
+});
+
+test('이전 저장(2장까지 플레이): 무령·세 세력이 다시 잠기지 않는다', () => {
+  const old = ['enemy:dokkaebi', 'enemy:jangsan', 'enemy:bulgasari', 'enemy:heuklin', 'clear:ch1',
+    'enemy:munyeo', 'enemy:dokkaebi_p', 'enemy:jangsan_p', 'enemy:dallae_boss', 'skill:정화수'];
+  // 이전 판에서 보이던 것 = 이전 밝힘 규칙(세력 처음부터, 무령은 무녀를 만나면)
+  const before = ['byeoksacheong', 'sindanghoe', 'domun', 'heuklin', 'dokkaebi', 'jangsan',
+    'narye', 'daena', 'bangsangssi', 'jeonghwasu', 'bangsangsital', 'muryeong'];
+  const now = onIds(Core.migrateLore(old).tokens);
+  for (const id of before) assert.ok(now.includes(id), `${id} 가 다시 잠겼다`);
+});
+
+test('이전 저장(1장만): 세 세력은 보이고, 무령은 여전히 잠김', () => {
+  const now = onIds(Core.migrateLore(['enemy:heuklin']).tokens);
+  for (const id of ['byeoksacheong', 'sindanghoe', 'domun', 'heuklin']) assert.ok(now.includes(id), id);
+  assert.equal(now.includes('muryeong'), false);
+});
+
+test('이전 저장이 빈 배열이어도 세 세력은 그대로 보인다', () => {
+  assert.deepEqual(onIds(Core.migrateLore([]).tokens), ['byeoksacheong', 'sindanghoe', 'domun']);
+});
+
+test('이관은 한 번 더 해도 같다', () => {
+  const once = Core.migrateLore(['enemy:munyeo']);
+  assert.deepEqual(Core.migrateLore(once), once);
+});

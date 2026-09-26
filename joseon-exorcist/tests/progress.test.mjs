@@ -52,3 +52,24 @@ test('저장 값 검사: 망가진 값은 버린다', () => {
 test('장 순서의 모든 장이 게임 안에 있다', () => {
   for (const id of Core.CAMPAIGN) assert.ok(Core.STAGES[id], id);
 });
+
+// ── 기존 저장 호환 (specs/immersion.md 11장): 업데이트로 진행·공적·품계가 후퇴하지 않는다 ──
+test('이전 판(사람 공적이 있던 때)의 누계는 다시 계산하지 않고 그대로 읽는다', () => {
+  const old = { v: 1, cleared: ['ch1', 'ch2'], merit: 13 }; // 1장 8 + 2장 5(무녀 2 포함)
+  const p = Core.checkProgress(JSON.parse(JSON.stringify(old)));
+  assert.deepEqual(p, old);
+  assert.equal(Core.rankFor(p.merit).name, '종8품');
+  assert.equal(Core.nextStage(p), null, '3장 준비 중');
+});
+
+test('깬 장을 다시 이겨도 누계·진행은 줄지도 늘지도 않는다', () => {
+  const p = { v: 1, cleared: ['ch1', 'ch2'], merit: 13 };
+  assert.deepEqual(Core.applyResult(p, 'ch2', 'win', 0), p);
+  assert.deepEqual(Core.applyResult(p, 'ch1', 'lose', 0), p);
+});
+
+test('새 저장: 빈 진행에서 1장부터', () => {
+  const p = Core.newProgress();
+  assert.deepEqual(p, { v: 1, cleared: [], merit: 0 });
+  assert.equal(Core.nextStage(p), 'ch1');
+});

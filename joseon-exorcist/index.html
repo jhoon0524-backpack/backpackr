@@ -1759,13 +1759,13 @@ var Core = (function () {
         '"사특한 것은 조정의 법으로 다스린다." 힘은 개인의 영력보다 관군·봉쇄선·왕명 같은 국가 조직력에서 나온다.',
       note: '벽사청은 실제 역사에 없던 게임 속 기관이다. 관상감의 나례, 방상씨, 소격서, 조선 관군을 모티프로 재구성했다.',
       motif: ['관상감 나례', '방상씨', '소격서', '조선 관군'] },
-    { id: 'sindanghoe', cat: '세력', name: '신당회', hanja: '神堂會', grade: 'C', unlock: ['stage:ch2'],
+    { id: 'sindanghoe', cat: '세력', name: '신당회', hanja: '神堂會', grade: 'C', unlock: ['stage:ch2', 'legacy:v1'],
       characterNotes: { yoon: '조정은 저들을 내쫓았다. 그런데 일이 나면 마을은 우리보다 저들을 먼저 찾는다.' },
       lore: '귀신과 사람 사이의 말을 듣는 이들의 모임. 원한은 베어 없애는 것이 아니라 풀어야 한다고 믿는다. ' +
         '"귀신도 사연 없이 생기지 않는다." — "조정은 우리를 내쫓으면서 사람이 죽으면 우리를 찾는다."',
       note: '신당회는 게임 속 조직이다. 무속의 무선·무령·신칼·정화수·굿·퇴송을 모티프로 삼았다.',
       motif: ['무선', '무령', '신칼', '정화수', '굿', '퇴송'] },
-    { id: 'domun', cat: '세력', name: '도문', hanja: '道門', grade: 'C', unlock: ['stage:ch1'],
+    { id: 'domun', cat: '세력', name: '도문', hanja: '道門', grade: 'C', unlock: ['stage:ch1', 'legacy:v1'],
       characterNotes: { yoon: '셈이 빠르고 속을 알 수 없다. 오늘 밤은 한편이다.' },
       lore: '귀물과 천지의 법칙을 연구하는 이들. 부법과 오행으로 인간이 다룰 수 없는 힘을 제어한다. ' +
         '"귀물에도 이치와 법칙이 있다."',
@@ -1849,6 +1849,20 @@ var Core = (function () {
     return (stageId ? ['stage:' + stageId] : []).concat(state.units.filter(function (u) { return u.side === 'enemy'; })
       .map(function (u) { return 'enemy:' + u.type; })
       .filter(function (t, i, all) { return all.indexOf(t) === i; }));
+  }
+
+  // 벽사록 저장 이관 (specs/immersion.md 11장). 이전 판은 토큰 배열만 저장했고, 이제는 { v: 2, tokens }.
+  // 이전 판에서 이미 보이던 것은 다시 잠그지 않는다: 세 세력은 처음부터 보였고('legacy:v1'),
+  // 무령은 무녀를 만나면 보였다('enemy:munyeo' → 'skill:무령'). raw 가 null 이면 새 저장.
+  var LORE_STORE_V = 2;
+  function migrateLore(raw) {
+    var strings = function (list) { return list.filter(function (t) { return typeof t === 'string'; }); };
+    if (raw && raw.v === LORE_STORE_V && Array.isArray(raw.tokens)) return { v: LORE_STORE_V, tokens: strings(raw.tokens) };
+    if (!Array.isArray(raw)) return { v: LORE_STORE_V, tokens: [] };
+    var tokens = strings(raw);
+    var extra = ['legacy:v1'].concat(tokens.indexOf('enemy:munyeo') !== -1 ? ['skill:무령'] : []);
+    extra.forEach(function (t) { if (tokens.indexOf(t) === -1) tokens.push(t); });
+    return { v: LORE_STORE_V, tokens: tokens };
   }
 
   // 본 것이 before → after 로 늘었을 때 새로 밝혀진 항목 (벽사록 발견 토스트용)
@@ -1951,6 +1965,7 @@ var Core = (function () {
     loreUnlocked: loreUnlocked,
     loreTokensForBattle: loreTokensForBattle,
     newlyUnlockedLore: newlyUnlockedLore,
+    migrateLore: migrateLore,
     GLOSSARY: GLOSSARY
   };
 })();
@@ -2054,21 +2069,22 @@ var Core = (function () {
 
   // ── 벽사록 밝힘 기록 (이 브라우저에만, 진행 저장과 따로 — specs/lore.md 보충 L4) ──
   var LORE_KEY = 'joseon-exorcist.lore';
+  function writeLore() {
+    try { localStorage.setItem(LORE_KEY, JSON.stringify({ v: 2, tokens: loreSeen })); } catch (e) { /* 저장 못 해도 이번 판은 보인다 */ }
+  }
   var loreSeen = (function () {
-    try {
-      var v = JSON.parse(localStorage.getItem(LORE_KEY) || '[]');
-      return Array.isArray(v) ? v.filter(function (t) { return typeof t === 'string'; }) : [];
-    } catch (e) {
-      return [];
-    }
+    var raw = null;
+    try { raw = JSON.parse(localStorage.getItem(LORE_KEY)); } catch (e) { /* 없거나 깨졌으면 새 기록 */ }
+    var store = Core.migrateLore(raw);
+    if (Array.isArray(raw)) { loreSeen = store.tokens; writeLore(); } // 이전 형식이면 한 번 옮겨 적는다
+    return store.tokens;
   })();
   function seeLore(tokens) {
     var added = false;
     tokens.forEach(function (t) {
       if (loreSeen.indexOf(t) === -1) { loreSeen.push(t); added = true; }
     });
-    if (!added) return;
-    try { localStorage.setItem(LORE_KEY, JSON.stringify(loreSeen)); } catch (e) { /* 저장 못 해도 이번 판은 보인다 */ }
+    if (added) writeLore();
   }
   // 이전 저장(벽사록 없던 때)의 깬 장도 밝힘으로 친다 — 마이그레이션 없이 호환. 깬 장은 시작도 한 장이다
   function loreTokens() {
