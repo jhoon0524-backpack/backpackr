@@ -18,7 +18,7 @@ test('2장 적: 무녀 2·정화 도깨비 2·정화 장산범 1·달래 보스'
   const count = {};
   for (const e of ch2.enemies) count[e.type] = (count[e.type] || 0) + 1;
   assert.deepEqual(count, { munyeo: 2, dokkaebi_p: 2, jangsan_p: 1, dallae_boss: 1 });
-  assert.equal(Core.maxMerit(ch2), 8, '보충 S11');
+  assert.equal(Core.maxMerit(ch2), 6, '사람(무녀 2) 제외 — specs/immersion.md 5장');
 });
 
 test('2장 전투 상태: 12턴 제한, 보스는 달래', () => {

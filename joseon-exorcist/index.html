@@ -907,7 +907,6 @@ var Core = (function () {
     var ids = enemyIds(stage.enemies);
     var state = {
       turn: 1, maxTurn: stage.maxTurn || 10, weather: '흐림', merit: 0, phase: 'ally', result: null,
-      humanMerit: 0, // 공적 중 사람을 쓰러뜨려 얻은 몫
       rows: stage.rows, cols: stage.cols, map: stage.map.slice(),
       units: stage.allies.map(function (a) { return makeUnit(ALLY_DEFS[a.id], a.id, 'ally', a.r, a.c); })
         .concat(stage.enemies.map(function (e, i) { return makeUnit(ENEMY_TYPES[e.type], ids[i], 'enemy', e.r, e.c, e.type); }))
@@ -1127,19 +1126,30 @@ var Core = (function () {
   var MERIT_NORMAL = 1;
   var MERIT_BOSS = 3;
 
-  // 요괴는 사라지고, 아군은 퇴각해 사라진다. 벽사청 유닛의 마지막 일격만 공적이 된다.
+  // 쓰러진 적을 무엇으로 처리했는지 (specs/immersion.md 4장). 사람은 죽이지 않고 제압한다
+  var DEFEAT_TYPES = { SUBDUE: '제압', EXORCISE: '퇴치', CHUKGWI: '축귀', CHUGYEOK: '축역', TOESONG: '퇴송' };
+  var DEFEAT_BY_ENTITY = {
+    HUMAN: 'SUBDUE', YOGOE: 'EXORCISE', JAPGWI: 'CHUKGWI', YEOKGWI: 'CHUGYEOK', WONGWI: 'TOESONG', SINRYEONG: 'EXORCISE'
+  };
+  function defeatTypeFor(entityType) {
+    return DEFEAT_BY_ENTITY[entityType] || 'EXORCISE';
+  }
+
+  // 벽사청 유닛의 마지막 일격만 공적이 된다. 사람 제압은 공적이 아니다 (장 보스는 예외, specs/immersion.md 5장)
+  function meritFor(attacker, target) {
+    if (target.side !== 'enemy' || attacker.faction !== '벽사청') return 0;
+    if (target.boss) return MERIT_BOSS;
+    return target.human ? 0 : MERIT_NORMAL;
+  }
+
+  // 적은 사라지고, 아군은 퇴각해 사라진다
   function knockOut(state, attacker, target, events) {
     target.alive = false;
-    var merit = 0;
-    if (target.side === 'enemy' && attacker.faction === '벽사청') {
-      merit = target.boss ? MERIT_BOSS : MERIT_NORMAL;
-      state.merit += merit;
-      if (target.human) state.humanMerit += merit;
-    }
-    events.push({
-      type: target.side === 'enemy' ? 'defeat' : 'retreat',
-      attackerId: attacker.id, targetId: target.id, merit: merit, human: target.human
-    });
+    var merit = meritFor(attacker, target);
+    state.merit += merit;
+    var ev = { type: target.side === 'enemy' ? 'defeat' : 'retreat', attackerId: attacker.id, targetId: target.id, merit: merit, human: target.human };
+    if (target.side === 'enemy') ev.defeatType = defeatTypeFor(target.entityType);
+    events.push(ev);
     updateResult(state, events);
   }
 
@@ -1540,7 +1550,8 @@ var Core = (function () {
 
   // 공적 최대 = 보스 아닌 적 수 × 1 + 보스 3 (specs/chapter2.md S11)
   function maxMerit(st) {
-    return st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss; }).length * MERIT_NORMAL + MERIT_BOSS;
+    // 사람(제압)은 공적이 아니므로 세지 않는다 (specs/immersion.md 5장)
+    return st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss && !ENEMY_TYPES[e.type].human; }).length * MERIT_NORMAL + MERIT_BOSS;
   }
 
   // 맵 코드 = 한 줄 JSON. 게임 안 스테이지 데이터와 같은 모양이다.
@@ -1815,6 +1826,8 @@ var Core = (function () {
     ENEMY_TYPES: ENEMY_TYPES,
     ENEMY_ORDER: ENEMY_ORDER,
     ENTITY_TYPES: ENTITY_TYPES,
+    DEFEAT_TYPES: DEFEAT_TYPES,
+    defeatTypeFor: defeatTypeFor,
     HISTORICITY: HISTORICITY,
     inBounds: inBounds,
     terrainAt: terrainAt,
@@ -1926,11 +1939,7 @@ var Core = (function () {
       { pause: FADE_MS, run: function () { ui.orb = { r: boss.r, c: boss.c }; render(); } },
       { who: '소운', face: '🧙', text: '여의주는 되찾았는데, 표정이 왜 그렇소?' },
       { who: '윤무겸', face: '🗡️', text: '…도문에서 이걸 탐내는 자가 있다고 들었다.' }
-    ].concat(state.humanMerit > 0 ? [
-      // 벽사청은 정의의 퇴마단이 아니다 (specs/chapter2.md 7-3)
-      { who: '한결', face: '🏹', text: '사람을 베어도 공적입니까?' },
-      { who: '윤무겸', face: '🗡️', text: '조정에서 적이라 정했으면 적이다.' }
-    ] : []);
+    ]; // 사람 공적 두 줄은 사람 제압이 공적 0 이 되며 뺐다 (specs/immersion.md 5장)
   }
 
   var CHAPTERS = {

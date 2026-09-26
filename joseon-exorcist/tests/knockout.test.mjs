@@ -75,34 +75,68 @@ test('최대 공적 = 8 (일반 5 + 흑린 3)', () => {
   assert.equal(s.merit, 8);
 });
 
-// ── 사람을 베어도 공적 (specs/chapter2.md 7-3) ──
-test('신당회 사람(무녀·달래)을 벽사청이 쓰러뜨려도 공적, 그 몫을 따로 센다', () => {
+// ── 사람은 제압, 공적 없음 (specs/immersion.md 4·5장) ──
+test('벽사청이 신당회 무녀를 제압하면 공적 0, 제압으로 표시', () => {
   const s = Core.newBattle(Core.STAGES.ch2);
   const yoon = Core.getUnit(s, 'yoon');
   const m = Core.getUnit(s, 'munyeo1');
   yoon.r = m.r; yoon.c = m.c + 1; m.hp = 1; // 무녀 (1,1) 오른쪽 (1,2)
-  const ev = Core.attack(s, 'yoon', 'munyeo1');
-  assert.equal(s.merit, 1);
-  assert.equal(s.humanMerit, 1);
-  assert.equal(ev.find((e) => e.type === 'defeat').human, true);
+  const ev = Core.attack(s, 'yoon', 'munyeo1').find((e) => e.type === 'defeat');
+  assert.equal(s.merit, 0);
+  assert.deepEqual([ev.merit, ev.human, ev.defeatType], [0, true, 'SUBDUE']);
+  assert.equal(Core.DEFEAT_TYPES[ev.defeatType], '제압');
 });
 
-test('정화된 요괴는 사람이 아니다', () => {
+test('정화된 요괴는 퇴치, 공적 +1', () => {
   const s = Core.newBattle(Core.STAGES.ch2);
   const yoon = Core.getUnit(s, 'yoon');
   const d = Core.getUnit(s, 'jangsan_p');
   yoon.r = d.r; yoon.c = d.c + 1; d.hp = 1;
-  Core.attack(s, 'yoon', 'jangsan_p');
-  assert.deepEqual([s.merit, s.humanMerit], [1, 0]);
+  const ev = Core.attack(s, 'yoon', 'jangsan_p').find((e) => e.type === 'defeat');
+  assert.equal(s.merit, 1);
+  assert.deepEqual([ev.merit, ev.defeatType], [1, 'EXORCISE']);
 });
 
-test('객장이 사람을 쓰러뜨리면 공적도 사람 몫도 없다', () => {
+test('달래(보스)는 사람이어도 공적 +3 유지', () => {
+  const s = Core.newBattle(Core.STAGES.ch2);
+  const yoon = Core.getUnit(s, 'yoon');
+  const d = Core.getUnit(s, 'dallae_boss');
+  yoon.r = d.r + 1; yoon.c = d.c; d.hp = 1; // 달래 (2,0) 아래 (3,0)
+  const ev = Core.attack(s, 'yoon', 'dallae_boss').find((e) => e.type === 'defeat');
+  assert.deepEqual([s.merit, ev.defeatType, s.result], [3, 'SUBDUE', 'win']);
+});
+
+test('관군의 마지막 일격도 벽사청 공적', () => {
+  const s = Core.newBattle(Core.STAGES.ch2, { merit: 3 });
+  const g = Core.getUnit(s, 'gwangun1');
+  const d = Core.getUnit(s, 'dokkaebi_p1');
+  g.r = d.r; g.c = d.c + 1; d.hp = 1;
+  Core.attack(s, 'gwangun1', 'dokkaebi_p1');
+  assert.equal(s.merit, 1);
+});
+
+test('객장이 쓰러뜨리면 공적 없음 (퇴장 표현은 붙는다)', () => {
   const s = Core.newBattle(Core.STAGES.ch2);
   const y = Core.getUnit(s, 'yeoul');
   const m = Core.getUnit(s, 'munyeo1');
   y.r = m.r; y.c = m.c + 1; m.hp = 1;
-  Core.attack(s, 'yeoul', 'munyeo1');
-  assert.deepEqual([s.merit, s.humanMerit], [0, 0]);
+  const ev = Core.attack(s, 'yeoul', 'munyeo1').find((e) => e.type === 'defeat');
+  assert.deepEqual([s.merit, ev.defeatType], [0, 'SUBDUE']);
+});
+
+test('존재 분류 → 퇴장 표현', () => {
+  const t = (x) => Core.DEFEAT_TYPES[Core.defeatTypeFor(x)];
+  assert.deepEqual(['HUMAN', 'YOGOE', 'JAPGWI', 'YEOKGWI', 'WONGWI'].map(t), ['제압', '퇴치', '축귀', '축역', '퇴송']);
+});
+
+test('아군 퇴각에는 퇴장 표현이 없다', () => {
+  const s = Core.newBattle();
+  const d = Core.getUnit(s, 'dokkaebi1');
+  const so = Core.getUnit(s, 'soun');
+  d.r = so.r - 1; d.c = so.c; so.hp = 1;
+  s.phase = 'enemy';
+  const ev = Core.enemyAct(s, 'dokkaebi1').find((e) => e.type === 'retreat');
+  assert.equal(ev.defeatType, undefined);
 });
 
 test('1장 요괴는 사람이 아니다', () => {
