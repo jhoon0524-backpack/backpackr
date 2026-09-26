@@ -142,3 +142,39 @@ test('아군 퇴각에는 퇴장 표현이 없다', () => {
 test('1장 요괴는 사람이 아니다', () => {
   assert.equal(Core.newBattle().units.some((u) => u.human), false);
 });
+
+// ── 공적 문구 = 실제 지급값 (specs/immersion.md 11장) ──
+function lastBlow(stage, attackerId, targetId, merit) {
+  const s = Core.newBattle(stage, { merit });
+  const a = Core.getUnit(s, attackerId);
+  const t = Core.getUnit(s, targetId);
+  const spot = [[t.r + 1, t.c], [t.r, t.c - 1], [t.r, t.c + 1], [t.r - 1, t.c]]
+    .find(([r, c]) => Core.isPassable(s, r, c) && !Core.unitAt(s, r, c));
+  a.r = spot[0]; a.c = spot[1]; t.hp = 1;
+  const before = s.merit;
+  const ev = Core.attack(s, attackerId, targetId).find((e) => e.type === 'defeat');
+  return { gained: s.merit - before, msg: Core.defeatMessage(s, ev) };
+}
+
+test('모든 적 × 벽사청·관군·객장의 일격: 공적 문구가 실제로 더해진 값과 같다', () => {
+  const cases = [];
+  for (const [stage, merit, ids] of [
+    [Core.STAGES.ch1, 0, ['dokkaebi1', 'dokkaebi2', 'jangsan1', 'jangsan2', 'bulgasari', 'heuklin']],
+    [Core.STAGES.ch2, 6, ['munyeo1', 'munyeo2', 'dokkaebi_p1', 'dokkaebi_p2', 'jangsan_p', 'dallae_boss']]
+  ]) {
+    const attackers = stage === Core.STAGES.ch1 ? ['yoon', 'hangyeol', 'yeoul', 'soun'] : ['yoon', 'gwangun1', 'yeoul'];
+    for (const id of ids) for (const a of attackers) cases.push([stage, a, id, merit]);
+  }
+  for (const [stage, a, id, merit] of cases) {
+    const { gained, msg } = lastBlow(stage, a, id, merit);
+    assert.equal(msg.merit, gained > 0 ? '공적 +' + gained : '공적 없음', `${a} → ${id}`);
+  }
+});
+
+test('문구 예: 무녀 제압 공적 없음 / 요괴 퇴치 +1 / 달래 +3', () => {
+  assert.deepEqual(lastBlow(Core.STAGES.ch2, 'yoon', 'munyeo1', 0).msg, { line: '신당회 무녀를 제압했다.', merit: '공적 없음' });
+  assert.deepEqual(lastBlow(Core.STAGES.ch2, 'yoon', 'dokkaebi_p1', 0).msg, { line: '정화된 도깨비를 퇴치했다.', merit: '공적 +1' });
+  assert.deepEqual(lastBlow(Core.STAGES.ch2, 'yoon', 'dallae_boss', 0).msg, { line: '달래가 여의주를 떨어뜨리고 물러났다.', merit: '공적 +3' });
+  assert.deepEqual(lastBlow(Core.STAGES.ch1, 'hangyeol', 'heuklin', 0).msg, { line: '흑린을 퇴치했다.', merit: '공적 +3' });
+  assert.equal(lastBlow(Core.STAGES.ch2, 'yeoul', 'dallae_boss', 0).msg.merit, '공적 없음', '객장이 물리치면 실제 0');
+});

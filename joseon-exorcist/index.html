@@ -1179,6 +1179,15 @@ var Core = (function () {
     return target.human ? 0 : MERIT_NORMAL;
   }
 
+  // 쓰러짐 알림 문장 (specs/immersion.md 4·11장). 공적 줄은 이벤트의 실제 지급값으로만 만든다
+  function defeatMessage(state, ev) {
+    var t = getUnit(state, ev.targetId);
+    var line = t.boss && t.human
+      ? josa(t.name, '이', '가') + ' 여의주를 떨어뜨리고 물러났다.'
+      : josa(t.name, '을', '를') + ' ' + DEFEAT_TYPES[ev.defeatType] + '했다.';
+    return { line: line, merit: ev.merit > 0 ? '공적 +' + ev.merit : '공적 없음' };
+  }
+
   // 적은 사라지고, 아군은 퇴각해 사라진다
   function knockOut(state, attacker, target, events) {
     target.alive = false;
@@ -1897,6 +1906,7 @@ var Core = (function () {
     ENTITY_TYPES: ENTITY_TYPES,
     DEFEAT_TYPES: DEFEAT_TYPES,
     josa: josa,
+    defeatMessage: defeatMessage,
     defeatTypeFor: defeatTypeFor,
     HISTORICITY: HISTORICITY,
     inBounds: inBounds,
@@ -2438,12 +2448,8 @@ var Core = (function () {
   function defeatToasts(events) {
     events.forEach(function (e) {
       if (e.type !== 'defeat') return;
-      var t = Core.getUnit(state, e.targetId);
-      var line = t.boss && t.human
-        ? Core.josa(t.name, '이', '가') + ' 여의주를 떨어뜨리고 물러났다.'
-        : Core.josa(t.name, '을', '를') + ' ' + Core.DEFEAT_TYPES[e.defeatType] + '했다.';
-      var merit = e.merit > 0 ? '공적 +' + e.merit : (e.human ? '공적 없음' : '');
-      toast([{ text: line }].concat(merit ? [{ small: merit }] : []), '', 2400);
+      var m = Core.defeatMessage(state, e);
+      toast([{ text: m.line }, { small: m.merit }], '', 2400);
     });
   }
 
