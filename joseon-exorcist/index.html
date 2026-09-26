@@ -617,14 +617,14 @@
   }
   #world .node .seal {
     position: relative; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    background: #f7f1e3; border: 2px solid #3b3326; font-family: "Nanum Myeongjo", "AppleMyungjo", serif; font-size: 19px; font-weight: 800;
+    background: #f7f1e3; border: 2px solid #3b3326; font-size: 13px; font-weight: 800; letter-spacing: -0.5px;
   }
   #world .node .label, #world .node .state { white-space: nowrap; background: rgba(243, 235, 217, .9); border-radius: 3px; padding: 0 3px; line-height: 1.35; }
   #world .node .label { font-size: 12px; font-weight: 700; }
   #world .node .state { font-size: 10px; color: #6b5f48; margin-top: -1px; }
   #world .node.on .seal { outline: 3px solid rgba(29, 26, 20, .35); outline-offset: 2px; }
   /* 본진: 붉은 네모 인장, 조금 크게 */
-  #world .st-HQ .seal { width: 46px; height: 46px; border-radius: 4px; border: 3px double #b0302a; color: #b0302a; transform: rotate(-4deg); font-size: 24px; }
+  #world .st-HQ .seal { width: 46px; height: 46px; border-radius: 4px; border: 3px double #b0302a; color: #b0302a; transform: rotate(-4deg); font-size: 15px; }
   /* 평온·안정됨: 창문 불빛 */
   #world .st-PEACEFUL .seal::after {
     content: ""; position: absolute; right: -2px; bottom: 2px; width: 7px; height: 7px; border-radius: 50%;
@@ -787,7 +787,7 @@
     <header class="w-head">
       <div class="w-top">
         <button class="w-btn" id="world-home" type="button" aria-label="첫 화면으로">←</button>
-        <h1>청령현 <small>靑嶺縣</small></h1>
+        <h1>청령현</h1>
         <button class="w-btn" id="world-lore" type="button" aria-label="벽사록 열기">📖</button>
       </div>
       <div class="w-rank" id="world-rank"></div>
@@ -2420,37 +2420,37 @@ var Core = (function () {
   // x·y 는 지도(가로 100 × 세로 130) 위 위치. chapter 가 있으면 그 장의 무대. lore 는 훗날 벽사록 '지역' 항목 id 자리
   // desc: 상태별 설명(없으면 default). note: 카드 아래 한 줄. record: 안정된 뒤 [기록 보기]
   var REGIONS = [
-    { id: 'hq', name: '벽사청', title: '辟邪廳 벽사청', mark: '辟', x: 50, y: 95, links: ['heukseok', 'naru'], lore: null,
+    { id: 'hq', name: '벽사청', mark: '본진', x: 50, y: 95, links: ['heukseok', 'naru'], lore: null,
       desc: { default: '사특한 것을 막는 조정의 비밀 관청.' } },
-    { id: 'heukseok', name: '흑석촌', mark: '村', x: 46, y: 74, chapter: 'ch1', links: ['hq', 'yeougol'], lore: 'region:heukseok',
+    { id: 'heukseok', name: '흑석촌', mark: '마을', x: 46, y: 74, chapter: 'ch1', links: ['hq', 'yeougol'], lore: 'region:heukseok',
       desc: {
         default: '산 아래 자리한 작은 마을.\n최근 가축과 사람들이 잇달아 산에서 사라지고 있다.',
         STABILIZED: '흑린의 위협이 사라졌다.\n주민들이 다시 산길을 오가기 시작했다.'
       },
       record: '1장 흑린 토벌 — 흑린을 퇴치했다.' },
-    { id: 'yeougol', name: '여우골', mark: '谷', x: 53, y: 52, chapter: 'ch2', links: ['heukseok', 'seonang', 'sangil', 'keungoeul'], lore: 'region:yeougol',
+    { id: 'yeougol', name: '여우골', mark: '골', x: 53, y: 52, chapter: 'ch2', links: ['heukseok', 'seonang', 'sangil', 'keungoeul'], lore: 'region:yeougol',
       desc: {
         UNKNOWN: '산 너머 마을.\n아직 보고가 들어오지 않았다.',
         default: '여의주를 가져간 달래가\n이곳에서 목격되었다.',
         STABILIZED: '여의주는 회수했다.\n그러나 신당회 사람들은 이미 모습을 감췄다.'
       },
       record: '2장 사라진 여의주 — 달래가 여의주를 떨어뜨리고 물러났다.' },
-    { id: 'keungoeul', name: '큰고을', mark: '邑', x: 84, y: 50, links: ['yeougol'], lore: 'region:keungoeul',
+    { id: 'keungoeul', name: '큰고을', mark: '고을', x: 84, y: 50, links: ['yeougol'], lore: 'region:keungoeul',
       desc: { default: '청령현의 관아와 장시가 있는 큰 고을.\n아직 겉으로 드러난 괴변은 없다.' } },
-    { id: 'seonang', name: '서낭고개', mark: '嶺', x: 46, y: 31, chapter: 'ch3', action: '조사한다', links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
+    { id: 'seonang', name: '서낭고개', mark: '고개', x: 46, y: 31, chapter: 'ch3', action: '조사한다', links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
       desc: {
         default: '고개를 넘은 사람들이\n밤마다 같은 꿈을 꾸고 있다.\n\n서낭당의 금줄이 끊어졌다.',
         STABILIZED: '안개가 걷혔다.\n고개를 넘는 사람들이 다시 늘기 시작했다.' // 기획자 승인 2026-09-26
       },
       note: { OMEN: '조사 준비 중' },
       record: '3장 서낭고개 — 끊어진 봉인을 복구했다.' },
-    { id: 'pyesachal', name: '폐사찰', mark: '寺', x: 58, y: 11, links: ['seonang'], lore: 'region:pyesachal',
+    { id: 'pyesachal', name: '폐사찰', mark: '절', x: 58, y: 11, links: ['seonang'], lore: 'region:pyesachal',
       desc: { default: '오래전 버려진 절.\n최근 밤마다 불빛이 보인다는 소문이 돈다.' },
       note: { LOCKED: '산길이 막혀 있다.', OMEN: '조사 준비 중' } },
-    { id: 'sangil', name: '봉쇄된 산길', mark: '路', x: 16, y: 50, links: ['yeougol'], lore: 'region:sangil',
+    { id: 'sangil', name: '봉쇄된 산길', mark: '길', x: 16, y: 50, links: ['yeougol'], lore: 'region:sangil',
       desc: { default: '산사태로 길이 끊겼다.\n그런데 무너진 바위 아래에서 사람 목소리가 들린다는 소문이 있다.' },
       note: '지금은 지나갈 수 없다.' },
-    { id: 'naru', name: '나루터', mark: '津', x: 50, y: 117, links: ['hq'], lore: 'region:naru',
+    { id: 'naru', name: '나루터', mark: '나루', x: 50, y: 117, links: ['hq'], lore: 'region:naru',
       desc: { default: '강을 건너 다른 고을로 향하는 나루.' },
       note: '아직 강을 건널 때가 아니다.' }
   ];
@@ -3982,7 +3982,7 @@ var Core = (function () {
     var sheet = document.getElementById('world-sheet');
     sheet.innerHTML = '';
     var head = el('div', 'head');
-    head.appendChild(el('h2', '', r.title || r.name));
+    head.appendChild(el('h2', '', r.name));
     if (st !== 'HQ') head.appendChild(el('span', 'w-badge ' + st, Core.REGION_STATUS[st]));
     var x = el('button', 'x', '✕');
     x.type = 'button';
