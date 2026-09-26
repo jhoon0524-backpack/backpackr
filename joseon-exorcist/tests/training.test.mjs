@@ -325,7 +325,7 @@ test('교란: 축지격에 맞은 적을 1칸 밀어낸다 (피해는 정상)', 
   assert.ok(ev.some((e) => e.type === 'push' && e.name === '교란'));
 });
 
-test('교란: 바위·맵 밖·다른 유닛·결계 쪽이면 밀리지 않는다. 기본공격에는 없다', () => {
+test('교란: 바위·맵 밖·다른 유닛 쪽이면 밀리지 않는다 (피해는 정상). 기본공격에도 밀린다', () => {
   const map = ['........', '........', '....D...', '........', '........', '........', '........', '........'];
   const s = arena([['dokkaebi', 3, 4], ['dokkaebi', 0, 1]], { yeoul: 'gyoran' }, map);
   put(s, 'yeoul', 4, 4);
@@ -345,8 +345,11 @@ test('교란: 바위·맵 밖·다른 유닛·결계 쪽이면 밀리지 않는�
   const s4 = arena([['dokkaebi', 3, 4]], { yeoul: 'gyoran' });
   put(s4, 'yeoul', 4, 4);
   U(s4, 'dokkaebi').hp = 99;
-  Core.attack(s4, 'yeoul', 'dokkaebi');
-  assert.deepEqual([U(s4, 'dokkaebi').r, U(s4, 'dokkaebi').c], [3, 4], '축지격에만');
+  const hp4 = U(s4, 'dokkaebi').hp;
+  const ev4 = Core.attack(s4, 'yeoul', 'dokkaebi');
+  assert.deepEqual([U(s4, 'dokkaebi').r, U(s4, 'dokkaebi').c], [2, 4], '기본공격에도 (기획자 확정 2026-09-26)');
+  assert.ok(ev4.some((e) => e.type === 'training' && e.kind === 'gyoran'));
+  assert.ok(U(s4, 'dokkaebi').hp < hp4);
 });
 
 test('교란: 강제 이동은 탈출 판정을 바로 일으키지 않는다 — 탈출로로 밀린 달래는 자기 차례에 행동한 뒤 탈출', () => {
@@ -395,6 +398,40 @@ test('역할 문구: 기획자 확정 8개', () => {
     '여럿을 한꺼번에 태우는 술법 공격수', '길목을 막고 전장을 설계하는 진법가',
     '거리를 벌렸다 파고드는 돌격수', '적의 위치를 흐트러뜨리는 전장 교란자'
   ]);
+});
+
+test('추적(기본공격): 맞은 적은 다음 차례 이동 −1, 중첩 없음, 최소 1, 차례가 끝나면 풀림. 비적대에는 없음', () => {
+  const s = arena([['dokkaebi', 1, 2]], { hangyeol: 'chujeok' });
+  put(s, 'hangyeol', 3, 2);
+  const d = U(s, 'dokkaebi');
+  d.hp = d.maxHp = 99;
+  const ev = Core.attack(s, 'hangyeol', 'dokkaebi');
+  assert.ok(ev.some((e) => e.type === 'training' && e.kind === 'chujeok'));
+  assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 2);
+  U(s, 'hangyeol').acted = false;
+  Core.attack(s, 'hangyeol', 'dokkaebi');
+  assert.equal(Math.max(...Core.moveTargets(s, d).map((p) => p.cost)), 2, '중첩 없음');
+  Core.endAllyPhase(s); Core.runEnemyPhase(s);
+  assert.equal(d.slow, false);
+  const s2 = Core.newBattle(Core.STAGES.ch3, { merit: 0, training: { hangyeol: 'chujeok', yeoul: 'gyoran' } });
+  const g = U(s2, 'seonang'); g.hp = g.maxHp = 999;
+  put(s2, 'hangyeol', g.r + 2, g.c);
+  Core.attack(s2, 'hangyeol', 'seonang');
+  const at = [g.r, g.c];
+  put(s2, 'yeoul', g.r + 1, g.c);
+  Core.attack(s2, 'yeoul', 'seonang');
+  assert.deepEqual([g.slow, g.r, g.c], [false, ...at], '서낭신에게는 기본공격으로도 안 걸린다');
+});
+
+test('교란(기본공격): 달래를 탈출로로 밀어도 바로 지지 않는다', () => {
+  const s = Core.newBattle(Core.STAGES.ch2, { merit: 0, training: { yeoul: 'gyoran' } });
+  const d = put(s, 'dallae_boss', 1, 7);
+  d.hp = d.maxHp = 99;
+  put(s, 'yeoul', 2, 7);
+  Core.attack(s, 'yeoul', 'dallae_boss');
+  assert.deepEqual([d.r, d.c, s.result], [0, 7, null]);
+  Core.endAllyPhase(s); Core.runEnemyPhase(s);
+  assert.equal(s.loseReason, 'escape', '자기 차례에 탈출');
 });
 
 // ── 기록과 회귀 ────────────────────────────────────

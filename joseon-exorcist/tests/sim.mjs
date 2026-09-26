@@ -171,8 +171,9 @@ function lampAlly(s, u, log, active) {
       [u.r, u.c] = saved;
       for (const x of opts) {
         let score = (x.dmg >= x.t.hp ? 100 : 0) + x.dmg - x.t.hp * 0.1 - c.cost * 0.2;
-        if (x.kind === 'skill' && u.training === 'gyoran') score += 30; // 밀어내기는 죽이지 않아도 효과 (자동)
-        if (x.kind === 'skill' && u.training === 'chujeok') score += 10;
+        const survives = x.dmg < x.t.hp;
+        if (survives && u.training === 'gyoran') score += 30; // 밀어내기·늦추기는 죽이지 않아도 효과 (기본공격도)
+        if (survives && u.training === 'chujeok' && !x.t.slow) score += 20;
         if (active && u.training === 'gisup' && x.kind === 'skill' && c.cost >= 3) score += 20;
         if (!best || score > best.score) best = { ...x, cell: c, score };
       }
@@ -233,6 +234,11 @@ export function playBattle({ seed = 1, mode = 'greedy', stage, merit, chapter = 
   while (s.result === null) {
     if (++guard > 60) throw new Error('전투가 끝나지 않는다');
     Core.logEvents(log, s, Core.startAllyPhase(s, rng));
+    // 4장: 이번 적 차례에 등(칸 또는 옆 칸)까지 올 수 있는 귀화 수 = 귀화 접근 (자동 검증 전용 지표)
+    if (s.lamps && s.objective.phase === 'lamps') {
+      log.gwihwaApproaches = (log.gwihwaApproaches || 0)
+        + fires(s).filter((f) => fireDistance(s, f) <= (f.slow ? Math.max(1, f.mov - 1) : f.mov)).length;
+    }
     for (const u of Core.livingUnits(s, 'ally')) {
       if (s.result !== null) break;
       const from = { r: u.r, c: u.c };

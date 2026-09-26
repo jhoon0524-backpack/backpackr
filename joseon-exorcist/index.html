@@ -1752,6 +1752,7 @@ var Core = (function () {
     var t = inList(attackTargets(state, u), targetId);
     if (!t) return null;
     var events = hit(state, u, t, false, []);
+    trainingOnHit(state, u, t, events); // 추적·교란은 기본공격에도 (기획자 확정 2026-09-26)
     finishAction(u);
     return events;
   }
@@ -1812,6 +1813,20 @@ var Core = (function () {
 
   function trainingAfterSkill(state, u, t, spread, events) {
     var tr = u.training;
+    trainingOnHit(state, u, t, events);
+    if (tr === 'bubeop' && spread && spread.alive && state.result === null) {
+      var amount = Math.max(1, Math.round(damage(state, u, spread, true) * BUBEOP_RATE + 1e-9));
+      events.push({ type: 'training', unitId: u.id, kind: 'bubeop', targetId: spread.id });
+      dealDamage(state, u, spread, amount, { name: '부법', skill: true, mult: 1 }, events);
+    }
+    if (tr === 'jiphaeng' && !t.alive && hostile(u, t) && state.result === null) {
+      u.reMove = true;
+      events.push({ type: 'training', unitId: u.id, kind: 'jiphaeng' });
+    }
+  }
+  // 추적·교란: 기본공격이든 기술이든 적중하면 (대상이 살아 있을 때)
+  function trainingOnHit(state, u, t, events) {
+    var tr = u.training;
     if (tr === 'chujeok' && t.alive && hostile(u, t)) {
       t.slow = true;
       events.push({ type: 'training', unitId: u.id, kind: 'chujeok', targetId: t.id });
@@ -1826,15 +1841,6 @@ var Core = (function () {
         events.push({ type: 'push', attackerId: u.id, targetId: t.id, from: from, to: to, name: '교란' });
         events.push({ type: 'training', unitId: u.id, kind: 'gyoran', targetId: t.id });
       }
-    }
-    if (tr === 'bubeop' && spread && spread.alive && state.result === null) {
-      var amount = Math.max(1, Math.round(damage(state, u, spread, true) * BUBEOP_RATE + 1e-9));
-      events.push({ type: 'training', unitId: u.id, kind: 'bubeop', targetId: spread.id });
-      dealDamage(state, u, spread, amount, { name: '부법', skill: true, mult: 1 }, events);
-    }
-    if (tr === 'jiphaeng' && !t.alive && hostile(u, t) && state.result === null) {
-      u.reMove = true;
-      events.push({ type: 'training', unitId: u.id, kind: 'jiphaeng' });
     }
   }
 
@@ -2313,9 +2319,9 @@ var Core = (function () {
     e.vanished = true;
   }
 
-  // 귀화 (기획자 확정 2026-09-26): 봉인등 칸 또는 상하좌우 1칸에 도달한 뒤, **다음 자기 차례의 행동으로** 끈다.
-  // 대각선은 아니다. 등 위에 선 아군은 소등을 막지 못한다. 닿는 순간 자동으로 꺼지지 않는다 —
-  // 그 사이에 아군이 치거나(사수·집행), 밀어내거나(교란), 늦추거나(추적), 길을 막아(진법) 끊을 수 있다.
+  // 귀화 (기획자 확정 2026-09-26, 2차): 봉인등 칸 또는 상하좌우 1칸까지 이동한 뒤 **같은 차례의 행동으로** 끈다.
+  // 처리 순서: 이동 → 귀화 행동 → 소등. 대각선은 아니다. 등 위에 선 아군은 소등을 막지 못한다.
+  // 이동 자체(밀려남 포함)는 소등을 일으키지 않는다. 도착하기 전에 끊어야 한다 (사수·집행·교란·추적·진법).
   var EXTINGUISH_RANGE = 1;
   function lampInReach(state, p) {
     return litLamps(state).filter(function (l) { return distance(l, p) <= EXTINGUISH_RANGE; })[0] || null;
@@ -2342,9 +2348,7 @@ var Core = (function () {
         relocate(state, e, dest, events);
         var reached = lampInReach(state, e);
         if (reached) {
-          // sameTurn: 도달한 그 차례에 행동으로 끈다 / 아니면 다음 자기 차례에 끈다 (그 사이 화면에 경고)
-          if (state.lampRules.sameTurn) extinguish(state, e, reached, events);
-          else events.push({ type: 'lampThreat', unitId: e.id });
+          extinguish(state, e, reached, events); // 같은 차례의 행동으로 끈다
           return events;
         }
         var near = attackTargets(state, e).filter(function (t) { return t.side === 'ally'; }).sort(function (a, b) { return a.hp - b.hp; })[0];
@@ -2599,7 +2603,7 @@ var Core = (function () {
       } else if (e.type === 'spring') {
         bump(log.springHealing, e.targetId, e.amount);
       } else if (e.type === 'lamp') {
-        log.sealLampsLit.push({ turn: state.turn, lamp: e.lampId, by: e.unitId });
+        log.sealLampsLit.push({ turn: state.turn, lamp: e.lampId, by: e.unitId, relight: !e.merit });
       } else if (e.type === 'extinguish') {
         log.sealLampsExtinguished.push({ turn: state.turn, lamp: e.lampId, by: e.unitId });
       } else if (e.type === 'hold') {
@@ -2886,7 +2890,7 @@ var Core = (function () {
     ],
     hangyeol: [
       { id: 'sasu', name: '사수', role: '멀리서 핵심 표적을 노리는 저격수', desc: '움직이지 않은 차례에는 파사궁 사거리가 2에서 3이 된다.' },
-      { id: 'chujeok', name: '추적', role: '도망치는 적의 발을 묶는 추격자', desc: '파사궁에 맞은 적은 다음 차례 이동력 −1 (최소 1).' }
+      { id: 'chujeok', name: '추적', role: '도망치는 적의 발을 묶는 추격자', desc: '기본 공격이나 파사궁에 맞은 적은 다음 차례 이동력 −1 (최소 1).' }
     ],
     soun: [
       { id: 'bubeop', name: '부법', role: '여럿을 한꺼번에 태우는 술법 공격수', desc: '화염부가 대상 옆의 적 1명에게 절반 피해로 번진다.' },
@@ -2894,7 +2898,7 @@ var Core = (function () {
     ],
     yeoul: [
       { id: 'gisup', name: '기습', role: '거리를 벌렸다 파고드는 돌격수', desc: '3칸 이상 달려와 축지격을 쓰면 피해 ×1.5.' },
-      { id: 'gyoran', name: '교란', role: '적의 위치를 흐트러뜨리는 전장 교란자', desc: '축지격에 맞은 적을 1칸 밀어낸다.' }
+      { id: 'gyoran', name: '교란', role: '적의 위치를 흐트러뜨리는 전장 교란자', desc: '기본 공격이나 축지격에 맞은 적을 1칸 밀어낸다.' }
     ]
   };
   var TRAINING_POINTS = { ch3: 2, ch4: 1 }; // 3장 2 — 4명 중 2명만 첫 수련, 4장 +1 — 세 번째 인물
@@ -3764,6 +3768,7 @@ var Core = (function () {
       if (oldTag) cell.removeChild(oldTag);
       var oldOrb = cell.querySelector('.orb');
       if (oldOrb) cell.removeChild(oldOrb);
+      cell.querySelectorAll('.threat').forEach(function (n) { cell.removeChild(n); }); // 추적 −1 표시
     });
     if (ui.orb) cellAt(ui.orb.r, ui.orb.c).appendChild(el('span', 'orb', '🔮'));
     renderPoints();
@@ -3780,7 +3785,7 @@ var Core = (function () {
       if (u.side === 'ally' && u.acted) tile.className += ' acted';
       if (u.id === 'dallae' && ui.dallaeGone) tile.className += ' fading';
       cellAt(u.r, u.c).appendChild(tile);
-      if (u.ai === 'lamp' && Core.lampInReach(state, u)) cellAt(u.r, u.c).appendChild(el('span', 'threat', '끈다!')); // 다음 차례에 등을 끈다
+      if (u.slow) cellAt(u.r, u.c).appendChild(el('span', 'threat', '−1')); // 추적: 다음 차례 이동 −1
       var tag = u.side !== 'ally' || ui.kind === 'skill' ? affinityTag(u) : null;
       if (tag && marksHas(marks, u)) cellAt(u.r, u.c).appendChild(tag);
     });
@@ -3847,7 +3852,7 @@ var Core = (function () {
     var o = state.objective;
     if (l.lit) {
       return { mark: '🏮', name: l.name + (l.dim ? ' · 약한 불' : ' · 켜짐'),
-        text: '귀화가 이 등이나 바로 옆 칸(상하좌우)에 닿으면\n다음 차례에 불을 끈다. 등 위에 서 있어도 막지 못한다.' };
+        text: '귀화가 이 등이나 바로 옆 칸(상하좌우)까지 오면\n그 차례에 불을 끈다. 등 위에 서 있어도 막지 못한다.\n오기 전에 끊어야 한다.' };
     }
     return { mark: '🏮', name: l.name + ' · 꺼짐',
       text: o.phase === 'lamps' ? '이 칸에 선 아군이 [봉인등 밝히기]를 할 수 있다.' : '불이 꺼져 있다.' };
@@ -3913,7 +3918,7 @@ var Core = (function () {
     text.appendChild(el('div', 'sub', u.type === 'seonang'
       ? (seonangHidden() ? '정체를 알 수 없다' : u.faction + ' · 원귀를 막고 있는 신령')
       : u.faction + ' · ' + u.title));
-    if (u.ai === 'lamp') text.appendChild(el('div', 'sub', Core.lampInReach(state, u) ? '봉인등에 닿았다 — 다음 차례에 불을 끈다' : '봉인등을 노린다'));
+    if (u.ai === 'lamp') text.appendChild(el('div', 'sub', '봉인등을 노린다 — 등이나 그 옆 칸까지 오면 그 차례에 끈다'));
     if (u.untargetable) text.appendChild(el('div', 'sub', '공격할 수 없다 · 옆에 온 귀물을 친다'));
     text.appendChild(el('div', 'stats',
       'HP ' + u.hp + '/' + u.maxHp +

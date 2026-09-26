@@ -94,18 +94,18 @@ function run4(mode, training, merit) {
   const logs = [];
   for (let seed = 1; seed <= N4; seed++) logs.push(playBattle({ seed, mode, stage: Core.STAGES.ch4, merit, chapter: 'ch4', training }));
   const wins = logs.filter((s) => s.result === 'win');
-  const reasons = {};
-  logs.filter((s) => s.result === 'lose').forEach((s) => { reasons[s.loseReason] = (reasons[s.loseReason] || 0) + 1; });
   const taken = (s) => Object.entries(s.log.damageTaken).filter(([id]) => Core.getUnit(s, id).side === 'ally').reduce((n, [, v]) => n + v, 0);
+  const acts = {};
+  logs.forEach((s) => Object.entries(s.log.trainingActivations).forEach(([k, v]) => { acts[k] = (acts[k] || 0) + v; }));
   return {
     승률: Math.round((wins.length / N4) * 100) + '%',
-    '평균턴(승)': wins.length ? f1(avg(wins.map((s) => s.turn))) : '-',
-    패배: JSON.stringify(reasons),
+    평균턴: wins.length ? f1(avg(wins.map((s) => s.turn))) : '-',
+    중앙턴: wins.length ? median(wins.map((s) => s.turn)) : '-',
     소등: f1(avg(logs.map((s) => s.log.sealLampsExtinguished.length))),
+    재점등: f1(avg(logs.map((s) => s.log.sealLampsLit.filter((l) => l.relight).length))),
+    귀화접근: f1(avg(logs.map((s) => s.log.gwihwaApproaches || 0))),
     받은피해: f1(avg(logs.map(taken))),
-    퇴각: f1(avg(logs.map((s) => s.log.defeatedUnits.filter((d) => d.how === '퇴각').length))),
-    귀화처치: f1(avg(logs.map((s) => s.log.gwihwaDefeated))),
-    수련발동: f1(avg(logs.map((s) => Object.values(s.log.trainingActivations).reduce((a, b) => a + b, 0))))
+    수련발동: Object.entries(acts).map(([k, v]) => k + ' ' + f1(v / N4)).join(', ') || '-'
   };
 }
 const rows4 = [];
@@ -118,5 +118,6 @@ for (const merit of [0, 13]) {
     rows4.push({ 품계: rank, 자동: 'C 수련 활용형', 수련: c.label, ...run4('training', c.training, merit) });
   }
 }
+// 귀화접근 = 아군 차례 시작마다 '이번 적 차례에 등까지 올 수 있는 귀화' 수의 합 (자동 검증 전용)
 console.log(`\n4장 시뮬레이션 — 조건마다 ${N4}판 (섬멸형·목표형·수련 활용형, 합법 수련 조합 ${COMBOS.length - 1}개 + 수련 없음)`);
 console.table(rows4);
