@@ -517,6 +517,26 @@
   #lore .back { margin-top: 4px; min-height: 32px; padding: 0 10px; border-radius: 4px; border: 1px solid #b9a984; background: #f7f1e3; font: inherit; font-size: 13px; color: #1d1a14; }
   #lore button:focus-visible { outline: 2px solid #b0302a; outline-offset: 1px; }
 
+  /* 프롤로그: 어두운 밤, 한지 색 글자, 붉은 인장 */
+  #prologue {
+    position: fixed; inset: 0; z-index: 30;
+    background: radial-gradient(ellipse at 50% 40%, #1c1914 0%, #0a0907 75%);
+    color: #efe6d2; font-family: "Nanum Myeongjo", "AppleMyungjo", "Noto Serif KR", serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+    padding: 24px 16px; text-align: center;
+  }
+  #prologue .lines { display: flex; flex-direction: column; gap: 14px; max-width: 320px; }
+  #prologue p { margin: 0; font-size: 16px; line-height: 1.6; word-break: keep-all; opacity: 0; transition: opacity .9s ease; }
+  #prologue p.on { opacity: 1; }
+  #prologue p b { color: #f5c542; font-weight: 700; }
+  #prologue .seal {
+    align-self: center; padding: 6px 10px; border: 3px double #c0392b; border-radius: 4px;
+    color: #d9443a; font-size: 26px; font-weight: 800; letter-spacing: .2em;
+    transform: rotate(-3deg); box-shadow: 0 0 18px rgba(192, 57, 43, .35);
+  }
+  #prologue .big-btn { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+  #prologue .big-btn.on { opacity: 1; pointer-events: auto; }
+
   /* 토스트: 맵을 가리지 않게 화면 아래에 잠깐 (specs/immersion.md 2·4·7장) */
   #toasts {
     position: fixed; left: 0; right: 0; bottom: 12px; z-index: 45; pointer-events: none;
@@ -574,6 +594,20 @@
       <button class="big-btn" id="btn-new-yes" type="button">기록 지우고 처음부터</button>
       <button class="big-btn plain" id="btn-new-no" type="button">취소</button>
     </div>
+  </div>
+
+  <!-- 프롤로그 (specs/immersion.md 3장): [처음부터] 뒤 1장 전에. 문장은 기획자가 정했다 — 고치지 않는다 -->
+  <div id="prologue" hidden>
+    <div class="lines">
+      <p>조선 ○○년.</p>
+      <p>도성 곳곳에서<br>설명할 수 없는 괴변이 이어졌다.</p>
+      <p>조정은 귀신의 존재를 인정하지 않았다.</p>
+      <p>대신 기록에 남지 않을<br>관청 하나를 만들었다.</p>
+      <p class="seal">辟邪廳</p>
+      <p>사특한 것을 막는 곳.</p>
+      <p>당신은 벽사청 종사관<br><b>윤무겸</b>이다.</p>
+    </div>
+    <button class="big-btn" id="btn-mission" type="button">임무를 받는다</button>
   </div>
 
   <!-- 벽사록: 도감 + 세계관 사전 (specs/lore.md 10~11장) -->
@@ -2765,12 +2799,37 @@ var Core = (function () {
     var next = Core.nextStage(progress);
     if (next) startChapter(next);
   });
+  // 프롤로그: 문장이 한 덩이씩 나타나고(약 10초) 마지막에 [임무를 받는다]. 화면을 누르면 한 번에 다 보인다
+  var PROLOGUE_STEP_MS = 1300;
+  var prologueTimers = [];
+  function showPrologue() {
+    var box = document.getElementById('prologue');
+    var parts = Array.prototype.slice.call(box.querySelectorAll('p')).concat([document.getElementById('btn-mission')]);
+    parts.forEach(function (n) { n.classList.remove('on'); });
+    box.hidden = false;
+    document.getElementById('title').hidden = true;
+    function reveal(n) { n.classList.add('on'); }
+    prologueTimers = parts.map(function (n, i) {
+      return setTimeout(function () { reveal(n); }, reduceMotion ? 0 : 400 + i * PROLOGUE_STEP_MS);
+    });
+    box.onclick = function (ev) {
+      if (ev.target.id === 'btn-mission') return;
+      prologueTimers.forEach(clearTimeout);
+      parts.forEach(reveal);
+    };
+  }
+  document.getElementById('btn-mission').addEventListener('click', function () {
+    prologueTimers.forEach(clearTimeout);
+    document.getElementById('prologue').hidden = true;
+    startChapter('ch1');
+  });
+
   // 처음부터: 진행이 있으면 확인 화면을 거친다 (브라우저 확인 창은 쓸 수 없는 환경이라 화면 안에)
   function newGame() {
     document.getElementById('new-confirm').hidden = true;
     progress = Core.newProgress();
     saveProgress();
-    startChapter('ch1');
+    showPrologue();
   }
   document.getElementById('btn-new').addEventListener('click', function () {
     if (progress.cleared.length > 0) document.getElementById('new-confirm').hidden = false;
