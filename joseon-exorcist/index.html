@@ -1839,6 +1839,7 @@ var Core = (function () {
     ENEMY_ORDER: ENEMY_ORDER,
     ENTITY_TYPES: ENTITY_TYPES,
     DEFEAT_TYPES: DEFEAT_TYPES,
+    josa: josa,
     defeatTypeFor: defeatTypeFor,
     HISTORICITY: HISTORICITY,
     inBounds: inBounds,
@@ -2026,9 +2027,21 @@ var Core = (function () {
     if (!added) return;
     try { localStorage.setItem(LORE_KEY, JSON.stringify(loreSeen)); } catch (e) { /* 저장 못 해도 이번 판은 보인다 */ }
   }
-  // 이전 저장(벽사록 없던 때)의 깬 장도 밝힘으로 친다 — 마이그레이션 없이 호환
+  // 이전 저장(벽사록 없던 때)의 깬 장도 밝힘으로 친다 — 마이그레이션 없이 호환. 깬 장은 시작도 한 장이다
   function loreTokens() {
-    return loreSeen.concat(progress.cleared.map(function (id) { return 'clear:' + id; }));
+    return loreSeen.concat(progress.cleared.map(function (id) { return 'clear:' + id; }),
+      progress.cleared.map(function (id) { return 'stage:' + id; }));
+  }
+  // 본 것을 기록하고, 새로 밝혀진 항목이 있으면 토스트로 알린다 (specs/immersion.md 7장)
+  function discover(tokens) {
+    var before = loreTokens();
+    seeLore(tokens);
+    var fresh = Core.newlyUnlockedLore(before, loreTokens());
+    if (!fresh.length) return;
+    toast([
+      { text: '📖 벽사록에 새 기록이 추가되었습니다.' },
+      { b: fresh.map(function (e) { return e.name + (e.hanja ? ' ' + e.hanja : ''); }).join(' · ') }
+    ], 'lore', 3000);
   }
   var chapterId = 'ch1';
 
@@ -2339,6 +2352,7 @@ var Core = (function () {
   // 행동이 끝난 뒤 공통 처리: 승리면 끝, 전원 행동했으면 잠시 뒤 자동으로 턴 종료
   function afterAction(events) {
     clearSelection();
+    defeatToasts(events || []);
     ghostDeaths(events || []);
     render();
     showFloats(events || []);
@@ -2350,6 +2364,19 @@ var Core = (function () {
       render();
       setTimeout(endTurn, ENEMY_STEP_MS);
     }
+  }
+
+  // 쓰러진 적을 문장으로: 사람은 제압, 요괴는 퇴치. 2장 달래는 여의주를 떨어뜨리고 물러난다 (specs/immersion.md 4장)
+  function defeatToasts(events) {
+    events.forEach(function (e) {
+      if (e.type !== 'defeat') return;
+      var t = Core.getUnit(state, e.targetId);
+      var line = t.boss && t.human
+        ? Core.josa(t.name, '이', '가') + ' 여의주를 떨어뜨리고 물러났다.'
+        : Core.josa(t.name, '을', '를') + ' ' + Core.DEFEAT_TYPES[e.defeatType] + '했다.';
+      var merit = e.merit > 0 ? '공적 +' + e.merit : (e.human ? '공적 없음' : '');
+      toast([{ text: line }].concat(merit ? [{ small: merit }] : []), '', 2400);
+    });
   }
 
   // 쓰러진 유닛은 render() 가 지우기 전에 복제해 두고 0.4초 동안 흐려지게 한다
@@ -2390,7 +2417,7 @@ var Core = (function () {
   }
 
   function skillEffects(events) {
-    seeLore(events.filter(function (e) { return e.name; }).map(function (e) { return 'skill:' + e.name; }));
+    discover(events.filter(function (e) { return e.name; }).map(function (e) { return 'skill:' + e.name; }));
     events.forEach(function (e) {
       var kind = LABELED[e.name];
       if (!kind || (e.type !== 'damage' && e.type !== 'heal')) return;
@@ -2435,6 +2462,7 @@ var Core = (function () {
   }
 
   function showEvents(events) {
+    defeatToasts(events);
     ghostDeaths(events);
     render();
     showFloats(events);
@@ -2644,11 +2672,11 @@ var Core = (function () {
     ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null };
     buildBoard();
     Core.startAllyPhase(state, Math.random);
-    seeLore(Core.loreTokensForBattle(state)); // 전투에서 만난 귀물
     render();
     playScene(CHAPTERS[id].intro(), function () {
       ui.busy = false;
       render();
+      discover(Core.loreTokensForBattle(state, id)); // 이 장에서 만난 세력·귀물
       terrainTips();
     });
   }
@@ -2695,9 +2723,9 @@ var Core = (function () {
     var win = state.result === 'win';
     var before = Core.rankFor(progress.merit).name;
     if (win) {
+      discover(['clear:' + chapterId]); // 누계 저장 전에: 깬 장은 이미 본 것으로 치기 때문
       progress = Core.applyResult(progress, chapterId, 'win', state.merit);
       saveProgress();
-      seeLore(['clear:' + chapterId]);
     }
     var next = Core.nextStage(progress);
     var t = document.getElementById('result-text');
