@@ -813,8 +813,8 @@
   <div id="result" hidden>
     <div class="title" id="result-text"></div>
     <div class="sub" id="result-sub"></div>
-    <button class="big-btn" id="btn-next" type="button">지도로 돌아간다</button>
     <button class="big-btn" id="btn-retry" type="button">다시하기</button>
+    <button class="big-btn" id="btn-next" type="button">지도로 돌아간다</button>
     <button class="big-btn plain" id="btn-home" type="button">처음 화면으로</button>
   </div>
   <div id="toasts" aria-live="polite"></div>
@@ -2113,8 +2113,10 @@ var Core = (function () {
     { id: 'news:ch2', after: 'ch2', region: 'seonang', title: '📜 새로운 보고',
       text: '서낭고개에서 새로운 보고가 올라오고 있다.' }
   ];
+  // 가장 최근에 깬 장의 급보만 보여 준다 — 이전 저장으로 처음 지도를 열 때 이미 지난 급보(안정된 곳을 가리키는)가 뜨지 않게
   function worldNews(progress, seen) {
-    return WORLD_NEWS.filter(function (n) { return progress.cleared.indexOf(n.after) !== -1 && seen.indexOf(n.id) === -1; });
+    var last = CAMPAIGN.filter(function (ch) { return progress.cleared.indexOf(ch) !== -1; }).pop();
+    return WORLD_NEWS.filter(function (n) { return n.after === last && seen.indexOf(n.id) === -1; });
   }
 
   // 현재 임무: 다음 장의 지역. 다 깼으면 조사 준비 중인 서낭고개
@@ -2444,12 +2446,17 @@ var Core = (function () {
   var PROGRESS_KEY = 'joseon-exorcist.progress';
   var canStore = true;
   function loadProgress() {
+    var raw;
     try {
-      var raw = localStorage.getItem(PROGRESS_KEY);
+      raw = localStorage.getItem(PROGRESS_KEY);
+    } catch (e) {
+      canStore = false; // 저장소 자체가 막힘
+      return Core.newProgress();
+    }
+    try {
       return (raw && Core.checkProgress(JSON.parse(raw))) || Core.newProgress();
     } catch (e) {
-      canStore = false;
-      return Core.newProgress();
+      return Core.newProgress(); // 글이 깨졌을 뿐 저장은 된다 — 조용히 새로 시작
     }
   }
   function saveProgress() {
@@ -3301,12 +3308,15 @@ var Core = (function () {
       sheet.appendChild(stats);
       sheetButton(row, '📖 벽사록', '', openLore);
       sheetButton(row, '현재 임무', '', showMission);
+    } else if (st === 'EXORCISM_REQUIRED' && r.chapter && worldOverride[id]) {
+      // ?dev=1 임시 상태에서는 출동하지 않는다 — 진행 저장이 장 순서와 어긋나지 않게
+      sheet.appendChild(el('div', 'note', 'DEV 임시 상태입니다. [되돌리기] 후 출동하세요.'));
     } else if (st === 'EXORCISM_REQUIRED' && r.chapter) {
       sheetButton(row, '출동', 'go', function () { closeRegion(); startChapter(r.chapter); });
     } else if (st === 'STABILIZED' && r.record) {
       var rec = sheetButton(row, '기록 보기', '', function () {
-        rec.disabled = true;
         sheet.insertBefore(el('div', 'record', r.record), row);
+        row.removeChild(rec); // 한 번 보면 버튼은 사라진다
       });
     } else if (r.note) {
       sheet.appendChild(el('div', 'note', r.note));
@@ -3335,7 +3345,7 @@ var Core = (function () {
     sheet.appendChild(head);
     sheet.appendChild(el('p', '', m.text));
     var row = el('div', 'row');
-    sheetButton(row, '지도에서 보기', '', function () { pulseRegion(m.region); openRegion(m.region); });
+    sheetButton(row, '지도에서 보기', '', function () { openRegion(m.region); pulseRegion(m.region); });
     sheet.appendChild(row);
     sheet.hidden = false;
   }
@@ -3391,8 +3401,11 @@ var Core = (function () {
     sheetButton(box, '되돌리기', '', function (ev) { ev.stopPropagation(); worldOverride = {}; renderWorld(); });
   }
 
-  document.getElementById('world-map').addEventListener('click', function (ev) {
-    if (!ev.target.closest('.node')) closeRegion(); // 지도 빈 곳을 누르면 카드 닫기
+  // 카드 바깥(지도 빈 곳·위쪽 글자)을 누르면 카드를 닫는다. 노드·버튼·카드 자신은 제외
+  document.getElementById('world').addEventListener('click', function (ev) {
+    if (document.getElementById('world-sheet').hidden) return;
+    if (ev.target.closest('.node, button, #world-sheet, #world-news')) return;
+    closeRegion();
   });
   document.getElementById('world-home').addEventListener('click', function () {
     document.getElementById('world').hidden = true;
@@ -3401,8 +3414,8 @@ var Core = (function () {
   document.getElementById('world-lore').addEventListener('click', openLore);
   document.getElementById('world-mission').addEventListener('click', function () {
     var m = Core.currentMission(progress);
-    pulseRegion(m.region);
     openRegion(m.region);
+    pulseRegion(m.region); // openRegion 이 노드를 다시 그리므로 그 뒤에
   });
 
   // ── 개발자용 플레이 기록 화면 (?dev=1) ──

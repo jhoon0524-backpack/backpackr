@@ -75,7 +75,8 @@ test('급보: 장을 깬 뒤 한 번, 본 급보는 다시 안 나온다', () =>
   assert.deepEqual(Core.worldNews(after1, []).map((n) => [n.id, n.region]), [['news:ch1', 'yeougol']]);
   assert.deepEqual(Core.worldNews(after1, ['news:ch1']), []);
   assert.deepEqual(Core.worldNews(after2, ['news:ch1']).map((n) => n.region), ['seonang']);
-  assert.equal(Core.worldNews(after2, []).length, 2, '2장까지 깬 이전 저장은 두 급보를 차례로');
+  assert.deepEqual(Core.worldNews(after2, []).map((n) => n.id), ['news:ch2'],
+    '2장까지 깬 이전 저장은 최근 급보만 — 이미 안정된 여우골을 가리키는 지난 급보는 뜨지 않는다');
 });
 
 test('현재 임무: 흑석촌 → 여우골 → 서낭고개 조사 준비 중', () => {
