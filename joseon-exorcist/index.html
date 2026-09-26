@@ -87,6 +87,9 @@
   .f-unknown { border-color: #6b6b6b; } /* 3장 서낭신: 진실 전에는 정체 모름 (회색·먹색) */
   #ask { position: fixed; inset: 0; z-index: 44; background: rgba(4, 5, 8, .75); display: flex; align-items: center; justify-content: center; padding: 20px; }
   #ask .card { max-width: 340px; width: 100%; background: var(--panel); border: 1px solid #e2c26b; border-radius: 10px; padding: 18px 16px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
+  .pt.barrier { background: #3d6ea8; color: #fff; }
+  .cell.barrier-cell { box-shadow: inset 0 0 0 3px rgba(61, 110, 168, .85); }
+  .hl-barrier { box-shadow: inset 0 0 0 3px #3d6ea8; background-color: rgba(61, 110, 168, .25) !important; }
   #ask p { margin: 0 0 4px; font-size: 15px; line-height: 1.6; word-break: keep-all; }
   /* 3장 지점 표시 (칸 왼쪽 위 작은 글자) */
   .pt {
@@ -663,7 +666,30 @@
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 26; margin: 0 auto; max-width: 480px;
     background: #f7f1e3; border: 1px solid #b9a984; border-bottom: none; border-radius: 12px 12px 0 0;
     box-shadow: 0 -6px 20px rgba(0, 0, 0, .25); padding: 14px 16px 18px;
+    max-height: 82vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
+  /* v0.8 [인물]·수련 (specs/growth.md 3장) */
+  #world .w-sheet .person { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 52px; margin-top: 6px; padding: 6px 10px;
+    border: 1px solid #d8cdb2; border-radius: 8px; background: #fbf6ea; color: #1d1a14; font: inherit; text-align: left; }
+  #world .w-sheet .person .face { font-size: 24px; }
+  #world .w-sheet .person .who { flex: 1; font-size: 15px; font-weight: 700; }
+  #world .w-sheet .person .who small { display: block; font-size: 12px; font-weight: 400; color: #6b5f48; }
+  #world .w-sheet .person .tr { font-size: 12px; font-weight: 700; color: #6b5f48; white-space: nowrap; }
+  #world .w-sheet .person .tr.done { color: #b0302a; }
+  #world .w-sheet .skill-line { font-size: 14px; margin: 6px 0 2px; }
+  #world .w-sheet .next { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; font-size: 14px; font-weight: 700; }
+  #world .w-sheet .next span { font-size: 12px; color: #b0302a; }
+  #world .w-sheet .opt { display: block; width: 100%; margin-top: 8px; padding: 9px 11px; border: 1.5px solid #b9a984; border-radius: 8px;
+    background: #fbf6ea; color: #1d1a14; font: inherit; text-align: left; }
+  #world .w-sheet .opt b { font-size: 16px; }
+  #world .w-sheet .opt .mark { display: inline-block; width: 1.2em; }
+  #world .w-sheet .opt .role { font-size: 12px; color: #6b5f48; margin-left: 4px; }
+  #world .w-sheet .opt .desc { display: block; font-size: 13px; line-height: 1.5; margin-top: 3px; word-break: keep-all; }
+  #world .w-sheet .opt.on { border-color: #b0302a; background: #fff; box-shadow: 0 0 0 2px rgba(176, 48, 42, .2); }
+  #world .w-sheet .opt.off { opacity: .45; }
+  #world .w-sheet .row button:disabled { opacity: .45; }
+  #world .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #b0302a; margin-left: 4px; vertical-align: middle; }
+  #world .node .seal .t-dot { position: absolute; right: -5px; top: -5px; width: 12px; height: 12px; border-radius: 50%; background: #b0302a; border: 2px solid #f7f1e3; }
   #world .w-sheet .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   #world .w-sheet h2 { margin: 0; font-size: 19px; font-family: "Nanum Myeongjo", "AppleMyungjo", serif; }
   #world .w-sheet .w-badge { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid #6b5f48; white-space: nowrap; }
@@ -741,6 +767,7 @@
       <button id="btn-attack">공격</button>
       <button id="btn-skill">스킬</button>
       <button id="btn-seal" hidden>봉인 복구</button>
+      <button id="btn-barrier" hidden>결계</button>
       <button id="btn-wait">대기</button>
       <button id="btn-cancel">취소</button>
     </div>
@@ -1188,7 +1215,10 @@ var Core = (function () {
       // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
       maxKi: ally || d.skill ? KI_MAX : null, ki: ally || d.skill ? KI_START : null,
       r: r, c: c, alive: true, acted: false,
-      from: null // 이동했지만 아직 행동 전일 때 이동 전 위치 (취소용)
+      from: null, // 이동했지만 아직 행동 전일 때 이동 전 위치 (취소용)
+      // v0.8 수련 (specs/growth.md). training: 고른 수련 id / moveCost: 이번 차례 이동 칸 수
+      // reMove: 행동 뒤 1칸 재이동을 아직 안 함 / slow: 추적에 맞아 다음 차례 이동력 −1
+      training: null, moveCost: 0, reMove: false, slow: false
     };
   }
 
@@ -1285,6 +1315,12 @@ var Core = (function () {
       };
     }
     state.loseReason = null;
+    state.barrier = null; // 진법 결계 { r, c, until, by } — 동시에 하나
+    if (opts && opts.training) {
+      livingUnits(state, 'ally').forEach(function (u) {
+        if (trainingDef(u.id, opts.training[u.id])) u.training = opts.training[u.id];
+      });
+    }
     if (opts && opts.merit !== undefined) {
       var rank = rankFor(opts.merit);
       state.rank = rank.name;
@@ -1318,6 +1354,18 @@ var Core = (function () {
   // ── 이동 (specs/battle.md 8장) ────────────────────────
   var DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
+  // 진법 결계 칸: 적은 들어가지 못한다 (아군은 지나간다)
+  function barrierAt(state, r, c) {
+    return !!state.barrier && state.barrier.r === r && state.barrier.c === c;
+  }
+  function barrierBlocks(state, unit, r, c) {
+    return unit.side === 'enemy' && barrierAt(state, r, c);
+  }
+  // 이번 차례 이동력: 추적에 맞았으면 −1 (최소 1)
+  function movOf(unit) {
+    return unit.slow ? Math.max(1, unit.mov - CHUJEOK_SLOW) : unit.mov;
+  }
+
   // unit 위치에서 상하좌우로 퍼져 나가며 칸별 이동 칸 수를 잰다.
   // 초가집·바위와 다른 유닛이 있는 칸은 통과도 정지도 못 한다. limit 을 넘는 칸은 버린다.
   // 결과: { 'r,c': 칸 수 }
@@ -1331,7 +1379,7 @@ var Core = (function () {
       if (d >= limit) continue;
       for (var i = 0; i < DIRS.length; i++) {
         var r = cur[0] + DIRS[i][0], c = cur[1] + DIRS[i][1], key = r + ',' + c;
-        if (costs[key] !== undefined || !isPassable(state, r, c)) continue;
+        if (costs[key] !== undefined || !isPassable(state, r, c) || barrierBlocks(state, unit, r, c)) continue;
         var other = unitAt(state, r, c);
         if (other && other !== unit) continue;
         costs[key] = d + 1;
@@ -1352,7 +1400,7 @@ var Core = (function () {
       var cur = queue.shift();
       for (var i = 0; i < DIRS.length; i++) {
         var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
-        if (prev[key] !== undefined || !isPassable(state, nr, nc)) continue;
+        if (prev[key] !== undefined || !isPassable(state, nr, nc) || barrierBlocks(state, unit, nr, nc)) continue;
         var other = unitAt(state, nr, nc);
         if (other && other !== unit) continue;
         prev[key] = cur[0] + ',' + cur[1];
@@ -1370,7 +1418,7 @@ var Core = (function () {
 
   // 이동할 수 있는 칸 (제자리 포함). 행 → 열 순서로 정렬한다.
   function moveTargets(state, unit) {
-    var costs = stepCosts(state, unit, unit.mov);
+    var costs = stepCosts(state, unit, movOf(unit));
     return Object.keys(costs).map(function (key) {
       var p = key.split(',');
       return { r: +p[0], c: +p[1], cost: costs[key] };
@@ -1385,18 +1433,28 @@ var Core = (function () {
   }
 
   // pos 를 주면 그 칸에 서 있다고 보고 잰다 (이동 전 미리 보기용). 없으면 지금 위치.
-  function attackTargets(state, unit, pos) {
-    var from = pos || unit;
+  function attackTargets(state, unit, pos, rng) {
+    var from = pos || unit, range = rng || unit.rng;
     return state.units.filter(function (t) {
       if (!t.alive || t.side === unit.side) return false;
       var d = distance(from, t);
-      return d >= 1 && d <= unit.rng;
+      return d >= 1 && d <= range;
     });
+  }
+
+  // 이번 차례 처음 자리에서 움직였나 (pos 를 주면 그 칸에 선다고 보고)
+  function movedAt(unit, pos) {
+    var start = unit.from || unit, where = pos || unit;
+    return where.r !== start.r || where.c !== start.c;
+  }
+  // 기술 사거리. 사수: 움직이지 않은 차례에는 +1
+  function skillRange(unit, pos) {
+    return unit.rng + (unit.training === 'sasu' && !movedAt(unit, pos) ? SASU_BONUS : 0);
   }
 
   // 정화수: 거리 2 안의 아군(자기 포함). 그 외 스킬: 기본공격과 같은 대상.
   function skillTargets(state, unit, pos) {
-    if (unit.skill !== HEAL_SKILL) return attackTargets(state, unit, pos);
+    if (unit.skill !== HEAL_SKILL) return attackTargets(state, unit, pos, skillRange(unit, pos));
     var from = pos || unit;
     return state.units.filter(function (t) {
       return t.alive && t.side === unit.side && distance(from, t) <= HEAL_RANGE;
@@ -1435,6 +1493,7 @@ var Core = (function () {
       v = Math.max(1, attacker.atk * 1.5 - target.def)
         * elementMultiplier(attacker.elem, target.elem)
         * weatherMultiplier(state.weather, attacker.elem);
+      if (gisupReady(attacker)) v *= GISUP_FACTOR;
     } else {
       v = Math.max(1, attacker.atk - target.def);
     }
@@ -1455,10 +1514,11 @@ var Core = (function () {
   function moveUnit(state, id, r, c) {
     var u = getUnit(state, id);
     if (!canCommand(state, u) || u.from) return false;
-    var ok = moveTargets(state, u).some(function (p) { return p.r === r && p.c === c; });
-    if (!ok) return false;
+    var cell = moveTargets(state, u).filter(function (p) { return p.r === r && p.c === c; })[0];
+    if (!cell) return false;
     u.from = { r: u.r, c: u.c };
     u.r = r; u.c = c;
+    u.moveCost = cell.cost;
     return true;
   }
 
@@ -1468,6 +1528,7 @@ var Core = (function () {
     if (!canCommand(state, u) || !u.from) return false;
     u.r = u.from.r; u.c = u.from.c;
     u.from = null;
+    u.moveCost = 0;
     return true;
   }
 
@@ -1485,14 +1546,15 @@ var Core = (function () {
 
   // 피해를 입히고 이벤트 목록에 남긴다. HP 는 0 밑으로 내려가지 않는다.
   function hit(state, attacker, target, useSkill, events) {
-    var amount = damage(state, attacker, target, useSkill);
-    target.hp = Math.max(0, target.hp - amount);
-    events.push({
-      type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount,
+    return dealDamage(state, attacker, target, damage(state, attacker, target, useSkill), {
       name: useSkill ? attacker.skill : attacker.attackName, // 화면에 띄울 기술 이름 (없으면 null)
       skill: !!useSkill, // 스킬인지 기본공격인지 (플레이 로그용)
       mult: useSkill ? elementMultiplier(attacker.elem, target.elem) : 1 // 상성 배율 (화면 연출용)
-    });
+    }, events);
+  }
+  function dealDamage(state, attacker, target, amount, info, events) {
+    target.hp = Math.max(0, target.hp - amount);
+    events.push({ type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount, name: info.name, skill: info.skill, mult: info.mult });
     if (target.hp === 0) knockOut(state, attacker, target, events);
     return events;
   }
@@ -1532,6 +1594,7 @@ var Core = (function () {
   // 적은 사라지고, 아군은 퇴각해 사라진다
   function knockOut(state, attacker, target, events) {
     target.alive = false;
+    target.slow = false;
     if (target.side === 'neutral') return guardianDown(state, attacker, target, events);
     if (target.respawn) target.respawnTurn = state.turn + (state.objective && state.objective.weakened ? 1 : target.respawn);
     var merit = meritFor(attacker, target);
@@ -1576,6 +1639,7 @@ var Core = (function () {
   function endEnemyPhase(state) {
     var events = [];
     if (state.result !== null) return events;
+    state.units.forEach(function (u) { u.slow = false; }); // 추적: 맞은 적의 다음 차례가 끝나면 풀린다
     if (state.turn >= state.maxTurn) {
       lose(state, 'time', events);
       return events;
@@ -1601,11 +1665,18 @@ var Core = (function () {
     return events;
   }
 
-  function useSkill(state, id, targetId) {
+  // opts.spreadId: 부법이 번질 적 (옆에 적이 둘 이상일 때 플레이어가 고른다. 하나면 그 적)
+  function useSkill(state, id, targetId, opts) {
     var u = getUnit(state, id);
     if (!canCommand(state, u) || !u.skill || u.ki < SKILL_COST) return null;
     var t = inList(skillTargets(state, u), targetId);
     if (!t) return null;
+    var spread = null;
+    if (u.training === 'bubeop') {
+      var near = spreadTargets(state, t);
+      spread = near.length === 1 ? near[0] : inList(near, opts && opts.spreadId);
+      if (near.length > 1 && !spread) return null; // 자동으로 고르지 않는다 (기획자 결정)
+    }
     u.ki -= SKILL_COST;
     var events;
     if (u.skill === HEAL_SKILL) {
@@ -1613,10 +1684,105 @@ var Core = (function () {
       t.hp += amount;
       events = [{ type: 'heal', attackerId: u.id, targetId: t.id, amount: amount, name: HEAL_SKILL }];
     } else {
+      var gisup = gisupReady(u);
       events = hit(state, u, t, true, []);
+      if (gisup) events.push({ type: 'training', unitId: u.id, kind: 'gisup' });
+      trainingAfterSkill(state, u, t, spread, events);
     }
     finishAction(u);
     return events;
+  }
+
+  // ── 수련 효과 (v0.8, specs/growth.md) ─────────────────
+  var SASU_BONUS = 1;       // 사수: 움직이지 않은 차례 파사궁 사거리 +1
+  var CHUJEOK_SLOW = 1;     // 추적: 다음 차례 이동력 −1 (최소 1, 중첩 없음)
+  var BUBEOP_RATE = 0.5;    // 부법: 옆 적에게 50%
+  var GISUP_MIN_MOVE = 3;   // 기습: 3칸 이상 이동한 뒤
+  var GISUP_FACTOR = 1.5;
+  var BARRIER_RANGE = 2;    // 진법: 거리 2 안의 빈 칸
+  var BARRIER_TURNS = 2;    // 진법: 2턴 (놓은 턴과 다음 턴의 적 차례)
+  var REMOVE_STEPS = 1;     // 집행·벽사: 1칸 재이동
+
+  function gisupReady(u) {
+    return u.training === 'gisup' && u.moveCost >= GISUP_MIN_MOVE;
+  }
+  // 부법이 번질 수 있는 적: 대상 옆(상하좌우) 칸의 적
+  function spreadTargets(state, target) {
+    return livingUnits(state, 'enemy').filter(function (e) { return e !== target && distance(e, target) === 1; });
+  }
+
+  function trainingAfterSkill(state, u, t, spread, events) {
+    var tr = u.training;
+    if (tr === 'chujeok' && t.alive && t.side === 'enemy') {
+      t.slow = true;
+      events.push({ type: 'training', unitId: u.id, kind: 'chujeok', targetId: t.id });
+    }
+    if (tr === 'gyoran' && t.alive && t.side === 'enemy' && state.result === null) {
+      var to = { r: t.r + Math.sign(t.r - u.r), c: t.c + Math.sign(t.c - u.c) };
+      if (isPassable(state, to.r, to.c) && !unitAt(state, to.r, to.c) && !barrierAt(state, to.r, to.c)
+          && !(t.ai === 'flee' && isEscape(state, to.r, to.c))) {
+        var from = { r: t.r, c: t.c };
+        t.r = to.r; t.c = to.c;
+        events.push({ type: 'push', attackerId: u.id, targetId: t.id, from: from, to: to, name: '교란' });
+        events.push({ type: 'training', unitId: u.id, kind: 'gyoran', targetId: t.id });
+      }
+    }
+    if (tr === 'bubeop' && spread && spread.alive && state.result === null) {
+      var amount = Math.max(1, Math.round(damage(state, u, spread, true) * BUBEOP_RATE + 1e-9));
+      events.push({ type: 'training', unitId: u.id, kind: 'bubeop', targetId: spread.id });
+      dealDamage(state, u, spread, amount, { name: '부법', skill: true, mult: 1 }, events);
+    }
+    if (tr === 'jiphaeng' && !t.alive && t.side === 'enemy' && state.result === null) {
+      u.reMove = true;
+      events.push({ type: 'training', unitId: u.id, kind: 'jiphaeng' });
+    }
+  }
+
+  // 집행·벽사: 행동 뒤 1칸만 다시 움직인다. 공격·임무 행동은 다시 못 한다
+  function reMoveTargets(state, u) {
+    if (!u || !u.alive || !u.reMove || state.phase !== 'ally' || state.result !== null) return [];
+    return Object.keys(stepCosts(state, u, REMOVE_STEPS)).map(function (key) {
+      var p = key.split(',');
+      return { r: +p[0], c: +p[1] };
+    });
+  }
+  // 제자리를 고르면 재이동을 쓰지 않고 끝낸다. 결과: 이벤트 배열 (조사 지점이면 조사 포함). 못 하면 null
+  function reMove(state, id, r, c) {
+    var u = getUnit(state, id);
+    var ok = reMoveTargets(state, u).some(function (p) { return p.r === r && p.c === c; });
+    if (!ok) return null;
+    u.reMove = false;
+    if (u.r === r && u.c === c) return [];
+    var events = [{ type: 'move', unitId: u.id, from: { r: u.r, c: u.c }, to: { r: r, c: c }, path: pathTo(state, u, r, c), reMove: true }];
+    u.r = r; u.c = c;
+    return events.concat(arrive(state, id));
+  }
+
+  // 진법 결계를 칠 수 있는 칸: 거리 2 안의 빈 칸. 지점(조사·봉인·원한) 칸과 탈출로에는 못 친다
+  function barrierCells(state, u) {
+    var cells = [];
+    for (var r = 0; r < state.rows; r++) {
+      for (var c = 0; c < state.cols; c++) {
+        var d = distance(u, { r: r, c: c });
+        if (d < 1 || d > BARRIER_RANGE || !isPassable(state, r, c) || unitAt(state, r, c)) continue;
+        if (pointAt(state, r, c) || isEscape(state, r, c)) continue;
+        cells.push({ r: r, c: c });
+      }
+    }
+    return cells;
+  }
+  function canBarrier(state, u) {
+    return canCommand(state, u) && u.training === 'jinbeop' && u.ki >= SKILL_COST && barrierCells(state, u).length > 0;
+  }
+  // 결계를 친다 (공격 대신, 기력 4). 새 결계를 놓으면 먼저 것은 사라진다
+  function placeBarrier(state, id, r, c) {
+    var u = getUnit(state, id);
+    if (!canBarrier(state, u)) return null;
+    if (!barrierCells(state, u).some(function (p) { return p.r === r && p.c === c; })) return null;
+    u.ki -= SKILL_COST;
+    state.barrier = { r: r, c: c, until: state.turn + BARRIER_TURNS, by: u.id };
+    finishAction(u);
+    return [{ type: 'barrier', unitId: u.id, r: r, c: c }, { type: 'training', unitId: u.id, kind: 'jinbeop' }];
   }
 
   function wait(state, id) {
@@ -1649,10 +1815,16 @@ var Core = (function () {
       events.push({ type: 'weather', weather: state.weather });
     }
     springHeal(state, 'ally', events);
+    if (state.barrier && state.turn >= state.barrier.until) {
+      events.push({ type: 'barrierEnd', r: state.barrier.r, c: state.barrier.c });
+      state.barrier = null;
+    }
     livingUnits(state, 'ally').forEach(function (u) {
       if (state.turn >= 2) u.ki = Math.min(u.maxKi, u.ki + 1);
       u.acted = false;
       u.from = null;
+      u.moveCost = 0;
+      u.reMove = false;
     });
     state.phase = 'ally';
     return events;
@@ -1667,7 +1839,7 @@ var Core = (function () {
   function endAllyPhase(state) {
     var events = [];
     if (state.phase !== 'ally' || state.result !== null) return events;
-    livingUnits(state, 'ally').forEach(function (u) { u.from = null; });
+    livingUnits(state, 'ally').forEach(function (u) { u.from = null; u.reMove = false; });
     state.phase = 'enemy';
     respawnWraiths(state, events);
     springHeal(state, 'enemy', events);
@@ -1684,7 +1856,7 @@ var Core = (function () {
   function approachMap(state, mover, target) {
     var dist = {}, queue = [];
     function free(r, c) {
-      if (!isPassable(state, r, c)) return false;
+      if (!isPassable(state, r, c) || barrierBlocks(state, mover, r, c)) return false;
       var o = unitAt(state, r, c);
       return !o || o === mover;
     }
@@ -1797,7 +1969,7 @@ var Core = (function () {
   function escapeMap(state, mover) {
     var dist = {}, queue = [];
     function free(r, c) {
-      if (!isPassable(state, r, c)) return false;
+      if (!isPassable(state, r, c) || barrierBlocks(state, mover, r, c)) return false;
       var o = unitAt(state, r, c);
       return !o || o === mover;
     }
@@ -1918,6 +2090,9 @@ var Core = (function () {
       state.result = 'win';
       state.phase = 'over';
       events.push({ type: 'result', result: 'win' });
+    } else if (u.training === 'byeoksa') {
+      u.reMove = true; // 벽사: 임무 행동 뒤 1칸 재이동
+      events.push({ type: 'training', unitId: u.id, kind: 'byeoksa' });
     }
     return events;
   }
@@ -1930,7 +2105,7 @@ var Core = (function () {
     seen[home.r + ',' + home.c] = true;
     while (queue.length) {
       var cur = queue.shift();
-      if (isPassable(state, cur[0], cur[1]) && !unitAt(state, cur[0], cur[1])) return { r: cur[0], c: cur[1] };
+      if (isPassable(state, cur[0], cur[1]) && !unitAt(state, cur[0], cur[1]) && !barrierAt(state, cur[0], cur[1])) return { r: cur[0], c: cur[1] };
       for (var i = 0; i < DIRS.length; i++) {
         var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
         if (seen[key] || !inBounds(state, nr, nc)) continue;
@@ -1962,7 +2137,7 @@ var Core = (function () {
       for (var k = 0; k < tries.length; k++) {
         if (!tries[k][0] && !tries[k][1]) continue;
         var to = { r: w.r + tries[k][0], c: w.c + tries[k][1] };
-        if (!isPassable(state, to.r, to.c) || unitAt(state, to.r, to.c)) continue;
+        if (!isPassable(state, to.r, to.c) || unitAt(state, to.r, to.c) || barrierAt(state, to.r, to.c)) continue;
         var from = { r: w.r, c: w.c };
         w.r = to.r; w.c = to.c;
         return [{ type: 'push', attackerId: g.id, targetId: w.id, from: from, to: to, name: ENEMY_TYPES[g.type].skillName || null }];
@@ -1975,7 +2150,7 @@ var Core = (function () {
   function goalMap(state, mover, goals) {
     var dist = {}, queue = [];
     function free(r, c) {
-      if (!isPassable(state, r, c)) return false;
+      if (!isPassable(state, r, c) || barrierBlocks(state, mover, r, c)) return false;
       var o = unitAt(state, r, c);
       return !o || o === mover;
     }
@@ -2111,8 +2286,11 @@ var Core = (function () {
       dalraeHealCount: 0, dalraeEscapeDistance: null, dalraeTrail: [], restartCount: restartCount || 0,
       moves: [], hits: [], heals: [], healFollowUps: [], names: names,
       // 3장 (specs/chapter3.md 10장)
-      investigations: [], sealRepairs: [], wongwiDefeated: 0, wongwiRespawns: 0, seonangDamageTaken: 0, objectiveChangedTurn: null
+      investigations: [], sealRepairs: [], wongwiDefeated: 0, wongwiRespawns: 0, seonangDamageTaken: 0, objectiveChangedTurn: null,
+      // v0.8 수련: 누가 무엇을 골랐나, 몇 번 발동했나 (v0.9 폐사찰에서 측정)
+      training: {}, trainingTriggers: {}, trainingEvents: []
     };
+    state.units.forEach(function (u) { if (u.training) log.training[u.id] = u.training; });
     trackDalrae(log, state);
     return log;
   }
@@ -2151,6 +2329,9 @@ var Core = (function () {
         log.wongwiRespawns++;
       } else if (e.type === 'spring') {
         bump(log.springHealing, e.targetId, e.amount);
+      } else if (e.type === 'training') {
+        bump(log.trainingTriggers, e.kind);
+        log.trainingEvents.push({ turn: state.turn, unit: e.unitId, kind: e.kind });
       } else if (e.type === 'defeat' || e.type === 'retreat') {
         var t = getUnit(state, e.targetId);
         if (t.respawn) log.wongwiDefeated++;
@@ -2383,12 +2564,12 @@ var Core = (function () {
   var CAMPAIGN = ['ch1', 'ch2', 'ch3']; // 장 순서
 
   function newProgress() {
-    return { v: 1, cleared: [], merit: 0 };
+    return { v: 1, cleared: [], merit: 0, training: {} };
   }
 
   // 장 결과를 반영한 새 진행 상태. 이긴 장만 공적이 누계에 더해진다 (같은 장은 한 번만).
   function applyResult(progress, stageId, result, merit) {
-    var p = { v: 1, cleared: progress.cleared.slice(), merit: progress.merit };
+    var p = { v: 1, cleared: progress.cleared.slice(), merit: progress.merit, training: copyTraining(progress.training) };
     if (result === 'win' && p.cleared.indexOf(stageId) === -1) {
       p.cleared.push(stageId);
       p.merit += merit;
@@ -2408,7 +2589,66 @@ var Core = (function () {
   function checkProgress(p) {
     if (!p || p.v !== 1 || !Array.isArray(p.cleared) || typeof p.merit !== 'number' || p.merit < 0) return null;
     if (!p.cleared.every(function (id) { return CAMPAIGN.indexOf(id) !== -1; })) return null;
-    return { v: 1, cleared: p.cleared.slice(), merit: p.merit };
+    // 수련이 없는 이전 저장(v0.7 까지)은 빈 수련으로. 잘못된 수련 기록은 버린다 (진행은 살린다)
+    var out = { v: 1, cleared: p.cleared.slice(), merit: p.merit, training: {} };
+    var t = copyTraining(p.training);
+    var ok = Object.keys(t).every(function (id) { return trainingDef(id, t[id]); })
+      && Object.keys(t).length <= trainingEarned(out);
+    if (ok) out.training = t;
+    return out;
+  }
+
+  // ── 수련 (v0.8, specs/growth.md) ──────────────────────
+  // 인물마다 두 방향 중 하나만. 벽사청 소속이 아니어도 지금 일행이면 수련한다 (각자 자기 기술을 갈고닦는다)
+  var TRAINING_ORDER = ['yoon', 'hangyeol', 'soun', 'yeoul'];
+  var TRAININGS = {
+    yoon: [
+      { id: 'jiphaeng', name: '집행', role: '적을 베며 앞으로 나아가는 선봉', desc: '벽사검으로 적을 쓰러뜨리면 1칸 다시 움직인다.' },
+      { id: 'byeoksa', name: '벽사', role: '봉인을 되살리는 임무 수행자', desc: '봉인 복구 같은 임무 행동 뒤 1칸 다시 움직인다.' }
+    ],
+    hangyeol: [
+      { id: 'sasu', name: '사수', role: '자리를 지키고 멀리 쏘는 저격수', desc: '움직이지 않은 차례에는 파사궁 사거리가 2에서 3이 된다.' },
+      { id: 'chujeok', name: '추적', role: '달아나는 적을 묶는 추격자', desc: '파사궁에 맞은 적은 다음 차례 이동력 −1 (최소 1).' }
+    ],
+    soun: [
+      { id: 'bubeop', name: '부법', role: '불길을 번지게 하는 술사', desc: '화염부가 대상 옆의 적 1명에게 절반 피해로 번진다.' },
+      { id: 'jinbeop', name: '진법', role: '길을 막고 판을 짜는 진법가', desc: '공격 대신 빈 칸에 결계를 친다. 2턴 동안 적이 들어오지 못한다. (기력 4)' }
+    ],
+    yeoul: [
+      { id: 'gisup', name: '기습', role: '멀리서 뛰어들어 한 명을 끝내는 자객', desc: '3칸 이상 달려와 축지격을 쓰면 피해 ×1.5.' },
+      { id: 'gyoran', name: '교란', role: '적을 밀어내 판을 흔드는 교란꾼', desc: '축지격에 맞은 적을 1칸 밀어낸다.' }
+    ]
+  };
+  var TRAINING_POINTS = { ch3: 2 }; // 3장을 깨면 수련점 2 — 4명 중 2명만 첫 수련
+
+  function trainingDef(unitId, trainingId) {
+    return (TRAININGS[unitId] || []).filter(function (t) { return t.id === trainingId; })[0] || null;
+  }
+  function copyTraining(t) {
+    var out = {};
+    if (t && typeof t === 'object') Object.keys(t).forEach(function (k) { out[k] = t[k]; });
+    return out;
+  }
+  // 깬 장에서 계산한다 (따로 저장하지 않음)
+  function trainingEarned(progress) {
+    return progress.cleared.reduce(function (n, id) { return n + (TRAINING_POINTS[id] || 0); }, 0);
+  }
+  function trainingPoints(progress) {
+    return trainingEarned(progress) - Object.keys(progress.training || {}).length;
+  }
+  // 수련한다: 새 진행 상태. 수련점이 없거나, 이미 수련한 인물이거나, 없는 방향이면 null
+  function train(progress, unitId, trainingId) {
+    if (!trainingDef(unitId, trainingId) || trainingPoints(progress) < 1) return null;
+    if (progress.training && progress.training[unitId]) return null; // 한 사람에 하나만
+    var p = applyResult(progress, null, null, 0);
+    p.training[unitId] = trainingId;
+    return p;
+  }
+  // 개발자용 (?dev=1): 수련을 모두 되돌린다. 플레이어에게는 되돌리기를 주지 않는다
+  function resetTraining(progress) {
+    var p = applyResult(progress, null, null, 0);
+    p.training = {};
+    return p;
   }
 
   // ── 월드맵: 청령현 (v0.6, specs/worldmap.md) ─────────
@@ -2728,6 +2968,22 @@ var Core = (function () {
     attack: attack,
     useSkill: useSkill,
     wait: wait,
+    skillRange: skillRange,
+    spreadTargets: spreadTargets,
+    reMoveTargets: reMoveTargets,
+    reMove: reMove,
+    barrierCells: barrierCells,
+    canBarrier: canBarrier,
+    placeBarrier: placeBarrier,
+    barrierAt: barrierAt,
+    TRAINING_ORDER: TRAINING_ORDER,
+    TRAININGS: TRAININGS,
+    TRAINING_POINTS: TRAINING_POINTS,
+    trainingDef: trainingDef,
+    trainingEarned: trainingEarned,
+    trainingPoints: trainingPoints,
+    train: train,
+    resetTraining: resetTraining,
     endEnemyPhase: endEnemyPhase,
     startAllyPhase: startAllyPhase,
     allActed: allActed,
@@ -3090,6 +3346,16 @@ var Core = (function () {
       var cls = ui.kind === 'skill' && u.skill === Core.HEAL_SKILL ? 'hl-heal' : 'hl-attack';
       currentTargets().forEach(function (t) { marks[t.r + ',' + t.c] = cls; });
     }
+    // v0.8 수련: 결계 칠 칸 / 부법이 번질 적 / 재이동 칸
+    if (ui.step === 'barrier') {
+      Core.barrierCells(state, Core.getUnit(state, ui.id)).forEach(function (p) { marks[p.r + ',' + p.c] = 'hl-barrier'; });
+    }
+    if (ui.step === 'spread') {
+      Core.spreadTargets(state, Core.getUnit(state, ui.spreadFrom)).forEach(function (t) { marks[t.r + ',' + t.c] = 'hl-attack'; });
+    }
+    if (ui.step === 'remove') {
+      Core.reMoveTargets(state, Core.getUnit(state, ui.id)).forEach(function (p) { marks[p.r + ',' + p.c] = 'hl-move'; });
+    }
     return marks;
   }
 
@@ -3145,6 +3411,12 @@ var Core = (function () {
     });
     if (ui.orb) cellAt(ui.orb.r, ui.orb.c).appendChild(el('span', 'orb', '🔮'));
     renderPoints();
+    cells.forEach(function (cell) { cell.classList.remove('barrier-cell'); });
+    if (state.barrier) {
+      var bc = cellAt(state.barrier.r, state.barrier.c);
+      bc.classList.add('barrier-cell');
+      bc.appendChild(el('span', 'pt barrier', '결계'));
+    }
     state.units.forEach(function (u) {
       if (!u.alive) return;
       var tile = unitTile(u);
@@ -3231,6 +3503,18 @@ var Core = (function () {
       box.appendChild(t);
       return;
     }
+    if (ui.infoCell && Core.barrierAt(state, ui.infoCell.r, ui.infoCell.c)) {
+      box.hidden = false;
+      box.innerHTML = '';
+      box.appendChild(el('div', 'face', '🧿'));
+      var bt = el('div');
+      bt.appendChild(el('div', 'name', '결계 · 소운의 진법'));
+      var left = state.barrier.until - state.turn;
+      bt.appendChild(el('div', 'stats', '적이 이 칸에 들어오지 못한다. 아군은 지나간다.\n' + (left > 1 ? '다음 턴 적 차례까지' : '이번 턴 적 차례까지') + ' 남는다.'));
+      bt.lastChild.style.whiteSpace = 'pre-line';
+      box.appendChild(bt);
+      return;
+    }
     var cellInfo = ui.infoCell && TERRAIN_INFO[Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c)];
     if (cellInfo) return renderTerrainInfo(box, Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c));
     var u = ui.infoId && Core.getUnit(state, ui.infoId);
@@ -3249,6 +3533,9 @@ var Core = (function () {
       'HP ' + u.hp + '/' + u.maxHp +
       ' · 기력 ' + (u.ki === null ? '—' : u.ki + '/' + u.maxKi) +
       ' · 속성 ' + u.elem));
+    var tr = u.training && Core.trainingDef(u.id, u.training);
+    if (tr) text.appendChild(el('div', 'sub', '수련 · ' + tr.name + ' — ' + tr.desc));
+    if (u.slow) text.appendChild(el('div', 'sub', '추적에 걸림 — 다음 차례 이동 −1'));
     var under = Core.terrainAt(state, u.r, u.c);
     if (under !== 'D' && TERRAIN_INFO[under]) {
       text.appendChild(el('div', 'sub', TERRAIN_MARK[under] + ' ' + TERRAIN_INFO[under].name + ' 위 · ' + TERRAIN_INFO[under].text));
@@ -3350,6 +3637,15 @@ var Core = (function () {
       note.appendChild(document.createTextNode(' — 대상을 고르세요'));
       return;
     }
+    var hint = { barrier: ['결계', ' — 파란 칸 중 한 곳을 고르세요'], spread: ['부법', ' — 불길이 번질 적을 고르세요'],
+      remove: [ui.step === 'remove' && trainingName(ui.id), ' — 1칸 더 움직일 수 있다 (제자리를 누르면 끝)'] }[ui.step];
+    if (hint && canEnd) {
+      note.className = 'aim';
+      note.innerHTML = '';
+      note.appendChild(el('b', '', hint[0]));
+      note.appendChild(document.createTextNode(hint[1]));
+      return;
+    }
     note.textContent = state.phase === 'enemy' ? enemyTurnLabel() : (canEnd ? '아군 차례 — 유닛을 눌러 움직이세요' : '');
   }
 
@@ -3365,6 +3661,14 @@ var Core = (function () {
     skill.appendChild(document.createTextNode(u.skill || '스킬'));
     skill.appendChild(el('small', '', u.skill ? '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')' : '없음')); // 관군은 스킬 없음
     document.getElementById('btn-seal').hidden = !Core.repairablePoint(state, u); // 3장 봉인 칸에 섰을 때만
+    var barrier = document.getElementById('btn-barrier');
+    barrier.hidden = u.training !== 'jinbeop'; // 소운 진법만
+    barrier.disabled = !Core.canBarrier(state, u);
+  }
+  function trainingName(id) {
+    var u = Core.getUnit(state, id);
+    var tr = u && u.training && Core.trainingDef(u.id, u.training);
+    return tr ? tr.name : '';
   }
 
   function marksHas(marks, u) {
@@ -3410,6 +3714,35 @@ var Core = (function () {
         clearSelection(); // 빈 칸: 선택 해제. 다른 유닛: 정보만 보고 선택은 유지
         ui.infoId = null;
       }
+    } else if (ui.step === 'barrier') {
+      var ok = Core.barrierCells(state, Core.getUnit(state, ui.id)).some(function (p) { return p.r === r && p.c === c; });
+      if (!ok) { ui.step = 'menu'; render(); return; }
+      var bFrom = startPos(ui.id), bActor = ui.id;
+      var bEvents = Core.placeBarrier(state, ui.id, r, c);
+      logAllyAction(bActor, bFrom, bEvents);
+      afterAction(bEvents);
+      return;
+    } else if (ui.step === 'spread') {
+      var spreadTo = u && Core.spreadTargets(state, Core.getUnit(state, ui.spreadFrom)).indexOf(u) !== -1 ? u : null;
+      if (!spreadTo) { ui.step = 'target'; render(); return; } // 다른 곳을 누르면 대상 고르기로 돌아간다
+      strike(Core.getUnit(state, ui.spreadFrom), spreadTo.id);
+      return;
+    } else if (ui.step === 'remove') {
+      var mid = ui.id, mu = Core.getUnit(state, mid);
+      var path = Core.pathTo(state, mu, r, c);
+      var rEvents = Core.reMove(state, mid, r, c);
+      if (!rEvents) return; // 1칸 밖은 무시 (제자리를 누르면 끝)
+      Core.logEvents(playLog, state, rEvents.filter(function (e) { return e.type === 'move'; }));
+      ui.busy = true;
+      slide(mid, rEvents.length ? path : null, function () {
+        ui.busy = false;
+        clearSelection();
+        render();
+        var found = rEvents.filter(function (e) { return e.type !== 'move'; });
+        if (found.length) return arrival(mid, found, continueTurn);
+        continueTurn();
+      });
+      return;
     } else if (ui.step === 'target') {
       var target = u && currentTargets().indexOf(u) !== -1 ? u : null;
       if (!target) {
@@ -3434,25 +3767,42 @@ var Core = (function () {
     render();
   }
 
-  function strike(target) {
+  function strike(target, spreadId) {
     var from = startPos(ui.id), actor = ui.id;
-    var events = ui.kind === 'skill' ? Core.useSkill(state, ui.id, target.id) : Core.attack(state, ui.id, target.id);
+    // 부법: 옆 적이 둘 이상이면 번질 적을 플레이어가 고른다 (자동으로 고르지 않는다)
+    if (ui.kind === 'skill' && !spreadId && Core.getUnit(state, actor).training === 'bubeop'
+        && Core.spreadTargets(state, target).length > 1) {
+      ui.step = 'spread';
+      ui.spreadFrom = target.id;
+      render();
+      return;
+    }
+    var events = ui.kind === 'skill' ? Core.useSkill(state, ui.id, target.id, { spreadId: spreadId }) : Core.attack(state, ui.id, target.id);
     logAllyAction(actor, from, events);
     afterAction(events);
   }
-  function ask(text, onYes, onNo) {
+  // labels: { yes, no, yesFirst } — 없으면 서낭신 확인창 그대로 ([그만둔다] 가 위)
+  function ask(text, onYes, onNo, labels) {
+    labels = labels || {};
     var box = document.getElementById('ask');
     document.getElementById('ask-text').textContent = text;
     document.getElementById('ask-text').style.whiteSpace = 'pre-line';
+    var yes = document.getElementById('ask-yes'), no = document.getElementById('ask-no');
+    yes.textContent = labels.yes || '그래도 공격한다';
+    no.textContent = labels.no || '그만둔다';
+    yes.className = 'big-btn' + (labels.yesFirst ? '' : ' plain');
+    no.className = 'big-btn' + (labels.yesFirst ? ' plain' : '');
+    if (labels.yesFirst) yes.parentNode.insertBefore(yes, no);
+    else yes.parentNode.insertBefore(no, yes);
     box.hidden = false;
     document.getElementById('ask-yes').onclick = function () { box.hidden = true; onYes(); };
     document.getElementById('ask-no').onclick = function () { box.hidden = true; onNo(); };
   }
 
   // 3장: 이동을 마친 칸이 조사 지점이면 자동 조사 → 짧은 글, 2곳째면 진실 대사 → 임무 갱신
-  function arrival(id) {
-    var events = Core.arrive(state, id);
-    if (!events.length) return;
+  function arrival(id, pre, after) {
+    var events = pre || Core.arrive(state, id);
+    if (!events.length) return after && after();
     Core.logEvents(playLog, state, events);
     var lines = [];
     events.forEach(function (e) {
@@ -3475,6 +3825,7 @@ var Core = (function () {
         var goal = Core.STAGES[chapterId].objective;
         toast([{ b: '임무 갱신' }, { html: goal.before }, { text: goal.after }], 'mission', 3200, 0);
       }
+      if (after) after();
     });
   }
   // 진실 공개 중 서낭신이 원귀 하나를 밀어내는 짧은 장면 (가까운 원귀가 없으면 기술 이름만)
@@ -3496,6 +3847,7 @@ var Core = (function () {
     showFloats(events || []);
     skillEffects(events || []);
     flashHits(events || []);
+    trainingLabels(events || []);
     if (state.result !== null) return finish();
     // 3장: 서낭신을 처음 친 뒤 한 번 (게임이 막지는 않는다)
     var struck = (events || []).some(function (e) { return e.type === 'damage' && Core.getUnit(state, e.targetId).side === 'neutral'; });
@@ -3506,6 +3858,16 @@ var Core = (function () {
     continueTurn();
   }
   function continueTurn() {
+    // 집행·벽사: 재이동이 남았으면 먼저 1칸 고르기 (턴 종료 버튼을 누르면 쓰지 않고 넘어간다)
+    var mover = Core.livingUnits(state, 'ally').filter(function (u) { return u.reMove; })[0];
+    if (mover && state.phase === 'ally' && state.result === null) {
+      ui.step = 'remove';
+      ui.id = mover.id;
+      ui.infoId = mover.id;
+      ui.infoCell = null;
+      render();
+      return;
+    }
     if (Core.allActed(state)) {
       ui.busy = true;
       render();
@@ -3514,6 +3876,15 @@ var Core = (function () {
     }
     autoSelect();
   }
+  // 수련이 발동하면 그 인물 칸 위에 수련 이름 (예: "집행!") — 기술 이름 표시 뒤에 조금 늦게
+  function trainingLabels(events) {
+    events.forEach(function (e) {
+      if (e.type !== 'training') return;
+      var u = Core.getUnit(state, e.unitId), tr = Core.trainingDef(u.id, e.kind);
+      setTimeout(function () { if (u.alive) skillLabel(tr.name + '!', u.r, u.c, 'plain'); }, 450);
+    });
+  }
+
   // 행동이 끝나면 다음 아군을 자동으로 고른다 (기획자 피드백 2026-09-26). 다른 유닛을 누르면 그쪽으로 바뀐다
   function autoSelect() {
     if (state.phase !== 'ally' || state.result !== null || ui.busy) return;
@@ -3956,7 +4327,9 @@ var Core = (function () {
       b.dataset.id = r.id;
       b.style.left = r.x + '%';
       b.style.top = (r.y / 130 * 100) + '%';
-      b.appendChild(el('span', 'seal', r.mark));
+      var seal = el('span', 'seal', r.mark);
+      if (r.id === 'hq' && Core.trainingPoints(progress) > 0) seal.appendChild(el('span', 't-dot')); // 수련점이 남았다
+      b.appendChild(seal);
       b.appendChild(el('span', 'label', r.name));
       // 안전한 곳은 조용하게: 평온·본진은 상태 글자 없음 (specs/worldmap-polish.md 3장)
       if (st !== 'HQ' && st !== 'PEACEFUL') b.appendChild(el('span', 'state', Core.REGION_STATUS[st]));
@@ -3999,8 +4372,14 @@ var Core = (function () {
       stats.appendChild(el('b', '', Core.rankFor(progress.merit).name));
       stats.appendChild(document.createTextNode(' · 누적 공적 '));
       stats.appendChild(el('b', '', String(progress.merit)));
+      if (Core.trainingPoints(progress) > 0) {
+        stats.appendChild(document.createTextNode(' · 수련점 '));
+        stats.appendChild(el('b', '', String(Core.trainingPoints(progress))));
+      }
       sheet.appendChild(stats);
       sheetButton(row, '📖 벽사록', '', openLore);
+      var pb = sheetButton(row, '인물', '', showPeople);
+      if (Core.trainingPoints(progress) > 0) pb.appendChild(el('span', 'dot'));
       sheetButton(row, '현재 임무', '', showMission);
     } else if (r.chapter && worldOverride[id]) {
       // ?dev=1 임시 상태에서는 출동하지 않는다 — 진행 저장이 장 순서와 어긋나지 않게
@@ -4035,6 +4414,96 @@ var Core = (function () {
     var sheetTop = document.getElementById('world-sheet').getBoundingClientRect().top;
     var over = node.getBoundingClientRect().bottom + 8 - sheetTop;
     if (over > 0) map.style.transform = 'translateY(' + (-over) + 'px)';
+  }
+
+  // ── 본진 [인물]: 지금 일행의 인물. 벽사청 소속이 아니어도 각자 자기 기술을 갈고닦는다 (specs/growth.md 3장) ──
+  function sheetHead(sheet, title) {
+    sheet.innerHTML = '';
+    var head = el('div', 'head');
+    head.appendChild(el('h2', '', title));
+    var x = el('button', 'x', '✕');
+    x.type = 'button';
+    x.setAttribute('aria-label', '닫기');
+    x.addEventListener('click', closeRegion);
+    head.appendChild(x);
+    sheet.appendChild(head);
+  }
+  function pointsNote() {
+    var left = Core.trainingPoints(progress);
+    if (Core.trainingEarned(progress) === 0) return '3장을 마치면 첫 수련을 할 수 있다.';
+    return left > 0 ? '수련점 ' + left + ' — 한 사람에 한 방향만 고를 수 있다.' : '수련점을 모두 썼다.';
+  }
+  function showPeople() {
+    var sheet = document.getElementById('world-sheet');
+    sheetHead(sheet, '인물');
+    sheet.appendChild(el('p', '', '지금 함께하는 일행. 각자 자기 기술을 갈고닦는다.'));
+    sheet.appendChild(el('div', 'note', pointsNote()));
+    Core.TRAINING_ORDER.forEach(function (id) {
+      var d = Core.ALLY_DEFS[id], tr = progress.training[id] && Core.trainingDef(id, progress.training[id]);
+      var b = el('button', 'person');
+      b.type = 'button';
+      b.dataset.id = id;
+      b.appendChild(el('span', 'face', d.emoji));
+      var who = el('span', 'who', d.name);
+      who.appendChild(el('small', '', d.faction + ' · ' + d.title));
+      b.appendChild(who);
+      b.appendChild(el('span', 'tr' + (tr ? ' done' : ''), tr ? '수련 · ' + tr.name : '수련 전'));
+      b.addEventListener('click', function () { showPerson(id); });
+      sheet.appendChild(b);
+    });
+    var row = el('div', 'row');
+    sheetButton(row, '← 본진', '', function () { openRegion('hq'); });
+    sheet.appendChild(row);
+    sheet.hidden = false;
+  }
+  function showPerson(id, picked) {
+    var d = Core.ALLY_DEFS[id], done = progress.training[id];
+    var left = Core.trainingPoints(progress);
+    var sheet = document.getElementById('world-sheet');
+    sheetHead(sheet, d.emoji + ' ' + d.name);
+    sheet.appendChild(el('div', 'note', d.faction + ' · ' + d.title));
+    sheet.appendChild(el('div', 'skill-line', '기술  ' + d.skill + ' (' + d.elem + ')'));
+    var next = el('div', 'next', done ? '수련' : '다음 수련');
+    if (!done && left > 0) next.appendChild(el('span', '', '수련점 ' + left));
+    sheet.appendChild(next);
+    Core.TRAININGS[id].forEach(function (t) {
+      var on = done ? done === t.id : picked === t.id;
+      var b = el('button', 'opt' + (on ? ' on' : '') + (done && !on ? ' off' : ''));
+      b.type = 'button';
+      b.dataset.id = t.id;
+      b.appendChild(el('span', 'mark', on ? '◉' : '◯'));
+      b.appendChild(el('b', '', t.name));
+      b.appendChild(el('span', 'role', t.role));
+      b.appendChild(el('span', 'desc', t.desc));
+      b.disabled = !!done || left < 1;
+      b.addEventListener('click', function () { showPerson(id, t.id); });
+      sheet.appendChild(b);
+    });
+    if (done) sheet.appendChild(el('div', 'note', '수련을 마쳤다.'));
+    else if (left < 1) sheet.appendChild(el('div', 'note', pointsNote()));
+    var row = el('div', 'row');
+    sheetButton(row, '← 인물', '', showPeople);
+    if (!done) {
+      var go = sheetButton(row, '수련한다', 'go', function () {
+        var t = Core.trainingDef(id, picked);
+        ask(d.name + ' — 「' + t.name + '」' + (hasFinal(t.name) ? '을' : '를') + ' 수련하시겠습니까?\n한 번 선택한 수련은 현재 버전에서는 되돌릴 수 없습니다.',
+          function () {
+            var p = Core.train(progress, id, picked);
+            if (!p) return showPerson(id);
+            progress = p;
+            saveProgress();
+            showPerson(id);
+            renderWorld();
+          }, function () {}, { yes: '수련한다', no: '취소', yesFirst: true });
+      });
+      go.disabled = !picked || left < 1;
+    }
+    sheet.appendChild(row);
+    sheet.hidden = false;
+  }
+  function hasFinal(word) {
+    var code = word.charCodeAt(word.length - 1) - 0xAC00;
+    return code >= 0 && code % 28 !== 0;
   }
 
   // 본진 [현재 임무] → 임무 카드, [지도에서 보기] 로 그 지역
@@ -4105,6 +4574,11 @@ var Core = (function () {
       });
     });
     sheetButton(box, '되돌리기', '', function (ev) { ev.stopPropagation(); worldOverride = {}; renderWorld(); });
+    // v0.8 수련 검증용 (플레이어에게는 되돌리기를 주지 않는다)
+    sheetButton(box, '수련 초기화', '', function (ev) { ev.stopPropagation(); progress = Core.resetTraining(progress); saveProgress(); closeRegion(); });
+    if (progress.cleared.indexOf('ch3') !== -1) {
+      sheetButton(box, '3장 수련 시험', '', function (ev) { ev.stopPropagation(); startChapter('ch3'); });
+    }
   }
 
   // 카드 바깥(지도 빈 곳·위쪽 글자)을 누르면 카드를 닫는다. 노드·버튼·카드 자신은 제외
@@ -4214,7 +4688,7 @@ var Core = (function () {
     document.getElementById('result').hidden = true;
     document.getElementById('title').hidden = true;
     document.getElementById('world').hidden = true;
-    state = Core.newBattle(Core.STAGES[id], { merit: progress.merit });
+    state = Core.newBattle(Core.STAGES[id], { merit: progress.merit, training: progress.training });
     playLog = Core.newPlayLog(state, id, playStore.restarts[id] || 0);
     ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, seonangWarned: false, askedSeonang: false };
     buildBoard();
@@ -4277,6 +4751,7 @@ var Core = (function () {
     var ch = CHAPTERS[chapterId];
     var win = state.result === 'win';
     var before = Core.rankFor(progress.merit).name;
+    var pointsBefore = Core.trainingEarned(progress);
     if (win) {
       discover(['clear:' + chapterId]); // 누계 저장 전에: 깬 장은 이미 본 것으로 치기 때문
       progress = Core.applyResult(progress, chapterId, 'win', state.merit);
@@ -4291,6 +4766,8 @@ var Core = (function () {
     if (win) {
       var after = Core.rankFor(progress.merit).name;
       sub = '공적 누계 ' + progress.merit + ' · 품계 ' + after + (after !== before ? ' (승진!)' : '');
+      var gained = Core.trainingEarned(progress) - pointsBefore;
+      if (gained > 0) sub += '\n수련점 +' + gained + ' — 본진에서 인물을 수련할 수 있다';
     }
     var subEl = document.getElementById('result-sub');
     subEl.textContent = sub;
@@ -4376,6 +4853,12 @@ var Core = (function () {
     if (!events) return;
     logAllyAction(actor, from, events);
     afterAction(events);
+  });
+  document.getElementById('btn-barrier').addEventListener('click', function () {
+    if (ui.step !== 'menu') return;
+    ui.step = 'barrier';
+    ui.kind = 'barrier';
+    render();
   });
   document.getElementById('btn-attack').addEventListener('click', function () {
     if (ui.step !== 'menu') return;

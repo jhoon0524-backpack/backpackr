@@ -6,13 +6,13 @@ const Core = loadCore();
 
 test('처음: 깬 장 없음, 누계 0, 다음은 1장', () => {
   const p = Core.newProgress();
-  assert.deepEqual(p, { v: 1, cleared: [], merit: 0 });
+  assert.deepEqual(p, { v: 1, cleared: [], merit: 0, training: {} });
   assert.equal(Core.nextStage(p), 'ch1');
 });
 
 test('이기면 누계에 더하고 다음 장으로', () => {
   const p = Core.applyResult(Core.newProgress(), 'ch1', 'win', 5);
-  assert.deepEqual(p, { v: 1, cleared: ['ch1'], merit: 5 });
+  assert.deepEqual(p, { v: 1, cleared: ['ch1'], merit: 5, training: {} });
   assert.equal(Core.nextStage(p), 'ch2');
   assert.equal(Core.rankFor(p.merit).name, '정9품');
 });
@@ -45,7 +45,7 @@ test('원본 진행 상태는 바뀌지 않는다', () => {
 });
 
 test('저장 값 검사: 망가진 값은 버린다', () => {
-  assert.deepEqual(Core.checkProgress({ v: 1, cleared: ['ch1'], merit: 4 }), { v: 1, cleared: ['ch1'], merit: 4 });
+  assert.deepEqual(Core.checkProgress({ v: 1, cleared: ['ch1'], merit: 4 }), { v: 1, cleared: ['ch1'], merit: 4, training: {} });
   for (const bad of [null, 'x', {}, { v: 2, cleared: [], merit: 0 }, { v: 1, cleared: ['ch9'], merit: 0 }, { v: 1, cleared: [], merit: -1 }]) {
     assert.equal(Core.checkProgress(bad), null, JSON.stringify(bad));
   }
@@ -59,19 +59,19 @@ test('장 순서의 모든 장이 게임 안에 있다', () => {
 test('이전 판(사람 공적이 있던 때)의 누계는 다시 계산하지 않고 그대로 읽는다', () => {
   const old = { v: 1, cleared: ['ch1', 'ch2'], merit: 13 }; // 1장 8 + 2장 5(무녀 2 포함)
   const p = Core.checkProgress(JSON.parse(JSON.stringify(old)));
-  assert.deepEqual(p, old);
+  assert.deepEqual(p, { ...old, training: {} }, 'v0.8: 수련 기록이 없는 저장은 빈 수련으로 읽는다');
   assert.equal(Core.rankFor(p.merit).name, '종8품');
   assert.equal(Core.nextStage(p), 'ch3', '2장까지 깬 이전 저장은 3장으로 이어진다');
 });
 
 test('깬 장을 다시 이겨도 누계·진행은 줄지도 늘지도 않는다', () => {
-  const p = { v: 1, cleared: ['ch1', 'ch2'], merit: 13 };
+  const p = { v: 1, cleared: ['ch1', 'ch2'], merit: 13, training: {} };
   assert.deepEqual(Core.applyResult(p, 'ch2', 'win', 0), p);
   assert.deepEqual(Core.applyResult(p, 'ch1', 'lose', 0), p);
 });
 
 test('새 저장: 빈 진행에서 1장부터', () => {
   const p = Core.newProgress();
-  assert.deepEqual(p, { v: 1, cleared: [], merit: 0 });
+  assert.deepEqual(p, { v: 1, cleared: [], merit: 0, training: {} });
   assert.equal(Core.nextStage(p), 'ch1');
 });
