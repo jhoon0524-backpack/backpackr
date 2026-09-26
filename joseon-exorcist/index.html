@@ -245,7 +245,7 @@
   #phase-note.aim b { color: #f5c542; font-size: 17px; }
   #btn-skill { font-size: 16px; font-weight: 800; letter-spacing: .04em; }
   #btn-skill:not(:disabled) { color: #f5c542; }
-  .skill-label small { font-size: 10px; font-weight: 600; margin-left: 3px; opacity: .85; }
+  .skill-label small { font-size: 10px; font-weight: 600; margin-left: 1px; opacity: .85; }
   .ghost {
     position: absolute;
     z-index: 4;
@@ -537,7 +537,7 @@
     font: inherit; font-size: 15px; text-align: left;
   }
   #lore .entry.locked { color: #9a8f78; }
-  #lore .entry small { color: #6b5f48; font-size: 12px; margin-left: 4px; }
+  #lore .entry small { color: #6b5f48; font-size: 12px; margin-left: 1px; }
   #lore .grade { font-size: 11px; color: #6b5f48; white-space: nowrap; }
   #lore .empty { color: #6b5f48; font-size: 13px; padding: 16px 4px; }
   #lore .detail h3 { margin: 6px 0 2px; font-size: 20px; }
@@ -567,6 +567,7 @@
     color: #d9443a; font-size: 26px; font-weight: 800; letter-spacing: .2em;
     transform: rotate(-3deg); box-shadow: 0 0 18px rgba(192, 57, 43, .35);
   }
+  #prologue .seal small { font-size: 15px; letter-spacing: .05em; margin-left: 4px; }
   #prologue .big-btn { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
   #prologue .big-btn.on { opacity: 1; pointer-events: auto; }
 
@@ -775,7 +776,7 @@
       <p>도성 곳곳에서<br>설명할 수 없는 괴변이 이어졌다.</p>
       <p>조정은 귀신의 존재를 인정하지 않았다.</p>
       <p>대신 기록에 남지 않을<br>관청 하나를 만들었다.</p>
-      <p class="seal">辟邪廳</p>
+      <p class="seal">벽사청<small>(辟邪廳)</small></p>
       <p>사특한 것을 막는 곳.</p>
       <p>당신은 벽사청 종사관<br><b>윤무겸</b>이다.</p>
     </div>
@@ -856,7 +857,7 @@
     <div class="paper">
       <header>
         <div>
-          <h2 id="lore-title">辟邪錄 벽사록</h2>
+          <h2 id="lore-title">벽사록(辟邪錄)</h2>
           <div class="count" id="lore-count"></div>
         </div>
         <button class="close" id="lore-close" type="button">닫기</button>
@@ -2599,7 +2600,7 @@ var Core = (function () {
     { id: 'bangsangsital', cat: '물건', name: '방상시탈', grade: 'A', item: 'ITEM_002', faction: '벽사청', unlock: ['clear:ch1'],
       characterNotes: { yoon: '탈을 쓰면 얼굴이 사라진다. 벽사청에 어울리는 물건이다.' },
       lore: '황금빛 네 눈을 지닌 축귀의 가면. 국가의 나례에서 방상씨가 착용하였다.',
-      note: '네 눈(사목 四目)으로 숨은 귀물과 환영을 간파한다는 효과는 게임 창작이다. 후속 장 예정.' },
+      note: '네 눈(사목(四目))으로 숨은 귀물과 환영을 간파한다는 효과는 게임 창작이다. 후속 장 예정.' },
     { id: 'dopan', cat: '물건', name: '도판', hanja: '桃板', grade: 'B', item: 'ITEM_003', faction: '벽사청', unlock: ['later'],
       lore: '복숭아나무판에 신명이나 그림을 새겨 문에 세우는 벽사의 물건.',
       note: '한 칸을 일정 시간 귀물이 지나가지 못하게 하는 설치물로 쓸 예정이다 (창작 효과).' },
@@ -2965,7 +2966,7 @@ var Core = (function () {
     if (!fresh.length) return;
     toast([
       { text: '📖 벽사록에 새 기록이 추가되었습니다.' },
-      { b: fresh.map(function (e) { return e.name + (e.hanja ? ' ' + e.hanja : ''); }).join(' · ') }
+      { b: fresh.map(function (e) { return e.name + (e.hanja ? '(' + e.hanja + ')' : ''); }).join(' · ') }
     ], 'lore', 3000, TOAST_RANK.lore);
   }
   var chapterId = 'ch1';
@@ -3592,13 +3593,13 @@ var Core = (function () {
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, ms);
   }
 
-  // 기술 이름을 칸 위에 0.8초. 벽사록에 한자가 있으면 작게 붙인다 (정화수 井華水, 무령 巫鈴)
+  // 기술 이름을 칸 위에 0.8초. 벽사록에 한자가 있으면 작게 붙인다 (정화수(井華水), 무령(巫鈴))
   function skillLabel(name, r, c, kind) {
     var p = cellCenter(r, c);
     var label = el('div', 'skill-label ' + kind, name);
     var entry = Core.LORE.filter(function (e) { return e.name === name && e.hanja; })[0];
     var hanja = entry ? entry.hanja : { '금역': '禁域' }[name];
-    if (hanja) label.appendChild(el('small', '', hanja));
+    if (hanja) label.appendChild(el('small', '', '(' + hanja + ')'));
     label.style.left = p.x + 'px';
     label.style.top = p.cell.offsetTop + 'px';
     board.appendChild(label);
@@ -3815,7 +3816,7 @@ var Core = (function () {
       var row = el('button', 'entry' + (on ? '' : ' locked'));
       row.type = 'button';
       var name = el('span', '', on ? e.name : '?????');
-      if (on && e.hanja) name.appendChild(el('small', '', e.hanja));
+      if (on && e.hanja) name.appendChild(el('small', '', '(' + e.hanja + ')'));
       row.appendChild(name);
       var g = Core.HISTORICITY[e.grade];
       row.appendChild(el('span', 'grade', on ? g.icon + ' ' + g.label : '잠김'));
@@ -3831,10 +3832,10 @@ var Core = (function () {
     back.type = 'button';
     back.addEventListener('click', function () { loreView.id = null; renderLore(); });
     box.appendChild(back);
-    var h = el('h3', '', e.name);
-    if (e.grade === 'A') h.appendChild(el('span', 'seal', '史'));
+    var h = el('h3', '', e.name + (e.hanja ? '(' + e.hanja + ')' : ''));
+    if (e.grade === 'A') h.appendChild(el('span', 'seal', '사료(史料)'));
     box.appendChild(h);
-    var meta = [e.hanja, e.entityType ? '분류 ' + Core.ENTITY_TYPES[e.entityType] : '', e.faction ? e.faction + ' 계열' : '']
+    var meta = [e.entityType ? '분류 ' + Core.ENTITY_TYPES[e.entityType] : '', e.faction ? e.faction + ' 계열' : '']
       .filter(Boolean).join(' · ');
     if (meta) box.appendChild(el('div', 'meta', meta));
     // 기록(객관적 설명) → 인물의 기록(캐릭터 시점) → 고증 메모 (specs/immersion.md 8장)
