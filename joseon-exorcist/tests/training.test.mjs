@@ -349,6 +349,54 @@ test('교란: 바위·맵 밖·다른 유닛·결계 쪽이면 밀리지 않는�
   assert.deepEqual([U(s4, 'dokkaebi').r, U(s4, 'dokkaebi').c], [3, 4], '축지격에만');
 });
 
+test('교란: 강제 이동은 탈출 판정을 바로 일으키지 않는다 — 탈출로로 밀린 달래는 자기 차례에 행동한 뒤 탈출', () => {
+  const s = Core.newBattle(Core.STAGES.ch2, { merit: 0, training: { yeoul: 'gyoran' } });
+  const d = put(s, 'dallae_boss', 1, 7);
+  d.hp = d.maxHp = 99;
+  put(s, 'yeoul', 2, 7);
+  const ev = Core.useSkill(s, 'yeoul', 'dallae_boss');
+  assert.deepEqual([d.r, d.c], [0, 7], '탈출로 칸으로 밀 수는 있다');
+  assert.ok(Core.isEscape(s, 0, 7));
+  assert.equal(s.result, null, '밀려서 바로 지지 않는다');
+  assert.ok(!ev.some((e) => e.type === 'escape'));
+  Core.endAllyPhase(s);
+  Core.runEnemyPhase(s);
+  assert.deepEqual([s.result, s.loseReason], ['lose', 'escape'], '자기 차례에 탈출');
+});
+
+test('수련 효과는 적대 대상에게만 — 중립(서낭신)에게는 추적·교란·부법이 걸리지 않는다', () => {
+  const s = Core.newBattle(Core.STAGES.ch3, { merit: 0, training: { hangyeol: 'chujeok', yeoul: 'gyoran', soun: 'bubeop' } });
+  const g = U(s, 'seonang');
+  g.hp = g.maxHp = 999;
+  put(s, 'hangyeol', g.r + 2, g.c);
+  const e1 = Core.useSkill(s, 'hangyeol', 'seonang');
+  assert.equal(g.slow, false);
+  assert.ok(!e1.some((e) => e.type === 'training'));
+  const at = [g.r, g.c];
+  put(s, 'yeoul', g.r + 1, g.c);
+  Core.useSkill(s, 'yeoul', 'seonang');
+  assert.deepEqual([g.r, g.c], at, '서낭신은 밀리지 않는다');
+  // 원귀 옆에 서낭신이 있어도 불길은 서낭신에게 번지지 않는다
+  const s2 = Core.newBattle(Core.STAGES.ch3, { merit: 0, training: { soun: 'bubeop' } });
+  const g2 = U(s2, 'seonang');
+  const w = put(s2, 'wongwi1', g2.r + 1, g2.c);
+  w.hp = w.maxHp = 99;
+  s2.units.filter((u) => u.type === 'wongwi' && u !== w).forEach((u) => { u.alive = false; });
+  put(s2, 'soun', w.r + 2, w.c);
+  assert.deepEqual(Core.spreadTargets(s2, w), []);
+  const e2 = Core.useSkill(s2, 'soun', 'wongwi1');
+  assert.ok(!e2.some((e) => e.targetId === 'seonang'));
+});
+
+test('역할 문구: 기획자 확정 8개', () => {
+  assert.deepEqual(Core.TRAINING_ORDER.flatMap((id) => Core.TRAININGS[id].map((t) => t.role)), [
+    '적을 베며 전선을 뚫는 선봉', '괴변의 핵심을 직접 처리하는 임무 수행자',
+    '멀리서 핵심 표적을 노리는 저격수', '도망치는 적의 발을 묶는 추격자',
+    '여럿을 한꺼번에 태우는 술법 공격수', '길목을 막고 전장을 설계하는 진법가',
+    '거리를 벌렸다 파고드는 돌격수', '적의 위치를 흐트러뜨리는 전장 교란자'
+  ]);
+});
+
 // ── 기록과 회귀 ────────────────────────────────────
 test('플레이 기록: 고른 수련과 발동 횟수가 남는다', () => {
   const s = arena([['dokkaebi', 3, 3], ['dokkaebi', 0, 7]], { yoon: 'jiphaeng', hangyeol: 'chujeok' });

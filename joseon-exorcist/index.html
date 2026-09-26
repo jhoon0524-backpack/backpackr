@@ -1672,7 +1672,7 @@ var Core = (function () {
     var t = inList(skillTargets(state, u), targetId);
     if (!t) return null;
     var spread = null;
-    if (u.training === 'bubeop') {
+    if (u.training === 'bubeop' && hostile(u, t)) {
       var near = spreadTargets(state, t);
       spread = near.length === 1 ? near[0] : inList(near, opts && opts.spreadId);
       if (near.length > 1 && !spread) return null; // 자동으로 고르지 않는다 (기획자 결정)
@@ -1703,24 +1703,31 @@ var Core = (function () {
   var BARRIER_TURNS = 2;    // 진법: 2턴 (놓은 턴과 다음 턴의 적 차례)
   var REMOVE_STEPS = 1;     // 집행·벽사: 1칸 재이동
 
+  // 수련 효과는 적대 대상에게만 (특정 유닛 예외가 아니라 편으로 판단 — 중립 신령·NPC 는 자동으로 빠진다)
+  function hostile(u, t) {
+    return t.side !== u.side && t.side !== 'neutral';
+  }
   function gisupReady(u) {
     return u.training === 'gisup' && u.moveCost >= GISUP_MIN_MOVE;
   }
   // 부법이 번질 수 있는 적: 대상 옆(상하좌우) 칸의 적
   function spreadTargets(state, target) {
-    return livingUnits(state, 'enemy').filter(function (e) { return e !== target && distance(e, target) === 1; });
+    return state.units.filter(function (e) {
+      return e.alive && e !== target && e.side === target.side && distance(e, target) === 1;
+    });
   }
 
   function trainingAfterSkill(state, u, t, spread, events) {
     var tr = u.training;
-    if (tr === 'chujeok' && t.alive && t.side === 'enemy') {
+    if (tr === 'chujeok' && t.alive && hostile(u, t)) {
       t.slow = true;
       events.push({ type: 'training', unitId: u.id, kind: 'chujeok', targetId: t.id });
     }
-    if (tr === 'gyoran' && t.alive && t.side === 'enemy' && state.result === null) {
+    if (tr === 'gyoran' && t.alive && hostile(u, t) && state.result === null) {
+      // 강제 이동은 도착하자마자 발동하는 탈출·패배 조건을 일으키지 않는다 (기획자 확정 2026-09-26).
+      // 탈출로로 밀려난 달래는 자기 차례에 행동한 뒤에야 탈출한다 (fleeAct)
       var to = { r: t.r + Math.sign(t.r - u.r), c: t.c + Math.sign(t.c - u.c) };
-      if (isPassable(state, to.r, to.c) && !unitAt(state, to.r, to.c) && !barrierAt(state, to.r, to.c)
-          && !(t.ai === 'flee' && isEscape(state, to.r, to.c))) {
+      if (isPassable(state, to.r, to.c) && !unitAt(state, to.r, to.c) && !barrierAt(state, to.r, to.c)) {
         var from = { r: t.r, c: t.c };
         t.r = to.r; t.c = to.c;
         events.push({ type: 'push', attackerId: u.id, targetId: t.id, from: from, to: to, name: '교란' });
@@ -1732,7 +1739,7 @@ var Core = (function () {
       events.push({ type: 'training', unitId: u.id, kind: 'bubeop', targetId: spread.id });
       dealDamage(state, u, spread, amount, { name: '부법', skill: true, mult: 1 }, events);
     }
-    if (tr === 'jiphaeng' && !t.alive && t.side === 'enemy' && state.result === null) {
+    if (tr === 'jiphaeng' && !t.alive && hostile(u, t) && state.result === null) {
       u.reMove = true;
       events.push({ type: 'training', unitId: u.id, kind: 'jiphaeng' });
     }
@@ -2601,22 +2608,23 @@ var Core = (function () {
   // ── 수련 (v0.8, specs/growth.md) ──────────────────────
   // 인물마다 두 방향 중 하나만. 벽사청 소속이 아니어도 지금 일행이면 수련한다 (각자 자기 기술을 갈고닦는다)
   var TRAINING_ORDER = ['yoon', 'hangyeol', 'soun', 'yeoul'];
+  // role: 이걸 고르면 전투에서 어떤 역할을 맡는가 (효과를 다시 설명하지 않는다). 기획자 확정 2026-09-26
   var TRAININGS = {
     yoon: [
-      { id: 'jiphaeng', name: '집행', role: '적을 베며 앞으로 나아가는 선봉', desc: '벽사검으로 적을 쓰러뜨리면 1칸 다시 움직인다.' },
-      { id: 'byeoksa', name: '벽사', role: '봉인을 되살리는 임무 수행자', desc: '봉인 복구 같은 임무 행동 뒤 1칸 다시 움직인다.' }
+      { id: 'jiphaeng', name: '집행', role: '적을 베며 전선을 뚫는 선봉', desc: '벽사검으로 적을 쓰러뜨리면 1칸 다시 움직인다.' },
+      { id: 'byeoksa', name: '벽사', role: '괴변의 핵심을 직접 처리하는 임무 수행자', desc: '봉인 복구 같은 임무 행동 뒤 1칸 다시 움직인다.' }
     ],
     hangyeol: [
-      { id: 'sasu', name: '사수', role: '자리를 지키고 멀리 쏘는 저격수', desc: '움직이지 않은 차례에는 파사궁 사거리가 2에서 3이 된다.' },
-      { id: 'chujeok', name: '추적', role: '달아나는 적을 묶는 추격자', desc: '파사궁에 맞은 적은 다음 차례 이동력 −1 (최소 1).' }
+      { id: 'sasu', name: '사수', role: '멀리서 핵심 표적을 노리는 저격수', desc: '움직이지 않은 차례에는 파사궁 사거리가 2에서 3이 된다.' },
+      { id: 'chujeok', name: '추적', role: '도망치는 적의 발을 묶는 추격자', desc: '파사궁에 맞은 적은 다음 차례 이동력 −1 (최소 1).' }
     ],
     soun: [
-      { id: 'bubeop', name: '부법', role: '불길을 번지게 하는 술사', desc: '화염부가 대상 옆의 적 1명에게 절반 피해로 번진다.' },
-      { id: 'jinbeop', name: '진법', role: '길을 막고 판을 짜는 진법가', desc: '공격 대신 빈 칸에 결계를 친다. 2턴 동안 적이 들어오지 못한다. (기력 4)' }
+      { id: 'bubeop', name: '부법', role: '여럿을 한꺼번에 태우는 술법 공격수', desc: '화염부가 대상 옆의 적 1명에게 절반 피해로 번진다.' },
+      { id: 'jinbeop', name: '진법', role: '길목을 막고 전장을 설계하는 진법가', desc: '공격 대신 빈 칸에 결계를 친다. 2턴 동안 적이 들어오지 못한다. (기력 4)' }
     ],
     yeoul: [
-      { id: 'gisup', name: '기습', role: '멀리서 뛰어들어 한 명을 끝내는 자객', desc: '3칸 이상 달려와 축지격을 쓰면 피해 ×1.5.' },
-      { id: 'gyoran', name: '교란', role: '적을 밀어내 판을 흔드는 교란꾼', desc: '축지격에 맞은 적을 1칸 밀어낸다.' }
+      { id: 'gisup', name: '기습', role: '거리를 벌렸다 파고드는 돌격수', desc: '3칸 이상 달려와 축지격을 쓰면 피해 ×1.5.' },
+      { id: 'gyoran', name: '교란', role: '적의 위치를 흐트러뜨리는 전장 교란자', desc: '축지격에 맞은 적을 1칸 밀어낸다.' }
     ]
   };
   var TRAINING_POINTS = { ch3: 2 }; // 3장을 깨면 수련점 2 — 4명 중 2명만 첫 수련
