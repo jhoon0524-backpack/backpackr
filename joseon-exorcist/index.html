@@ -2110,7 +2110,7 @@ var Core = (function () {
     toast([
       { text: '📖 벽사록에 새 기록이 추가되었습니다.' },
       { b: fresh.map(function (e) { return e.name + (e.hanja ? ' ' + e.hanja : ''); }).join(' · ') }
-    ], 'lore', 3000);
+    ], 'lore', 3000, TOAST_RANK.lore);
   }
   var chapterId = 'ch1';
 
@@ -2295,9 +2295,32 @@ var Core = (function () {
     box.appendChild(text);
   }
 
-  // 화면 아래에 잠깐 뜨는 알림. lines: [{ b: 굵게, small: 작게, text: 보통 }], kind: 'lore' 면 한지 색
-  function toast(lines, kind, ms) {
-    ms = ms || 2800;
+  // 화면 아래에 잠깐 뜨는 알림. lines: [{ b: 굵게, small: 작게, text: 보통 }], kind: 'lore' 면 한지 색.
+  // 한 번에 하나만 보이고, 기다리는 알림은 우선순위(rank) 순 → 같은 순위는 들어온 순 (specs/immersion.md 11장)
+  var TOAST_RANK = { lore: 1, terrain: 2, other: 3 };
+  var toastQueue = [];
+  var toastSeq = 0;
+  var toastTimer = null;
+  function toast(lines, kind, ms, rank) {
+    toastQueue.push({ lines: lines, kind: kind, ms: ms || 2800, rank: rank || TOAST_RANK.other, seq: toastSeq++ });
+    if (!toastTimer) nextToast();
+  }
+  function nextToast() {
+    toastTimer = null;
+    if (!toastQueue.length) return;
+    toastQueue.sort(function (a, b) { return a.rank - b.rank || a.seq - b.seq; });
+    var item = toastQueue.shift();
+    showToast(item.lines, item.kind, item.ms);
+    toastTimer = setTimeout(nextToast, item.ms + 150); // 앞 알림이 사라진 뒤 다음
+  }
+  // 장을 새로 시작하면 지난 판의 알림은 버린다
+  function clearToasts() {
+    toastQueue = [];
+    clearTimeout(toastTimer);
+    toastTimer = null;
+    document.getElementById('toasts').innerHTML = '';
+  }
+  function showToast(lines, kind, ms) {
     var t = el('div', 'toast' + (kind ? ' ' + kind : ''));
     t.style.setProperty('--ms', ms + 'ms');
     lines.forEach(function (line) {
@@ -2326,7 +2349,7 @@ var Core = (function () {
     });
     if (!fresh.length) return;
     toast(fresh.map(function (t) { return { text: TERRAIN_MARK[t] + ' ' + TERRAIN_INFO[t].name + ' · ' + TERRAIN_INFO[t].text }; })
-      .concat([{ small: '지형 칸을 누르면 다시 볼 수 있습니다.' }]), '', 4200);
+      .concat([{ small: '지형 칸을 누르면 다시 볼 수 있습니다.' }]), '', 3600, TOAST_RANK.terrain);
     try { localStorage.setItem(TIPS_KEY, JSON.stringify(seen.concat(fresh))); } catch (e) { /* 무시 */ }
   }
 
@@ -2749,6 +2772,7 @@ var Core = (function () {
   // 장 시작: 공적 누계로 품계·관군을 정하고 시작 대사부터
   function startChapter(id) {
     chapterId = id;
+    clearToasts();
     document.getElementById('result').hidden = true;
     document.getElementById('title').hidden = true;
     state = Core.newBattle(Core.STAGES[id], { merit: progress.merit });
