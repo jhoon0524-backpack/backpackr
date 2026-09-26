@@ -14,3 +14,8 @@ dropbid-mobile/.expo/
 # OS 잡동사니
 .DS_Store
 Thumbs.db
+
+# 비밀키 (mail-agent)
+.env
+.env.*
+google_client_secret.json
