@@ -35,6 +35,8 @@ test('모든 장을 깨면 다음 장은 없음 (준비 중)', () => {
   assert.equal(Core.nextStage(p), 'ch3', 'v0.7: 2장 뒤 3장');
   p = Core.applyResult(p, 'ch3', 'win', 6);
   assert.equal(p.merit, 16);
+  assert.equal(Core.nextStage(p), 'ch4', 'v0.9: 3장 뒤 4장');
+  p = Core.applyResult(p, 'ch4', 'win', 6);
   assert.equal(Core.nextStage(p), null);
 });
 

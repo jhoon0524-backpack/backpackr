@@ -74,3 +74,49 @@ for (const c of CONDITIONS) {
 }
 console.log(`\n3장 시뮬레이션 — 조건마다 ${N}판`);
 console.table(rows3);
+
+// ── 4장 폐사찰: 섬멸형 / 목표형 / 수련 활용형 × 수련 조합 (specs/chapter4.md 12장) ──
+// 성공 조건: 섬멸형은 승률이 낮고, 목표형은 모든 합법 조합(2명 × 방향)과 수련 없음으로 이긴다 (수련 없음은 더 어려워도 된다)
+// 수련 활용형은 목표형보다 턴·받은 피해·소등 횟수 중 무엇이든 나아야 한다
+const PEOPLE = Core.TRAINING_ORDER;
+const COMBOS = [{ label: '수련 없음', training: {} }];
+for (let i = 0; i < PEOPLE.length; i++) {
+  for (let j = i + 1; j < PEOPLE.length; j++) {
+    for (const a of Core.TRAININGS[PEOPLE[i]]) {
+      for (const b of Core.TRAININGS[PEOPLE[j]]) {
+        COMBOS.push({ label: a.name + '+' + b.name, training: { [PEOPLE[i]]: a.id, [PEOPLE[j]]: b.id } });
+      }
+    }
+  }
+}
+const N4 = Math.min(N, 20); // 4장 랜덤은 날씨뿐이라 판 수를 줄인다
+function run4(mode, training, merit) {
+  const logs = [];
+  for (let seed = 1; seed <= N4; seed++) logs.push(playBattle({ seed, mode, stage: Core.STAGES.ch4, merit, chapter: 'ch4', training }));
+  const wins = logs.filter((s) => s.result === 'win');
+  const reasons = {};
+  logs.filter((s) => s.result === 'lose').forEach((s) => { reasons[s.loseReason] = (reasons[s.loseReason] || 0) + 1; });
+  const taken = (s) => Object.entries(s.log.damageTaken).filter(([id]) => Core.getUnit(s, id).side === 'ally').reduce((n, [, v]) => n + v, 0);
+  return {
+    승률: Math.round((wins.length / N4) * 100) + '%',
+    '평균턴(승)': wins.length ? f1(avg(wins.map((s) => s.turn))) : '-',
+    패배: JSON.stringify(reasons),
+    소등: f1(avg(logs.map((s) => s.log.sealLampsExtinguished.length))),
+    받은피해: f1(avg(logs.map(taken))),
+    퇴각: f1(avg(logs.map((s) => s.log.defeatedUnits.filter((d) => d.how === '퇴각').length))),
+    귀화처치: f1(avg(logs.map((s) => s.log.gwihwaDefeated))),
+    수련발동: f1(avg(logs.map((s) => Object.values(s.log.trainingActivations).reduce((a, b) => a + b, 0))))
+  };
+}
+const rows4 = [];
+for (const merit of [0, 13]) {
+  const rank = Core.rankFor(merit).name;
+  rows4.push({ 품계: rank, 자동: 'A 섬멸형', 수련: '수련 없음', ...run4('nearest', {}, merit) });
+  for (const c of COMBOS) {
+    if (merit === 0 && c.label !== '수련 없음') continue; // 종9품은 수련 없음만 (가장 어려운 경우)
+    rows4.push({ 품계: rank, 자동: 'B 목표형', 수련: c.label, ...run4('objective', c.training, merit) });
+    rows4.push({ 품계: rank, 자동: 'C 수련 활용형', 수련: c.label, ...run4('training', c.training, merit) });
+  }
+}
+console.log(`\n4장 시뮬레이션 — 조건마다 ${N4}판 (섬멸형·목표형·수련 활용형, 합법 수련 조합 ${COMBOS.length - 1}개 + 수련 없음)`);
+console.table(rows4);

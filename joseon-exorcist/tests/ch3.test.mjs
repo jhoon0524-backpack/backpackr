@@ -183,8 +183,7 @@ test('월드맵: 2장 뒤 서낭고개 [조사한다], 3장 뒤 안정됨·폐�
   const w = Core.worldState(after3);
   assert.deepEqual([w.seonang, w.pyesachal], ['STABILIZED', 'OMEN']);
   assert.deepEqual(Core.worldNews(after3, []).map((n) => n.region), ['seonang', 'pyesachal']);
-  assert.equal(Core.regionNote(Core.regionById('pyesachal'), 'OMEN'), '조사 준비 중');
-  assert.equal(Core.sortieChapter(after3, 'pyesachal'), null, '4장 전투는 없다');
+  assert.equal(Core.sortieChapter(after3, 'pyesachal'), 'ch4', 'v0.9: 3장 뒤 폐사찰 [조사한다]');
 });
 
 test('벽사록: 3장 시작에 서낭당·서낭신·원귀, 금줄은 금줄 지점에서', () => {

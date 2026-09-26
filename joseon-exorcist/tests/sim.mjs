@@ -106,23 +106,142 @@ function objectiveAlly(s, u, log) {
   return Core.wait(s, u.id);
 }
 
+// ── 4장 폐사찰 (specs/chapter4.md 12장) ──
+// 목표형: 조사 → 꺼진 봉인등 밝히기 → 등 위에 서서 지킨다 → 남는 인원은 귀화를 먼저 친다. 수련은 자동으로 붙는 효과만
+// 수련 활용형(active): 목표형 + 결계로 길목 막기, 사수는 제자리에서 쏘기, 기습은 멀리 달려와 치기, 재이동으로 빈 등 쪽으로
+const K = (c) => `${c.r},${c.c}`;
+// 귀화가 등(켜진 등 칸 또는 상하좌우) 옆까지 몇 칸 남았나. block 칸은 막혔다고 본다 (결계 시험용)
+function fireDistance(s, f, block) {
+  const goals = [];
+  for (const l of Core.litLamps(s)) for (const [dr, dc] of [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]]) goals.push({ r: l.r + dr, c: l.c + dc });
+  const free = (r, c) => Core.isPassable(s, r, c) && !Core.barrierAt(s, r, c) && !(block && block.r === r && block.c === c)
+    && (!Core.unitAt(s, r, c) || Core.unitAt(s, r, c) === f);
+  const dist = {}, q = [];
+  for (const g of goals) if (free(g.r, g.c) && dist[K(g)] === undefined) { dist[K(g)] = 0; q.push(g); }
+  while (q.length) {
+    const g = q.shift();
+    for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+      const n = { r: g.r + dr, c: g.c + dc };
+      if (dist[K(n)] !== undefined || !free(n.r, n.c)) continue;
+      dist[K(n)] = dist[K(g)] + 1; q.push(n);
+    }
+  }
+  return dist[K(f)] ?? 99;
+}
+function fires(s) { return Core.livingUnits(s, 'enemy').filter((e) => e.ai === 'lamp'); }
+function afterReMove(s, u, active, log) {
+  if (!u.reMove) return;
+  const opts = Core.reMoveTargets(s, u);
+  let pick = { r: u.r, c: u.c };
+  if (active) {
+    const fs = fires(s);
+    if (fs.length) pick = opts.slice().sort((a, b) => Math.min(...fs.map((f) => Math.abs(f.r - a.r) + Math.abs(f.c - a.c)))
+      - Math.min(...fs.map((f) => Math.abs(f.r - b.r) + Math.abs(f.c - b.c))))[0];
+  }
+  const ev = Core.reMove(s, u.id, pick.r, pick.c) || [];
+  if (log) Core.logEvents(log, s, ev);
+}
+function lampAlly(s, u, log, active) {
+  const o = s.objective;
+  const finish = (ev) => { if (log) Core.logEvents(log, s, ev || []); afterReMove(s, u, active, log); return []; };
+  if (o.phase === 'investigate') return finish(objectiveAlly(s, u, log));
+  const cells = Core.moveTargets(s, u);
+  // 1. 꺼진 등 위 → 밝힌다
+  const here = Core.lampAt(s, u.r, u.c);
+  if (here && !here.lit) { Core.moveUnit(s, u.id, u.r, u.c); return finish(Core.lightLamp(s, u.id)); }
+  const fs = fires(s);
+  const imminent = fs.filter((f) => Core.lampInReach(s, f));
+  const incoming = fs.filter((f) => !Core.lampInReach(s, f) && fireDistance(s, f) <= f.mov);
+  // 사수(활용형): 움직이지 않고 사거리 3 으로 귀화를 칠 수 있으면 제자리에서
+  if (active && u.training === 'sasu' && u.ki >= Core.SKILL_COST) {
+    const t = Core.skillTargets(s, u).filter((x) => x.ai === 'lamp').sort((a, b) => (imminent.includes(b) ? 1 : 0) - (imminent.includes(a) ? 1 : 0) || a.hp - b.hp)[0];
+    if (t) { Core.moveUnit(s, u.id, u.r, u.c); return finish(Core.useSkill(s, u.id, t.id)); }
+  }
+  // 칠 수 있는 가장 좋은 일격 (priority: 곧 끌 귀화 > 다가오는 귀화 > 다른 귀화 > 원귀)
+  const strikeFor = (targets) => {
+    let best = null;
+    for (const c of cells) {
+      const saved = [u.r, u.c]; u.r = c.r; u.c = c.c;
+      const opts = [];
+      for (const t of Core.attackTargets(s, u).filter((x) => targets.includes(x))) opts.push({ kind: 'attack', t, dmg: Core.damage(s, u, t, false) });
+      if (u.skill && u.ki >= Core.SKILL_COST) {
+        const moved = !(c.r === (u.from || { r: saved[0] }).r && c.c === (u.from || { c: saved[1] }).c);
+        for (const t of Core.skillTargets(s, u).filter((x) => targets.includes(x))) opts.push({ kind: 'skill', t, dmg: Core.damage(s, u, t, true) });
+      }
+      [u.r, u.c] = saved;
+      for (const x of opts) {
+        let score = (x.dmg >= x.t.hp ? 100 : 0) + x.dmg - x.t.hp * 0.1 - c.cost * 0.2;
+        if (x.kind === 'skill' && u.training === 'gyoran') score += 30; // 밀어내기는 죽이지 않아도 효과 (자동)
+        if (x.kind === 'skill' && u.training === 'chujeok') score += 10;
+        if (active && u.training === 'gisup' && x.kind === 'skill' && c.cost >= 3) score += 20;
+        if (!best || score > best.score) best = { ...x, cell: c, score };
+      }
+    }
+    return best;
+  };
+  const doIt = (b) => {
+    Core.moveUnit(s, u.id, b.cell.r, b.cell.c);
+    if (b.kind === 'attack') return finish(Core.attack(s, u.id, b.t.id));
+    const near = Core.spreadTargets(s, b.t).sort((a, c) => a.hp - c.hp);
+    return finish(Core.useSkill(s, u.id, b.t.id, { spreadId: near[0] && near[0].id }));
+  };
+  // 2. 이번 차례에 닿는 꺼진 등 → 가서 밝힌다 (등을 켜야 이긴다 — 곧 끌 귀화는 다른 사람이 맡는다)
+  const dark = cells.filter((c) => s.lamps.some((l) => !l.lit && l.r === c.r && l.c === c.c));
+  if (dark.length) { Core.moveUnit(s, u.id, dark[0].r, dark[0].c); return finish(Core.lightLamp(s, u.id)); }
+  // 3. 곧 끌 귀화를 친다
+  if (imminent.length) { const b = strikeFor(imminent); if (b) return doIt(b); }
+  // 진법(활용형): 다가오는 귀화의 길을 가장 길게 만드는 칸에 결계
+  if (active && u.training === 'jinbeop' && u.ki >= Core.SKILL_COST && incoming.length) {
+    let plan = null;
+    for (const c of cells) {
+      const saved = [u.r, u.c]; u.r = c.r; u.c = c.c;
+      const bc = Core.barrierCells(s, u);
+      [u.r, u.c] = saved;
+      for (const b of bc) {
+        const gain = incoming.reduce((n, f) => n + Math.min(fireDistance(s, f, b), 12) - fireDistance(s, f), 0);
+        if (gain > 0 && (!plan || gain > plan.gain || (gain === plan.gain && c.cost < plan.c.cost))) plan = { c, b, gain };
+      }
+    }
+    if (plan) {
+      Core.moveUnit(s, u.id, plan.c.r, plan.c.c);
+      const ev = Core.placeBarrier(s, u.id, plan.b.r, plan.b.c);
+      if (ev) return finish(ev);
+      Core.cancelMove(s, u.id);
+    }
+  }
+  // 3. 다가오는 귀화 → 다른 귀화 → 원귀 순으로 친다
+  for (const group of [incoming, fs, Core.livingUnits(s, 'enemy')]) {
+    if (!group.length) continue;
+    const b = strikeFor(group);
+    if (b) return doIt(b);
+  }
+  // 4. 칠 것이 없으면: 꺼진 등 → 가장 가까운 귀화 → 켜진 등 쪽으로
+  const goals = s.lamps.filter((l) => !l.lit).concat(fs).concat(s.lamps);
+  const map = bfsFrom(s, u, goals.slice(0, Math.max(1, goals.length)).map((g) => ({ r: g.r, c: g.c })));
+  const dest = cells.slice().sort((a, b) => (map[K(a)] ?? 99) - (map[K(b)] ?? 99) || a.cost - b.cost)[0];
+  Core.moveUnit(s, u.id, dest.r, dest.c);
+  return finish(Core.wait(s, u.id));
+}
+
 // 한 판을 끝까지. mode: 'greedy'(도망 보스를 쫓음) | 'nearest'(가까운 적만 침 — 3장 섬멸형) | 'idle'(아군은 대기만) | 'objective'(3장 목표형). stage·merit(누계)로 장·품계를 고른다.
 // 플레이 로그(Core.newPlayLog …)도 화면과 같은 방식으로 채워 s.log 에 둔다 (specs/playtest.md)
-export function playBattle({ seed = 1, mode = 'greedy', stage, merit, chapter = 'ch1' } = {}) {
+export function playBattle({ seed = 1, mode = 'greedy', stage, merit, chapter = 'ch1', training } = {}) {
   const rng = seeded(seed);
-  const s = Core.newBattle(stage, merit === undefined ? undefined : { merit });
+  const s = Core.newBattle(stage, merit === undefined && !training ? undefined : { merit: merit || 0, training });
   const log = Core.newPlayLog(s, chapter, 0);
   let guard = 0;
   while (s.result === null) {
-    if (++guard > 50) throw new Error('전투가 끝나지 않는다');
+    if (++guard > 60) throw new Error('전투가 끝나지 않는다');
     Core.logEvents(log, s, Core.startAllyPhase(s, rng));
     for (const u of Core.livingUnits(s, 'ally')) {
       if (s.result !== null) break;
       const from = { r: u.r, c: u.c };
+      const lampMode = s.lamps && (mode === 'objective' || mode === 'training');
       const events = mode === 'idle' ? Core.wait(s, u.id)
-        : mode === 'objective' ? objectiveAlly(s, u, log) : greedyAlly(s, u, mode !== 'nearest');
+        : lampMode ? lampAlly(s, u, log, mode === 'training')
+          : mode === 'objective' ? objectiveAlly(s, u, log) : greedyAlly(s, u, mode !== 'nearest');
       Core.logMove(log, s, u.id, from, { r: u.r, c: u.c });
-      if (mode !== 'objective' && s.objective) Core.logEvents(log, s, Core.arrive(s, u.id)); // 섬멸형도 지나다 서면 조사는 된다
+      if (mode !== 'objective' && mode !== 'training' && s.objective) Core.logEvents(log, s, Core.arrive(s, u.id)); // 섬멸형도 지나다 서면 조사는 된다
       Core.logEvents(log, s, events);
     }
     if (s.result !== null) break;

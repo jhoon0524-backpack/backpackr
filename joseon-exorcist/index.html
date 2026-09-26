@@ -103,6 +103,18 @@
   .pt.grudge { background: #5b3a78; color: #eadcff; }
   @keyframes pt-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(176, 48, 42, .8); } 50% { box-shadow: 0 0 0 4px rgba(176, 48, 42, 0); } }
   .cell.goal { box-shadow: inset 0 0 0 2px rgba(176, 48, 42, .8); }
+  /* 4장 봉인등: 켜짐(따뜻한 빛) / 약한 불 / 꺼짐. 곧 끌 귀화에는 붉은 ! */
+  .pt.lamp-on { background: #f5c542; color: #1d1a14; }
+  .pt.lamp-dim { background: #9c8440; color: #1d1a14; }
+  .pt.lamp-off { background: #3a3f4d; color: #d8d4c8; }
+  .pt.lamp-off.urgent { background: #b0302a; color: #fbf6ea; animation: pt-pulse 1.6s ease-in-out infinite; }
+  .cell.lamp-glow { box-shadow: inset 0 0 12px 2px rgba(245, 197, 66, .55); }
+  .threat { position: absolute; top: -2px; right: 0; z-index: 3; font-size: 11px; font-weight: 800; color: #fff; background: #b0302a;
+    border-radius: 3px; padding: 0 3px; line-height: 1.3; pointer-events: none; }
+  #result .reward { margin: 10px 0 2px; font-size: 14px; line-height: 1.8; }
+  #result .reward b { color: #f5c542; }
+  @keyframes quake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-4px, 2px); } 40% { transform: translate(4px, -2px); } 60% { transform: translate(-3px, 1px); } 80% { transform: translate(2px, -1px); } }
+  .quake { animation: quake .5s ease-in-out 1; }
   #objective {
     margin: -4px auto 6px; max-width: 464px; padding: 4px 8px; border-radius: 6px; font-size: 13px; line-height: 1.4;
     background: rgba(226, 194, 107, .12); border: 1px solid rgba(226, 194, 107, .5); text-align: center;
@@ -768,6 +780,7 @@
       <button id="btn-skill">스킬</button>
       <button id="btn-seal" hidden>봉인 복구</button>
       <button id="btn-barrier" hidden>결계</button>
+      <button id="btn-lamp" hidden>봉인등 밝히기</button>
       <button id="btn-wait">대기</button>
       <button id="btn-cancel">취소</button>
     </div>
@@ -909,6 +922,7 @@
     <div class="title" id="result-text"></div>
     <div class="sub" id="result-sub"></div>
     <button class="big-btn" id="btn-retry" type="button">다시하기</button>
+    <button class="big-btn" id="btn-hq" type="button" hidden>본진에서 확인</button>
     <button class="big-btn" id="btn-next" type="button">지도로 돌아간다</button>
     <button class="big-btn plain" id="btn-home" type="button">처음 화면으로</button>
   </div>
@@ -1115,6 +1129,60 @@ var Core = (function () {
         investigateNeed: 2, sealMerit: 1, clearMerit: 3,
         before: '서낭고개의 괴변 원인을 확인하라.', after: '봉인 지점 3곳을 복구하라.'
       }
+    },
+    // 4장 폐사찰의 등불 (specs/chapter4.md). 맵 배치는 AI 초안 — 시뮬레이션으로 조정
+    ch4: {
+      v: 1,
+      name: '4장 폐사찰의 등불',
+      rows: 10,
+      cols: 8,
+      maxTurn: 14,
+      map: [
+        'DD......',
+        'D......D',
+        '..DDDD..',
+        '..DDDD..',
+        '........',
+        '.D....D.',
+        '.D.DD.D.',
+        '........',
+        '........',
+        '........'
+      ],
+      allies: [
+        { id: 'yoon', r: 9, c: 3 },
+        { id: 'hangyeol', r: 9, c: 2 },
+        { id: 'yeoul', r: 9, c: 4 },
+        { id: 'soun', r: 9, c: 5 }
+      ],
+      enemies: [
+        { type: 'gwihwa', r: 1, c: 6 },
+        { type: 'gwihwa', r: 4, c: 0 },
+        { type: 'wongwi_b', r: 4, c: 2 },
+        { type: 'wongwi_b', r: 4, c: 5 }
+      ],
+      reserves: [{ r: 8, c: 3 }, { r: 8, c: 4 }],
+      // 봉인등: lit 켜짐 / dim 약해진 불 (규칙은 켜짐과 같다, 보이는 것만 다르다)
+      lamps: [
+        { id: 'north', name: '북쪽 봉인등', r: 0, c: 4, lit: true },
+        { id: 'east', name: '동쪽 봉인등', r: 3, c: 7, lit: true, dim: true },
+        { id: 'west', name: '서쪽 봉인등', r: 3, c: 0, lit: false }
+      ],
+      points: [
+        { id: 'lampWest', name: '꺼진 봉인등', r: 3, c: 0,
+          investigate: { title: '꺼진 봉인등', text: '등잔 아래 오래된 부적이 겹겹이 붙어 있다.',
+            say: { who: '소운', face: '🧙', text: '…이건 불을 밝히기 위한 등이 아니오.' } } },
+        { id: 'door', name: '본당 문', r: 4, c: 3,
+          investigate: { title: '본당 문', text: '문 안쪽에서 무언가 부딪히는 소리가 들린다.',
+            say: { who: '한결', face: '🏹', text: '안에… 뭔가 있습니다.' } } }
+      ],
+      spawns: [{ r: 9, c: 0 }, { r: 9, c: 7 }], // 귀화 증원 자리 (서쪽 산길·동쪽 회랑 입구)
+      appear: { type: 'dosa', r: 1, c: 4 }, // 진실이 밝혀지면 나타나는 도문 술사
+      objective: {
+        investigateNeed: 2, next: 'lamps', lampMerit: 1, clearMerit: 3, holdNeed: 2,
+        reinforceAtTruth: 2, reinforceEvery: 2,
+        before: '폐사찰의 괴변 원인을 조사하라.', after: '세 개의 봉인등을 모두 밝히고 지켜라.'
+      }
     }
   };
   var TERRAINS = ['.', 'D', 'M', 'K', 'E'];
@@ -1179,7 +1247,15 @@ var Core = (function () {
       faction: '서낭고개', title: '고개의 신령', ai: 'guardian', skillName: '금역', entityType: 'SINRYEONG' },
     // 떠도는 원귀: 쓰러져도 respawn 턴 뒤 원한 지점에서 다시 나타난다 (미련). 공적 없음
     wongwi: { name: '떠도는 원귀', emoji: '👻', hp: 16, atk: 8, def: 3, mov: 3, rng: 1, elem: '없음',
-      faction: '귀물', ai: 'wraith', respawn: 2, entityType: 'WONGWI', defeatLine: '원귀를 물리쳤다.' }
+      faction: '귀물', ai: 'wraith', respawn: 2, entityType: 'WONGWI', defeatLine: '원귀를 물리쳤다.' },
+    // 4장 (specs/chapter4.md). 원귀는 다시 나타나지 않고 아군을 붙잡는다. 귀화는 봉인등을 노린다
+    wongwi_b: { name: '떠도는 원귀', emoji: '👻', hp: 16, atk: 8, def: 3, mov: 3, rng: 1, elem: '없음',
+      faction: '귀물', entityType: 'WONGWI', defeatLine: '원귀를 물리쳤다.', noMerit: true },
+    gwihwa: { name: '귀화', emoji: '🔵', hp: 12, atk: 5, def: 2, mov: 4, rng: 1, elem: '없음',
+      faction: '귀물', ai: 'lamp', entityType: 'WONGWI', defeatLine: '귀화가 흩어졌다.', noMerit: true },
+    // 도문 술사: 중립 NPC. 움직이지 않고 옆의 적을 친다. 누구의 공격 대상도 아니다
+    dosa: { name: '도문 술사', emoji: '☯️', hp: 40, atk: 12, def: 6, mov: 0, rng: 1, elem: '없음', neutral: true,
+      faction: '도문', title: '도문의 술사', ai: 'sentinel', untargetable: true, human: true, entityType: 'HUMAN' }
   };
   // ── 존재 분류·고증 등급 (specs/lore.md 1·6장). 게임용 분류이며 역사적 공식 분류가 아니다 ──
   var ENTITY_TYPES = {
@@ -1210,6 +1286,8 @@ var Core = (function () {
       human: !!d.human, // 사람(신당회). 요괴가 아니다 (specs/chapter2.md 7-3)
       entityType: d.entityType || 'HUMAN', // 아군은 모두 사람
       attackName: d.attackName || null, // 기본공격 표시명 (무녀 '무령'). 없으면 그냥 '공격'
+      untargetable: !!d.untargetable, // 4장 도문 술사: 아군도 적도 치지 않는다
+      noMerit: !!d.noMerit,
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: d.skill || null,
       // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
@@ -1311,8 +1389,18 @@ var Core = (function () {
       state.points = stage.points.map(function (p) { return JSON.parse(JSON.stringify(p)); });
       state.objective = {
         phase: 'investigate', investigated: [], repaired: [], changedTurn: null, weakened: false,
-        need: stage.objective.investigateNeed, sealMerit: stage.objective.sealMerit, clearMerit: stage.objective.clearMerit
+        need: stage.objective.investigateNeed, sealMerit: stage.objective.sealMerit, clearMerit: stage.objective.clearMerit,
+        next: stage.objective.next || 'seal', hold: 0 // 4장: 세 등이 모두 켜진 채 버틴 적 차례 수
       };
+    }
+    if (stage.lamps) {
+      state.lamps = stage.lamps.map(function (l) {
+        return { id: l.id, name: l.name, r: l.r, c: l.c, lit: !!l.lit, dim: !!l.dim, lightedOnce: false };
+      });
+      state.spawns = stage.spawns.map(function (p) { return { r: p.r, c: p.c }; });
+      state.appear = stage.appear;
+      state.reinforced = 0;
+      state.lampRules = stage.objective;
     }
     state.loseReason = null;
     state.barrier = null; // 진법 결계 { r, c, until, by } — 동시에 하나
@@ -1436,7 +1524,7 @@ var Core = (function () {
   function attackTargets(state, unit, pos, rng) {
     var from = pos || unit, range = rng || unit.rng;
     return state.units.filter(function (t) {
-      if (!t.alive || t.side === unit.side) return false;
+      if (!t.alive || t.side === unit.side || t.untargetable) return false;
       var d = distance(from, t);
       return d >= 1 && d <= range;
     });
@@ -1576,6 +1664,7 @@ var Core = (function () {
   function meritFor(attacker, target) {
     if (target.side !== 'enemy' || attacker.faction !== '벽사청') return 0;
     if (target.respawn) return 0; // 돌아오는 원귀는 공적이 아니다 (막타 파밍 방지, specs/chapter3.md 7장)
+    if (target.noMerit) return 0; // 4장 귀화·원귀: 증원이 계속 나오는 장이라 공적 없음
     if (target.boss) return MERIT_BOSS;
     return target.human ? 0 : MERIT_NORMAL;
   }
@@ -1640,6 +1729,8 @@ var Core = (function () {
     var events = [];
     if (state.result !== null) return events;
     state.units.forEach(function (u) { u.slow = false; }); // 추적: 맞은 적의 다음 차례가 끝나면 풀린다
+    lampHold(state, events);
+    if (state.result !== null) return events;
     if (state.turn >= state.maxTurn) {
       lose(state, 'time', events);
       return events;
@@ -1685,7 +1776,9 @@ var Core = (function () {
       events = [{ type: 'heal', attackerId: u.id, targetId: t.id, amount: amount, name: HEAL_SKILL }];
     } else {
       var gisup = gisupReady(u);
+      var sasu = u.training === 'sasu' && distance(u, t) > u.rng; // 사거리 3 으로 쐈다
       events = hit(state, u, t, true, []);
+      if (sasu) events.push({ type: 'training', unitId: u.id, kind: 'sasu' });
       if (gisup) events.push({ type: 'training', unitId: u.id, kind: 'gisup' });
       trainingAfterSkill(state, u, t, spread, events);
     }
@@ -1772,7 +1865,7 @@ var Core = (function () {
       for (var c = 0; c < state.cols; c++) {
         var d = distance(u, { r: r, c: c });
         if (d < 1 || d > BARRIER_RANGE || !isPassable(state, r, c) || unitAt(state, r, c)) continue;
-        if (pointAt(state, r, c) || isEscape(state, r, c)) continue;
+        if (pointAt(state, r, c) || isEscape(state, r, c) || lampAt(state, r, c) || isSpawn(state, r, c)) continue;
         cells.push({ r: r, c: c });
       }
     }
@@ -1849,6 +1942,7 @@ var Core = (function () {
     livingUnits(state, 'ally').forEach(function (u) { u.from = null; u.reMove = false; });
     state.phase = 'enemy';
     respawnWraiths(state, events);
+    lampReinforce(state, events);
     springHeal(state, 'enemy', events);
     // 기력 있는 적(2장 달래)은 아군과 같은 규칙: 2턴부터 페이즈 시작마다 +1 (보충 S2)
     livingUnits(state, 'enemy').forEach(function (u) {
@@ -2067,9 +2161,10 @@ var Core = (function () {
     o.investigated.push(p.id);
     events.push({ type: 'investigate', pointId: p.id, unitId: u.id });
     if (o.investigated.length >= o.need) {
-      o.phase = 'seal';
+      o.phase = o.next;
       o.changedTurn = state.turn;
       events.push({ type: 'truth' });
+      if (o.phase === 'lamps') lampTruth(state, events);
     }
     return events;
   }
@@ -2102,6 +2197,169 @@ var Core = (function () {
       events.push({ type: 'training', unitId: u.id, kind: 'byeoksa' });
     }
     return events;
+  }
+
+  // ── 4장 폐사찰: 봉인등 (specs/chapter4.md) ────────────
+  function lampAt(state, r, c) {
+    return (state.lamps || []).filter(function (l) { return l.r === r && l.c === c; })[0] || null;
+  }
+  function isSpawn(state, r, c) {
+    return (state.spawns || []).some(function (p) { return p.r === r && p.c === c; });
+  }
+  function litLamps(state) {
+    return (state.lamps || []).filter(function (l) { return l.lit; });
+  }
+  function allLit(state) {
+    return !!state.lamps && state.lamps.every(function (l) { return l.lit; });
+  }
+  // (r, c) 에서 가장 가까운 빈 칸 (결계 칸 제외). 위 → 아래 → 왼쪽 → 오른쪽
+  function freeCellNear(state, r0, c0) {
+    var seen = {}, queue = [[r0, c0]];
+    seen[r0 + ',' + c0] = true;
+    while (queue.length) {
+      var cur = queue.shift();
+      if (isPassable(state, cur[0], cur[1]) && !unitAt(state, cur[0], cur[1]) && !barrierAt(state, cur[0], cur[1])) return { r: cur[0], c: cur[1] };
+      for (var i = 0; i < DIRS.length; i++) {
+        var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
+        if (seen[key] || !inBounds(state, nr, nc)) continue;
+        seen[key] = true;
+        queue.push([nr, nc]);
+      }
+    }
+    return null;
+  }
+  // 귀화 증원 한 마리: 증원 자리를 번갈아 쓴다
+  function spawnGwihwa(state, events) {
+    var at = state.spawns[state.reinforced % state.spawns.length];
+    var cell = freeCellNear(state, at.r, at.c);
+    if (!cell) return;
+    var n = state.units.filter(function (u) { return u.type === 'gwihwa'; }).length + 1;
+    var g = makeUnit(ENEMY_TYPES.gwihwa, 'gwihwa' + n, 'enemy', cell.r, cell.c, 'gwihwa');
+    state.units.push(g);
+    state.reinforced++;
+    events.push({ type: 'reinforce', unitId: g.id, r: cell.r, c: cell.c });
+  }
+  // 진실: 도문 술사가 나타나고 귀화 증원 (임무 갱신)
+  function lampTruth(state, events) {
+    var a = state.appear;
+    if (a) {
+      var cell = freeCellNear(state, a.r, a.c);
+      if (cell) {
+        var d = makeUnit(ENEMY_TYPES[a.type], a.type, 'neutral', cell.r, cell.c, a.type);
+        state.units.push(d);
+        events.push({ type: 'appear', unitId: d.id, r: cell.r, c: cell.c });
+      }
+    }
+    for (var i = 0; i < state.lampRules.reinforceAtTruth; i++) spawnGwihwa(state, events);
+  }
+  // 적 차례 시작: 임무 갱신 뒤 N턴마다 귀화 1
+  function lampReinforce(state, events) {
+    var o = state.objective;
+    if (!o || o.phase !== 'lamps') return;
+    var every = state.lampRules.reinforceEvery;
+    if (state.turn > o.changedTurn && (state.turn - o.changedTurn) % every === 0) spawnGwihwa(state, events);
+  }
+
+  // 지금 이 유닛이 밝힐 수 있는 봉인등 (봉인등 단계 + 꺼진 등 칸에 서 있음)
+  function lightableLamp(state, unit) {
+    var o = state.objective;
+    if (!o || o.phase !== 'lamps' || !canCommand(state, unit)) return null;
+    var l = lampAt(state, unit.r, unit.c);
+    return l && !l.lit ? l : null;
+  }
+  // [봉인등 밝히기]: 등마다 처음 한 번 공적 +1. 행동 끝 (벽사는 1칸 재이동)
+  function lightLamp(state, id) {
+    var u = getUnit(state, id), l = u && lightableLamp(state, u);
+    if (!l) return null;
+    var events = [];
+    l.lit = true;
+    l.dim = false;
+    var merit = l.lightedOnce ? 0 : state.lampRules.lampMerit;
+    l.lightedOnce = true;
+    state.merit += merit;
+    events.push({ type: 'lamp', lampId: l.id, unitId: u.id, merit: merit });
+    finishAction(u);
+    if (allLit(state)) events.push({ type: 'lampsAll' });
+    if (u.training === 'byeoksa') {
+      u.reMove = true; // 벽사: 임무 행동 뒤 1칸 재이동
+      events.push({ type: 'training', unitId: u.id, kind: 'byeoksa' });
+    }
+    return events;
+  }
+  // 적 차례가 끝났을 때: 세 등이 모두 켜져 있으면 봉인 유지 +1, 다 채우면 승리
+  function lampHold(state, events) {
+    var o = state.objective;
+    if (!o || o.phase !== 'lamps' || state.result !== null) return;
+    if (!allLit(state)) { o.hold = 0; return; }
+    o.hold++;
+    events.push({ type: 'hold', n: o.hold, need: state.lampRules.holdNeed });
+    if (o.hold >= state.lampRules.holdNeed) {
+      state.merit += state.lampRules.clearMerit;
+      events.push({ type: 'objective', merit: state.lampRules.clearMerit });
+      state.result = 'win';
+      state.phase = 'over';
+      events.push({ type: 'result', result: 'win' });
+    }
+  }
+  function extinguish(state, e, l, events) {
+    l.lit = false;
+    l.dim = false;
+    events.push({ type: 'extinguish', lampId: l.id, unitId: e.id });
+    if (state.objective && state.objective.hold > 0) {
+      state.objective.hold = 0;
+      events.push({ type: 'holdReset' });
+    }
+    e.alive = false; // 등을 끈 귀화는 사라진다 (쓰러진 것이 아니다)
+    e.vanished = true;
+  }
+
+  // 귀화 (기획자 확정 2026-09-26): 봉인등 칸 또는 상하좌우 1칸에 도달한 뒤, **다음 자기 차례의 행동으로** 끈다.
+  // 대각선은 아니다. 등 위에 선 아군은 소등을 막지 못한다. 닿는 순간 자동으로 꺼지지 않는다 —
+  // 그 사이에 아군이 치거나(사수·집행), 밀어내거나(교란), 늦추거나(추적), 길을 막아(진법) 끊을 수 있다.
+  var EXTINGUISH_RANGE = 1;
+  function lampInReach(state, p) {
+    return litLamps(state).filter(function (l) { return distance(l, p) <= EXTINGUISH_RANGE; })[0] || null;
+  }
+  // 귀화 우선순위: ① 가장 가까운 켜진 봉인등 ② 길을 막는 아군 ③ 기타 아군
+  function gwihwaAct(state, e) {
+    var events = [];
+    var ready = lampInReach(state, e);
+    if (ready) {
+      extinguish(state, e, ready, events);
+      return events;
+    }
+    var lit = litLamps(state);
+    if (lit.length) {
+      var goals = [];
+      lit.forEach(function (l) {
+        goals.push({ r: l.r, c: l.c });
+        DIRS.forEach(function (d) { goals.push({ r: l.r + d[0], c: l.c + d[1] }); });
+      });
+      var map = goalMap(state, e, goals);
+      if (stepsFrom(map, e) !== Infinity) {
+        var cells = moveTargets(state, e);
+        var dest = cells.slice().sort(function (a, b) { return stepsFrom(map, a) - stepsFrom(map, b) || byCell(a, b); })[0];
+        relocate(state, e, dest, events);
+        var reached = lampInReach(state, e);
+        if (reached) {
+          // sameTurn: 도달한 그 차례에 행동으로 끈다 / 아니면 다음 자기 차례에 끈다 (그 사이 화면에 경고)
+          if (state.lampRules.sameTurn) extinguish(state, e, reached, events);
+          else events.push({ type: 'lampThreat', unitId: e.id });
+          return events;
+        }
+        var near = attackTargets(state, e).filter(function (t) { return t.side === 'ally'; }).sort(function (a, b) { return a.hp - b.hp; })[0];
+        return near ? hit(state, e, near, false, events) : events; // 길을 막는 아군
+      }
+    }
+    return normalEnemyAct(state, e);
+  }
+
+  // 도문 술사: 움직이지 않고 옆의 적 하나를 친다 (귀화 먼저, 그다음 HP 낮은 적)
+  function sentinelAct(state, d) {
+    var t = attackTargets(state, d).filter(function (x) { return x.side === 'enemy'; }).sort(function (a, b) {
+      return (a.ai === 'lamp' ? 0 : 1) - (b.ai === 'lamp' ? 0 : 1) || a.hp - b.hp;
+    })[0];
+    return t ? hit(state, d, t, false, []) : [];
   }
 
   // 원귀가 다시 나타나는 칸: 원한 지점, 차 있으면 가장 가까운 빈 칸 (위 → 아래 → 왼쪽 → 오른쪽)
@@ -2234,6 +2492,8 @@ var Core = (function () {
     var e = getUnit(state, id);
     if (!e || !e.alive || e.side === 'ally' || state.phase !== 'enemy' || state.result !== null) return [];
     if (e.ai === 'guardian') return guardianAct(state, e);
+    if (e.ai === 'sentinel') return sentinelAct(state, e);
+    if (e.ai === 'lamp') return gwihwaAct(state, e);
     if (e.ai === 'wraith') return wraithAct(state, e);
     if (e.ai === 'hold') return bossAct(state, e);
     if (e.ai === 'flee') return fleeAct(state, e);
@@ -2295,9 +2555,11 @@ var Core = (function () {
       // 3장 (specs/chapter3.md 10장)
       investigations: [], sealRepairs: [], wongwiDefeated: 0, wongwiRespawns: 0, seonangDamageTaken: 0, objectiveChangedTurn: null,
       // v0.8 수련: 누가 무엇을 골랐나, 몇 번 발동했나 (v0.9 폐사찰에서 측정)
-      training: {}, trainingTriggers: {}, trainingEvents: []
+      trainingChoices: {}, trainingActivations: {}, trainingEvents: [],
+      // 4장 (specs/chapter4.md 11장)
+      sealLampsLit: [], sealLampsExtinguished: [], sealDefenseRounds: 0, gwihwaDefeated: 0
     };
-    state.units.forEach(function (u) { if (u.training) log.training[u.id] = u.training; });
+    state.units.forEach(function (u) { if (u.training) log.trainingChoices[u.id] = u.training; });
     trackDalrae(log, state);
     return log;
   }
@@ -2336,12 +2598,19 @@ var Core = (function () {
         log.wongwiRespawns++;
       } else if (e.type === 'spring') {
         bump(log.springHealing, e.targetId, e.amount);
+      } else if (e.type === 'lamp') {
+        log.sealLampsLit.push({ turn: state.turn, lamp: e.lampId, by: e.unitId });
+      } else if (e.type === 'extinguish') {
+        log.sealLampsExtinguished.push({ turn: state.turn, lamp: e.lampId, by: e.unitId });
+      } else if (e.type === 'hold') {
+        log.sealDefenseRounds++;
       } else if (e.type === 'training') {
-        bump(log.trainingTriggers, e.kind);
+        bump(log.trainingActivations, e.kind);
         log.trainingEvents.push({ turn: state.turn, unit: e.unitId, kind: e.kind });
       } else if (e.type === 'defeat' || e.type === 'retreat') {
         var t = getUnit(state, e.targetId);
         if (t.respawn) log.wongwiDefeated++;
+        if (t.ai === 'lamp') log.gwihwaDefeated++;
         log.defeatedUnits.push({
           turn: state.turn, id: t.id, name: t.name, side: t.side,
           // 2장 달래(사람 보스)는 화면 문구처럼 '물러남' (defeatMessage)
@@ -2439,6 +2708,7 @@ var Core = (function () {
 
   // 공적 최대 = 보스 아닌 적 수 × 1 + 보스 3 (specs/chapter2.md S11)
   function maxMerit(st) {
+    if (st.lamps) return st.lamps.length * st.objective.lampMerit + st.objective.clearMerit;
     if (st.objective) return st.points.filter(function (p) { return p.seal; }).length * st.objective.sealMerit + st.objective.clearMerit;
     // 사람(제압)은 공적이 아니므로 세지 않는다 (specs/immersion.md 5장)
     return st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss && !ENEMY_TYPES[e.type].human; }).length * MERIT_NORMAL + MERIT_BOSS;
@@ -2568,7 +2838,7 @@ var Core = (function () {
   }
 
   // ── 진행 (specs/chapter2.md 1-3, 보충 S7·S9) ──────────
-  var CAMPAIGN = ['ch1', 'ch2', 'ch3']; // 장 순서
+  var CAMPAIGN = ['ch1', 'ch2', 'ch3', 'ch4']; // 장 순서
 
   function newProgress() {
     return { v: 1, cleared: [], merit: 0, training: {} };
@@ -2627,7 +2897,7 @@ var Core = (function () {
       { id: 'gyoran', name: '교란', role: '적의 위치를 흐트러뜨리는 전장 교란자', desc: '축지격에 맞은 적을 1칸 밀어낸다.' }
     ]
   };
-  var TRAINING_POINTS = { ch3: 2 }; // 3장을 깨면 수련점 2 — 4명 중 2명만 첫 수련
+  var TRAINING_POINTS = { ch3: 2, ch4: 1 }; // 3장 2 — 4명 중 2명만 첫 수련, 4장 +1 — 세 번째 인물
 
   function trainingDef(unitId, trainingId) {
     return (TRAININGS[unitId] || []).filter(function (t) { return t.id === trainingId; })[0] || null;
@@ -2685,7 +2955,11 @@ var Core = (function () {
       },
       record: '2장 사라진 여의주 — 달래가 여의주를 떨어뜨리고 물러났다.' },
     { id: 'keungoeul', name: '큰고을', mark: '고을', x: 84, y: 50, links: ['yeougol'], lore: 'region:keungoeul',
-      desc: { default: '청령현의 관아와 장시가 있는 큰 고을.\n아직 겉으로 드러난 괴변은 없다.' } },
+      desc: {
+        default: '청령현의 관아와 장시가 있는 큰 고을.\n아직 겉으로 드러난 괴변은 없다.',
+        EXORCISM_REQUIRED: '객사의 문이 밤새 잠겨 있었다.\n아침이 되어 문을 열었을 때\n관리 한 명이 흔적도 없이 사라져 있었다.'
+      },
+      note: { EXORCISM_REQUIRED: '조사 준비 중' } },
     { id: 'seonang', name: '서낭고개', mark: '고개', x: 46, y: 31, chapter: 'ch3', action: '조사한다', links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
       desc: {
         default: '고개를 넘은 사람들이\n밤마다 같은 꿈을 꾸고 있다.\n\n서낭당의 금줄이 끊어졌다.',
@@ -2693,9 +2967,14 @@ var Core = (function () {
       },
       note: { OMEN: '조사 준비 중' },
       record: '3장 서낭고개 — 끊어진 봉인을 복구했다.' },
-    { id: 'pyesachal', name: '폐사찰', mark: '절', x: 58, y: 11, links: ['seonang'], lore: 'region:pyesachal',
-      desc: { default: '오래전 버려진 절.\n최근 밤마다 불빛이 보인다는 소문이 돈다.' },
-      note: { LOCKED: '산길이 막혀 있다.', OMEN: '조사 준비 중' } },
+    { id: 'pyesachal', name: '폐사찰', mark: '절', x: 58, y: 11, chapter: 'ch4', action: '조사한다', links: ['seonang'], lore: 'region:pyesachal',
+      desc: {
+        default: '오래전 버려진 절.\n최근 밤마다 불빛이 보인다는 소문이 돈다.',
+        OMEN: '오래전에 버려진 절이다.\n사람이 살지 않는데도 밤마다 세 개의 불빛이 보인다고 한다.',
+        STABILIZED: '밤마다 보이던 불빛은 사라졌다.\n본당의 문은 여전히 굳게 닫혀 있다.'
+      },
+      note: { LOCKED: '산길이 막혀 있다.' },
+      record: '4장 폐사찰의 등불 — 세 봉인등을 다시 밝혔다.' },
     { id: 'sangil', name: '봉쇄된 산길', mark: '길', x: 16, y: 50, links: ['yeougol'], lore: 'region:sangil',
       desc: { default: '산사태로 길이 끊겼다.\n그런데 무너진 바위 아래에서 사람 목소리가 들린다는 소문이 있다.' },
       note: '지금은 지나갈 수 없다.' },
@@ -2703,7 +2982,7 @@ var Core = (function () {
       desc: { default: '강을 건너 다른 고을로 향하는 나루.' },
       note: '아직 강을 건널 때가 아니다.' }
   ];
-  var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol', ch3: 'seonang' };
+  var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol', ch3: 'seonang', ch4: 'pyesachal' };
   // 조선 전체 → 권역 → 지역 (specs/worldmap-polish.md 4장). 지금 화면 전체가 청령현 권역맵이다.
   // 권역 하나는 6~10 지역으로 두고, 권역 이야기가 끝나면 나루터로 다음 권역맵 (권역 이동 화면은 아직 없다)
   var PROVINCES = [
@@ -2720,9 +2999,9 @@ var Core = (function () {
       hq: 'HQ',
       heukseok: cleared('ch1') ? 'STABILIZED' : 'EXORCISM_REQUIRED',
       yeougol: cleared('ch2') ? 'STABILIZED' : (cleared('ch1') ? 'EXORCISM_REQUIRED' : 'UNKNOWN'),
-      keungoeul: 'PEACEFUL',
+      keungoeul: cleared('ch4') ? 'EXORCISM_REQUIRED' : 'PEACEFUL', // 4장 뒤 관리 실종 (5장은 아직 없다)
       seonang: cleared('ch3') ? 'STABILIZED' : 'OMEN',
-      pyesachal: cleared('ch3') ? 'OMEN' : 'LOCKED', // 3장 뒤 새 떡밥 (4장 전투는 아직 없다)
+      pyesachal: cleared('ch4') ? 'STABILIZED' : (cleared('ch3') ? 'OMEN' : 'LOCKED'),
       sangil: 'BLOCKED',
       naru: 'PEACEFUL'
     };
@@ -2750,7 +3029,9 @@ var Core = (function () {
     { id: 'news:ch3', after: 'ch3', region: 'seonang', title: '📜 보고',
       text: '서낭고개의 통행이 다시 시작되었다.' },
     { id: 'news:ch3b', after: 'ch3', region: 'pyesachal', title: '📜 새로운 급보가 도착했습니다.',
-      text: '서낭고개 너머 폐사찰에서\n밤마다 불빛이 보인다는 보고가 올라왔다.' }
+      text: '서낭고개 너머 폐사찰에서\n밤마다 불빛이 보인다는 보고가 올라왔다.' },
+    { id: 'news:ch4', after: 'ch4', region: 'keungoeul', title: '📜 새로운 급보가 도착했습니다.',
+      text: '큰고을 객사의 문이 밤새 잠겨 있었다.\n아침이 되어 문을 열었을 때\n관리 한 명이 흔적도 없이 사라져 있었다.' }
   ];
   // 가장 최근에 깬 장의 급보만 보여 준다 — 이전 저장으로 처음 지도를 열 때 이미 지난 급보(안정된 곳을 가리키는)가 뜨지 않게
   function worldNews(progress, seen) {
@@ -2762,12 +3043,13 @@ var Core = (function () {
   var MISSIONS = {
     ch1: { title: '흑린 토벌', text: '흑석촌에서 가축과 사람들이 잇달아 사라지고 있다.' },
     ch2: { title: '사라진 여의주', text: '여우골에서 달래의 흔적을 찾았다.' },
-    ch3: { title: '괴변의 원인 조사', text: '서낭고개의 괴변 원인을 확인하라.' }
+    ch3: { title: '괴변의 원인 조사', text: '서낭고개의 괴변 원인을 확인하라.' },
+    ch4: { title: '폐사찰의 등불', text: '사람이 없는 폐사찰에 밤마다 세 개의 불빛이 켜진다.' }
   };
   function currentMission(progress) {
     var ch = nextStage(progress);
     if (ch) return { region: REGION_BY_CHAPTER[ch], chapter: ch, title: MISSIONS[ch].title, text: MISSIONS[ch].text, ready: true };
-    return { region: 'pyesachal', chapter: null, title: '조사 준비 중', text: '서낭고개 너머 폐사찰에서 밤마다 불빛이 보인다는 보고가 올라왔다.', ready: false };
+    return { region: 'keungoeul', chapter: null, title: '조사 준비 중', text: '큰고을 객사에서 관리 한 명이 흔적도 없이 사라졌다.', ready: false };
   }
 
   // ── 벽사록: 도감 + 세계관 사전 (specs/lore.md 9~13장) ─────────────
@@ -2819,6 +3101,11 @@ var Core = (function () {
       characterNotes: { yoon: '칼로 베었는데도 다시 일어났다.\n죽은 것을 다시 죽일 수는 없는 모양이다.' },
       lore: '강한 원한이나 미련을 남긴 혼. 벽사청에서는 같은 귀물이라도 단순한 잡귀와 구분하여 기록한다.',
       note: '원한을 품고 죽은 이의 혼이라는 관념은 민간 신앙에 널리 있다. 잡귀·원귀 같은 체계적 분류와 다시 나타나는 성질은 게임 설정이다.' },
+    // 4장 — 민속 자료 검증 전이라 게임 속 설정만 적는다 (specs/chapter4.md 10장). 문구는 AI 초안
+    { id: 'gwihwa', cat: '귀물', name: '귀화', hanja: '鬼火', grade: 'C', entityType: 'WONGWI', unlock: ['enemy:gwihwa'],
+      characterNotes: { yoon: '사람에게는 관심이 없었다.\n불만 보면 달려들었다.' },
+      lore: '폐사찰에 나타난 푸른 불빛 같은 귀물. 약하지만 빠르고, 사람보다 봉인등을 먼저 노린다.',
+      note: '귀화라는 이름과 관련된 민속은 아직 자료를 확인하지 않았다. 여기 적은 모습과 성질은 모두 게임 설정이다.' },
 
     // 의식 — 1장 승리 후 벽사청의 뿌리로 밝혀진다
     { id: 'narye', cat: '의식', name: '나례', hanja: '儺禮', grade: 'A', unlock: ['clear:ch1'],
@@ -2839,6 +3126,16 @@ var Core = (function () {
       characterNotes: { yoon: '지날 때 돌 하나 얹는 일을 미신이라 여겼다.\n그 돌 아래 무엇이 눌려 있는지는 생각해 본 적이 없었다.' },
       lore: '마을 어귀나 고갯마루에 서낭신을 모신 자리. 돌무더기나 신목, 작은 당집 등의 모습으로 나타난다. 길을 지나는 사람들은 돌이나 천 조각 등을 놓으며 마을과 길의 안녕을 빌기도 했다.',
       note: '서낭당은 성황당이라고도 불렸으며, 조선시대에도 마을과 지역을 지키는 신앙의 장소로 널리 모셔졌다. 게임에서 서낭당이 원귀를 막는 ‘봉인’ 역할을 한다는 설정은 창작이다.' },
+
+    // 4장 폐사찰 — 게임 속 장소·물건 (문구는 AI 초안)
+    { id: 'pyesachal', cat: '기록', name: '폐사찰', grade: 'C', unlock: ['stage:ch4'],
+      characterNotes: { yoon: '사람이 떠난 절에 불이 켜진다.\n누군가는 떠나지 않았다는 뜻이다.' },
+      lore: '청령현 북쪽 서낭고개 너머의 버려진 절. 밤마다 세 개의 불빛이 켜진다는 소문이 돌았다.',
+      note: '폐사찰과 그 안의 봉인은 게임 속 창작 장소다.' },
+    { id: 'bonginding', cat: '물건', name: '봉인등', grade: 'C', unlock: ['point:lampWest'],
+      characterNotes: { yoon: '등잔 아래 부적이 겹겹이 붙어 있었다.\n누군가 오래 지켜 온 불이다.' },
+      lore: '폐사찰 세 방향에 놓인 등. 불을 밝히기 위한 것이 아니라 본당 안의 무언가를 가두는 봉인이다.',
+      note: '봉인등은 게임 속 창작 물건이다.' },
 
     // 물건 — 데이터와 벽사록 항목만. 인벤토리·사용은 아직 없다 (specs/lore.md 17장)
     { id: 'jeonghwasu', cat: '물건', name: '정화수', hanja: '井華水', grade: 'B', item: 'ITEM_001', faction: '신당회', unlock: ['skill:정화수'],
@@ -2977,6 +3274,13 @@ var Core = (function () {
     useSkill: useSkill,
     wait: wait,
     skillRange: skillRange,
+    lampAt: lampAt,
+    lampInReach: lampInReach,
+    litLamps: litLamps,
+    allLit: allLit,
+    lightableLamp: lightableLamp,
+    lightLamp: lightLamp,
+    isSpawn: isSpawn,
     spreadTargets: spreadTargets,
     reMoveTargets: reMoveTargets,
     reMove: reMove,
@@ -3164,7 +3468,51 @@ var Core = (function () {
       firstStrike: [
         { who: '서낭신', face: '👴', text: '눈앞의 것만 보는구나.' },
         { who: '소운', face: '🧙', text: '…잠깐. 저것이 우리를 노리고 있지는 않소.' }
-      ]
+      ],
+      truthShowcase: 5 // 진실 대사 5줄 뒤 서낭신 금역 장면
+    },
+    // 4장 폐사찰의 등불 (specs/chapter4.md) — 대사는 기획서 그대로
+    ch4: {
+      label: '4장',
+      title: '제4장 — 폐사찰의 등불',
+      intro: function () {
+        return [
+          { who: '윤무겸', face: '🗡️', text: '사람이 없는 절에 등불이 켜진다?' },
+          { who: '한결', face: '🏹', text: '마을 사람들은 귀신이 제사를 지내는 거라고 합니다.' },
+          { who: '소운', face: '🧙', text: '세 개라고 했소?' },
+          { who: '윤무겸', face: '🗡️', text: '아는 게 있나?' },
+          { who: '소운', face: '🧙', text: '…직접 확인해야겠소.' }
+        ];
+      },
+      truth: [
+        { who: '도문 술사', face: '☯️', text: '그 문에서 떨어져라.' },
+        { who: '윤무겸', face: '🗡️', text: '누구냐.' },
+        { who: '소운', face: '🧙', text: '…사형.' },
+        { who: '도문 술사', face: '☯️', text: '저 불은 귀신이 켠 것이 아니다.' },
+        { who: '도문 술사', face: '☯️', text: '저것이 꺼지면 안에 있는 것이 나온다.' },
+        { who: '윤무겸', face: '🗡️', text: '그럼 왜 관아에 알리지 않았지?' },
+        { who: '도문 술사', face: '☯️', text: '관아가 알아서는 안 되기 때문이다.' }
+      ],
+      outro: function () {
+        return [
+          { who: '', face: '🚪', text: '쿵.' },
+          { who: '', face: '🚪', text: '본당 문 안쪽에서 한 번, 큰 충격음이 울렸다.\n그리고 조용해졌다.' },
+          { who: '윤무겸', face: '🗡️', text: '봉인한 것이 무엇인지 확인해야겠다.' },
+          { who: '도문 술사', face: '☯️', text: '안 된다.' },
+          { who: '윤무겸', face: '🗡️', text: '벽사청의 관할이다.' },
+          { who: '도문 술사', face: '☯️', text: '그렇기에 더더욱 안 된다.' },
+          { who: '소운', face: '🧙', text: '이건 오래돼서 끊어진 게 아니오.' },
+          { who: '윤무겸', face: '🗡️', text: '뭐지?' },
+          { who: '소운', face: '🧙', text: '잘린 거요.' },
+          { who: '', face: '🔍', text: '봉인 일부에 칼로 끊은 흔적이 있다.\n누군가 일부러 봉인을 풀려고 했다.' }
+        ];
+      },
+      lose: {
+        wipe: '벽사청 일행이 폐사찰에서 물러났다.',
+        time: '날이 밝도록 봉인등을 지키지 못했다.'
+      },
+      objectiveLine: ['쿵.', '본당 문 안쪽에서 큰 충격음이 울렸다.'],
+      summary: '폐사찰의 봉인을 복구했다.'
     }
   };
 
@@ -3432,6 +3780,7 @@ var Core = (function () {
       if (u.side === 'ally' && u.acted) tile.className += ' acted';
       if (u.id === 'dallae' && ui.dallaeGone) tile.className += ' fading';
       cellAt(u.r, u.c).appendChild(tile);
+      if (u.ai === 'lamp' && Core.lampInReach(state, u)) cellAt(u.r, u.c).appendChild(el('span', 'threat', '끈다!')); // 다음 차례에 등을 끈다
       var tag = u.side !== 'ally' || ui.kind === 'skill' ? affinityTag(u) : null;
       if (tag && marksHas(marks, u)) cellAt(u.r, u.c).appendChild(tag);
     });
@@ -3463,21 +3812,46 @@ var Core = (function () {
     box.hidden = !state.objective;
     if (!state.objective) return;
     var o = state.objective;
+    cells.forEach(function (cell) { cell.classList.remove('lamp-glow'); });
+    var marked = {};
     state.points.forEach(function (p) {
       var m = pointMark(p);
       if (!m) return;
+      if (o.phase === 'lamps' && Core.lampAt(state, p.r, p.c)) return; // 봉인등 단계에는 등 표시만
       var cell = cellAt(p.r, p.c);
       cell.appendChild(el('span', 'pt ' + m[0], m[1]));
+      marked[p.r + ',' + p.c] = true;
       if (m[0] === 'seal') cell.classList.add('goal');
+    });
+    (state.lamps || []).forEach(function (l) {
+      var cell = cellAt(l.r, l.c);
+      if (l.lit) cell.classList.add('lamp-glow');
+      if (marked[l.r + ',' + l.c]) return;
+      var off = !l.lit && o.phase === 'lamps';
+      cell.appendChild(el('span', 'pt ' + (l.lit ? (l.dim ? 'lamp-dim' : 'lamp-on') : 'lamp-off' + (off ? ' urgent' : '')),
+        l.lit ? (l.dim ? '약한 등' : '등불') : '꺼짐'));
+      if (off) cell.classList.add('goal');
     });
     var goal = CHAPTERS[chapterId] && Core.STAGES[chapterId].objective;
     box.innerHTML = '';
     box.appendChild(el('b', '', '임무 '));
+    var lamps = state.lamps && Core.litLamps(state).length + '/' + state.lamps.length;
     box.appendChild(document.createTextNode(o.phase === 'investigate'
       ? goal.before + ' (조사 ' + o.investigated.length + '/' + o.need + ')'
-      : goal.after + ' (복구 ' + o.repaired.length + '/' + Core.STAGES[chapterId].points.filter(function (p) { return p.seal; }).length + ')'));
+      : o.phase === 'lamps'
+        ? goal.after + ' (켜진 등 ' + lamps + ' · 봉인 유지 ' + o.hold + '/' + goal.holdNeed + ')'
+        : goal.after + ' (복구 ' + o.repaired.length + '/' + Core.STAGES[chapterId].points.filter(function (p) { return p.seal; }).length + ')'));
   }
   // 지점 칸을 눌렀을 때의 설명
+  function lampInfo(l) {
+    var o = state.objective;
+    if (l.lit) {
+      return { mark: '🏮', name: l.name + (l.dim ? ' · 약한 불' : ' · 켜짐'),
+        text: '귀화가 이 등이나 바로 옆 칸(상하좌우)에 닿으면\n다음 차례에 불을 끈다. 등 위에 서 있어도 막지 못한다.' };
+    }
+    return { mark: '🏮', name: l.name + ' · 꺼짐',
+      text: o.phase === 'lamps' ? '이 칸에 선 아군이 [봉인등 밝히기]를 할 수 있다.' : '불이 꺼져 있다.' };
+  }
   function pointInfo(p) {
     var o = state.objective;
     if (o.phase === 'investigate') {
@@ -3498,7 +3872,9 @@ var Core = (function () {
   function renderInfo() {
     var box = document.getElementById('info');
     var pt = ui.infoCell && state.objective && Core.pointAt(state, ui.infoCell.r, ui.infoCell.c);
-    var pInfo = pt && pointInfo(pt);
+    var lp = ui.infoCell && Core.lampAt(state, ui.infoCell.r, ui.infoCell.c);
+    var pInfo = lp && (state.objective.phase === 'lamps' || !pt || state.objective.investigated.indexOf(pt.id) !== -1)
+      ? lampInfo(lp) : pt && pointInfo(pt);
     if (pInfo) {
       box.hidden = false;
       box.innerHTML = '';
@@ -3534,9 +3910,11 @@ var Core = (function () {
     var name = el('div', 'name', u.name);
     if (u.guest) name.appendChild(el('span', 'guest', '객장'));
     text.appendChild(name);
-    text.appendChild(el('div', 'sub', u.side === 'neutral'
+    text.appendChild(el('div', 'sub', u.type === 'seonang'
       ? (seonangHidden() ? '정체를 알 수 없다' : u.faction + ' · 원귀를 막고 있는 신령')
       : u.faction + ' · ' + u.title));
+    if (u.ai === 'lamp') text.appendChild(el('div', 'sub', Core.lampInReach(state, u) ? '봉인등에 닿았다 — 다음 차례에 불을 끈다' : '봉인등을 노린다'));
+    if (u.untargetable) text.appendChild(el('div', 'sub', '공격할 수 없다 · 옆에 온 귀물을 친다'));
     text.appendChild(el('div', 'stats',
       'HP ' + u.hp + '/' + u.maxHp +
       ' · 기력 ' + (u.ki === null ? '—' : u.ki + '/' + u.maxKi) +
@@ -3669,6 +4047,7 @@ var Core = (function () {
     skill.appendChild(document.createTextNode(u.skill || '스킬'));
     skill.appendChild(el('small', '', u.skill ? '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')' : '없음')); // 관군은 스킬 없음
     document.getElementById('btn-seal').hidden = !Core.repairablePoint(state, u); // 3장 봉인 칸에 섰을 때만
+    document.getElementById('btn-lamp').hidden = !Core.lightableLamp(state, u); // 4장 꺼진 등 위에 섰을 때만
     var barrier = document.getElementById('btn-barrier');
     barrier.hidden = u.training !== 'jinbeop'; // 소운 진법만
     barrier.disabled = !Core.canBarrier(state, u);
@@ -3818,13 +4197,21 @@ var Core = (function () {
         var p = Core.pointById(state, e.pointId);
         discover(['point:' + p.id]);
         lines.push({ who: '조사 — ' + p.investigate.title, face: '🔍', text: p.investigate.text });
+        if (p.investigate.say) lines.push(p.investigate.say);
       }
     });
     var truth = events.some(function (e) { return e.type === 'truth'; });
     if (truth) {
-      lines = lines.concat(CHAPTERS[chapterId].truth.slice(0, 5));
-      lines.push({ pause: 900, run: guardianShowcase });
-      lines = lines.concat(CHAPTERS[chapterId].truth.slice(5));
+      var ch = CHAPTERS[chapterId], at = ch.truthShowcase;
+      if (at) {
+        lines = lines.concat(ch.truth.slice(0, at));
+        lines.push({ pause: 900, run: guardianShowcase });
+        lines = lines.concat(ch.truth.slice(at));
+      } else {
+        // 4장: 도문 술사가 먼저 모습을 드러내고 말한다
+        lines.push({ pause: 700, run: function () { render(); markNew(events); } });
+        lines = lines.concat(ch.truth);
+      }
     }
     playScene(lines, function () {
       ui.busy = false;
@@ -3834,6 +4221,14 @@ var Core = (function () {
         toast([{ b: '임무 갱신' }, { html: goal.before }, { text: goal.after }], 'mission', 3200, 0);
       }
       if (after) after();
+    });
+  }
+  // 4장 진실: 새로 나타난 도문 술사·귀화를 반짝 표시
+  function markNew(events) {
+    events.forEach(function (e) {
+      if (e.type !== 'appear' && e.type !== 'reinforce') return;
+      var tile = board.querySelector('.unit[data-id="' + e.unitId + '"]');
+      if (tile) tile.classList.add('respawned');
     });
   }
   // 진실 공개 중 서낭신이 원귀 하나를 밀어내는 짧은 장면 (가까운 원귀가 없으면 기술 이름만)
@@ -3912,8 +4307,20 @@ var Core = (function () {
         discover(['point:' + e.pointId]);
         toast([{ text: Core.pointById(state, e.pointId).seal.done }, { small: '봉인 복구 · 공적 +' + e.merit }], '', 2400);
       } else if (e.type === 'objective') {
-        toast([{ b: '바람이 멎었다.' }, { small: '임무 완료 · 공적 +' + e.merit }], 'mission', 2600, 0);
+        var line = CHAPTERS[chapterId].objectiveLine || ['바람이 멎었다.'];
+        toast([{ b: line[0] }].concat(line[1] ? [{ text: line[1] }] : []).concat([{ small: '임무 완료 · 공적 +' + e.merit }]), 'mission', 2600, 0);
+        if (state.lamps) quake();
         fadeWraiths();
+      } else if (e.type === 'lamp') {
+        toast([{ text: '봉인등을 다시 밝혔다.' }, { small: e.merit ? '공적 +' + e.merit : '다시 켰다' }], '', 2000);
+      } else if (e.type === 'lampsAll') {
+        toast([{ b: '세 봉인등이 모두 켜졌다.' }, { small: '봉인 유지 0/' + Core.STAGES[chapterId].objective.holdNeed + ' — 적의 차례를 두 번 버텨라' }], 'mission', 2600, 0);
+      } else if (e.type === 'hold') {
+        if (e.n < e.need) toast([{ b: '봉인 유지 ' + e.n + '/' + e.need }], 'mission', 2000, 0);
+      } else if (e.type === 'extinguish') {
+        toast([{ text: '봉인등 하나가 꺼졌다.' }].concat(state.objective.phase === 'lamps' ? [{ small: '봉인 유지 0/' + Core.STAGES[chapterId].objective.holdNeed }] : []), '', 2400, 0);
+      } else if (e.type === 'reinforce') {
+        toast([{ text: '귀화가 나타났다.' }], '', 1800);
       } else if (e.type === 'respawn') {
         toast([{ text: '원한이 남아 다시 모습을 드러냈다.' }], '', 2400);
       } else if (e.type === 'weakened') {
@@ -3921,10 +4328,16 @@ var Core = (function () {
       }
     });
   }
-  // 마지막 봉인: 남은 원귀가 희미해지며 사라진다
+  function quake() {
+    var b = document.getElementById('board');
+    b.classList.remove('quake');
+    void b.offsetWidth;
+    b.classList.add('quake');
+  }
+  // 마지막 봉인: 남은 원귀(4장은 귀화도)가 희미해지며 사라진다
   function fadeWraiths() {
     Core.livingUnits(state, 'enemy').forEach(function (u) {
-      if (u.type !== 'wongwi') return;
+      if (u.type !== 'wongwi' && u.type !== 'wongwi_b' && u.type !== 'gwihwa') return;
       var tile = board.querySelector('.unit[data-id="' + u.id + '"]');
       if (!tile) return;
       var ghost = el('div', 'ghost dying');
@@ -4542,10 +4955,16 @@ var Core = (function () {
   }
 
   // 급보: 장을 깬 뒤 처음 지도를 볼 때 차례로
+  var peopleAfterNews = false;
+  var loreAtStart = [];
   function showNews() {
     var news = Core.worldNews(progress, worldSeen)[0];
     var box = document.getElementById('world-news');
-    if (!news) { box.hidden = true; return; }
+    if (!news) {
+      box.hidden = true;
+      if (peopleAfterNews) { peopleAfterNews = false; openRegion('hq'); showPeople(); }
+      return;
+    }
     document.getElementById('world-news-title').textContent = news.title;
     document.getElementById('world-news-text').textContent = news.text;
     box.hidden = false;
@@ -4586,6 +5005,9 @@ var Core = (function () {
     sheetButton(box, '수련 초기화', '', function (ev) { ev.stopPropagation(); progress = Core.resetTraining(progress); saveProgress(); closeRegion(); });
     if (progress.cleared.indexOf('ch3') !== -1) {
       sheetButton(box, '3장 수련 시험', '', function (ev) { ev.stopPropagation(); startChapter('ch3'); });
+    }
+    if (progress.cleared.indexOf('ch4') !== -1) {
+      sheetButton(box, '4장 다시', '', function (ev) { ev.stopPropagation(); startChapter('ch4'); });
     }
   }
 
@@ -4697,6 +5119,7 @@ var Core = (function () {
     document.getElementById('title').hidden = true;
     document.getElementById('world').hidden = true;
     state = Core.newBattle(Core.STAGES[id], { merit: progress.merit, training: progress.training });
+    loreAtStart = loreTokens().slice(); // 결과 화면의 "벽사록 신규 기록" 수
     playLog = Core.newPlayLog(state, id, playStore.restarts[id] || 0);
     ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, seonangWarned: false, askedSeonang: false };
     buildBoard();
@@ -4768,18 +5191,34 @@ var Core = (function () {
     var t = document.getElementById('result-text');
     t.className = 'title ' + (win ? 'win' : 'lose');
     t.textContent = win
-      ? ch.title + ' 완료 · 공적 ' + state.merit + ' / ' + Core.maxMerit(Core.STAGES[chapterId])
+      ? (ch.summary ? '임무 완료' : ch.title + ' 완료 · 공적 ' + state.merit + ' / ' + Core.maxMerit(Core.STAGES[chapterId]))
       : (typeof ch.lose === 'string' ? ch.lose : ch.lose[state.loseReason] || ch.lose.wipe);
     var sub = '';
     if (win) {
       var after = Core.rankFor(progress.merit).name;
       sub = '공적 누계 ' + progress.merit + ' · 품계 ' + after + (after !== before ? ' (승진!)' : '');
       var gained = Core.trainingEarned(progress) - pointsBefore;
-      if (gained > 0) sub += '\n수련점 +' + gained + ' — 본진에서 인물을 수련할 수 있다';
+      if (gained > 0 && !ch.summary) sub += '\n수련점 +' + gained + ' — 본진에서 인물을 수련할 수 있다';
     }
     var subEl = document.getElementById('result-sub');
     subEl.textContent = sub;
     subEl.style.whiteSpace = 'pre-line';
+    // 4장부터: 보상을 분명하게 (specs/chapter4.md 9장)
+    var hq = document.getElementById('btn-hq');
+    hq.hidden = true;
+    var old = document.querySelector('#result .reward');
+    if (old) old.parentNode.removeChild(old);
+    if (win && ch.summary) {
+      subEl.textContent = ch.summary + '\n' + sub;
+      var box = el('div', 'reward');
+      box.appendChild(el('div', '', '획득'));
+      box.appendChild(el('div', '', '공적 +' + state.merit));
+      if (gained > 0) box.appendChild(el('div', '', '수련점 +' + gained));
+      var newLore = Core.newlyUnlockedLore(loreAtStart, loreTokens()).length;
+      if (newLore) box.appendChild(el('div', '', '벽사록 신규 기록 ' + newLore));
+      if (gained > 0) { box.appendChild(el('b', '', '새로운 수련이 가능합니다.')); hq.hidden = false; }
+      subEl.parentNode.insertBefore(box, subEl.nextSibling);
+    }
     document.getElementById('btn-next').hidden = false; // 이겨도 져도 [지도로 돌아간다] (자동으로 다음 장을 시작하지 않는다)
     document.getElementById('btn-retry').hidden = win;
     document.getElementById('result').hidden = false;
@@ -4791,6 +5230,11 @@ var Core = (function () {
     startChapter(chapterId);
   });
   document.getElementById('btn-next').addEventListener('click', showWorld); // [지도로 돌아간다]
+  // [본진에서 확인]: 지도로 가서 급보를 본 뒤 인물 화면 (수련창을 강제로 열지 않는다 — 누른 사람만)
+  document.getElementById('btn-hq').addEventListener('click', function () {
+    peopleAfterNews = true;
+    showWorld();
+  });
   document.getElementById('btn-home').addEventListener('click', showTitle);
   document.getElementById('btn-continue').addEventListener('click', showWorld); // 이어하기는 언제나 지도로
   // 프롤로그: 문장이 한 덩이씩 나타나고(약 10초) 마지막에 [임무를 받는다]. 화면을 누르면 한 번에 다 보인다
@@ -4858,6 +5302,14 @@ var Core = (function () {
     if (ui.step !== 'menu') return;
     var from = startPos(ui.id), actor = ui.id;
     var events = Core.repairSeal(state, ui.id);
+    if (!events) return;
+    logAllyAction(actor, from, events);
+    afterAction(events);
+  });
+  document.getElementById('btn-lamp').addEventListener('click', function () {
+    if (ui.step !== 'menu') return;
+    var from = startPos(ui.id), actor = ui.id;
+    var events = Core.lightLamp(state, ui.id);
     if (!events) return;
     logAllyAction(actor, from, events);
     afterAction(events);

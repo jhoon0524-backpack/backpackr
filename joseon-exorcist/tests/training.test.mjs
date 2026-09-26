@@ -401,11 +401,11 @@ test('역할 문구: 기획자 확정 8개', () => {
 test('플레이 기록: 고른 수련과 발동 횟수가 남는다', () => {
   const s = arena([['dokkaebi', 3, 3], ['dokkaebi', 0, 7]], { yoon: 'jiphaeng', hangyeol: 'chujeok' });
   const log = Core.newPlayLog(s, 'ch4', 0);
-  assert.deepEqual(log.training, { yoon: 'jiphaeng', hangyeol: 'chujeok' });
+  assert.deepEqual(log.trainingChoices, { yoon: 'jiphaeng', hangyeol: 'chujeok' });
   put(s, 'yoon', 4, 3);
   U(s, 'dokkaebi1').hp = 1;
   Core.logEvents(log, s, Core.useSkill(s, 'yoon', 'dokkaebi1'));
-  assert.deepEqual(log.trainingTriggers, { jiphaeng: 1 });
+  assert.deepEqual(log.trainingActivations, { jiphaeng: 1 });
   assert.deepEqual(log.trainingEvents, [{ turn: 1, unit: 'yoon', kind: 'jiphaeng' }]);
 });
 

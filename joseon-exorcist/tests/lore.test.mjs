@@ -83,11 +83,11 @@ test('달래의 회복(아군·적 모두)은 정화수', () => {
 const ids = Core.LORE.map((e) => e.id);
 const byId = Object.fromEntries(Core.LORE.map((e) => [e.id, e]));
 
-test('카테고리 6개, 항목: 세력 3·귀물 5·의식 4·물건 11 (v0.7 서낭신·원귀·서낭당·금줄)', () => {
+test('카테고리 6개, 항목: 세력 3·귀물 6·의식 4·물건 12·기록 1 (v0.9 귀화·봉인등·폐사찰)', () => {
   assert.deepEqual(Core.LORE_CATEGORIES, ['인물', '세력', '귀물', '의식', '물건', '기록']);
   const count = {};
   for (const e of Core.LORE) count[e.cat] = (count[e.cat] || 0) + 1;
-  assert.deepEqual(count, { 세력: 3, 귀물: 5, 의식: 4, 물건: 11 });
+  assert.deepEqual(count, { 세력: 3, 귀물: 6, 의식: 4, 물건: 12, 기록: 1 });
   assert.equal(new Set(ids).size, ids.length, 'id 중복 없음');
 });
 
@@ -144,7 +144,8 @@ test('밝힘: 벽사청만 처음부터, 도문 1장·신당회 2장, 귀물은 
   assert.ok(on(ch2).includes('dokkaebi'), '정화된 도깨비도 도깨비');
   assert.ok(on(['skill:정화수']).includes('jeonghwasu'));
   const everything = [...after1, ...ch2, 'skill:정화수', 'skill:무령', 'clear:ch2',
-    ...Core.loreTokensForBattle(Core.newBattle(Core.STAGES.ch3), 'ch3'), 'point:geumjul'];
+    ...Core.loreTokensForBattle(Core.newBattle(Core.STAGES.ch3), 'ch3'), 'point:geumjul',
+    ...Core.loreTokensForBattle(Core.newBattle(Core.STAGES.ch4), 'ch4'), 'point:lampWest'];
   assert.deepEqual(Core.LORE.filter((e) => !Core.loreUnlocked(e, everything)).map((e) => e.id),
     ['dopan', 'dobong', 'munbae', 'sehwa', 'cheonjungjeokbu', 'dongjipat'], '후속 장 물건 6개만 잠김');
 });
