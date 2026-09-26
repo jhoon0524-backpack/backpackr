@@ -543,6 +543,113 @@
   #prologue .big-btn { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
   #prologue .big-btn.on { opacity: 1; pointer-events: auto; }
 
+  /* 월드맵: 한지·먹선 고지도 느낌. 노드는 또렷하게 (specs/worldmap.md 6장) */
+  #world {
+    position: fixed; inset: 0; z-index: 24; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 40%, #f3ebd9 0%, #e6d9bd 70%, #d9c9a6 100%);
+    color: #1d1a14; display: flex; flex-direction: column; align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  }
+  #world .w-head { width: 100%; max-width: 480px; padding: 8px 12px 4px; text-align: center; }
+  #world .w-top { display: flex; align-items: center; justify-content: space-between; }
+  #world h1 { margin: 0; font-size: 20px; letter-spacing: .12em; font-family: "Nanum Myeongjo", "AppleMyungjo", serif; }
+  #world h1 small { font-size: 12px; color: #6b5f48; letter-spacing: .1em; }
+  #world .w-btn { min-width: 40px; height: 36px; border-radius: 6px; border: 1px solid #b9a984; background: #f7f1e3; color: #1d1a14; font: inherit; font-size: 16px; }
+  #world .w-rank { font-size: 13px; color: #3b3326; margin-top: 2px; }
+  #world .w-rank b { color: #b0302a; }
+  #world .w-mission {
+    margin-top: 6px; width: 100%; min-height: 36px; border-radius: 6px; border: 1px solid #b0302a;
+    background: rgba(176, 48, 42, .08); color: #1d1a14; font: inherit; font-size: 13px; font-weight: 700;
+  }
+  #world .w-mission small { font-weight: 400; color: #6b5f48; margin-right: 6px; }
+  #world .w-dev { margin-top: 6px; font-size: 11px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-items: center; }
+  #world .w-dev button { font: inherit; font-size: 11px; padding: 2px 6px; border: 1px solid #6b5f48; background: #f7f1e3; border-radius: 3px; }
+  #world .w-map {
+    position: relative; flex: none; aspect-ratio: 100 / 160; /* 세로로 늘려 노드 사이 여유 (좌표는 100×130 기준 그대로) */
+    width: min(calc(100vw - 16px), calc((100vh - 150px) * 100 / 160), 440px);
+  }
+  #world .w-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #world .ridge path { fill: none; stroke: #3b3326; stroke-width: .5; stroke-linejoin: round; opacity: .55; }
+  #world .ridge.faint path { opacity: .3; }
+  #world .river { fill: none; stroke: #7f98a3; stroke-width: 4; opacity: .35; stroke-linecap: round; }
+  #world .road { stroke: #6b5f48; stroke-width: .7; stroke-dasharray: 1.6 1.1; opacity: .8; }
+  #world .road.shut { opacity: .3; }
+  #world .node {
+    position: absolute; transform: translate(-50%, -50%); background: none; border: none; padding: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; color: #1d1a14;
+    min-width: 56px; min-height: 56px; justify-content: center; touch-action: manipulation;
+  }
+  #world .node .seal {
+    position: relative; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: #f7f1e3; border: 2px solid #3b3326; font-family: "Nanum Myeongjo", "AppleMyungjo", serif; font-size: 19px; font-weight: 800;
+  }
+  #world .node .label, #world .node .state { white-space: nowrap; background: rgba(243, 235, 217, .9); border-radius: 3px; padding: 0 3px; line-height: 1.35; }
+  #world .node .label { font-size: 12px; font-weight: 700; }
+  #world .node .state { font-size: 10px; color: #6b5f48; margin-top: -1px; }
+  #world .node.on .seal { outline: 3px solid rgba(29, 26, 20, .35); outline-offset: 2px; }
+  /* 본진: 붉은 네모 인장, 조금 크게 */
+  #world .st-HQ .seal { width: 46px; height: 46px; border-radius: 4px; border: 3px double #b0302a; color: #b0302a; transform: rotate(-4deg); font-size: 24px; }
+  /* 평온·안정됨: 창문 불빛 */
+  #world .st-PEACEFUL .seal::after, #world .st-STABILIZED .seal::after {
+    content: ""; position: absolute; right: -2px; bottom: 2px; width: 7px; height: 7px; border-radius: 50%;
+    background: #f5c542; box-shadow: 0 0 6px 2px rgba(245, 197, 66, .7);
+  }
+  #world .st-STABILIZED .seal { background: #fbf6ea; border-color: #4a5a52; color: #2d3a33; }
+  /* 이상 징후: 옅은 안개와 느린 회색 파동 */
+  #world .st-OMEN .seal { border-color: #8a8270; color: #5d5646; box-shadow: 0 0 0 6px rgba(160, 150, 130, .25), 0 0 14px 6px rgba(200, 192, 170, .6); }
+  #world .st-OMEN .seal::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(140, 130, 110, .6); animation: w-omen 3.2s ease-out infinite; }
+  @keyframes w-omen { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }
+  /* 괴변 발생: 붉은 인장 + 검은 연기 + 느린 호흡 (가장 눈에 띈다) */
+  #world .st-EXORCISM_REQUIRED .seal { background: #b0302a; border-color: #6e1b17; color: #f7f1e3; animation: w-breath 2.4s ease-in-out infinite; }
+  #world .st-EXORCISM_REQUIRED .seal::before {
+    content: ""; position: absolute; left: 50%; bottom: 80%; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(20, 16, 12, .75) 0%, rgba(20, 16, 12, 0) 70%); filter: blur(1px);
+    animation: w-smoke 2.8s ease-out infinite;
+  }
+  #world .st-EXORCISM_REQUIRED .label { color: #8f231d; }
+  @keyframes w-breath { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(176, 48, 42, .45); } 50% { transform: scale(1.06); box-shadow: 0 0 0 7px rgba(176, 48, 42, 0); } }
+  @keyframes w-smoke { 0% { transform: translateY(4px) scale(.7); opacity: .9; } 100% { transform: translateY(-14px) scale(1.5); opacity: 0; } }
+  /* 미확인·봉쇄·통행 불가: 흐리게, 금줄 */
+  #world .st-UNKNOWN .seal { border-style: dashed; color: #8a8270; background: #eee5d0; }
+  #world .st-UNKNOWN .label, #world .st-LOCKED .label, #world .st-BLOCKED .label { color: #6b5f48; }
+  #world .st-LOCKED .seal, #world .st-BLOCKED .seal { opacity: .5; }
+  #world .st-LOCKED .seal::after, #world .st-BLOCKED .seal::after {
+    content: ""; position: absolute; left: -6px; right: -6px; top: 45%; height: 4px; transform: rotate(-18deg);
+    background: repeating-linear-gradient(90deg, #6b5f48 0 3px, #d9c9a6 3px 5px); border-radius: 2px;
+  }
+  /* 급보가 도착한 지역: 붉은 파동 세 번 */
+  #world .node.news .seal { box-shadow: 0 0 0 0 rgba(176, 48, 42, .7); animation: w-news 1s ease-out 3; }
+  @keyframes w-news { 0% { box-shadow: 0 0 0 0 rgba(176, 48, 42, .7); } 100% { box-shadow: 0 0 0 18px rgba(176, 48, 42, 0); } }
+  /* 바텀시트 */
+  #world .w-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 26; margin: 0 auto; max-width: 480px;
+    background: #f7f1e3; border: 1px solid #b9a984; border-bottom: none; border-radius: 12px 12px 0 0;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, .25); padding: 14px 16px 18px;
+  }
+  #world .w-sheet .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  #world .w-sheet h2 { margin: 0; font-size: 19px; font-family: "Nanum Myeongjo", "AppleMyungjo", serif; }
+  #world .w-sheet .w-badge { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid #6b5f48; white-space: nowrap; }
+  #world .w-sheet .w-badge.EXORCISM_REQUIRED { background: #b0302a; color: #f7f1e3; border-color: #b0302a; }
+  #world .w-sheet .w-badge.STABILIZED { background: #e3eadf; }
+  #world .w-sheet .w-badge.OMEN { background: #e6e0d0; }
+  #world .w-sheet p { margin: 8px 0; font-size: 14px; line-height: 1.6; white-space: pre-line; word-break: keep-all; }
+  #world .w-sheet .note { font-size: 13px; color: #6b5f48; }
+  #world .w-sheet .record { font-size: 13px; border-left: 3px solid #b0302a; padding-left: 8px; margin: 8px 0; }
+  #world .w-sheet .stats { font-size: 14px; margin: 6px 0; }
+  #world .w-sheet .stats b { color: #b0302a; }
+  #world .w-sheet .row { display: flex; gap: 8px; margin-top: 10px; }
+  #world .w-sheet .row button { flex: 1; min-height: 44px; border-radius: 8px; border: 1px solid #3b3326; background: #efe6d2; color: #1d1a14; font: inherit; font-size: 15px; font-weight: 700; }
+  #world .w-sheet .row button.go { background: #b0302a; color: #f7f1e3; border-color: #6e1b17; }
+  #world .w-sheet .x { min-width: 36px; height: 32px; border: none; background: none; font-size: 18px; color: #6b5f48; }
+  /* 급보 */
+  #world .w-news { position: fixed; inset: 0; z-index: 27; background: rgba(20, 16, 12, .55); display: flex; align-items: center; justify-content: center; padding: 20px; }
+  #world .w-news .card { max-width: 340px; width: 100%; background: #f7f1e3; border: 2px solid #b0302a; border-radius: 8px; padding: 18px 16px; text-align: center; }
+  #world .w-news .t { font-weight: 800; font-size: 16px; color: #8f231d; }
+  #world .w-news p { font-size: 15px; line-height: 1.7; white-space: pre-line; word-break: keep-all; margin: 12px 0 16px; }
+  @media (prefers-reduced-motion: reduce) {
+    #world .seal, #world .seal::before { animation: none !important; }
+  }
+
   /* 개발자용 플레이 기록 */
   .dev-link { display: block; margin: 8px auto 0; background: none; border: none; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; }
   #playlog { position: fixed; inset: 0; z-index: 42; background: rgba(4, 5, 8, .8); display: flex; justify-content: center; padding: 12px; }
@@ -636,6 +743,47 @@
     <button class="big-btn" id="btn-mission" type="button">임무를 받는다</button>
   </div>
 
+  <!-- 월드맵: 청령현 (specs/worldmap.md). 지역을 누르면 아래 카드 -->
+  <div id="world" hidden>
+    <header class="w-head">
+      <div class="w-top">
+        <button class="w-btn" id="world-home" type="button" aria-label="첫 화면으로">←</button>
+        <h1>청령현 <small>靑嶺縣</small></h1>
+        <button class="w-btn" id="world-lore" type="button" aria-label="벽사록 열기">📖</button>
+      </div>
+      <div class="w-rank" id="world-rank"></div>
+      <button class="w-mission" id="world-mission" type="button"></button>
+      <div class="w-dev" id="world-dev" hidden></div>
+    </header>
+    <div class="w-map" id="world-map">
+      <svg viewBox="0 0 100 130" preserveAspectRatio="none" aria-hidden="true">
+        <g class="ridge">
+          <path d="M-2 22 L8 10 L14 16 L22 5 L31 15 L37 9 L44 18"/>
+          <path d="M56 18 L63 8 L70 15 L78 4 L86 13 L93 7 L102 17"/>
+          <path d="M-2 40 L6 33 L11 38 L17 30 L25 41"/>
+          <path d="M75 40 L82 32 L88 37 L95 29 L102 36"/>
+          <path d="M-2 70 L5 63 L10 68 L16 60 L24 71"/>
+          <path d="M77 72 L84 64 L90 69 L96 62 L102 70"/>
+        </g>
+        <g class="ridge faint">
+          <path d="M20 28 L27 22 L33 27"/><path d="M66 28 L72 23 L79 28"/>
+          <path d="M26 88 L32 82 L38 87"/><path d="M62 86 L68 80 L75 86"/>
+        </g>
+        <path class="river" d="M-2 108 C15 102 30 113 46 107 S78 100 102 110"/>
+        <g id="world-roads"></g>
+      </svg>
+      <div id="world-nodes"></div>
+    </div>
+    <div class="w-sheet" id="world-sheet" hidden role="dialog" aria-live="polite"></div>
+    <div class="w-news" id="world-news" hidden role="dialog" aria-modal="true">
+      <div class="card">
+        <div class="t" id="world-news-title"></div>
+        <p id="world-news-text"></p>
+        <button class="big-btn" id="world-news-ok" type="button">확인</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 벽사록: 도감 + 세계관 사전 (specs/lore.md 10~11장) -->
   <div id="lore" hidden role="dialog" aria-modal="true" aria-labelledby="lore-title">
     <div class="paper">
@@ -665,7 +813,7 @@
   <div id="result" hidden>
     <div class="title" id="result-text"></div>
     <div class="sub" id="result-sub"></div>
-    <button class="big-btn" id="btn-next" type="button">다음 장으로</button>
+    <button class="big-btn" id="btn-next" type="button">지도로 돌아간다</button>
     <button class="big-btn" id="btn-retry" type="button">다시하기</button>
     <button class="big-btn plain" id="btn-home" type="button">처음 화면으로</button>
   </div>
@@ -3053,6 +3201,210 @@ var Core = (function () {
     if (ev.key === 'Escape' && !document.getElementById('lore').hidden) closeLore();
   });
 
+  // ── 월드맵 (specs/worldmap.md) — 지역 상태는 진행(progress)에서 계산, 본 급보만 저장 ──
+  var WORLD_KEY = 'joseon-exorcist.world';
+  var worldSeen = (function () {
+    try {
+      var v = JSON.parse(localStorage.getItem(WORLD_KEY));
+      if (v && v.v === 1 && Array.isArray(v.seen)) return v.seen.filter(function (t) { return typeof t === 'string'; });
+    } catch (e) { /* 없거나 깨졌으면 처음부터 */ }
+    return [];
+  })();
+  function saveWorld() {
+    try { localStorage.setItem(WORLD_KEY, JSON.stringify({ v: 1, seen: worldSeen })); } catch (e) { /* 저장이 막히면 이번에만 */ }
+  }
+  var worldOverride = {}; // ?dev=1 도구의 임시 상태 (메모리에만)
+  var worldSelected = null;
+  var STATUS_DOT = { EXORCISM_REQUIRED: '🔴', OMEN: '🟡', STABILIZED: '🔵', PEACEFUL: '⚪', UNKNOWN: '🔒', LOCKED: '🔒', BLOCKED: '⛔', HQ: '' };
+
+  function regionStatus(id) {
+    return worldOverride[id] || Core.worldState(progress)[id];
+  }
+
+  function renderWorld() {
+    var rank = Core.rankFor(progress.merit).name;
+    var rankBox = document.getElementById('world-rank');
+    rankBox.innerHTML = '';
+    rankBox.appendChild(document.createTextNode(rank + ' 벽사청 종사관 윤무겸 · 공적 '));
+    rankBox.appendChild(el('b', '', String(progress.merit)));
+    var m = Core.currentMission(progress);
+    var mission = document.getElementById('world-mission');
+    mission.innerHTML = '';
+    mission.appendChild(el('small', '', '현재 임무'));
+    mission.appendChild(document.createTextNode((STATUS_DOT[regionStatus(m.region)] || '') + ' ' + Core.regionById(m.region).name + ' — ' + m.title));
+    // 길
+    var roads = document.getElementById('world-roads');
+    roads.innerHTML = '';
+    Core.REGIONS.forEach(function (a) {
+      a.links.forEach(function (bid) {
+        var b = Core.regionById(bid);
+        if (a.id > b.id) return; // 한 번만
+        var shut = ['LOCKED', 'BLOCKED', 'UNKNOWN'].indexOf(regionStatus(a.id)) !== -1 || ['LOCKED', 'BLOCKED', 'UNKNOWN'].indexOf(regionStatus(b.id)) !== -1;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y); line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+        line.setAttribute('class', 'road' + (shut ? ' shut' : ''));
+        roads.appendChild(line);
+      });
+    });
+    // 노드
+    var nodes = document.getElementById('world-nodes');
+    nodes.innerHTML = '';
+    Core.REGIONS.forEach(function (r) {
+      var st = regionStatus(r.id);
+      var b = el('button', 'node st-' + st + (r.id === worldSelected ? ' on' : ''));
+      b.type = 'button';
+      b.dataset.id = r.id;
+      b.style.left = r.x + '%';
+      b.style.top = (r.y / 130 * 100) + '%';
+      b.appendChild(el('span', 'seal', r.mark));
+      b.appendChild(el('span', 'label', r.name));
+      if (st !== 'HQ') b.appendChild(el('span', 'state', Core.REGION_STATUS[st]));
+      b.setAttribute('aria-label', r.name + ' ' + Core.REGION_STATUS[st]);
+      b.addEventListener('click', function (ev) { ev.stopPropagation(); openRegion(r.id); });
+      nodes.appendChild(b);
+    });
+    renderWorldDev();
+  }
+
+  function sheetButton(row, label, cls, fn) {
+    var b = el('button', cls || '', label);
+    b.type = 'button';
+    b.addEventListener('click', fn);
+    row.appendChild(b);
+    return b;
+  }
+
+  // 지역 카드 (바텀시트)
+  function openRegion(id) {
+    worldSelected = id;
+    var r = Core.regionById(id);
+    var st = regionStatus(id);
+    var sheet = document.getElementById('world-sheet');
+    sheet.innerHTML = '';
+    var head = el('div', 'head');
+    head.appendChild(el('h2', '', r.title || r.name));
+    if (st !== 'HQ') head.appendChild(el('span', 'w-badge ' + st, Core.REGION_STATUS[st]));
+    var x = el('button', 'x', '✕');
+    x.type = 'button';
+    x.setAttribute('aria-label', '닫기');
+    x.addEventListener('click', closeRegion);
+    head.appendChild(x);
+    sheet.appendChild(head);
+    sheet.appendChild(el('p', '', Core.regionDesc(r, st)));
+    var row = el('div', 'row');
+    if (st === 'HQ') {
+      var stats = el('div', 'stats');
+      stats.appendChild(document.createTextNode('현재 품계 '));
+      stats.appendChild(el('b', '', Core.rankFor(progress.merit).name));
+      stats.appendChild(document.createTextNode(' · 누적 공적 '));
+      stats.appendChild(el('b', '', String(progress.merit)));
+      sheet.appendChild(stats);
+      sheetButton(row, '📖 벽사록', '', openLore);
+      sheetButton(row, '현재 임무', '', showMission);
+    } else if (st === 'EXORCISM_REQUIRED' && r.chapter) {
+      sheetButton(row, '출동', 'go', function () { closeRegion(); startChapter(r.chapter); });
+    } else if (st === 'STABILIZED' && r.record) {
+      var rec = sheetButton(row, '기록 보기', '', function () {
+        rec.disabled = true;
+        sheet.insertBefore(el('div', 'record', r.record), row);
+      });
+    } else if (r.note) {
+      sheet.appendChild(el('div', 'note', r.note));
+    }
+    if (row.childNodes.length) sheet.appendChild(row);
+    sheet.hidden = false;
+    renderWorld();
+  }
+  function closeRegion() {
+    worldSelected = null;
+    document.getElementById('world-sheet').hidden = true;
+    renderWorld();
+  }
+
+  // 본진 [현재 임무] → 임무 카드, [지도에서 보기] 로 그 지역
+  function showMission() {
+    var m = Core.currentMission(progress);
+    var sheet = document.getElementById('world-sheet');
+    sheet.innerHTML = '';
+    var head = el('div', 'head');
+    head.appendChild(el('h2', '', '현재 임무 — ' + m.title));
+    var x = el('button', 'x', '✕');
+    x.type = 'button';
+    x.addEventListener('click', closeRegion);
+    head.appendChild(x);
+    sheet.appendChild(head);
+    sheet.appendChild(el('p', '', m.text));
+    var row = el('div', 'row');
+    sheetButton(row, '지도에서 보기', '', function () { pulseRegion(m.region); openRegion(m.region); });
+    sheet.appendChild(row);
+    sheet.hidden = false;
+  }
+
+  function pulseRegion(id) {
+    var n = document.querySelector('#world-nodes .node[data-id="' + id + '"]');
+    if (!n) return;
+    n.classList.remove('news');
+    void n.offsetWidth;
+    n.classList.add('news');
+  }
+
+  // 급보: 장을 깬 뒤 처음 지도를 볼 때 차례로
+  function showNews() {
+    var news = Core.worldNews(progress, worldSeen)[0];
+    var box = document.getElementById('world-news');
+    if (!news) { box.hidden = true; return; }
+    document.getElementById('world-news-title').textContent = news.title;
+    document.getElementById('world-news-text').textContent = news.text;
+    box.hidden = false;
+    document.getElementById('world-news-ok').onclick = function () {
+      worldSeen.push(news.id);
+      saveWorld();
+      box.hidden = true;
+      pulseRegion(news.region);
+      setTimeout(showNews, 400);
+    };
+  }
+
+  function showWorld() {
+    ['title', 'result', 'scene', 'prologue'].forEach(function (id) { document.getElementById(id).hidden = true; });
+    clearToasts();
+    worldSelected = null;
+    document.getElementById('world-sheet').hidden = true;
+    document.getElementById('world').hidden = false;
+    renderWorld();
+    showNews();
+  }
+
+  // ?dev=1: 흑석촌·여우골 상태를 잠깐 바꿔 보는 도구 (저장하지 않는다)
+  function renderWorldDev() {
+    var box = document.getElementById('world-dev');
+    box.hidden = !DEV;
+    if (!DEV) return;
+    box.innerHTML = '';
+    box.appendChild(el('b', '', 'DEV'));
+    ['heukseok', 'yeougol'].forEach(function (id) {
+      box.appendChild(el('span', '', Core.regionById(id).name));
+      [['UNKNOWN', '미확인'], ['EXORCISM_REQUIRED', '괴변'], ['STABILIZED', '안정']].forEach(function (o) {
+        sheetButton(box, o[1], '', function (ev) { ev.stopPropagation(); worldOverride[id] = o[0]; renderWorld(); });
+      });
+    });
+    sheetButton(box, '되돌리기', '', function (ev) { ev.stopPropagation(); worldOverride = {}; renderWorld(); });
+  }
+
+  document.getElementById('world-map').addEventListener('click', function (ev) {
+    if (!ev.target.closest('.node')) closeRegion(); // 지도 빈 곳을 누르면 카드 닫기
+  });
+  document.getElementById('world-home').addEventListener('click', function () {
+    document.getElementById('world').hidden = true;
+    showTitle();
+  });
+  document.getElementById('world-lore').addEventListener('click', openLore);
+  document.getElementById('world-mission').addEventListener('click', function () {
+    var m = Core.currentMission(progress);
+    pulseRegion(m.region);
+    openRegion(m.region);
+  });
+
   // ── 개발자용 플레이 기록 화면 (?dev=1) ──
   function isAllyId(id) { return !!Core.ALLY_DEFS[id] || /^gwangun\d$/.test(id); }
   function countBy(list, key) {
@@ -3142,6 +3494,7 @@ var Core = (function () {
     clearToasts();
     document.getElementById('result').hidden = true;
     document.getElementById('title').hidden = true;
+    document.getElementById('world').hidden = true;
     state = Core.newBattle(Core.STAGES[id], { merit: progress.merit });
     playLog = Core.newPlayLog(state, id, playStore.restarts[id] || 0);
     ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null };
@@ -3162,7 +3515,6 @@ var Core = (function () {
     document.getElementById('scene').hidden = true;
     document.getElementById('title').hidden = false;
     document.getElementById('new-confirm').hidden = true;
-    var next = Core.nextStage(progress);
     var started = progress.cleared.length > 0;
     var prog = document.getElementById('title-prog');
     prog.innerHTML = '';
@@ -3174,8 +3526,7 @@ var Core = (function () {
     }
     var cont = document.getElementById('btn-continue');
     cont.hidden = !started;
-    cont.textContent = next ? '이어하기 · ' + CHAPTERS[next].title : '이어하기 · 3장 준비 중';
-    cont.disabled = !next;
+    cont.textContent = '이어하기'; // 언제나 지도로 (specs/worldmap.md 1장)
     document.getElementById('btn-new').textContent = started ? '처음부터' : '시작하기';
     document.getElementById('title-note').textContent = canStore ? '' : '이 브라우저에는 진행이 저장되지 않습니다.';
   }
@@ -3211,7 +3562,6 @@ var Core = (function () {
       progress = Core.applyResult(progress, chapterId, 'win', state.merit);
       saveProgress();
     }
-    var next = Core.nextStage(progress);
     var t = document.getElementById('result-text');
     t.className = 'title ' + (win ? 'win' : 'lose');
     t.textContent = win
@@ -3221,12 +3571,11 @@ var Core = (function () {
     if (win) {
       var after = Core.rankFor(progress.merit).name;
       sub = '공적 누계 ' + progress.merit + ' · 품계 ' + after + (after !== before ? ' (승진!)' : '');
-      if (!next) sub += '\n3장은 준비 중입니다.';
     }
     var subEl = document.getElementById('result-sub');
     subEl.textContent = sub;
     subEl.style.whiteSpace = 'pre-line';
-    document.getElementById('btn-next').hidden = !(win && next);
+    document.getElementById('btn-next').hidden = false; // 이겨도 져도 [지도로 돌아간다] (자동으로 다음 장을 시작하지 않는다)
     document.getElementById('btn-retry').hidden = win;
     document.getElementById('result').hidden = false;
   }
@@ -3236,15 +3585,9 @@ var Core = (function () {
     savePlayStore();
     startChapter(chapterId);
   });
-  document.getElementById('btn-next').addEventListener('click', function () {
-    var next = Core.nextStage(progress);
-    if (next) startChapter(next);
-  });
+  document.getElementById('btn-next').addEventListener('click', showWorld); // [지도로 돌아간다]
   document.getElementById('btn-home').addEventListener('click', showTitle);
-  document.getElementById('btn-continue').addEventListener('click', function () {
-    var next = Core.nextStage(progress);
-    if (next) startChapter(next);
-  });
+  document.getElementById('btn-continue').addEventListener('click', showWorld); // 이어하기는 언제나 지도로
   // 프롤로그: 문장이 한 덩이씩 나타나고(약 10초) 마지막에 [임무를 받는다]. 화면을 누르면 한 번에 다 보인다
   var PROLOGUE_STEP_MS = 1300;
   var prologueTimers = [];
@@ -3267,7 +3610,7 @@ var Core = (function () {
   document.getElementById('btn-mission').addEventListener('click', function () {
     prologueTimers.forEach(clearTimeout);
     document.getElementById('prologue').hidden = true;
-    startChapter('ch1');
+    showWorld(); // 프롤로그 뒤에는 지도부터 (벽사청 → 흑석촌 출동)
   });
 
   // 처음부터: 진행이 있으면 확인 화면을 거친다 (브라우저 확인 창은 쓸 수 없는 환경이라 화면 안에)
@@ -3275,6 +3618,8 @@ var Core = (function () {
     document.getElementById('new-confirm').hidden = true;
     progress = Core.newProgress();
     saveProgress();
+    worldSeen = []; // 새 게임에서는 급보를 다시 본다
+    saveWorld();
     showPrologue();
   }
   document.getElementById('btn-new').addEventListener('click', function () {
