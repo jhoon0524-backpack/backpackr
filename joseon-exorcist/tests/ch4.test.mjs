@@ -28,18 +28,70 @@ test('4장 스테이지: 10×8·14턴, 봉인등 3 (북 켜짐·동 약해짐·�
   assert.equal(s.objective.phase, 'investigate');
 });
 
-test('조사 두 곳 모두 → 진실: 도문 술사 등장, 귀화 증원 2, 봉인등 단계', () => {
+test('조사 두 곳 모두 → 진실: 도문 술사 등장, 귀화 증원 2 예고(징조), 봉인등 단계', () => {
   const s = fresh();
   put(s, 'yeoul', 3, 0);
   assert.deepEqual(Core.arrive(s, 'yeoul').map((e) => e.type), ['investigate'], '한 곳으로는 부족');
   const before = s.units.filter((u) => u.type === 'gwihwa').length;
   put(s, 'hangyeol', 4, 3);
   const ev = Core.arrive(s, 'hangyeol');
-  assert.deepEqual(ev.map((e) => e.type), ['investigate', 'truth', 'appear', 'reinforce', 'reinforce']);
+  assert.deepEqual(ev.map((e) => e.type), ['investigate', 'truth', 'appear', 'omen', 'omen']);
   assert.equal(s.objective.phase, 'lamps');
   const d = U(s, 'dosa');
   assert.deepEqual([d.side, d.name, d.untargetable], ['neutral', '도문 술사', true]);
+  assert.equal(s.units.filter((u) => u.type === 'gwihwa').length, before, '진실 순간에는 아직 나오지 않는다');
+  assert.deepEqual(s.omens, ['west', 'east']);
+  const rv = Core.endAllyPhase(s).filter((e) => e.type === 'reinforce');
+  assert.deepEqual(rv.map((e) => [e.spawnId, e.r, e.c]), [['west', 9, 0], ['east', 9, 7]], '이번 턴 적 차례 시작에 예고한 자리에서');
   assert.equal(s.units.filter((u) => u.type === 'gwihwa').length, before + 2);
+  assert.deepEqual(s.omens, []);
+});
+
+test('v0.9.2 증원 자리: 서 → 동 → 북을 차례로, 같은 자리가 연달아 나오지 않고, 나오기 전 아군 차례에 징조', () => {
+  const s = fresh();
+  toLamps(s); // 1턴에 진실 → 서·동 예고
+  const order = [];
+  for (let t = 1; t <= 9 && !s.result; t++) {
+    const pre = s.omens.slice();
+    const rv = Core.endAllyPhase(s).filter((e) => e.type === 'reinforce');
+    assert.deepEqual(rv.map((e) => e.spawnId), pre, t + '턴: 예고한 자리에서만 나온다');
+    order.push(...pre);
+    s.units.filter((u) => u.type === 'gwihwa').forEach((u) => { u.alive = false; }); // 등을 끄지 않게
+    Core.runEnemyPhase(s);
+    if (s.result) break;
+    const sv = Core.startAllyPhase(s, () => 0).filter((e) => e.type === 'omen');
+    assert.equal(sv.length, (s.turn - 1) % 2 === 0 ? 1 : 0, s.turn + '턴 시작: 2턴마다 예고 1');
+  }
+  assert.deepEqual(order.slice(0, 6), ['west', 'east', 'north', 'west', 'east', 'north']);
+  for (let i = 1; i < order.length; i++) assert.notEqual(order[i], order[i - 1]);
+});
+
+test('v0.9.2 북쪽 뒷산: 막지 않으면 나오자마자 북쪽 등을 끄고, 출구 (0,6) 을 막으면 끄지 못한다', () => {
+  for (const block of [false, true]) {
+    const s = fresh();
+    toLamps(s);
+    s.units.filter((u) => u.side === 'enemy' && u.type !== 'dosa').forEach((u) => { u.alive = false; });
+    U(s, 'dosa').r = 9; U(s, 'dosa').c = 3; // 도문 술사가 끼어들지 않게
+    s.lamps.forEach((l) => { l.lit = true; });
+    if (block) put(s, 'yoon', 0, 6);
+    s.omens = ['north'];
+    const g = Core.endAllyPhase(s).find((e) => e.type === 'reinforce');
+    assert.deepEqual([g.r, g.c], [0, 7]);
+    const ev = Core.enemyAct(s, g.unitId);
+    assert.equal(lamp(s, 'north').lit, block, block ? '막으면 켜진 채' : '막지 않으면 꺼진다');
+    if (block) assert.ok(ev.some((e) => e.targetId === 'yoon'), '막은 인물을 친다');
+  }
+});
+
+test('v0.9.2 증원 자리가 막혀 있으면 가까운 빈 칸, 북쪽 뒷산은 (0,7)', () => {
+  const s = fresh();
+  toLamps(s);
+  s.omens = ['north'];
+  put(s, 'yoon', 0, 7);
+  const rv = Core.endAllyPhase(s).filter((e) => e.type === 'reinforce');
+  assert.deepEqual(rv.map((e) => [e.r, e.c]), [[0, 6]]);
+  assert.deepEqual(s.spawns.map((p) => [p.id, p.name, p.r, p.c]),
+    [['west', '서쪽 산길', 9, 0], ['east', '동쪽 회랑', 9, 7], ['north', '북쪽 뒷산', 0, 7]]);
 });
 
 test('도문 술사: 아무도 칠 수 없고, 옆의 적(귀화 먼저)을 친다', () => {
@@ -179,7 +231,8 @@ test('증원: 임무 갱신 뒤 2턴마다 1 (적 차례 시작), 증원 자리�
   const n0 = count();
   for (let t = 1; t <= 4; t++) {
     Core.endAllyPhase(s);
-    if (s.turn === 3) assert.equal(count(), n0 + 1, '3턴 적 차례 시작에 1');
+    if (s.turn === 1) assert.equal(count(), n0 + 2, '진실 증원 2 는 1턴 적 차례 시작에');
+    if (s.turn === 3) assert.equal(count(), n0 + 3, '3턴 적 차례 시작에 1');
     Core.runEnemyPhase(s);
     if (s.result) break;
     Core.startAllyPhase(s, () => 0);
@@ -203,6 +256,17 @@ test('플레이 기록: 봉인등 켬·꺼짐·유지·귀화 처치·수련 선
   for (const k of ['sealLampsLit', 'sealLampsExtinguished', 'sealDefenseRounds', 'gwihwaDefeated', 'trainingChoices', 'trainingActivations']) assert.ok(k in l, k);
   assert.deepEqual(l.trainingChoices, { yoon: 'jiphaeng', soun: 'jinbeop' });
   assert.equal(l.sealLampsLit.length >= 1, true);
+  assert.deepEqual(l.gwihwaSpawns.slice(0, 3).map((x) => x.spawn), ['west', 'east', 'north'], 'v0.9.2 증원 자리 기록');
+});
+
+test('v0.9.2 자동 검증: 징조를 무시하면 봉인등 단계에 등이 꺼지고, 징조를 보고 막으면 꺼지지 않는다', () => {
+  const lampPhaseOut = (s) => s.log.sealLampsExtinguished.filter((e) => e.turn >= s.log.objectiveChangedTurn).length;
+  const b = playBattle({ seed: 1, mode: 'objective', stage: ch4, merit: 13, chapter: 'ch4' });
+  const c = playBattle({ seed: 1, mode: 'training', stage: ch4, merit: 13, chapter: 'ch4' });
+  assert.equal(b.result, 'win');
+  assert.equal(c.result, 'win');
+  assert.ok(lampPhaseOut(b) >= 1, '북쪽 뒷산 귀화가 나오자마자 북쪽 등을 끈다');
+  assert.equal(lampPhaseOut(c), 0, '길목(0,6)을 막으면 끄지 못한다');
 });
 
 test('자동 검증: 섬멸형은 이기지 못하고, 목표형은 수련 없이도 이긴다', () => {

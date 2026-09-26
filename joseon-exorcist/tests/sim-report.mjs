@@ -102,6 +102,8 @@ function run4(mode, training, merit) {
     평균턴: wins.length ? f1(avg(wins.map((s) => s.turn))) : '-',
     중앙턴: wins.length ? median(wins.map((s) => s.turn)) : '-',
     소등: f1(avg(logs.map((s) => s.log.sealLampsExtinguished.length))),
+    // 임무 갱신(진실) 뒤 = 봉인등 단계 소등 (v0.9.2)
+    봉인단계소등: f1(avg(logs.map((s) => s.log.sealLampsExtinguished.filter((e) => s.log.objectiveChangedTurn !== null && e.turn >= s.log.objectiveChangedTurn).length))),
     재점등: f1(avg(logs.map((s) => s.log.sealLampsLit.filter((l) => l.relight).length))),
     귀화접근: f1(avg(logs.map((s) => s.log.gwihwaApproaches || 0))),
     받은피해: f1(avg(logs.map(taken))),

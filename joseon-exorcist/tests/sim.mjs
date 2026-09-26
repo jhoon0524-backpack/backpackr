@@ -216,6 +216,24 @@ function lampAlly(s, u, log, active) {
     const b = strikeFor(group);
     if (b) return doIt(b);
   }
+  // 활용형: 귀기(증원 징조)가 보이면, 아직 아무도 막지 않은 증원 자리의 옆 칸으로 (자리 위에 서면 옆 빈 칸에 나온다)
+  if (active && s.omens && s.omens.length) {
+    const guard = [];
+    for (const id of s.omens) {
+      const sp = s.spawns.find((p) => p.id === id);
+      const side = [[-1, 0], [1, 0], [0, -1], [0, 1]].map(([dr, dc]) => ({ r: sp.r + dr, c: sp.c + dc })).filter((c) => Core.isPassable(s, c.r, c.c));
+      if (!side.some((c) => { const o = Core.unitAt(s, c.r, c.c); return o && o.side === 'ally' && o !== u; })) guard.push(...side);
+    }
+    if (guard.length) {
+      const map = bfsFrom(s, u, guard);
+      const dest = cells.filter((c) => !(s.spawns.some((p) => p.r === c.r && p.c === c.c)))
+        .sort((a, b) => (map[K(a)] ?? 99) - (map[K(b)] ?? 99) || a.cost - b.cost)[0];
+      if (dest && (map[K(dest)] ?? 99) < 99) {
+        Core.moveUnit(s, u.id, dest.r, dest.c);
+        return finish(Core.wait(s, u.id));
+      }
+    }
+  }
   // 4. 칠 것이 없으면: 꺼진 등 → 가장 가까운 귀화 → 켜진 등 쪽으로
   const goals = s.lamps.filter((l) => !l.lit).concat(fs).concat(s.lamps);
   const map = bfsFrom(s, u, goals.slice(0, Math.max(1, goals.length)).map((g) => ({ r: g.r, c: g.c })));
