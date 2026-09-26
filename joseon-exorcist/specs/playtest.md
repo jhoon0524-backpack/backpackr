@@ -21,7 +21,7 @@
 | unitMoves | 유닛 id → 실제로 칸을 옮긴 횟수 (아군은 행동을 마친 이동만, 취소는 안 셈. 적 포함) |
 | attacks / skillsByUnit | 유닛 id → 기본공격 수 / 스킬 수 (적의 무령은 기본공격) |
 | skills | 스킬 이름 → 사용 수 (정화수 포함, 아군·적 모두) |
-| damageDealt / damageTaken | 유닛 id → 준 피해 / 받은 피해 합 |
+| damageDealt / damageTaken | 유닛 id → 준 피해 / 받은 피해 합 (계산된 피해 그대로 — 남은 HP 보다 큰 마지막 일격도 전부 셈) |
 | healing | 유닛 id → 정화수로 채운 HP 합. **(보충)** 약수터 회복은 `springHealing`(유닛 id → 합)에 따로 |
 | defeatedUnits | [{ turn, id, name, side, how: 제압·퇴치·퇴각, by, merit }] |
 | meritEarned | 이번 판에 얻은 공적 |
