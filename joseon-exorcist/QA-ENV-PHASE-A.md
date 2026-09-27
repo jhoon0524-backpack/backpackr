@@ -58,3 +58,13 @@
 - 확인: `node --test` 343 통과 / 1장 **PASS 23** (이음새 2 · 이동 강조 값 · 공격 위계 · 표식 · 작업 전 `eb2c703` 대비 맵·통과 64칸·M/K·판 344×344·유닛 11개 크기 35.03×35.03·점유율 74% 동일 · 2~4장 이동 강조·표식 전역값 그대로) / 회귀 1장 20 · 2장 25 · 3~4장 34 · 1~4장 32 · 5장 B 17 · A·POLISH 21 · UI 28 · 흐름 19+15 모두 PASS / core 차이 없음
 - 캡처: `qa-shots/env-polish-a/` — `01-start-clean` `02-dirt-no-band` `03-shrine-no-band` `04-move-highlight` `05-shrine-mark` `06-spring-mark` + `07-attack-vs-move` `08-fallback`
 - 남은 것 (DESIGN, 이번 범위 밖 파일): `env_block_rock` 왼쪽(23/36)·`env_spring` 왼쪽(17/31)도 가장자리가 조금 어두워 바위·약수터 칸 왼쪽에 가는 어두운 선이 보인다. 흙 칸의 반복 띠보다 훨씬 약하고 칸 수가 적다
+
+## ENV-POLISH-A2 — 바위·약수터 이음새 (2026-09-27)
+- 1차 (A2): 받은 `env_block_rock` · `env_spring` 에 왼쪽 검은 세로 띠가 그대로 (위치만 약 13px 이동) → BLOCKED, 커밋 없음. 증거 `qa-shots/env-polish-a2/x-band-still-present.png` · `rock-clean.png` · `spring-clean.png`
+- 2차 (A2-FIX): 새로 만든 두 파일로 재교체. 코드 변경 없음
+  - 판정 방법: 열(세로줄)마다 평균 밝기 · 거의 검정(≤14)이 4열 이상 이어지는 구간 · 열 안의 밝기 흩어짐(평평한 단색인지) + 게임 크기 캡처(4배 확대)
+  - 바위: 검정 연속 구간 없음 · 가장 어두운 열 26 · 모든 열이 자연스러운 명암 → PASS
+  - 약수터: 왼쪽 0~11 열이 위아래 같은 어두운 단색(RGB 9,16,18, 흩어짐 0.7). 게임 칸에서는 약 2px 이고 칸 사이 틈과 같은 색이라 선으로 보이지 않음 (`x-spring-left-strip-zoom.png`) → **기획자 판단으로 PASS**
+- **검수 기준 (기획자 확정): 환경 타일의 성공 기준은 픽셀 단위 완전 연속이 아니라, 실제 게임 표시 크기에서 인위적인 반복 이음새가 눈에 띄지 않는가이다.**
+- 확인: `node --test` 343 통과 / core 차이 없음 / 1장 유닛 11개 35.03×35.03·점유율 74%·맵·통과 64칸·M/K·판 크기 작업 전(`eb2c703`)과 동일 / 회귀 1장 20 · 2장 25 · 3~4장 34 · 1~4장 32 · 5장 B 17 · A·POLISH 21 · UI 28 · 흐름 19+15 PASS
+- 캡처: `qa-shots/env-polish-a2/` — `rock-clean-final` `spring-clean-final` `board-final` (최종) · `x-rock-zoom` `x-spring-left-strip-zoom` (4배) · 1차 BLOCKED 근거 `x-band-still-present` `rock-clean` `spring-clean`
