@@ -159,6 +159,7 @@
   /* 그림 뒤 바탕은 옅게 (테두리 색은 그대로): 적갈 바탕에 인물이 탁해 보이지 않게 */
   .unit.has-art.k-human { background: rgba(142, 67, 56, .2); }
   .unit.has-art.f-bs, .unit.has-art.f-guest { background: rgba(51, 70, 85, .4); }
+  .unit.has-art.k-boss { background: rgba(21, 20, 17, .75); } /* 1장 흑린: 자주 그림이 자주 바탕에 묻히지 않게 먹색 바탕 (테두리는 귀물 자주 그대로) */
   #ask { position: fixed; inset: 0; z-index: 44; background: rgba(4, 5, 8, .75); display: flex; align-items: center; justify-content: center; padding: 20px; }
   #ask .card { max-width: 340px; width: 100%; background: var(--panel); border: 1px solid #e2c26b; border-radius: 10px; padding: 18px 16px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
   .pt.barrier { background: #3d6ea8; color: #fff; }
@@ -4201,9 +4202,13 @@ var Core = (function () {
     return !!o && ((o.phase === 'chase' && u.runner) || (o.phase === 'find' && u.type === 'official'));
   }
 
-  // ── ART-PHASE-A-01: 5장만 실제 아트 (1~4장은 이모지 그대로). assets/ 의 개별 파일만 쓴다 ──
+  // ── 실제 아트 (ART-PHASE-A-01 5장 · C-01 1장, 나머지 장은 이모지 그대로). assets/ 의 개별 파일만 쓴다 ──
   // crop = [가로 중심 %, 세로 중심 %, 확대] — 원본은 자르지 않고 CSS 로만 맞춘다. 불러오기 실패하면 이모지로 돌아간다
-  var ART_CHAPTER = 'ch5';
+  // 장마다 그림을 쓰는 유닛 종류 (ART-PHASE-C-01: 1장 추가). 목록에 없는 장·종류는 이모지 그대로 (2~4장)
+  var ART_ALLOW = {
+    ch1: ['yoon', 'hangyeol', 'soun', 'yeoul', 'dallae', 'gwangun', 'dokkaebi', 'jangsan', 'bulgasari', 'heuklin'],
+    ch5: ['yoon', 'hangyeol', 'soun', 'yeoul', 'gwangun', 'official', 'runner', 'gwihwa']
+  };
   var TOKEN_CROP = [50, 50, 1.42]; // 전투 토큰: 둘레 여백을 줄여 인물이 테두리 안을 채우게
   var ART = {
     yoon: { battle: 'assets/characters/yoon_battle.webp', portrait: 'assets/characters/yoon_portrait.webp', face: [58, 35, 1.9] },
@@ -4213,20 +4218,26 @@ var Core = (function () {
     gwangun: { battle: 'assets/npcs/soldier_battle.webp' },
     official: { battle: 'assets/npcs/official_battle.webp' },
     runner: { battle: 'assets/enemies/ledger_runner.webp' },
-    gwihwa: { battle: 'assets/enemies/gwihwa.webp', crop: [50, 50, 1] } // ART-POLISH-01: 한 마리 파일 — 보정 없이 contain (얼굴이 아래쪽이라 확대하면 HP 막대에 가린다)
+    gwihwa: { battle: 'assets/enemies/gwihwa.webp', crop: [50, 50, 1] }, // ART-POLISH-01: 한 마리 파일 — 보정 없이 contain (얼굴이 아래쪽이라 확대하면 HP 막대에 가린다)
+    // ART-PHASE-C-01 (1장): 새 토큰은 한 개체를 꽉 차게 그린 파일이라 확대 없이 contain
+    dallae: { battle: 'assets/characters/dallae_battle.webp', portrait: 'assets/characters/dallae_portrait.webp', face: [53, 47, 1.6], crop: [50, 50, 1] },
+    dokkaebi: { battle: 'assets/enemies/dokkaebi_battle.webp', crop: [50, 50, 1] },
+    jangsan: { battle: 'assets/enemies/jangsan_battle.webp', crop: [50, 50, 1] },
+    bulgasari: { battle: 'assets/enemies/bulgasari_battle.webp', crop: [50, 50, 1] },
+    heuklin: { battle: 'assets/enemies/heuklin_battle.webp', crop: [50, 50, 1] }
   };
   var artFailed = {};
   function artFor(u, kind) {
     return artForType(u.type, kind);
   }
   function artForType(type, kind) {
-    var a = chapterId === ART_CHAPTER && ART[type];
+    var a = (ART_ALLOW[chapterId] || []).indexOf(type) !== -1 && ART[type];
     var src = a && a[kind];
     return src && !artFailed[src] ? src : null;
   }
-  // ART-PHASE-B-01: 대사 화자 이름 → 그림 (5장만). 목록에 없는 화자는 기존 이모지
+  // ART-PHASE-B-01: 대사 화자 이름 → 그림 (그 장에서 허용된 종류만). 목록에 없는 화자는 기존 이모지
   var ART_BY_WHO = { '윤무겸': 'yoon', '한결': 'hangyeol', '소운': 'soun', '여울': 'yeoul',
-    '실종된 관리': 'official', '관리': 'official', '장부 운반자': 'runner', '관군': 'gwangun' };
+    '실종된 관리': 'official', '관리': 'official', '장부 운반자': 'runner', '관군': 'gwangun', '달래': 'dallae' };
   // 인물 그림 상자: 플레이어는 초상(얼굴 중심, 행동 중 패널과 같은 crop) / NPC·적은 전투 그림을 확대 없이 contain. 없으면 null
   function faceArt(type, alt, onFail) {
     var portrait = artForType(type, 'portrait');
@@ -4247,10 +4258,9 @@ var Core = (function () {
     box.appendChild(img);
     return box;
   }
-  // 5장 들어갈 때 미리 불러 둔다 (첫 등장 때 그림이 늦게 튀지 않게)
+  // 그림을 쓰는 장에 들어갈 때 그 장 그림만 미리 불러 둔다 (첫 등장 때 그림이 늦게 튀지 않게)
   function preloadArt() {
-    if (chapterId !== ART_CHAPTER) return;
-    Object.keys(ART).forEach(function (k) {
+    (ART_ALLOW[chapterId] || []).forEach(function (k) { // 이 장에서 쓰는 그림만
       ['battle', 'portrait'].forEach(function (kind) {
         var src = ART[k][kind];
         if (!src || artFailed[src]) return;
@@ -4267,6 +4277,7 @@ var Core = (function () {
     tile.dataset.id = u.id;
     if (art) tile.appendChild(artBox(art, ART[u.type].crop || TOKEN_CROP, u.name));
     if (missionTarget(u)) tile.className += ' k-target';
+    if (art && u.boss) tile.className += ' k-boss';
     if (u.guest) tile.appendChild(el('span', 'badge', '객'));
     var kind = unitKind(u);
     if (kind) {
