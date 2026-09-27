@@ -125,3 +125,42 @@ for (const merit of [0, 13]) {
 // 귀화접근 = 아군 차례 시작마다 '이번 적 차례에 등까지 올 수 있는 귀화' 수의 합 (자동 검증 전용)
 console.log(`\n4장 시뮬레이션 — 조건마다 ${N4}판 (섬멸형·목표형·수련 활용형, 합법 수련 조합 ${COMBOS.length - 1}개 + 수련 없음)`);
 console.table(rows4);
+
+// ── 5장 사라진 장부 (specs/chapter5.md 34~35장) — 재미가 아니라 진행 불능·수련 필수 여부를 본다 ──
+// 수련 조합: 4장까지 깨면 수련점 3 → 4명 중 0~3명이 각자 한 방향 (합법 조합 전부 = 65)
+const COMBOS5 = [];
+(function rec(i, t) {
+  if (i === PEOPLE.length) { if (Object.keys(t).length <= 3) COMBOS5.push({ ...t }); return; }
+  rec(i + 1, t);
+  for (const d of Core.TRAININGS[PEOPLE[i]]) { t[PEOPLE[i]] = d.id; rec(i + 1, t); delete t[PEOPLE[i]]; }
+})(0, {});
+const label5 = (t) => PEOPLE.filter((p) => t[p]).map((p) => Core.trainingDef(p, t[p]).name).join('+') || '수련 없음';
+function run5(mode, list, merit) {
+  const logs = [];
+  for (const training of list) for (let seed = 1; seed <= Math.min(N, 5); seed++) logs.push({ s: playBattle({ seed, mode, stage: Core.STAGES.ch5, merit, chapter: 'ch5', training }), training });
+  const wins = logs.filter((x) => x.s.result === 'win');
+  const reason = (r) => logs.filter((x) => x.s.loseReason === r).length;
+  const pct = (n) => Math.round((n / logs.length) * 100) + '%';
+  const sum = (f) => f1(avg(logs.map((x) => f(x.s.log))));
+  const failed = [...new Set(logs.filter((x) => x.s.result !== 'win').map((x) => label5(x.training)))];
+  return {
+    판: logs.length, 승률: pct(wins.length), 탈출패배: pct(reason('escape')), 시간패배: pct(reason('time')),
+    평균턴: wins.length ? f1(avg(wins.map((x) => x.s.turn))) : '-',
+    등장턴: sum((l) => l.runnerSpawnTurn || 0), 추격턴: wins.length ? f1(avg(wins.map((x) => x.s.log.runnerSubduedTurn - x.s.log.runnerSpawnTurn))) : '-',
+    관군막음: sum((l) => l.runnerBlockedBySoldier), 견제사격: sum((l) => l.runnerSlowedByChujeok), 밀어내기: sum((l) => l.runnerPushedByGyoran), 결계막음: sum((l) => l.runnerBlockedByBarrier),
+    진조합: failed.length ? failed.slice(0, 4).join(' / ') + (failed.length > 4 ? ` 외 ${failed.length - 4}` : '') : '-'
+  };
+}
+const rows5 = [];
+// 품계: 3장을 이기려면 봉인 3곳을 모두 복구해야 해서 3장 공적은 늘 6 (3 + 완료 3) → 5장에 오는 플레이어는 모두 종8품(관군 2)이다.
+// 종9품(관군 0)은 정상 진행으로는 나오지 않아 표에서 뺐다 (관군 0 이면 자동 플레이는 운반자를 놓친다 — 관군이 이 장에서 쓰이는 이유)
+for (const merit of [19]) {
+  const rank = Core.rankFor(merit).name;
+  rows5.push({ 품계: rank, 자동: 'A 섬멸형', 수련: '전 조합', ...run5('nearest', COMBOS5, merit) });
+  rows5.push({ 품계: rank, 자동: 'B 목표형', 수련: '전 조합', ...run5('objective', COMBOS5, merit) });
+  rows5.push({ 품계: rank, 자동: 'C 수련 활용형', 수련: '전 조합', ...run5('training', COMBOS5, merit) });
+}
+// 수련 하나씩 (다른 수련 없이) — 특정 수련이 필수인지·도움이 되는지
+for (const p of PEOPLE) for (const d of Core.TRAININGS[p]) rows5.push({ 품계: '종8품', 자동: 'C 수련 활용형', 수련: d.name + ' 만', ...run5('training', [{ [p]: d.id }], 19) });
+console.log(`\n5장 시뮬레이션 — 합법 수련 조합 ${COMBOS5.length}개 × ${Math.min(N, 5)}판 (섬멸형·목표형·수련 활용형). 진행 불능·특정 수련 필수 여부 확인용`);
+console.table(rows5);

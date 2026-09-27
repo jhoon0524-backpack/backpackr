@@ -273,6 +273,133 @@ function lampAlly(s, u, log, active) {
   return finish(Core.wait(s, u.id));
 }
 
+// ── 5장 사라진 장부 (specs/chapter5.md 34장) — 진행 불능·수련 필수 여부를 찾는 용도 (재미 판단 아님) ──
+// 모든 모드: 흔적(보이는 것만) → 관리 옆. 추격 단계에서
+//  섬멸형(nearest): 가까운 적·귀화부터 친다 (운반자를 특별히 쫓지 않는다)
+//  목표형(objective): 운반자를 칠 수 있으면 가장 세게 친다 / 관군은 운반자가 향하는 성문 칸을 막는다 / 나머지는 운반자 쪽으로
+//  수련 활용형(training): 목표형 + 운반자가 다음 차례에 성문에 닿을 수 있으면 견제사격·밀어내기·결계로 막는다
+const ADJ = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+function ledgerGoals(s) {
+  const o = s.objective;
+  if (o.phase === 'investigate') return s.points.filter((p) => p.investigate && !o.investigated.includes(p.id) && Core.pointOpen(s, p));
+  if (o.phase === 'find') {
+    const off = Core.getUnit(s, 'official');
+    return ADJ.map(([dr, dc]) => ({ r: off.r + dr, c: off.c + dc })).filter((p) => Core.isPassable(s, p.r, p.c));
+  }
+  return [];
+}
+function runnerMov(r) { return r.slow ? Math.max(1, r.mov - Core.CHUJEOK_SLOW) : r.mov; }
+// 이 칸에서 운반자에게 줄 수 있는 가장 큰 피해 (공격·기술)
+function bestStrike(s, u, cells, runner) {
+  let best = null;
+  for (const c of cells) {
+    const saved = [u.r, u.c]; u.r = c.r; u.c = c.c;
+    const opts = [];
+    if (Core.attackTargets(s, u).includes(runner)) opts.push({ kind: 'attack', dmg: Core.damage(s, u, runner, false) });
+    if (u.skill && u.skill !== Core.HEAL_SKILL && u.ki >= Core.SKILL_COST && Core.skillTargets(s, u).includes(runner)) opts.push({ kind: 'skill', dmg: Core.damage(s, u, runner, true) });
+    [u.r, u.c] = saved;
+    for (const x of opts) if (!best || x.dmg > best.dmg || (x.dmg === best.dmg && c.cost < best.cell.cost)) best = { ...x, cell: c };
+  }
+  return best;
+}
+// 견제사격·밀어내기: 운반자가 다음 차례에 성문에 닿지 못하게 되는 자리 (활용형)
+function controlPlan(s, u, cells, runner) {
+  const before = Core.runnerSteps(s);
+  if (!Core.controlAction(u) || before === null) return null;
+  let best = null;
+  for (const c of cells) {
+    const saved = [u.r, u.c]; u.r = c.r; u.c = c.c;
+    if (Core.controlTargets(s, u).includes(runner)) {
+      let gain = 0;
+      if (u.training === 'chujeok') {
+        if (!runner.slow && before <= runner.mov && before > runnerMov({ ...runner, slow: true })) gain = runner.mov - runnerMov({ ...runner, slow: true });
+      } else {
+        const to = { r: runner.r + Math.sign(runner.r - c.r), c: runner.c + Math.sign(runner.c - c.c) };
+        if (Core.isPassable(s, to.r, to.c) && !Core.unitAt(s, to.r, to.c) && !Core.barrierAt(s, to.r, to.c)) {
+          const at = [runner.r, runner.c]; [runner.r, runner.c] = [to.r, to.c];
+          const after = Core.runnerSteps(s);
+          [runner.r, runner.c] = at;
+          if (before <= runnerMov(runner) && (after === null || after > runnerMov(runner))) gain = (after ?? 99) - before;
+        }
+      }
+      if (gain > 0 && (!best || gain > best.gain || (gain === best.gain && c.cost < best.cell.cost))) best = { cell: c, gain };
+    }
+    [u.r, u.c] = saved;
+  }
+  return best;
+}
+// 결계: 운반자가 다음 차례에 성문에 닿지 못하게 되는 칸 (활용형 진법)
+function barrierPlan(s, u, cells, runner) {
+  const before = Core.runnerSteps(s);
+  if (u.training !== 'jinbeop' || u.ki < Core.SKILL_COST || before === null || before > runnerMov(runner)) return null;
+  for (const c of cells) {
+    const saved = [u.r, u.c]; u.r = c.r; u.c = c.c;
+    const opts = Core.barrierCells(s, u);
+    [u.r, u.c] = saved;
+    for (const b of opts) {
+      const old = s.barrier; s.barrier = { r: b.r, c: b.c, until: s.turn + 2, by: u.id };
+      const after = Core.runnerSteps(s);
+      s.barrier = old;
+      if (after === null || after > runnerMov(runner)) return { cell: c, b };
+    }
+  }
+  return null;
+}
+function ledgerAlly(s, u, log, mode) {
+  const o = s.objective;
+  const done = (ev) => {
+    if (log) Core.logEvents(log, s, ev || []);
+    if (u.reMove) { const r = Core.reMove(s, u.id, u.r, u.c); if (log) Core.logEvents(log, s, r || []); } // 재이동은 쓰지 않는다
+    return [];
+  };
+  if (o.phase !== 'chase') {
+    const cells = Core.moveTargets(s, u);
+    const map = bfsFrom(s, u, ledgerGoals(s));
+    const cell = cells.slice().sort((a, b) => (map[`${a.r},${a.c}`] ?? 99) - (map[`${b.r},${b.c}`] ?? 99) || a.cost - b.cost)[0];
+    Core.moveUnit(s, u.id, cell.r, cell.c);
+    if (log) Core.logEvents(log, s, Core.arrive(s, u.id));
+    if (o.phase !== 'chase') return done(Core.wait(s, u.id));
+    // 방금 운반자가 나타났다: 이 인물은 이동을 마쳤으니 칠 수 있으면 친다
+    const r0 = Core.getUnit(s, 'runner');
+    if (Core.attackTargets(s, u).includes(r0)) return done(Core.attack(s, u.id, r0.id));
+    return done(Core.wait(s, u.id));
+  }
+  if (mode === 'nearest') return done(greedyAlly(s, u, false));
+  const runner = Core.getUnit(s, 'runner');
+  const cells = Core.moveTargets(s, u);
+  const steps = Core.runnerSteps(s);
+  const danger = steps !== null && steps <= runnerMov(runner); // 다음 적 차례에 성문에 닿는다
+  const strike = bestStrike(s, u, cells, runner);
+  if (strike && strike.dmg >= runner.hp) { Core.moveUnit(s, u.id, strike.cell.r, strike.cell.c); return done(strike.kind === 'attack' ? Core.attack(s, u.id, runner.id) : Core.useSkill(s, u.id, runner.id)); }
+  if (mode === 'training' && danger) {
+    const cp = controlPlan(s, u, cells, runner);
+    if (cp) { Core.moveUnit(s, u.id, cp.cell.r, cp.cell.c); return done(Core.control(s, u.id, runner.id)); }
+    const bp = barrierPlan(s, u, cells, runner);
+    if (bp) { Core.moveUnit(s, u.id, bp.cell.r, bp.cell.c); const ev = Core.placeBarrier(s, u.id, bp.b.r, bp.b.c); if (ev) return done(ev); Core.cancelMove(s, u.id); }
+  }
+  // 관군: 운반자가 향하는 성문 칸을 막는다 (성문이 두 칸이라 한 명으로는 못 막는다)
+  const gate = Core.runnerGates(s)[0];
+  if (u.type === 'gwangun' && gate) {
+    const exitCells = [];
+    for (let c = 0; c < s.cols; c++) {
+      const gr = s.exitsList.find((x) => x.name === gate.name).r;
+      if (Core.isEscape(s, gr, c)) exitCells.push({ r: gr, c });
+    }
+    const map = bfsFrom(s, u, exitCells.filter((p) => !Core.unitAt(s, p.r, p.c) || Core.unitAt(s, p.r, p.c) === u));
+    const cell = cells.slice().sort((a, b) => (map[`${a.r},${a.c}`] ?? 99) - (map[`${b.r},${b.c}`] ?? 99) || a.cost - b.cost)[0];
+    Core.moveUnit(s, u.id, cell.r, cell.c);
+    const t = Core.attackTargets(s, u).find((x) => x === runner);
+    return done(t ? Core.attack(s, u.id, runner.id) : Core.wait(s, u.id));
+  }
+  if (strike) { Core.moveUnit(s, u.id, strike.cell.r, strike.cell.c); return done(strike.kind === 'attack' ? Core.attack(s, u.id, runner.id) : Core.useSkill(s, u.id, runner.id)); }
+  // 칠 수 없으면 운반자 쪽으로 (길을 막는 귀화가 있으면 그 귀화를 친다)
+  const map = bfsFrom(s, u, ADJ.map(([dr, dc]) => ({ r: runner.r + dr, c: runner.c + dc })));
+  const cell = cells.slice().sort((a, b) => (map[`${a.r},${a.c}`] ?? 99) - (map[`${b.r},${b.c}`] ?? 99) || a.cost - b.cost)[0];
+  Core.moveUnit(s, u.id, cell.r, cell.c);
+  const g = Core.attackTargets(s, u).filter((x) => x.side === 'enemy').sort((a, b) => a.hp - b.hp)[0];
+  return done(g ? Core.attack(s, u.id, g.id) : Core.wait(s, u.id));
+}
+
 // 한 판을 끝까지. mode: 'greedy'(도망 보스를 쫓음) | 'nearest'(가까운 적만 침 — 3장 섬멸형) | 'idle'(아군은 대기만) | 'objective'(3장 목표형). stage·merit(누계)로 장·품계를 고른다.
 // 플레이 로그(Core.newPlayLog …)도 화면과 같은 방식으로 채워 s.log 에 둔다 (specs/playtest.md)
 export function playBattle({ seed = 1, mode = 'greedy', stage, merit, chapter = 'ch1', training } = {}) {
@@ -292,11 +419,13 @@ export function playBattle({ seed = 1, mode = 'greedy', stage, merit, chapter = 
       if (s.result !== null) break;
       const from = { r: u.r, c: u.c };
       const lampMode = s.lamps && (mode === 'objective' || mode === 'training');
+      const ledgerMode = !!s.runnerSpec && mode !== 'idle';
       const events = mode === 'idle' ? Core.wait(s, u.id)
+        : ledgerMode ? ledgerAlly(s, u, log, mode)
         : lampMode ? lampAlly(s, u, log, mode === 'training')
           : mode === 'objective' ? objectiveAlly(s, u, log) : greedyAlly(s, u, mode !== 'nearest');
       Core.logMove(log, s, u.id, from, { r: u.r, c: u.c });
-      if (mode !== 'objective' && mode !== 'training' && s.objective) Core.logEvents(log, s, Core.arrive(s, u.id)); // 섬멸형도 지나다 서면 조사는 된다
+      if (mode !== 'objective' && mode !== 'training' && s.objective && !ledgerMode) Core.logEvents(log, s, Core.arrive(s, u.id)); // 섬멸형도 지나다 서면 조사는 된다
       Core.logEvents(log, s, events);
     }
     if (s.result !== null) break;

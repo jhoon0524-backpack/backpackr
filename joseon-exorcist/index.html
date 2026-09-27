@@ -809,6 +809,7 @@
     <button class="big-btn plain" id="lore-open-title" type="button">📖 벽사록</button>
     <button class="big-btn plain" id="playlog-open-title" type="button" hidden>🧪 플레이 기록</button>
     <button class="big-btn plain" id="btn-test4" type="button" hidden>🧪 4장 바로 시험</button>
+    <button class="big-btn plain" id="btn-test5" type="button" hidden>🧪 5장 바로 시험</button>
     <div class="note" id="title-note"></div>
     <!-- 처음부터 확인 (specs/chapter2.md 7-4): 폰 오터치로 기록이 지워지지 않게 -->
     <div class="confirm" id="new-confirm" hidden>
@@ -1197,6 +1198,58 @@ var Core = (function () {
         reinforceAtTruth: 2, reinforceEvery: 2,
         before: '폐사찰의 괴변 원인을 조사하라.', after: '세 개의 봉인등을 모두 밝히고 지켜라.'
       }
+    },
+    // 5장 사라진 장부 (specs/chapter5.md). 흔적 연쇄 조사 → 관리 발견 → 장부 운반자 추격. 맵 배치는 AI 초안 — 시뮬레이션으로 조정
+    // 위 = 북문, 아래 = 남문 (E 칸 = 성문, 운반자가 닿으면 패배). 성문마다 칸 두 개·가는 길 두 갈래 이상 — 관군 한 명으로는 막히지 않는다
+    // 배치 (보충: 자동 검증으로 고름): 객사(왼쪽 위) → 뒷골목(가운데 아래) → 관리(오른쪽 아래 골목 끝) → 운반자는 반대편 왼쪽에서 달아난다.
+    // 운반자 자리: 시작부터 갇히지 않고(두 방향으로 나감), 자동 플레이에서 성문 1~2칸 앞까지 갔다가 잡히는 자리
+    ch5: {
+      v: 1,
+      name: '5장 사라진 장부',
+      rows: 10,
+      cols: 8,
+      maxTurn: 15,
+      map: [
+        'DDDEEDDD',
+        '.D....D.',
+        '.DD..DD.',
+        '........',
+        '.D.DD.D.',
+        '...DD...',
+        '.D....D.',
+        '.DD..DD.',
+        '.D....D.',
+        'DDDEEDDD'
+      ],
+      allies: [
+        { id: 'yoon', r: 3, c: 2 },
+        { id: 'hangyeol', r: 3, c: 5 },
+        { id: 'yeoul', r: 4, c: 2 },
+        { id: 'soun', r: 4, c: 5 }
+      ],
+      enemies: [],
+      // 관군 시작 자리: 운반자가 북문으로 가는 길(3줄 왼쪽) 밖 — 가만히 세워 두기만 해도 길이 막히지 않게
+      reserves: [{ r: 3, c: 6 }, { r: 3, c: 7 }],
+      points: [
+        { id: 'gaeksa', name: '객사', r: 1, c: 2,
+          investigate: { title: '객사', text: '싸움 흔적도, 피도 없다. 개인 물건은 대부분 그대로다.\n관청 출입패만 사라졌다.',
+            say: [{ who: '한결', face: '🏹', text: '끌려간 사람치곤 준비를 너무 잘했습니다.' },
+              { who: '윤무겸', face: '🗡️', text: '스스로 나갔다는 건가.' }] } },
+        // 뒷골목은 객사를 조사한 뒤에야 보인다 (흔적 연쇄)
+        { id: 'golmok', name: '뒷골목', r: 6, c: 3, after: 'gaeksa',
+          investigate: { title: '뒷골목', text: '관청 문서 조각이 떨어져 있다.\n객사에서 이어진 발자국이 골목 안쪽으로 향한다.',
+            say: { who: '소운', face: '🧙', text: '뭔가를 들고 나갔군.' } } }
+      ],
+      appear: { type: 'official', r: 8, c: 7 }, // 흔적 두 곳을 찾으면 골목 깊숙이 숨은 관리가 드러난다
+      runner: { type: 'runner', r: 3, c: 1 }, // 관리와 이야기하면 시장 쪽(반대편)에서 장부 운반자가 달아나기 시작한다
+      // 운반자 HP 가 절반 이하가 되면: 장부에서 봉인 문서가 떨어지고 귀화 2 가 나타난다
+      midEvent: { hpRate: 0.5, spawns: [{ r: 3, c: 0 }, { r: 3, c: 7 }] },
+      exits: [{ id: 'north', name: '북문', r: 0, c: 3 }, { id: 'south', name: '남문', r: 9, c: 3 }],
+      terrainLabels: { E: { mark: '🚪', name: '성문', text: '장부 운반자가 이 칸에 도착하면 패배합니다.' } },
+      objective: {
+        investigateNeed: 2, next: 'find', officialMerit: 1, runnerMerit: 2, clearMerit: 3,
+        before: '사라진 관리의 흔적을 찾아라.', find: '골목 깊숙이 숨은 관리를 찾아라.', after: '장부 운반자를 제압하라.'
+      }
     }
   };
   var TERRAINS = ['.', 'D', 'M', 'K', 'E'];
@@ -1269,7 +1322,13 @@ var Core = (function () {
       faction: '귀물', ai: 'lamp', entityType: 'WONGWI', defeatLine: '귀화가 흩어졌다.', noMerit: true },
     // 도문 술사: 중립 NPC. 움직이지 않고 옆의 적을 친다. 누구의 공격 대상도 아니다
     dosa: { name: '도문 술사', emoji: '☯️', hp: 40, atk: 12, def: 6, mov: 0, rng: 1, elem: '없음', neutral: true,
-      faction: '도문', title: '도문의 술사', ai: 'sentinel', untargetable: true, human: true, entityType: 'HUMAN' }
+      faction: '도문', title: '도문의 술사', ai: 'sentinel', untargetable: true, human: true, entityType: 'HUMAN' },
+    // 5장 (specs/chapter5.md). 관리: 중립, 움직이지 않고 누구도 칠 수 없다 (옆 칸에 서면 이야기)
+    official: { name: '실종된 관리', emoji: '👤', hp: 20, atk: 0, def: 4, mov: 0, rng: 1, elem: '없음', neutral: true,
+      faction: '큰고을 관아', title: '객사에서 사라진 관리', ai: 'still', untargetable: true, human: true, entityType: 'HUMAN' },
+    // 장부 운반자: 싸우지 않고 북문·남문으로 달아난다 (2장 달래 도주 재사용, 치유 없음). 조직명은 밝히지 않는다
+    runner: { name: '장부 운반자', emoji: '🏃', hp: 28, atk: 8, def: 5, mov: 4, rng: 1, elem: '없음',
+      faction: '알 수 없음', title: '장부 꾸러미를 든 자', ai: 'flee', human: true, runner: true, noMerit: true, entityType: 'HUMAN' }
   };
   // ── 존재 분류·고증 등급 (specs/lore.md 1·6장). 게임용 분류이며 역사적 공식 분류가 아니다 ──
   var ENTITY_TYPES = {
@@ -1302,6 +1361,7 @@ var Core = (function () {
       attackName: d.attackName || null, // 기본공격 표시명 (무녀 '무령'). 없으면 그냥 '공격'
       untargetable: !!d.untargetable, // 4장 도문 술사: 아군도 적도 치지 않는다
       noMerit: !!d.noMerit,
+      runner: !!d.runner, // 5장 장부 운반자: 제압하면 임무 완료
       maxHp: d.hp, hp: d.hp, atk: d.atk, def: d.def, mov: d.mov, rng: d.rng, elem: d.elem,
       skill: d.skill || null,
       // 기력: 아군은 모두, 적은 스킬이 있는 유닛(달래)만
@@ -1404,8 +1464,17 @@ var Core = (function () {
       state.objective = {
         phase: 'investigate', investigated: [], repaired: [], changedTurn: null, weakened: false,
         need: stage.objective.investigateNeed, sealMerit: stage.objective.sealMerit, clearMerit: stage.objective.clearMerit,
-        next: stage.objective.next || 'seal', hold: 0 // 4장: 세 등이 모두 켜진 채 버틴 적 차례 수
+        next: stage.objective.next || 'seal', hold: 0, // 4장: 세 등이 모두 켜진 채 버틴 적 차례 수
+        // 5장: 관리 확보·운반자 확보 공적, 운반자가 나타난 턴
+        officialMerit: stage.objective.officialMerit || 0, runnerMerit: stage.objective.runnerMerit || 0, chaseTurn: null
       };
+    }
+    if (stage.runner) {
+      state.appear = stage.appear;
+      state.runnerSpec = stage.runner;
+      state.exitsList = stage.exits;
+      state.midEvent = stage.midEvent;
+      state.midDone = false;
     }
     if (stage.lamps) {
       state.lamps = stage.lamps.map(function (l) {
@@ -1659,6 +1728,7 @@ var Core = (function () {
     target.hp = Math.max(0, target.hp - amount);
     events.push({ type: 'damage', attackerId: attacker.id, targetId: target.id, amount: amount, name: info.name, skill: info.skill, mult: info.mult });
     if (target.hp === 0) knockOut(state, attacker, target, events);
+    else if (target.runner && state.midEvent && !state.midDone && target.hp <= target.maxHp * state.midEvent.hpRate) runnerMidEvent(state, events);
     return events;
   }
 
@@ -1706,6 +1776,7 @@ var Core = (function () {
     var ev = { type: target.side === 'enemy' ? 'defeat' : 'retreat', attackerId: attacker.id, targetId: target.id, merit: merit, human: target.human };
     if (target.side === 'enemy') ev.defeatType = defeatTypeFor(target.entityType);
     events.push(ev);
+    if (target.runner && state.objective && state.objective.phase === 'chase' && state.result === null) return runnerCaught(state, events);
     updateResult(state, events);
   }
 
@@ -2111,13 +2182,16 @@ var Core = (function () {
 
   // 탈출로(E)까지 남은 실제 이동 칸 수 지도. mover 자신의 칸은 비어 있다고 본다.
   // 아군이 서 있는 탈출로·길은 막힌다 (길막). 결과: { 'r,c': 칸 수 }
-  function escapeMap(state, mover) {
+  // opts.ignoreSoldiers / opts.ignoreBarrier: 관군·결계가 없었다면 몇 칸이었나 (5장 기록 — 무엇이 길을 막았나)
+  function escapeFree(state, mover, r, c, opts) {
+    opts = opts || {};
+    if (!isPassable(state, r, c) || (!opts.ignoreBarrier && barrierBlocks(state, mover, r, c))) return false;
+    var o = unitAt(state, r, c);
+    return !o || o === mover || (opts.ignoreSoldiers && o.type === 'gwangun');
+  }
+  function escapeMap(state, mover, opts) {
     var dist = {}, queue = [];
-    function free(r, c) {
-      if (!isPassable(state, r, c) || barrierBlocks(state, mover, r, c)) return false;
-      var o = unitAt(state, r, c);
-      return !o || o === mover;
-    }
+    function free(r, c) { return escapeFree(state, mover, r, c, opts); }
     for (var r = 0; r < state.rows; r++) {
       for (var c = 0; c < state.cols; c++) {
         if (isEscape(state, r, c) && free(r, c)) {
@@ -2173,7 +2247,13 @@ var Core = (function () {
         healed = true;
       }
     }
+    var before = e.runner ? { steps: runnerSteps(state), soldiers: runnerSteps(state, { ignoreSoldiers: true }), barrier: runnerSteps(state, { ignoreBarrier: true }) } : null;
     if (!healed) relocate(state, e, cells.sort(order)[0], events);
+    if (before) {
+      // 5장 기록: 관군·결계가 없었다면 성문까지 더 가까웠나 (= 그것이 길을 막았다)
+      var longer = function (x) { return x !== null && (before.steps === null || x < before.steps); };
+      events.push({ type: 'runnerMove', unitId: e.id, steps: runnerSteps(state), blockedBySoldier: longer(before.soldiers), blockedByBarrier: longer(before.barrier) });
+    }
     if (isEscape(state, e.r, e.c) && state.result === null) {
       events.push({ type: 'escape', unitId: e.id });
       lose(state, 'escape', events);
@@ -2199,9 +2279,14 @@ var Core = (function () {
   // 아군이 이동을 마치고 조사 지점에 서면 자동 조사 (행동을 쓰지 않는다). 2곳째에 진실 → 봉인 단계
   function arrive(state, id) {
     var u = getUnit(state, id), o = state.objective, events = [];
-    if (!o || !u || !u.alive || u.side !== 'ally' || o.phase !== 'investigate' || state.result !== null) return events;
+    if (!o || !u || !u.alive || u.side !== 'ally' || state.result !== null) return events;
+    if (o.phase === 'find') {
+      if (nextToOfficial(state, u)) foundOfficial(state, u, events);
+      return events;
+    }
+    if (o.phase !== 'investigate') return events;
     var p = pointAt(state, u.r, u.c);
-    if (!p || !p.investigate || o.investigated.indexOf(p.id) !== -1) return events;
+    if (!p || !p.investigate || o.investigated.indexOf(p.id) !== -1 || !pointOpen(state, p)) return events;
     o.investigated.push(p.id);
     events.push({ type: 'investigate', pointId: p.id, unitId: u.id });
     if (o.investigated.length >= o.need) {
@@ -2209,8 +2294,94 @@ var Core = (function () {
       o.changedTurn = state.turn;
       events.push({ type: 'truth' });
       if (o.phase === 'lamps') lampTruth(state, events);
+      if (o.phase === 'find') officialAppears(state, events);
     }
     return events;
+  }
+  // 5장 흔적 연쇄: after 가 있는 지점은 앞 흔적을 찾은 뒤에야 보이고 조사할 수 있다
+  function pointOpen(state, p) {
+    return !p.after || state.objective.investigated.indexOf(p.after) !== -1;
+  }
+
+  // ── 5장 사라진 장부 (specs/chapter5.md) ─────────────────
+  // 흔적 두 곳 → 관리가 드러난다. 이미 옆에 선 아군이 있으면 바로 이야기
+  function officialAppears(state, events) {
+    var a = state.appear, cell = freeCellNear(state, a.r, a.c);
+    if (!cell) return;
+    var off = makeUnit(ENEMY_TYPES[a.type], a.type, 'neutral', cell.r, cell.c, a.type);
+    state.units.push(off);
+    events.push({ type: 'appear', unitId: off.id, r: cell.r, c: cell.c });
+    var near = livingUnits(state, 'ally').filter(function (x) { return nextToOfficial(state, x); })[0];
+    if (near) foundOfficial(state, near, events);
+  }
+  function nextToOfficial(state, u) {
+    var off = getUnit(state, 'official');
+    return !!off && off.alive && distance(u, off) === 1;
+  }
+  // 관리 확보 (+1) → 시장 쪽에서 장부 운반자가 달아난다 → 추격 단계
+  function foundOfficial(state, u, events) {
+    var o = state.objective;
+    o.phase = 'chase';
+    o.chaseTurn = state.turn;
+    state.merit += o.officialMerit;
+    events.push({ type: 'official', unitId: u.id, merit: o.officialMerit });
+    var spec = state.runnerSpec, cell = freeCellNear(state, spec.r, spec.c);
+    if (!cell) return;
+    var runner = makeUnit(ENEMY_TYPES[spec.type], spec.type, 'enemy', cell.r, cell.c, spec.type);
+    state.units.push(runner);
+    events.push({ type: 'runner', unitId: runner.id, r: cell.r, c: cell.c, steps: runnerSteps(state) });
+  }
+  // 운반자가 성문까지 남은 칸 수 (막혀서 길이 없으면 null)
+  function runnerSteps(state, opts) {
+    var e = getUnit(state, 'runner');
+    if (!e || !e.alive) return null;
+    var d = stepsFrom(escapeMap(state, e, opts), e);
+    return d === Infinity ? null : d;
+  }
+  // 성문마다 운반자에게서 몇 칸인가 [{ id, name, steps }] (가까운 순, 길이 없는 성문은 빠진다) — 화면 임무 줄용
+  function runnerGates(state) {
+    var e = getUnit(state, 'runner');
+    if (!e || !e.alive || !state.exitsList) return [];
+    var dist = {}, queue = [[e.r, e.c]];
+    dist[e.r + ',' + e.c] = 0;
+    while (queue.length) {
+      var cur = queue.shift();
+      for (var i = 0; i < DIRS.length; i++) {
+        var nr = cur[0] + DIRS[i][0], nc = cur[1] + DIRS[i][1], key = nr + ',' + nc;
+        if (dist[key] !== undefined || !escapeFree(state, e, nr, nc)) continue;
+        dist[key] = dist[cur[0] + ',' + cur[1]] + 1;
+        queue.push([nr, nc]);
+      }
+    }
+    return state.exitsList.map(function (x) {
+      var best = Infinity;
+      for (var c = 0; c < state.cols; c++) {
+        if (isEscape(state, x.r, c) && dist[x.r + ',' + c] !== undefined) best = Math.min(best, dist[x.r + ',' + c]);
+      }
+      return { id: x.id, name: x.name, steps: best };
+    }).filter(function (g) { return g.steps !== Infinity; }).sort(function (a, b) { return a.steps - b.steps; });
+  }
+  // 운반자 HP 가 절반 이하가 되면 한 번: 봉인 문서가 떨어지고 귀화가 나타난다
+  function runnerMidEvent(state, events) {
+    state.midDone = true;
+    events.push({ type: 'ledgerPage' });
+    state.midEvent.spawns.forEach(function (p) {
+      var cell = freeCellNear(state, p.r, p.c);
+      if (!cell) return;
+      var n = state.units.filter(function (u) { return u.type === 'gwihwa'; }).length + 1;
+      var g = makeUnit(ENEMY_TYPES.gwihwa, 'gwihwa' + n, 'enemy', cell.r, cell.c, 'gwihwa');
+      state.units.push(g);
+      events.push({ type: 'reinforce', unitId: g.id, r: cell.r, c: cell.c });
+    });
+  }
+  // 운반자 제압: 운반자 확보 +2, 임무 완료 +3 → 승리 (사람을 쓰러뜨려서가 아니라 임무 단계라서 주는 공적)
+  function runnerCaught(state, events) {
+    var o = state.objective;
+    state.merit += o.runnerMerit + o.clearMerit;
+    events.push({ type: 'objective', merit: o.runnerMerit + o.clearMerit });
+    state.result = 'win';
+    state.phase = 'over';
+    events.push({ type: 'result', result: 'win' });
   }
 
   // 지금 이 유닛이 복구할 수 있는 봉인 지점 (봉인 단계 + 복구 안 된 봉인 칸에 서 있음)
@@ -2551,6 +2722,7 @@ var Core = (function () {
     if (!e || !e.alive || e.side === 'ally' || state.phase !== 'enemy' || state.result !== null) return [];
     if (e.ai === 'guardian') return guardianAct(state, e);
     if (e.ai === 'sentinel') return sentinelAct(state, e);
+    if (e.ai === 'still') return []; // 5장 관리: 아무것도 하지 않는다
     if (e.ai === 'lamp') return gwihwaAct(state, e);
     if (e.ai === 'wraith') return wraithAct(state, e);
     if (e.ai === 'hold') return bossAct(state, e);
@@ -2619,6 +2791,12 @@ var Core = (function () {
       gwihwaSpawns: [] // v0.9.2: 증원 귀화가 어느 자리에서 나왔나
     };
     state.units.forEach(function (u) { if (u.training) log.trainingChoices[u.id] = u.training; });
+    if (state.runnerSpec) {
+      // 5장 (specs/chapter5.md 33장): 무엇이 운반자를 막았나
+      log.clueTurns = []; log.officialFoundTurn = null; log.runnerSpawnTurn = null; log.runnerSubduedTurn = null;
+      log.runnerDistanceToExitByTurn = []; log.runnerBlockedBySoldier = 0; log.runnerSlowedByChujeok = 0;
+      log.runnerPushedByGyoran = 0; log.runnerBlockedByBarrier = 0;
+    }
     trackDalrae(log, state);
     return log;
   }
@@ -2649,6 +2827,7 @@ var Core = (function () {
         log.heals.push({ turn: state.turn, by: e.attackerId, target: e.targetId, amount: e.amount, at: log.hits.length });
       } else if (e.type === 'investigate') {
         log.investigations.push({ turn: state.turn, point: e.pointId, by: e.unitId });
+        if (log.clueTurns) log.clueTurns.push(state.turn);
       } else if (e.type === 'truth') {
         log.objectiveChangedTurn = state.turn;
       } else if (e.type === 'seal') {
@@ -2665,13 +2844,26 @@ var Core = (function () {
         log.sealDefenseRounds++;
       } else if (e.type === 'reinforce') {
         log.gwihwaSpawns.push({ turn: state.turn, spawn: e.spawnId, id: e.unitId });
+      } else if (e.type === 'official' && log.clueTurns) {
+        log.officialFoundTurn = state.turn;
+      } else if (e.type === 'runner' && log.clueTurns) {
+        log.runnerSpawnTurn = state.turn;
+        log.runnerDistanceToExitByTurn.push({ turn: state.turn, steps: e.steps });
+      } else if (e.type === 'runnerMove') {
+        log.runnerDistanceToExitByTurn.push({ turn: state.turn, steps: e.steps });
+        if (e.blockedBySoldier) log.runnerBlockedBySoldier++;
+        if (e.blockedByBarrier) log.runnerBlockedByBarrier++;
+      } else if (e.type === 'push' && log.clueTurns && getUnit(state, e.targetId).runner) {
+        log.runnerPushedByGyoran++;
       } else if (e.type === 'training') {
         bump(log.trainingActivations, e.kind);
         log.trainingEvents.push({ turn: state.turn, unit: e.unitId, kind: e.kind });
+        if (log.clueTurns && e.kind === 'chujeok' && e.targetId === 'runner') log.runnerSlowedByChujeok++;
       } else if (e.type === 'defeat' || e.type === 'retreat') {
         var t = getUnit(state, e.targetId);
         if (t.respawn) log.wongwiDefeated++;
         if (t.ai === 'lamp') log.gwihwaDefeated++;
+        if (t.runner && log.clueTurns) log.runnerSubduedTurn = state.turn;
         log.defeatedUnits.push({
           turn: state.turn, id: t.id, name: t.name, side: t.side,
           // 2장 달래(사람 보스)는 화면 문구처럼 '물러남' (defeatMessage)
@@ -2770,6 +2962,7 @@ var Core = (function () {
   // 공적 최대 = 보스 아닌 적 수 × 1 + 보스 3 (specs/chapter2.md S11)
   function maxMerit(st) {
     if (st.lamps) return st.lamps.length * st.objective.lampMerit + st.objective.clearMerit;
+    if (st.runner) return st.objective.officialMerit + st.objective.runnerMerit + st.objective.clearMerit;
     if (st.objective) return st.points.filter(function (p) { return p.seal; }).length * st.objective.sealMerit + st.objective.clearMerit;
     // 사람(제압)은 공적이 아니므로 세지 않는다 (specs/immersion.md 5장)
     return st.enemies.filter(function (e) { return !ENEMY_TYPES[e.type].boss && !ENEMY_TYPES[e.type].human; }).length * MERIT_NORMAL + MERIT_BOSS;
@@ -2899,7 +3092,7 @@ var Core = (function () {
   }
 
   // ── 진행 (specs/chapter2.md 1-3, 보충 S7·S9) ──────────
-  var CAMPAIGN = ['ch1', 'ch2', 'ch3', 'ch4']; // 장 순서
+  var CAMPAIGN = ['ch1', 'ch2', 'ch3', 'ch4', 'ch5']; // 장 순서
 
   function newProgress() {
     return { v: 1, cleared: [], merit: 0, training: {} };
@@ -3015,12 +3208,13 @@ var Core = (function () {
         STABILIZED: '여의주는 회수했다.\n그러나 신당회 사람들은 이미 모습을 감췄다.'
       },
       record: '2장 사라진 여의주 — 달래가 여의주를 떨어뜨리고 물러났다.' },
-    { id: 'keungoeul', name: '큰고을', mark: '고을', x: 84, y: 50, links: ['yeougol'], lore: 'region:keungoeul',
+    { id: 'keungoeul', name: '큰고을', mark: '고을', x: 84, y: 50, chapter: 'ch5', action: '조사한다', links: ['yeougol'], lore: 'region:keungoeul',
       desc: {
         default: '청령현의 관아와 장시가 있는 큰 고을.\n아직 겉으로 드러난 괴변은 없다.',
-        EXORCISM_REQUIRED: '객사의 문이 밤새 잠겨 있었다.\n아침이 되어 문을 열었을 때\n관리 한 명이 흔적도 없이 사라져 있었다.'
+        EXORCISM_REQUIRED: '객사의 문이 밤새 잠겨 있었다.\n아침이 되어 문을 열었을 때\n관리 한 명이 흔적도 없이 사라져 있었다.',
+        STABILIZED: '사라졌던 관리는 확보됐다.\n도난당한 봉인처 장부의 일부는 아직 돌아오지 않았다.' // 기획서 5장 28장
       },
-      note: { EXORCISM_REQUIRED: '조사 준비 중' } },
+      record: '5장 사라진 장부 — 관리를 확보하고 장부 운반자를 제압했다.' },
     { id: 'seonang', name: '서낭고개', mark: '고개', x: 46, y: 31, chapter: 'ch3', action: '조사한다', links: ['yeougol', 'pyesachal'], lore: 'region:seonang',
       desc: {
         default: '고개를 넘은 사람들이\n밤마다 같은 꿈을 꾸고 있다.\n\n서낭당의 금줄이 끊어졌다.',
@@ -3040,10 +3234,13 @@ var Core = (function () {
       desc: { default: '산사태로 길이 끊겼다.\n그런데 무너진 바위 아래에서 사람 목소리가 들린다는 소문이 있다.' },
       note: '지금은 지나갈 수 없다.' },
     { id: 'naru', name: '나루터', mark: '나루', x: 50, y: 117, links: ['hq'], lore: 'region:naru',
-      desc: { default: '강을 건너 다른 고을로 향하는 나루.' },
-      note: '아직 강을 건널 때가 아니다.' }
+      desc: {
+        default: '강을 건너 다른 고을로 향하는 나루.',
+        EXORCISM_REQUIRED: '사공 없는 배가 강을 건너왔다.\n배 안에는 아무도 없다고 한다.' // 기획서 5장 28장
+      },
+      note: { PEACEFUL: '아직 강을 건널 때가 아니다.', EXORCISM_REQUIRED: '조사 준비 중' } }
   ];
-  var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol', ch3: 'seonang', ch4: 'pyesachal' };
+  var REGION_BY_CHAPTER = { ch1: 'heukseok', ch2: 'yeougol', ch3: 'seonang', ch4: 'pyesachal', ch5: 'keungoeul' };
   // 조선 전체 → 권역 → 지역 (specs/worldmap-polish.md 4장). 지금 화면 전체가 청령현 권역맵이다.
   // 권역 하나는 6~10 지역으로 두고, 권역 이야기가 끝나면 나루터로 다음 권역맵 (권역 이동 화면은 아직 없다)
   var PROVINCES = [
@@ -3060,11 +3257,11 @@ var Core = (function () {
       hq: 'HQ',
       heukseok: cleared('ch1') ? 'STABILIZED' : 'EXORCISM_REQUIRED',
       yeougol: cleared('ch2') ? 'STABILIZED' : (cleared('ch1') ? 'EXORCISM_REQUIRED' : 'UNKNOWN'),
-      keungoeul: cleared('ch4') ? 'EXORCISM_REQUIRED' : 'PEACEFUL', // 4장 뒤 관리 실종 (5장은 아직 없다)
+      keungoeul: cleared('ch5') ? 'STABILIZED' : (cleared('ch4') ? 'EXORCISM_REQUIRED' : 'PEACEFUL'), // 4장 뒤 관리 실종 → 5장
       seonang: cleared('ch3') ? 'STABILIZED' : 'OMEN',
       pyesachal: cleared('ch4') ? 'STABILIZED' : (cleared('ch3') ? 'OMEN' : 'LOCKED'),
       sangil: 'BLOCKED',
-      naru: 'PEACEFUL'
+      naru: cleared('ch5') ? 'EXORCISM_REQUIRED' : 'PEACEFUL' // 5장 뒤 사공 없는 배 (6장은 아직 없다)
     };
   }
 
@@ -3092,7 +3289,10 @@ var Core = (function () {
     { id: 'news:ch3b', after: 'ch3', region: 'pyesachal', title: '📜 새로운 급보가 도착했습니다.',
       text: '서낭고개 너머 폐사찰에서\n밤마다 불빛이 보인다는 보고가 올라왔다.' },
     { id: 'news:ch4', after: 'ch4', region: 'keungoeul', title: '📜 새로운 급보가 도착했습니다.',
-      text: '큰고을 객사의 문이 밤새 잠겨 있었다.\n아침이 되어 문을 열었을 때\n관리 한 명이 흔적도 없이 사라져 있었다.' }
+      text: '큰고을 객사의 문이 밤새 잠겨 있었다.\n아침이 되어 문을 열었을 때\n관리 한 명이 흔적도 없이 사라져 있었다.' },
+    // (보충: 문구는 기획서 26·28장을 줄인 AI 초안)
+    { id: 'news:ch5', after: 'ch5', region: 'naru', title: '📜 새로운 급보가 도착했습니다.',
+      text: '나루터에서 급보가 올라왔다.\n강 건너에서 사공 없는 배 한 척이 들어왔다.\n배 밑에서 사람이 두드리는 소리가 난다고 한다.' }
   ];
   // 가장 최근에 깬 장의 급보만 보여 준다 — 이전 저장으로 처음 지도를 열 때 이미 지난 급보(안정된 곳을 가리키는)가 뜨지 않게
   function worldNews(progress, seen) {
@@ -3105,12 +3305,13 @@ var Core = (function () {
     ch1: { title: '흑린 토벌', text: '흑석촌에서 가축과 사람들이 잇달아 사라지고 있다.' },
     ch2: { title: '사라진 여의주', text: '여우골에서 달래의 흔적을 찾았다.' },
     ch3: { title: '괴변의 원인 조사', text: '서낭고개의 괴변 원인을 확인하라.' },
-    ch4: { title: '폐사찰의 등불', text: '사람이 없는 폐사찰에 밤마다 세 개의 불빛이 켜진다.' }
+    ch4: { title: '폐사찰의 등불', text: '사람이 없는 폐사찰에 밤마다 세 개의 불빛이 켜진다.' },
+    ch5: { title: '사라진 장부', text: '큰고을 객사에서 관리 한 명이 흔적도 없이 사라졌다.' }
   };
   function currentMission(progress) {
     var ch = nextStage(progress);
     if (ch) return { region: REGION_BY_CHAPTER[ch], chapter: ch, title: MISSIONS[ch].title, text: MISSIONS[ch].text, ready: true };
-    return { region: 'keungoeul', chapter: null, title: '조사 준비 중', text: '큰고을 객사에서 관리 한 명이 흔적도 없이 사라졌다.', ready: false };
+    return { region: 'naru', chapter: null, title: '조사 준비 중', text: '나루터에 사공 없는 배가 들어왔다.', ready: false };
   }
 
   // ── 벽사록: 도감 + 세계관 사전 (specs/lore.md 9~13장) ─────────────
@@ -3197,6 +3398,19 @@ var Core = (function () {
       characterNotes: { yoon: '등잔 아래 부적이 겹겹이 붙어 있었다.\n누군가 오래 지켜 온 불이다.' },
       lore: '폐사찰 세 방향에 놓인 등. 불을 밝히기 위한 것이 아니라 본당 안의 무언가를 가두는 봉인이다.',
       note: '봉인등은 게임 속 창작 물건이다.' },
+    // 5장 (specs/chapter5.md 32장). 문구는 AI 초안. 객사의 역사 설명은 자료 대조 전이라 쓰지 않았다
+    { id: 'gaeksa', cat: '기록', name: '큰고을 객사', grade: 'C', unlock: ['point:gaeksa', 'clear:ch5'],
+      characterNotes: { yoon: '문은 안에서 잠겨 있었다.\n그 문을 잠근 사람은 스스로 나간 사람이었다.' },
+      lore: '큰고을 관아 곁의 객사. 공무로 온 관리가 머물던 방에서, 싸운 흔적도 피도 없이 사람이 사라졌다.',
+      note: '고증 검증 필요: 조선 시대 객사의 쓰임에 대한 설명은 자료를 대조한 뒤에 채운다. 이 사건과 장소는 게임 설정이다.' },
+    { id: 'ledger', cat: '물건', name: '봉인처 장부', grade: 'C', unlock: ['clear:ch5'],
+      characterNotes: { yoon: '서낭고개와 폐사찰이 적혀 있었다.\n우리가 막아 온 괴변은 누군가의 목록에 이미 있었다.' },
+      lore: '청령현 일대의 오래된 봉인처가 적힌 장부. 관아에 보관돼 있다가 빼돌려졌다. 되찾았지만 한 장이 뜯겨 있다.',
+      note: '봉인처 장부는 게임 속 창작 물건이다.' },
+    { id: 'runner', cat: '인물', name: '장부 운반자', grade: 'C', unlock: ['enemy:runner', 'clear:ch5'],
+      characterNotes: { yoon: '옮기는 것뿐이라고 했다.\n누구에게 옮기는지는 끝까지 말하지 않았다.' },
+      lore: '큰고을에서 봉인처 장부를 들고 달아난 자. 어느 무리에 속했는지는 밝혀지지 않았다.',
+      note: '장부 운반자는 게임 속 가상 인물이다.' },
 
     // 물건 — 데이터와 벽사록 항목만. 인벤토리·사용은 아직 없다 (specs/lore.md 17장)
     { id: 'jeonghwasu', cat: '물건', name: '정화수', hanja: '井華水', grade: 'B', item: 'ITEM_001', faction: '신당회', unlock: ['skill:정화수'],
@@ -3345,6 +3559,9 @@ var Core = (function () {
     spreadTargets: spreadTargets,
     reMoveTargets: reMoveTargets,
     controlAction: controlAction,
+    pointOpen: pointOpen,
+    runnerGates: runnerGates,
+    runnerSteps: runnerSteps,
     controlTargets: controlTargets,
     canControl: canControl,
     control: control,
@@ -3437,6 +3654,13 @@ var Core = (function () {
     'E': { name: '탈출로', text: '달래가 이 칸에 도착하면 패배합니다.' },
     'D': { name: '초가집·바위', text: '지나갈 수 없습니다.' }
   };
+  // 장마다 지형 표시를 바꿀 수 있다 (5장: 탈출로 🌲 → 성문 🚪). 규칙은 그대로
+  function terrainLabel(t) {
+    var st = chapterId && Core.STAGES[chapterId];
+    return st && st.terrainLabels && st.terrainLabels[t];
+  }
+  function terrainMark(t) { var o = terrainLabel(t); return o ? o.mark : TERRAIN_MARK[t]; }
+  function terrainInfo(t) { var o = terrainLabel(t); return o || TERRAIN_INFO[t]; }
   var TIP_TERRAINS = ['M', 'K', 'E']; // 처음 만나면 한 번 알려 주는 특수 지형
   var ENEMY_STEP_MS = 500; // 요괴 한 마리씩 행동하는 간격 (기획서 14장)
 
@@ -3579,6 +3803,70 @@ var Core = (function () {
       },
       objectiveLine: ['쿵.', '본당 문 안쪽에서 큰 충격음이 울렸다.'],
       summary: '폐사찰의 봉인을 복구했다.'
+    },
+    // 5장 사라진 장부 (specs/chapter5.md). 대사는 기획서 그대로 (관군 호칭 "나리", 여울 말투는 기획자 확정 2026-09-27)
+    ch5: {
+      label: '5장',
+      title: '제5장 — 사라진 장부',
+      intro: function () {
+        return [
+          { who: '한결', face: '🏹', text: '문은 안에서 잠겨 있었다고 합니다.' },
+          { who: '윤무겸', face: '🗡️', text: '창은?' },
+          { who: '한결', face: '🏹', text: '닫혀 있었습니다.' },
+          { who: '여울', face: '🥷', text: '그럼 귀신 짓 아니오?' },
+          { who: '소운', face: '🧙', text: '귀신이라면 문을 잠그고 갈 이유가 있겠소?' },
+          { who: '윤무겸', face: '🗡️', text: '방부터 본다.' }
+        ];
+      },
+      truth: [], // 흔적 두 곳 → 골목 깊숙이 숨은 관리가 드러난다 (대사 없이 반짝임 + 임무 갱신)
+      officialTalk: [
+        { who: '실종된 관리', face: '👤', text: '나는 사람을 죽이지 않았소.' },
+        { who: '윤무겸', face: '🗡️', text: '무얼 넘겼지?' },
+        { who: '실종된 관리', face: '👤', text: '……' },
+        { who: '소운', face: '🧙', text: '봉인과 관계된 것이오?' },
+        { who: '실종된 관리', face: '👤', text: '…장부요.' },
+        { who: '한결', face: '🏹', text: '무슨 장부?' },
+        { who: '실종된 관리', face: '👤', text: '청령현의 옛 봉인처가 적혀 있었소.' }
+      ],
+      runnerCall: [{ who: '실종된 관리', face: '👤', text: '저 자요!' }],
+      ledgerPage: [
+        { who: '', face: '📜', text: '도망치던 자에게서 장부 한 장이 떨어졌다.\n낡은 부적과 봉인 흔적이 붙어 있다.' },
+        { who: '소운', face: '🧙', text: '그건 평범한 장부가 아니오.' },
+        { who: '소운', face: '🧙', text: '봉인에 쓰던 문서요.' }
+      ],
+      outro: function () {
+        return [
+          { who: '윤무겸', face: '🗡️', text: '누가 장부를 원했지?' },
+          { who: '장부 운반자', face: '🏃', text: '……' },
+          { who: '한결', face: '🏹', text: '폐사찰도 네 짓인가?' },
+          { who: '장부 운반자', face: '🏃', text: '내가 한 일은 옮기는 것뿐이오.' },
+          { who: '윤무겸', face: '🗡️', text: '누구에게?' },
+          { who: '장부 운반자', face: '🏃', text: '이미 늦었소.' },
+          { who: '', face: '📜', text: '되찾은 장부에는 청령현 곳곳의 오래된 장소가 적혀 있다.\n서낭고개. 폐사찰. 그리고 다른 봉인처들.\n한 장이 뜯겨 있다.' },
+          { who: '소운', face: '🧙', text: '…한 장이 없소.' },
+          { who: '윤무겸', face: '🗡️', text: '어디지?' },
+          { who: '소운', face: '🧙', text: '나루터.' },
+          { who: '관군', face: '🪖', text: '나리!' },
+          { who: '윤무겸', face: '🗡️', text: '무슨 일이냐.' },
+          { who: '관군', face: '🪖', text: '나루터에서 급보입니다.' },
+          { who: '한결', face: '🏹', text: '무슨 일이지?' },
+          { who: '관군', face: '🪖', text: '강 건너에서 배 한 척이 들어왔는데…' },
+          { who: '관군', face: '🪖', text: '사공이 없습니다.' },
+          { who: '윤무겸', face: '🗡️', text: '사람은?' },
+          { who: '관군', face: '🪖', text: '없습니다.' },
+          { who: '관군', face: '🪖', text: '그런데 배 밑에서 사람이 두드리는 소리가 난답니다.' },
+          { who: '', face: '🌑', text: '……' } // 암전
+        ];
+      },
+      lose: {
+        escape: '장부 운반자가 성문을 빠져나가 어둠 속으로 사라졌다.', // (보충: 패배 문구 AI 초안)
+        wipe: '벽사청 일행이 큰고을에서 물러났다.',
+        time: '날이 밝았다. 장부 운반자의 행방은 끊겼다.'
+      },
+      objectiveLine: ['장부를 되찾았다.'], // 운반자 확보 +2 · 임무 완료 +3 (쓰러짐 알림 "제압했다" 와 겹치지 않게)
+      summary: '실종된 관리를 확보하고 장부 운반자를 제압했다.',
+      reward: '봉인처 장부 일부 회수',
+      nextChapter: '제6장 — 잠김' // 6장은 아직 없다. 제목 미확정이라 기획서 27장의 대체 표시
     }
   };
 
@@ -3714,7 +4002,7 @@ var Core = (function () {
         var cell = el('div', 'cell ' + TERRAIN_CLASS[t]);
         cell.dataset.r = r;
         cell.dataset.c = c;
-        if (TERRAIN_MARK[t]) cell.appendChild(el('span', 'mark', TERRAIN_MARK[t]));
+        if (terrainMark(t)) cell.appendChild(el('span', 'mark', terrainMark(t)));
         board.appendChild(cell);
         cells.push(cell);
       }
@@ -3863,7 +4151,7 @@ var Core = (function () {
   function pointMark(p) {
     var o = state.objective;
     if (o.phase === 'investigate') {
-      if (!p.investigate) return null;
+      if (!p.investigate || !Core.pointOpen(state, p)) return null; // 5장 흔적 연쇄: 앞 흔적을 찾기 전에는 보이지 않는다
       return o.investigated.indexOf(p.id) === -1 ? ['clue', '조사'] : ['done', p.respawn ? '원한' : '조사함'];
     }
     if (p.seal) return o.repaired.indexOf(p.id) === -1 ? ['seal', '봉인'] : ['sealed', '완료'];
@@ -3911,10 +4199,17 @@ var Core = (function () {
     var lamps = state.lamps && Core.litLamps(state).length + '/' + state.lamps.length;
     box.appendChild(document.createTextNode(o.phase === 'investigate'
       ? goal.before + ' (조사 ' + o.investigated.length + '/' + o.need + ')'
+      : o.phase === 'find' ? goal.find
+      : o.phase === 'chase' ? goal.after + ' (' + runnerGateText() + ')'
       : o.phase === 'lamps'
         ? goal.after + ' (켜진 등 ' + lamps + ' · 봉인 유지 ' + o.hold + '/' + goal.holdNeed + ')'
           + (omenSpawns().length ? ' · 귀기: ' + omenSpawns().map(function (sp) { return sp.name; }).join('·') : '')
         : goal.after + ' (복구 ' + o.repaired.length + '/' + Core.STAGES[chapterId].points.filter(function (p) { return p.seal; }).length + ')'));
+  }
+  // 5장: 운반자가 향하는 성문과 남은 칸 수 — "어디로 도망가려 하지?"를 보고 병력을 배치한다
+  function runnerGateText() {
+    var g = Core.runnerGates(state)[0];
+    return g ? '운반자 → ' + g.name + ' ' + g.steps + '칸' : '운반자 — 성문 길이 모두 막혔다';
   }
   // 4장: 다음 적 차례에 귀화가 나올 증원 자리 (징조)
   function omenSpawns() {
@@ -3935,7 +4230,7 @@ var Core = (function () {
   function pointInfo(p) {
     var o = state.objective;
     if (o.phase === 'investigate') {
-      if (!p.investigate) return null;
+      if (!p.investigate || !Core.pointOpen(state, p)) return null; // 5장 흔적 연쇄: 앞 흔적을 찾기 전에는 보이지 않는다
       if (o.investigated.indexOf(p.id) === -1) return { mark: '🔍', name: '수상한 흔적', text: '아군이 이 칸에 서면 조사한다.' };
       return { mark: '🔍', name: p.investigate.title, text: p.investigate.text };
     }
@@ -3991,7 +4286,7 @@ var Core = (function () {
       box.appendChild(bt);
       return;
     }
-    var cellInfo = ui.infoCell && TERRAIN_INFO[Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c)];
+    var cellInfo = ui.infoCell && terrainInfo(Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c));
     if (cellInfo) return renderTerrainInfo(box, Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c));
     var u = ui.infoId && Core.getUnit(state, ui.infoId);
     box.hidden = !u || !u.alive;
@@ -4015,8 +4310,8 @@ var Core = (function () {
     if (tr) text.appendChild(el('div', 'sub', '수련 · ' + tr.name + ' — ' + tr.desc));
     if (u.slow) text.appendChild(el('div', 'sub', '추적에 걸림 — 다음 차례 이동 −' + Core.CHUJEOK_SLOW));
     var under = Core.terrainAt(state, u.r, u.c);
-    if (under !== 'D' && TERRAIN_INFO[under]) {
-      text.appendChild(el('div', 'sub', TERRAIN_MARK[under] + ' ' + TERRAIN_INFO[under].name + ' 위 · ' + TERRAIN_INFO[under].text));
+    if (under !== 'D' && terrainInfo(under)) {
+      text.appendChild(el('div', 'sub', terrainMark(under) + ' ' + terrainInfo(under).name + ' 위 · ' + terrainInfo(under).text));
     }
     box.appendChild(text);
   }
@@ -4024,10 +4319,10 @@ var Core = (function () {
   function renderTerrainInfo(box, t) {
     box.hidden = false;
     box.innerHTML = '';
-    box.appendChild(el('div', 'face', TERRAIN_MARK[t]));
+    box.appendChild(el('div', 'face', terrainMark(t)));
     var text = el('div');
-    text.appendChild(el('div', 'name', TERRAIN_INFO[t].name));
-    text.appendChild(el('div', 'stats', TERRAIN_INFO[t].text));
+    text.appendChild(el('div', 'name', terrainInfo(t).name));
+    text.appendChild(el('div', 'stats', terrainInfo(t).text));
     box.appendChild(text);
   }
 
@@ -4091,7 +4386,7 @@ var Core = (function () {
       return seen.indexOf(t) === -1 && state.map.some(function (row) { return row.indexOf(t) !== -1; });
     });
     if (!fresh.length) return;
-    toast(fresh.map(function (t) { return { text: TERRAIN_MARK[t] + ' ' + TERRAIN_INFO[t].name + ' · ' + TERRAIN_INFO[t].text }; })
+    toast(fresh.map(function (t) { return { text: terrainMark(t) + ' ' + terrainInfo(t).name + ' · ' + terrainInfo(t).text }; })
       .concat([{ small: '지형 칸을 누르면 다시 볼 수 있습니다.' }]), '', 3600, TOAST_RANK.terrain);
     try { localStorage.setItem(TIPS_KEY, JSON.stringify(seen.concat(fresh))); } catch (e) { /* 무시 */ }
   }
@@ -4299,7 +4594,7 @@ var Core = (function () {
         var p = Core.pointById(state, e.pointId);
         discover(['point:' + p.id]);
         lines.push({ who: '조사 — ' + p.investigate.title, face: '🔍', text: p.investigate.text });
-        if (p.investigate.say) lines.push(p.investigate.say);
+        if (p.investigate.say) lines = lines.concat(p.investigate.say); // 한 줄 또는 여러 줄 (5장 객사)
       }
     });
     var truth = events.some(function (e) { return e.type === 'truth'; });
@@ -4310,17 +4605,29 @@ var Core = (function () {
         lines.push({ pause: 900, run: guardianShowcase });
         lines = lines.concat(ch.truth.slice(at));
       } else {
-        // 4장: 도문 술사가 먼저 모습을 드러내고 말한다
+        // 4장: 도문 술사가 먼저 모습을 드러내고 말한다 / 5장: 골목 깊숙이 숨은 관리가 드러난다
         lines.push({ pause: 700, run: function () { render(); markNew(events); } });
         lines = lines.concat(ch.truth);
       }
     }
+    // 5장: 관리 옆에 서면 이야기 → 시장 쪽에서 소란, 장부 운반자가 달아난다 (카메라 대신 칸 반짝임 + 알림)
+    var found = events.filter(function (e) { return e.type === 'official'; })[0];
+    if (found) {
+      lines = lines.concat(CHAPTERS[chapterId].officialTalk);
+      lines.push({ pause: 700, run: function () {
+        render(); markNew(events);
+        toast([{ b: '시장 쪽에서 소란!' }], 'mission', 2200, 0);
+      } });
+      lines = lines.concat(CHAPTERS[chapterId].runnerCall);
+    }
     playScene(lines, function () {
       ui.busy = false;
       render();
-      if (truth) {
-        var goal = Core.STAGES[chapterId].objective;
-        toast([{ b: '임무 갱신' }, { html: goal.before }, { text: goal.after }], 'mission', 3200, 0);
+      var goal = Core.STAGES[chapterId].objective;
+      if (found) {
+        toast([{ b: '임무 갱신' }, { text: goal.after }, { small: '관리 확보 · 공적 +' + found.merit }], 'mission', 3200, 0);
+      } else if (truth) {
+        toast([{ b: '임무 갱신' }, { html: goal.before }, { text: state.objective.phase === 'find' ? goal.find : goal.after }], 'mission', 3200, 0);
         omenToast(events);
       }
       if (after) after();
@@ -4329,7 +4636,7 @@ var Core = (function () {
   // 4장 진실: 새로 나타난 도문 술사·귀화를 반짝 표시
   function markNew(events) {
     events.forEach(function (e) {
-      if (e.type !== 'appear' && e.type !== 'reinforce') return;
+      if (e.type !== 'appear' && e.type !== 'reinforce' && e.type !== 'runner') return;
       var tile = board.querySelector('.unit[data-id="' + e.unitId + '"]');
       if (tile) tile.classList.add('respawned');
     });
@@ -4355,6 +4662,12 @@ var Core = (function () {
     flashHits(events || []);
     trainingLabels(events || []);
     if (state.result !== null) return finish();
+    // 5장 중간 사건: 운반자에게서 봉인 문서가 떨어지고 귀화가 나타난다
+    if ((events || []).some(function (e) { return e.type === 'ledgerPage'; })) {
+      ui.busy = true;
+      var page = CHAPTERS[chapterId].ledgerPage.concat([{ pause: 600, run: function () { render(); markNew(events); } }]);
+      return playScene(page, function () { ui.busy = false; render(); continueTurn(); });
+    }
     // 3장: 서낭신을 처음 친 뒤 한 번 (게임이 막지는 않는다)
     var struck = (events || []).some(function (e) { return e.type === 'damage' && Core.getUnit(state, e.targetId).side === 'neutral'; });
     if (struck && !ui.seonangWarned && CHAPTERS[chapterId].firstStrike) {
@@ -5216,6 +5529,17 @@ var Core = (function () {
       showWorld();
     }, function () {}, { yes: '4장 시험 시작', no: '취소', yesFirst: true });
   });
+  document.getElementById('btn-test5').hidden = !DEV && location.hostname === 'joseon-exorcist.vercel.app';
+  document.getElementById('btn-test5').addEventListener('click', function () {
+    ask('4장까지 깬 상태로 바꾸고 지도로 갑니다.\n지금 이 브라우저의 진행은 덮어씁니다.', function () {
+      progress = Core.checkProgress({ v: 1, cleared: ['ch1', 'ch2', 'ch3', 'ch4'], merit: 19, training: {} });
+      saveProgress();
+      ['news:ch1', 'news:ch2', 'news:ch3', 'news:ch3b', 'news:ch4'].forEach(function (id) { if (worldSeen.indexOf(id) === -1) worldSeen.push(id); });
+      worldSeen = worldSeen.filter(function (id) { return id !== 'warn:training:ch5'; }); // 수련점 출동 경고도 다시 본다
+      saveWorld();
+      showWorld();
+    }, function () {}, { yes: '5장 시험 시작', no: '취소', yesFirst: true });
+  });
   document.getElementById('playlog-open-battle').addEventListener('click', openPlayLog);
   document.getElementById('playlog-close').addEventListener('click', function () { document.getElementById('playlog').hidden = true; });
   document.getElementById('playlog-copy').addEventListener('click', function () {
@@ -5352,8 +5676,10 @@ var Core = (function () {
       box.appendChild(el('div', '', '획득'));
       box.appendChild(el('div', '', '공적 +' + state.merit));
       if (gained > 0) box.appendChild(el('div', '', '수련점 +' + gained));
+      if (ch.reward) box.appendChild(el('div', '', ch.reward)); // 5장: 봉인처 장부 일부 회수
       var newLore = Core.newlyUnlockedLore(loreAtStart, loreTokens()).length;
       if (newLore) box.appendChild(el('div', '', '벽사록 신규 기록 ' + newLore));
+      if (ch.nextChapter) box.appendChild(el('b', '', ch.nextChapter)); // 다음 장 예고 (표시만)
       if (gained > 0) { box.appendChild(el('b', '', '새로운 수련이 가능합니다.')); hq.hidden = false; }
       subEl.parentNode.insertBefore(box, subEl.nextSibling);
     }

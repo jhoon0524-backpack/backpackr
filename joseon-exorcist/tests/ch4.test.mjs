@@ -286,7 +286,7 @@ test('월드맵: 3장 뒤 폐사찰 [조사한다], 4장 뒤 안정됨·큰고�
   assert.match(Core.regionDesc(Core.regionById('pyesachal'), 'STABILIZED'), /본당의 문은 여전히 굳게 닫혀/);
   assert.deepEqual(Core.worldNews(after4, []).map((n) => n.region), ['keungoeul']);
   assert.match(Core.worldNews(after4, [])[0].text, /관리 한 명이 흔적도 없이/);
-  assert.equal(Core.regionNote(Core.regionById('keungoeul'), 'EXORCISM_REQUIRED'), '조사 준비 중');
+  assert.equal(Core.sortieChapter(after4, 'keungoeul'), 'ch5', 'v1.0: 4장 뒤 큰고을 [조사한다] (5장)');
   assert.equal(Core.trainingPoints(after4), 3, '3장 2 + 4장 1');
 });
 
