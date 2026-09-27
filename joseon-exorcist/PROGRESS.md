@@ -263,6 +263,7 @@
 - 이 폴더는 `backpackr` 저장소 안의 하위 폴더다. 커밋은 저장소 전체에 쌓이지만 이 폴더 밖은 건드리지 않는다
 
 ## 배포 기록 (CLAUDE.md 5-1장 — 같은 커밋 재배포 금지를 확인하는 곳)
+- 2026-09-27 **v0.9.3 production 배포·확인** — 커밋 `1868dc0` (게임 파일은 `edef009` 과 같음), 배포 `dpl_5GcBfJT38iWyKaXaR67QwNRmaZKi` READY, https://joseon-exorcist.vercel.app 에서 받은 파일이 로컬 index.html 과 한 글자도 다르지 않음 (251,574자). 1회만 배포. 9/27 예약(`trig_01Bsv8JMbMKLH95kXMR2oWFr`)은 꺼 둔 그대로
 - 2026-09-26 v0.9.3 `edef009` 보존용 push (기획자 예외 허용 — 작업 유실 방지, Preview 1회 허용). production 아님
 - 2026-09-26 v0.9 `a783dac` 실제 주소 배포·확인
 - 2026-09-26 v0.9.1 `2eabfb7` 배포 시도 → Vercel 하루 한도(100회) 초과로 실패. 한도 해제 2026-09-27 19:43 KST 뒤 1회 배포 예정 (기획자 요청)
