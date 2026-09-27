@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>텀블벅 브랜드 모션</title>
+<style>
+  :root {
+    --brand: #FA6462;   /* 텀블벅 메인 컬러 (공식 가이드 값으로 교체 가능) */
+    --ink: #151515;
+    --paper: #FFF7F4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--ink); }
+  body { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--ink); }
+  .abs { position: absolute; }
+  .center { left: 50%; top: 50%; }
+  .txt { color: #fff; font-weight: 700; white-space: nowrap; transform-origin: center; }
+  .dot { border-radius: 50%; }
+  #paper { left: 0; top: 0; width: 1920px; height: 1080px; background: var(--paper); }
+  #bar { left: 510px; top: 600px; width: 900px; height: 22px; border-radius: 11px; background: #2c2c2c; overflow: hidden; }
+  #barFill { height: 100%; width: 0; background: var(--brand); border-radius: 11px; }
+  .tile { width: 330px; height: 170px; border-radius: 28px; display: flex; align-items: center; justify-content: center;
+          font-size: 50px; font-weight: 700; color: var(--ink); }
+  #wipe { background: var(--brand); border-radius: 50%; width: 100px; height: 100px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <!-- 장면 1~3: 어두운 배경 -->
+  <div id="supporters"></div>
+  <div id="ring" class="abs dot center" style="border:4px solid var(--brand); width:60px; height:60px;"></div>
+  <div id="seed" class="abs dot center" style="background:var(--brand); width:60px; height:60px;"></div>
+  <div id="t1" class="abs txt center" style="font-size:72px;">작은 아이디어 하나가</div>
+  <div id="t2" class="abs txt center" style="font-size:72px;">함께하는 마음을 만나</div>
+  <div id="pct" class="abs txt center" style="font-size:200px; color:var(--brand);">0%</div>
+  <div id="bar" class="abs"><div id="barFill"></div></div>
+  <div id="t3" class="abs txt center" style="font-size:80px;">현실이 됩니다</div>
+  <div id="confetti"></div>
+
+  <!-- 장면 4: 밝은 배경 + 카테고리 -->
+  <div id="paper" class="abs"></div>
+  <div id="t4" class="abs txt center" style="font-size:76px; color:var(--ink);">모든 창작이 시작되는 곳</div>
+  <div id="tiles"></div>
+
+  <!-- 장면 5: 브랜드 마무리 -->
+  <div id="wipe" class="abs center"></div>
+  <div id="logo" class="abs center" style="display:flex;"></div>
+  <div id="t5" class="abs txt center" style="font-size:60px;">크리에이터를 위한 크라우드펀딩</div>
+  <div id="t6" class="abs txt center" style="font-size:40px; font-weight:400; letter-spacing:4px; opacity:.9;">tumblbug.com</div>
+</div>
+
+<script>
+  // ── 기본 도구 ────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const prog = (t, a, b) => clamp((t - a) / (b - a));                 // a~b 구간 진행률 0→1
+  const outCubic = p => 1 - Math.pow(1 - p, 3);
+  const inOutCubic = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+  const outBack = p => { const c = 1.70158; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+  const lerp = (a, b, p) => a + (b - a) * p;
+  let seed = 7;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;  // 매 프레임 같은 결과를 위한 고정 난수
+
+  // 가운데 정렬 기준 transform 적용
+  function place(el, { x = 0, y = 0, s = 1, r = 0, o = 1 }) {
+    el.style.transform = `translate(-50%,-50%) translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`;
+    el.style.opacity = o;
+  }
+  // 등장(in)·퇴장(out) 구간을 가진 텍스트: 아래에서 떠오르며 등장, 위로 사라짐
+  function textInOut(el, t, inA, inB, outA, outB, baseY = 0) {
+    const pi = outCubic(prog(t, inA, inB)), po = inOutCubic(prog(t, outA, outB));
+    place(el, { y: baseY + (1 - pi) * 60 - po * 60, o: pi * (1 - po) });
+  }
+
+  const COLORS = ['#FA6462', '#FFFFFF', '#FFC94D', '#6ED3B8', '#8FA8FF'];
+
+  // ── 후원자 점 (장면 2) ───────────────────────────────────
+  const supporters = [];
+  for (let i = 0; i < 64; i++) {
+    const el = document.createElement('div');
+    const size = 10 + rand() * 18;
+    el.className = 'abs dot center';
+    Object.assign(el.style, { width: size + 'px', height: size + 'px', background: COLORS[i % COLORS.length] });
+    $('supporters').appendChild(el);
+    const ang = rand() * Math.PI * 2, dist = 1150 + rand() * 300;
+    supporters.push({ el, sx: Math.cos(ang) * dist, sy: Math.sin(ang) * dist * .6,
+                      bend: (rand() - .5) * 700, delay: rand() * 1.4 });
+  }
+
+  // ── 축하 폭죽 (장면 3) ───────────────────────────────────
+  const confetti = [];
+  for (let i = 0; i < 90; i++) {
+    const el = document.createElement('div');
+    const w = 10 + rand() * 14;
+    el.className = 'abs center';
+    Object.assign(el.style, { width: w + 'px', height: w * .5 + 'px', borderRadius: '3px', background: COLORS[i % COLORS.length] });
+    $('confetti').appendChild(el);
+    const ang = -Math.PI / 2 + (rand() - .5) * Math.PI * 1.6, v = 700 + rand() * 900;
+    confetti.push({ el, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, spin: (rand() - .5) * 1440 });
+  }
+
+  // ── 카테고리 타일 (장면 4) ───────────────────────────────
+  const CATS = ['게임', '출판', '디자인', '음악', '영화·비디오', '공연', '푸드', '테크·가전'];
+  const TILE_BG = ['#FFD9D6', '#FFE9B8', '#D4F2E8', '#DDE4FF', '#FFE0EC', '#E6F5C9', '#FFE3CC', '#E3DCFF'];
+  const tiles = CATS.map((name, i) => {
+    const el = document.createElement('div');
+    el.className = 'abs tile center';
+    el.textContent = name;
+    el.style.background = TILE_BG[i];
+    $('tiles').appendChild(el);
+    const col = i % 4, row = Math.floor(i / 4);
+    return { el, x: (col - 1.5) * 380, y: 90 + (row - .5) * 210, r: (rand() - .5) * 8, phase: rand() * 6 };
+  });
+
+  // ── 워드마크 글자 (장면 5) ───────────────────────────────
+  const letters = 'tumblbug'.split('').map(ch => {
+    const el = document.createElement('span');
+    el.textContent = ch;
+    Object.assign(el.style, { display: 'inline-block', color: '#fff', fontSize: '220px', fontWeight: 700, letterSpacing: '-6px' });
+    $('logo').appendChild(el);
+    return el;
+  });
+
+  // ── 프레임 그리기: 시간 t(초)를 받아 화면 전체를 결정 ────────
+  window.render = function (t) {
+    // 장면 1: 씨앗(아이디어) 등장
+    const seedIn = outBack(prog(t, .3, .9));
+    const grow = outCubic(prog(t, 4.2, 6.2));                        // 후원자가 모일수록 커짐
+    const seedOut = inOutCubic(prog(t, 6.4, 6.9));
+    const pulse = 1 + Math.sin(t * 5) * .04;
+    place($('seed'), { y: -40, s: seedIn * pulse * (1 + grow * 2.2) * (1 - seedOut), o: seedIn > 0 ? 1 : 0 });
+    const rp = (t % 1.2) / 1.2;                                        // 퍼져나가는 파동
+    place($('ring'), { y: -40, s: 1 + rp * 2.5 * (1 + grow), o: (1 - rp) * .8 * prog(t, .9, 1.2) * (1 - prog(t, 6.2, 6.5)) });
+    textInOut($('t1'), t, .9, 1.6, 3.0, 3.4, 170);
+
+    // 장면 2: 후원자들이 모여듦
+    textInOut($('t2'), t, 3.5, 4.2, 6.2, 6.6, 240);
+    supporters.forEach(d => {
+      const p = inOutCubic(prog(t, 3.3 + d.delay, 5.0 + d.delay * .7));
+      const k = Math.sin(p * Math.PI) * d.bend;                       // 곡선 궤적
+      const x = lerp(d.sx, 0, p) + k * .6, y = lerp(d.sy, -40, p) + k * .3;
+      place(d.el, { x, y, s: 1 - p * .6, o: t < 3.3 ? 0 : (p >= 1 ? 0 : 1) });
+    });
+
+    // 장면 3: 펀딩 달성 게이지
+    const barIn = outCubic(prog(t, 6.7, 7.2)), barOut = inOutCubic(prog(t, 10.0, 10.3));
+    const fill = inOutCubic(prog(t, 7.1, 9.1));
+    $('barFill').style.width = (fill * 100) + '%';
+    $('bar').style.opacity = barIn * (1 - barOut);
+    $('bar').style.transform = `scaleX(${lerp(.6, 1, barIn)})`;
+    $('pct').textContent = Math.round(fill * 100) + '%';
+    const pop = t > 9.1 ? 1 + Math.sin(prog(t, 9.1, 9.5) * Math.PI) * .15 : 1;
+    place($('pct'), { y: -120, s: lerp(.8, 1, barIn) * pop, o: barIn * (1 - barOut) });
+    textInOut($('t3'), t, 9.1, 9.7, 10.0, 10.3, 180);
+    confetti.forEach(c => {
+      const dt = t - 9.1;
+      const on = dt > 0 && dt < 1.6;
+      place(c.el, { x: c.vx * dt, y: 20 + c.vy * dt + 900 * dt * dt, r: c.spin * dt, o: on ? 1 - clamp(dt / 1.6) : 0 });
+    });
+
+    // 장면 4: 밝은 배경 + 모든 창작 카테고리
+    const paperIn = inOutCubic(prog(t, 10.1, 10.6));
+    $('paper').style.transform = `translateY(${(1 - paperIn) * 1080}px)`;
+    textInOut($('t4'), t, 10.6, 11.2, 14.2, 14.6, -270);
+    tiles.forEach((d, i) => {
+      const pi = outBack(prog(t, 10.9 + i * .1, 11.5 + i * .1));
+      const po = inOutCubic(prog(t, 13.9 + i * .04, 14.5 + i * .04));
+      const float = Math.sin(t * 2 + d.phase) * 8;
+      place(d.el, { x: d.x, y: d.y + float + po * 120, r: d.r * pi, s: pi * (1 - po * .4), o: clamp(pi * 3) * (1 - po) });
+    });
+
+    // 장면 5: 브랜드 컬러로 화면 전환 → 워드마크 + 슬로건
+    const w = inOutCubic(prog(t, 14.5, 15.3));
+    place($('wipe'), { s: w * 45, o: w > 0 ? 1 : 0 });
+    letters.forEach((el, i) => {
+      const p = outBack(prog(t, 15.2 + i * .07, 15.8 + i * .07));
+      el.style.transform = `translateY(${(1 - p) * 140}px)`;
+      el.style.opacity = clamp(p * 2);
+    });
+    const settle = outCubic(prog(t, 16.4, 17.0));
+    place($('logo'), { y: -50 - settle * 40, s: 1 });
+    textInOut($('t5'), t, 16.6, 17.2, 99, 100, 130);
+    textInOut($('t6'), t, 17.2, 17.8, 99, 100, 220);
+  };
+  render(0);
+</script>
+</body>
+</html>
