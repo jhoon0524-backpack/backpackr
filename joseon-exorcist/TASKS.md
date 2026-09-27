@@ -191,5 +191,6 @@
 ## [ART-PHASE-A-01 5장 실제 아트] (Issue #24)
 - [x] assets 복사 · 5장 지도 토큰 8종 · 행동 중 초상 4명 · 미리 불러오기 · 이모지 fallback
 - [x] 자동 테스트 · 5장 360×740 필수 캡처 10장 · 1~4장 아트 미적용 확인
-- [ ] 기획자 확인 (Game Director 검수) · 귀화 그림 파일 확인 (ART_REVIEW_REQUIRED)
+- [x] ART-POLISH-01 귀화 한 마리 파일 교체 · 전용 보정 제거
+- [ ] 기획자 확인 (Game Director 검수)
 
