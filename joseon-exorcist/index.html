@@ -140,6 +140,21 @@
   .kind.anomaly { background: var(--anomaly-line); }
   .kind.neutral { background: var(--neutral-line); transform: rotate(45deg); border-radius: 2px; width: 11px; height: 11px; top: -1px; right: -1px; }
   .kind.neutral svg { transform: rotate(-45deg); width: 9px; height: 9px; }
+  /* ART-PHASE-A-01 (5장만): 실제 그림은 세력 테두리 안쪽에 잘려 들어간다.
+     테두리 색·모양 / 표식 / HP 막대 / 선택·임무 고리는 그림 위에 그대로 — 그림이 의미를 대신하지 않는다 */
+  .art { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; z-index: 0; }
+  .art img {
+    display: block; width: 100%; height: 100%; object-fit: contain;
+    /* 원본은 자르지 않고 CSS 로만: 얼굴(초상)·인물(토큰) 중심 (--fx, --fy) 을 칸 가운데로 옮겨 --z 배 확대 */
+    transform: translate(calc(50% - var(--fx, 50%)), calc(50% - var(--fy, 50%))) scale(var(--z, 1));
+    transform-origin: var(--fx, 50%) var(--fy, 50%);
+  }
+  .portrait .art img { object-fit: cover; }
+  .unit.has-art .hpbar { z-index: 2; background: rgba(21, 20, 17, .8); }
+  .unit.has-art .badge { z-index: 2; }
+  /* 그림 뒤 바탕은 옅게 (테두리 색은 그대로): 적갈 바탕에 인물이 탁해 보이지 않게 */
+  .unit.has-art.k-human { background: rgba(142, 67, 56, .2); }
+  .unit.has-art.f-bs, .unit.has-art.f-guest { background: rgba(51, 70, 85, .4); }
   #ask { position: fixed; inset: 0; z-index: 44; background: rgba(4, 5, 8, .75); display: flex; align-items: center; justify-content: center; padding: 20px; }
   #ask .card { max-width: 340px; width: 100%; background: var(--panel); border: 1px solid #e2c26b; border-radius: 10px; padding: 18px 16px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
   .pt.barrier { background: #3d6ea8; color: #fff; }
@@ -389,6 +404,7 @@
   #actor.enemy { border-color: var(--vermilion-dark); }
   /* 초상 자리: 지금은 이모지. 나중에 실제 초상 이미지로 바꿔 끼울 수 있게 칸만 만든다 (data-unit 로 인물 구분) */
   .portrait {
+    position: relative; overflow: hidden;
     flex: none; width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
     font-size: 26px; line-height: 1; background: var(--ink-800) center / cover no-repeat; border: 2px solid var(--byeoksa-line);
   }
@@ -4181,9 +4197,58 @@ var Core = (function () {
     return !!o && ((o.phase === 'chase' && u.runner) || (o.phase === 'find' && u.type === 'official'));
   }
 
+  // ── ART-PHASE-A-01: 5장만 실제 아트 (1~4장은 이모지 그대로). assets/ 의 개별 파일만 쓴다 ──
+  // crop = [가로 중심 %, 세로 중심 %, 확대] — 원본은 자르지 않고 CSS 로만 맞춘다. 불러오기 실패하면 이모지로 돌아간다
+  var ART_CHAPTER = 'ch5';
+  var TOKEN_CROP = [50, 50, 1.42]; // 전투 토큰: 둘레 여백을 줄여 인물이 테두리 안을 채우게
+  var ART = {
+    yoon: { battle: 'assets/characters/yoon_battle.webp', portrait: 'assets/characters/yoon_portrait.webp', face: [58, 35, 1.9] },
+    hangyeol: { battle: 'assets/characters/hangyeol_battle.webp', portrait: 'assets/characters/hangyeol_portrait.webp', face: [54, 34, 1.9] },
+    soun: { battle: 'assets/characters/soun_battle.webp', portrait: 'assets/characters/soun_portrait.webp', face: [51, 35, 1.9] },
+    yeoul: { battle: 'assets/characters/yeoul_battle.webp', portrait: 'assets/characters/yeoul_portrait.webp', face: [57, 35, 1.9] },
+    gwangun: { battle: 'assets/npcs/soldier_battle.webp' },
+    official: { battle: 'assets/npcs/official_battle.webp' },
+    runner: { battle: 'assets/enemies/ledger_runner.webp' },
+    gwihwa: { battle: 'assets/enemies/gwihwa.webp', crop: [24, 62, 2.1] } // 파일에 불꽃 4개가 나란히 — 맨 앞 하나만 보이게
+  };
+  var artFailed = {};
+  function artFor(u, kind) {
+    var a = chapterId === ART_CHAPTER && ART[u.type];
+    var src = a && a[kind];
+    return src && !artFailed[src] ? src : null;
+  }
+  function artBox(src, crop, alt) {
+    var box = el('span', 'art');
+    var img = document.createElement('img');
+    img.alt = alt;
+    img.draggable = false;
+    img.style.setProperty('--fx', crop[0] + '%');
+    img.style.setProperty('--fy', crop[1] + '%');
+    img.style.setProperty('--z', crop[2]);
+    img.onerror = function () { artFailed[src] = true; render(); }; // 게임은 멈추지 않고 이모지로
+    img.src = src;
+    box.appendChild(img);
+    return box;
+  }
+  // 5장 들어갈 때 미리 불러 둔다 (첫 등장 때 그림이 늦게 튀지 않게)
+  function preloadArt() {
+    if (chapterId !== ART_CHAPTER) return;
+    Object.keys(ART).forEach(function (k) {
+      ['battle', 'portrait'].forEach(function (kind) {
+        var src = ART[k][kind];
+        if (!src || artFailed[src]) return;
+        var img = new Image();
+        img.onerror = function () { artFailed[src] = true; };
+        img.src = src;
+      });
+    });
+  }
+
   function unitTile(u) {
-    var tile = el('div', 'unit ' + factionClass(u), u.emoji);
+    var art = artFor(u, 'battle');
+    var tile = el('div', 'unit ' + factionClass(u) + (art ? ' has-art' : ''), art ? '' : u.emoji);
     tile.dataset.id = u.id;
+    if (art) tile.appendChild(artBox(art, ART[u.type].crop || TOKEN_CROP, u.name));
     if (missionTarget(u)) tile.className += ' k-target';
     if (u.guest) tile.appendChild(el('span', 'badge', '객'));
     var kind = unitKind(u);
@@ -4356,7 +4421,9 @@ var Core = (function () {
     delete face.dataset.unit;
     if (u) {
       box.className = '';
-      face.textContent = u.emoji;
+      var portrait = artFor(u, 'portrait');
+      if (portrait) face.appendChild(artBox(portrait, ART[u.type].face, u.name)); // 5장: 초상 (실패하면 이모지)
+      else face.textContent = u.emoji;
       face.dataset.unit = u.id;
       name.appendChild(el('span', 'lead', '행동 중'));
       name.appendChild(document.createTextNode(u.name + (u.guest ? ' (객장)' : '')));
@@ -5870,6 +5937,7 @@ var Core = (function () {
     document.getElementById('title').hidden = true;
     document.getElementById('world').hidden = true;
     state = Core.newBattle(Core.STAGES[id], { merit: progress.merit, training: progress.training });
+    preloadArt();
     loreAtStart = loreTokens().slice(); // 결과 화면의 "벽사록 신규 기록" 수
     playLog = Core.newPlayLog(state, id, playStore.restarts[id] || 0);
     ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, seonangWarned: false, askedSeonang: false };
