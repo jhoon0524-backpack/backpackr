@@ -160,6 +160,8 @@
   .unit.has-art.k-human { background: rgba(142, 67, 56, .2); }
   .unit.has-art.f-bs, .unit.has-art.f-guest { background: rgba(51, 70, 85, .4); }
   .unit.has-art.k-boss { background: rgba(21, 20, 17, .75); } /* 1장 흑린: 자주 그림이 자주 바탕에 묻히지 않게 먹색 바탕 (테두리는 귀물 자주 그대로) */
+  /* ART-PHASE-C-02 (2장 정화된 도깨비·장산범): 1장과 같은 그림 + 그림 안쪽 옅은 금백색 가는 링 (자주 테두리·HP·표식 그대로) */
+  .unit.k-purified .art::after { content: ''; position: absolute; inset: 2px; border-radius: inherit; box-shadow: inset 0 0 0 1.5px rgba(236, 226, 198, .6); }
   #ask { position: fixed; inset: 0; z-index: 44; background: rgba(4, 5, 8, .75); display: flex; align-items: center; justify-content: center; padding: 20px; }
   #ask .card { max-width: 340px; width: 100%; background: var(--panel); border: 1px solid #e2c26b; border-radius: 10px; padding: 18px 16px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
   .pt.barrier { background: #3d6ea8; color: #fff; }
@@ -4204,9 +4206,11 @@ var Core = (function () {
 
   // ── 실제 아트 (ART-PHASE-A-01 5장 · C-01 1장, 나머지 장은 이모지 그대로). assets/ 의 개별 파일만 쓴다 ──
   // crop = [가로 중심 %, 세로 중심 %, 확대] — 원본은 자르지 않고 CSS 로만 맞춘다. 불러오기 실패하면 이모지로 돌아간다
-  // 장마다 그림을 쓰는 유닛 종류 (ART-PHASE-C-01: 1장 추가). 목록에 없는 장·종류는 이모지 그대로 (2~4장)
+  // 장마다 그림을 쓰는 유닛 종류 (ART-PHASE-C-01: 1장 · C-02: 2장 추가). 목록에 없는 장·종류는 이모지 그대로 (3~4장)
   var ART_ALLOW = {
     ch1: ['yoon', 'hangyeol', 'soun', 'yeoul', 'dallae', 'gwangun', 'dokkaebi', 'jangsan', 'bulgasari', 'heuklin'],
+    ch2: ['yoon', 'hangyeol', 'soun', 'yeoul', 'gwangun', 'munyeo', 'dokkaebi_p', 'jangsan_p', 'dallae_boss',
+      'dallae'], // 'dallae' = 2장 대사 화자 달래의 초상
     ch5: ['yoon', 'hangyeol', 'soun', 'yeoul', 'gwangun', 'official', 'runner', 'gwihwa']
   };
   var TOKEN_CROP = [50, 50, 1.42]; // 전투 토큰: 둘레 여백을 줄여 인물이 테두리 안을 채우게
@@ -4224,7 +4228,12 @@ var Core = (function () {
     dokkaebi: { battle: 'assets/enemies/dokkaebi_battle.webp', crop: [50, 50, 1] },
     jangsan: { battle: 'assets/enemies/jangsan_battle.webp', crop: [50, 50, 1] },
     bulgasari: { battle: 'assets/enemies/bulgasari_battle.webp', crop: [50, 50, 1] },
-    heuklin: { battle: 'assets/enemies/heuklin_battle.webp', crop: [50, 50, 1] }
+    heuklin: { battle: 'assets/enemies/heuklin_battle.webp', crop: [50, 50, 1] },
+    // ART-PHASE-C-02 (2장): 새 그림은 무녀 1개. 달래·정화 요괴는 1장 파일 재사용 (purified = 안쪽 금백색 링)
+    munyeo: { battle: 'assets/enemies/shindang_munyeo_battle.webp', crop: [50, 50, 1] },
+    dallae_boss: { battle: 'assets/characters/dallae_battle.webp', portrait: 'assets/characters/dallae_portrait.webp', face: [53, 47, 1.6], crop: [50, 50, 1] },
+    dokkaebi_p: { battle: 'assets/enemies/dokkaebi_battle.webp', crop: [50, 50, 1], purified: true },
+    jangsan_p: { battle: 'assets/enemies/jangsan_battle.webp', crop: [50, 50, 1], purified: true }
   };
   var artFailed = {};
   function artFor(u, kind) {
@@ -4278,7 +4287,8 @@ var Core = (function () {
     tile.dataset.id = u.id;
     if (art) tile.appendChild(artBox(art, ART[u.type].crop || TOKEN_CROP, u.name));
     if (missionTarget(u)) tile.className += ' k-target';
-    if (art && u.boss) tile.className += ' k-boss';
+    if (art && u.boss && unitKind(u) === 'anomaly') tile.className += ' k-boss'; // 먹색 바탕은 귀물 보스(흑린)만 — 2장 달래 보스는 일반 적대 인간
+    if (art && ART[u.type].purified) tile.className += ' k-purified';
     if (u.guest) tile.appendChild(el('span', 'badge', '객'));
     var kind = unitKind(u);
     if (kind) {
