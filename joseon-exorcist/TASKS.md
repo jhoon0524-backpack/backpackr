@@ -224,3 +224,8 @@
 - [x] ENV-POLISH-A2 바위·약수터 이음새 (A2-FIX 재교체, 실게임 기준 재검수로 BLOCKED 해소)
 - [ ] 기획자 확인 (Game Director 검수)
 
+## [ENV-PHASE-B 2장 산길 추격전 환경] (Issue #24)
+- [x] 2장 환경 에셋 7개 (V2) · `ENV_ART` 칸 역할 이름으로 정리 + ch2 · E 탈출로 그림 · 2장 D 표식 0.2
+- [x] 작업 전후 맵·80칸 지형·통과·E·달래 시작·reserves·판·유닛 크기 동일 · 같은 날씨 AI 동일 · 이음새 판정 (V1 BLOCKED → V2 PASS) · 전 장 회귀
+- [ ] 기획자 확인 (Game Director 검수)
+
