@@ -87,6 +87,9 @@
   .t-rock   { background: var(--rock); }
   .t-shrine { background: var(--shrine); }
   .t-spring { background: var(--spring); }
+  /* ENV-PHASE-A (1장만): 지형 칸 배경 그림. 그림이 없거나 실패하면 위 지형 색이 그대로 보인다 */
+  .cell.env-ch1 { background-size: cover; background-position: center; background-repeat: no-repeat; }
+  .cell.env-ch1.t-rock .mark { opacity: .2; } /* 그림 속 집·바위와 🛖 이 겹쳐 보여 D 표식만 조금 옅게 (숨기지 않음). 🏮 💧 는 그대로 */
   .t-escape { background: var(--escape); box-shadow: inset 0 0 0 1px #3f6b48; } /* 2장 탈출로(숲길): 예전 그대로 */
   /* 5장 성문: 등장 전에는 조용한 먹색 + 표찰, 운반자가 향하는 성문만 주홍 테두리 */
   .t-escape.gate { background: var(--gate); box-shadow: inset 0 0 0 1px rgba(117, 106, 88, .75); }
@@ -4157,7 +4160,29 @@ var Core = (function () {
     return e;
   }
 
-  function buildBoard() {
+  // ENV-PHASE-A: 장별 지형 배경 그림 (1장만). 지형 의미(. D M K)는 그대로, 같은 좌표는 항상 같은 그림
+  var ENV_ART = {
+    ch1: {
+      dirt: 'assets/environment/ch1/env_dirt.webp',
+      path: 'assets/environment/ch1/env_path.webp',
+      house: 'assets/environment/ch1/env_block_house.webp',
+      rock: 'assets/environment/ch1/env_block_rock.webp',
+      shrine: 'assets/environment/ch1/env_shrine.webp',
+      spring: 'assets/environment/ch1/env_spring.webp'
+    }
+  };
+  function envArtForCell(ch, t, r, c) {
+    var e = ENV_ART[ch];
+    if (!e) return null;
+    if (t === '.') return (r * 3 + c) % 4 === 0 ? e.path : e.dirt;
+    if (t === 'D') return (r + c) % 2 === 0 ? e.house : e.rock;
+    if (t === 'M') return e.shrine;
+    if (t === 'K') return e.spring;
+    return null;
+  }
+
+  // withEnv: 장을 시작할 때만 배경 그림 (첫 화면 뒤에 숨은 판은 그림을 부르지 않는다)
+  function buildBoard(withEnv) {
     board.innerHTML = '';
     cells = [];
     board.style.gridTemplateColumns = 'repeat(' + state.cols + ', 1fr)';
@@ -4169,6 +4194,11 @@ var Core = (function () {
       for (var c = 0; c < state.cols; c++) {
         var t = Core.terrainAt(state, r, c);
         var cell = el('div', 'cell ' + TERRAIN_CLASS[t]);
+        var env = withEnv && envArtForCell(chapterId, t, r, c);
+        if (env) {
+          cell.className += ' env-' + chapterId;
+          cell.style.backgroundImage = 'url(' + env + ')';
+        }
         cell.dataset.r = r;
         cell.dataset.c = c;
         if (terrainMark(t)) cell.appendChild(el('span', 'mark', terrainMark(t)));
@@ -6003,7 +6033,7 @@ var Core = (function () {
     loreAtStart = loreTokens().slice(); // 결과 화면의 "벽사록 신규 기록" 수
     playLog = Core.newPlayLog(state, id, playStore.restarts[id] || 0);
     ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, seonangWarned: false, askedSeonang: false };
-    buildBoard();
+    buildBoard(true);
     Core.startAllyPhase(state, Math.random);
     render();
     playScene(CHAPTERS[id].intro(), function () {
