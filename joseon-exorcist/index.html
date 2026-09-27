@@ -5,19 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>조선 퇴마전</title>
 <style>
+  /* UI-PHASE-A-01 색 토큰 — "괴변 사건첩 위에서 부대를 움직인다" (먹·남청·한지·주홍 관인)
+     뜻: 아군 = 남청 / 적대 인간 = 적갈 / 귀물 = 탁한 자주 / 중립 = 황갈 / 임무 = 황토·금 */
   :root {
-    --bg: #0e1016;
-    --panel: #181b24;
-    --text: #e6e2d6;
-    --muted: #8a8778;
-    --dirt: #2a2620;
-    --rock: #121212;
+    --ink-950: #151411;
+    --ink-900: #1D1B17;
+    --ink-800: #29251F;
+    --paper-100: #E7DEC8;
+    --paper-200: #D4C8AE;
+    --paper-700: #756A58;
+    --byeoksa: #334655;
+    --byeoksa-light: #51697A;
+    --byeoksa-line: #7E9CB0;    /* 어두운 칸 위 아군 테두리 (대비 보정) */
+    --vermilion: #A63D32;
+    --vermilion-dark: #743129;
+    --human-hostile: #8E4338;
+    --human-line: #C0604F;      /* 어두운 칸 위 적대 인간 테두리 (대비 보정) */
+    --anomaly: #68455F;
+    --anomaly-line: #A77A9C;    /* 어두운 칸 위 귀물 테두리 (대비 보정) */
+    --neutral: #9A7A46;
+    --neutral-line: #C8A566;
+    --mission: #B49A58;
+    --text-primary: #EEE7D8;
+    --text-secondary: #B7AD9A;
+
+    --bg: var(--ink-950);
+    --panel: var(--ink-900);
+    --text: var(--text-primary);
+    --muted: var(--text-secondary);
+    --dirt: #2c2822;
+    --rock: #121110;
     --shrine: #3a2327;
     --spring: #1d3140;
     --escape: #1f3324;
-    --bs: #d9443a;      /* 벽사청 */
-    --guest: #9a9a9a;   /* 객장 */
-    --enemy: #a35ad8;   /* 요괴 */
+    --gate: #2a1d1a;       /* 5장 성문 칸 */
+    --bs: var(--byeoksa-line);      /* 벽사청 */
+    --guest: var(--byeoksa-line);   /* 객장도 아군 — '객' 표식으로만 구분 */
+    --enemy: var(--anomaly-line);   /* 귀물 */
+    --btn-h: 44px;
+    --radius: 8px;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
@@ -42,9 +68,10 @@
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
     gap: 2px;
-    background: #07080b;
+    background: var(--ink-950);
     padding: 2px;
     border-radius: 6px;
+    box-shadow: 0 0 0 1px var(--paper-700);
     touch-action: manipulation;
   }
   .cell {
@@ -59,7 +86,20 @@
   .t-rock   { background: var(--rock); }
   .t-shrine { background: var(--shrine); }
   .t-spring { background: var(--spring); }
-  .t-escape { background: var(--escape); box-shadow: inset 0 0 0 1px #3f6b48; }
+  .t-escape { background: var(--escape); box-shadow: inset 0 0 0 1px #3f6b48; } /* 2장 탈출로(숲길): 예전 그대로 */
+  /* 5장 성문: 등장 전에는 조용한 먹색 + 표찰, 운반자가 향하는 성문만 주홍 테두리 */
+  .t-escape.gate { background: var(--gate); box-shadow: inset 0 0 0 1px rgba(117, 106, 88, .75); }
+  .t-escape.gate .mark { opacity: .5; }
+  /* 5장 성문 표찰 "북문 / 탈출" — 운반자 등장 전에는 조용히, 도주 방향이 드러난 성문만 약하게 강조 */
+  .gate-plaque {
+    position: absolute; left: 50%; transform: translateX(-50%); z-index: 0; pointer-events: none; white-space: nowrap;
+    font-size: 9px; font-weight: 800; line-height: 1; padding: 2px 3px; border-radius: 2px; letter-spacing: -.02em;
+    background: var(--paper-200); color: var(--ink-900);
+  }
+  .gate-plaque.top { top: 2px; }
+  .gate-plaque.bottom { bottom: 2px; }
+  .gate-plaque.exit { background: var(--vermilion-dark); color: var(--paper-100); }
+  .cell.gate.gate-target { box-shadow: inset 0 0 0 2px var(--vermilion); }
   .mark {
     position: absolute;
     font-size: clamp(12px, 4.5vw, 22px);
@@ -80,11 +120,25 @@
     background: rgba(0, 0, 0, .35);
     z-index: 1;
   }
-  .f-bs    { border-color: var(--bs); }
-  .f-guest { border-color: var(--guest); }
-  .f-enemy { border-color: var(--enemy); }
-  .f-neutral { border-color: #e2c26b; box-shadow: 0 0 6px rgba(226, 194, 107, .45); } /* 3장 서낭신: 진실 뒤 금색 신령 */
+  /* 피아 식별: 색 + 모양 + 표식 (UI-PHASE-A-01 4장)
+     아군 = 남청 둥근 네모 / 적대 인간 = 적갈 각진 네모 + 사람 표식 / 귀물 = 자주 동그라미 + 불꽃 표식 / 중립 = 황갈 이중선 + 마름모 표식 */
+  .f-bs, .f-guest { border-color: var(--byeoksa-line); background: rgba(51, 70, 85, .55); border-radius: 9px; }
+  .f-enemy { border-color: var(--anomaly-line); background: rgba(104, 69, 95, .45); border-radius: 50%; }
+  .f-enemy.k-human { border-color: var(--human-line); background: rgba(142, 67, 56, .38); border-radius: 2px; }
+  .f-neutral { border: 3px double var(--neutral-line); background: rgba(154, 122, 70, .25); } /* 3장 서낭신(진실 뒤)·4장 도문 술사·5장 관리 */
   .f-unknown { border-color: #6b6b6b; } /* 3장 서낭신: 진실 전에는 정체 모름 (회색·먹색) */
+  /* 임무 대상 (5장 찾을 관리·쫓을 운반자): 황토 고리 — 맵에서 가장 먼저 눈에 들어온다 */
+  .unit.k-target { box-shadow: 0 0 0 2px var(--ink-950), 0 0 0 4px var(--mission), 0 0 10px 3px rgba(180, 154, 88, .55); }
+  .kind {
+    position: absolute; top: -3px; right: -3px; z-index: 2; width: 14px; height: 14px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; pointer-events: none;
+    border: 1px solid var(--ink-950);
+  }
+  .kind svg { width: 11px; height: 11px; display: block; }
+  .kind.human { background: var(--human-line); border-radius: 2px; }
+  .kind.anomaly { background: var(--anomaly-line); }
+  .kind.neutral { background: var(--neutral-line); transform: rotate(45deg); border-radius: 2px; width: 11px; height: 11px; top: -1px; right: -1px; }
+  .kind.neutral svg { transform: rotate(-45deg); width: 9px; height: 9px; }
   #ask { position: fixed; inset: 0; z-index: 44; background: rgba(4, 5, 8, .75); display: flex; align-items: center; justify-content: center; padding: 20px; }
   #ask .card { max-width: 340px; width: 100%; background: var(--panel); border: 1px solid #e2c26b; border-radius: 10px; padding: 18px 16px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
   .pt.barrier { background: #3d6ea8; color: #fff; }
@@ -96,8 +150,13 @@
     position: absolute; left: 1px; top: 1px; z-index: 2; pointer-events: none;
     font-size: 9px; font-weight: 800; line-height: 1; padding: 2px 3px; border-radius: 3px; letter-spacing: -.02em;
   }
+  /* 조사 지점: 칸 전체가 아니라 작은 금색 돋보기 아이콘 / 조사한 곳은 작은 회색 점검 표시 */
   .pt.clue { background: #e0b04a; color: #1d1a14; }
   .pt.done { background: #4a4f5c; color: #d8d4c8; }
+  .pt.icon { width: 14px; height: 14px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .pt.icon.clue { background: var(--mission); box-shadow: 0 0 0 1px var(--ink-950); }
+  .pt.icon.done { background: var(--paper-700); opacity: .85; width: 12px; height: 12px; }
+  .pt svg { width: 10px; height: 10px; display: block; }
   .pt.seal { background: #b0302a; color: #fbf6ea; animation: pt-pulse 1.6s ease-in-out infinite; }
   .pt.sealed { background: #e2c26b; color: #1d1a14; }
   .pt.grudge { background: #5b3a78; color: #eadcff; }
@@ -119,14 +178,24 @@
   #result .reward b { color: #f5c542; }
   @keyframes quake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-4px, 2px); } 40% { transform: translate(4px, -2px); } 60% { transform: translate(-3px, 1px); } 80% { transform: translate(2px, -1px); } }
   .quake { animation: quake .5s ease-in-out 1; }
+  /* 임무 바: 높이 고정 — 문구가 바뀌어도 맵이 움직이지 않는다. 긴 문장은 말줄임, 누르면 아래 정보 칸에 전체 */
   #objective {
-    margin: -4px auto 6px; max-width: 464px; padding: 4px 8px; border-radius: 6px; font-size: 13px; line-height: 1.4;
-    background: rgba(226, 194, 107, .12); border: 1px solid rgba(226, 194, 107, .5); text-align: center;
+    margin: -4px auto 6px; max-width: 464px; height: 44px; padding: 0 8px; border-radius: var(--radius);
+    display: flex; align-items: center; gap: 8px; overflow: hidden; cursor: pointer;
+    background: var(--ink-900); border: 1px solid rgba(180, 154, 88, .55); border-left: 3px solid var(--mission);
   }
-  #objective b { color: #e2c26b; }
-  .toast.mission { background: rgba(60, 20, 18, .97); border-color: #b0302a; }
-  .toast.mission b { color: #f5c542; font-size: 17px; }
-  .toast.mission s { color: #8a8778; }
+  #objective .obj-tag {
+    flex: none; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--ink-950);
+    background: var(--mission); border-radius: 3px; padding: 3px 5px; line-height: 1;
+  }
+  #objective .obj-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  #objective .obj-goal, #objective .obj-status { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #objective .obj-goal { font-size: 14px; font-weight: 700; line-height: 1.25; color: var(--text-primary); }
+  #objective .obj-status { font-size: 12px; line-height: 1.2; color: var(--mission); }
+  #objective .obj-status:empty { display: none; }
+  .toast.mission { background: rgba(29, 27, 23, .97); border-color: var(--mission); border-left-width: 3px; }
+  .toast.mission b { color: var(--mission); font-size: 16px; }
+  .toast.mission s { color: var(--text-secondary); }
   .unit.respawned { animation: respawn .9s ease-out; }
   @keyframes respawn { 0% { opacity: 0; transform: scale(.6); } 100% { opacity: 1; transform: none; } }
   .badge {
@@ -148,8 +217,9 @@
     pointer-events: none;
     z-index: 0;
   }
-  .hl-move::after { background: rgba(70, 140, 255, .38); box-shadow: inset 0 0 0 2px rgba(120, 180, 255, .8); }
-  .hl-attack::after { background: rgba(230, 60, 60, .35); box-shadow: inset 0 0 0 2px rgba(255, 110, 110, .9); }
+  /* 이동 범위는 바닥 색만 밝게 (맵에서 가장 약한 정보) / 공격 대상은 주홍 */
+  .hl-move::after { background: rgba(126, 156, 176, .30); box-shadow: inset 0 0 0 1px rgba(126, 156, 176, .55); }
+  .hl-attack::after { background: rgba(166, 61, 50, .38); box-shadow: inset 0 0 0 2px #d0604f; }
   .hl-heal::after { background: rgba(60, 200, 110, .32); box-shadow: inset 0 0 0 2px rgba(110, 240, 150, .9); }
   .tag {
     position: absolute;
@@ -230,7 +300,7 @@
     15% { opacity: 1; }
     100% { transform: translateY(-70%); opacity: 0; }
   }
-  .unit.selected { box-shadow: 0 0 0 2px #fff, 0 0 10px 2px rgba(255, 255, 255, .5); }
+  .unit.selected { box-shadow: 0 0 0 2px var(--text-primary), 0 0 10px 2px rgba(238, 231, 216, .5); }
   .hpbar {
     position: absolute;
     left: 3px;
@@ -255,18 +325,19 @@
   }
   #top .sep { color: var(--muted); font-weight: 400; }
 
-  .unit.acting { box-shadow: 0 0 0 2px var(--enemy), 0 0 12px 3px rgba(163, 90, 216, .7); }
+  .unit.acting { box-shadow: 0 0 0 2px var(--text-primary), 0 0 12px 3px rgba(238, 231, 216, .55); }
   #top.flash { animation: flash 1.2s ease-out; }
   @keyframes flash { 0% { color: #f5c542; } 100% { color: var(--text); } }
-  #btn-end { background: #2a1f24; border-color: #5a3440; }
-  #phase-note { text-align: center; font-size: 12px; color: var(--muted); min-height: 16px; margin-top: 6px; }
-  #phase-note.aim { font-size: 15px; color: var(--text); }
-  #phase-note.aim b { color: #f5c542; font-size: 17px; }
-  #btn-skill { font-size: 16px; font-weight: 800; letter-spacing: .04em; }
-  #btn-skill:not(:disabled) { color: #f5c542; }
-  /* v0.9.3 추적·교란 능동 행동: 기술(금색)과 다른 청록색 */
-  #btn-control { font-weight: 800; font-size: 14px; letter-spacing: -.03em; white-space: nowrap; padding-left: 2px; padding-right: 2px; }
-  #btn-control:not(:disabled) { color: #6fd6c4; border-color: #2f6b62; }
+  #btn-end { background: var(--vermilion-dark); border-color: var(--vermilion); color: var(--paper-100); }
+  /* 행동 버튼 자리에 뜨는 안내 (버튼이 없을 때): 같은 높이라 아래 줄이 움직이지 않는다 */
+  #phase-note {
+    min-height: var(--btn-h); display: flex; align-items: center; justify-content: center; gap: 4px; padding: 0 8px;
+    text-align: center; font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden;
+    border: 1px dashed var(--ink-800); border-radius: var(--radius);
+  }
+  #phase-note:empty { border-color: transparent; }
+  #phase-note.aim { font-size: 14px; color: var(--text-primary); border-color: var(--vermilion-dark); }
+  #phase-note.aim b { color: var(--mission); font-size: 16px; }
   .skill-label small { font-size: 10px; font-weight: 600; margin-left: 1px; opacity: .85; }
   .ghost {
     position: absolute;
@@ -304,41 +375,92 @@
     .water::before, .water::after, .skill-label { animation-duration: .01s; }
     .bell-wave { transition: none; }
   }
-  .unit.acted { filter: grayscale(1) brightness(.55); }
+  .unit.acted { filter: saturate(.35) brightness(.8); opacity: .6; } /* 행동 끝: 테두리는 남겨 아군인 줄은 보이게 */
 
-  #panel { margin-top: 8px; min-height: 120px; }
+  /* 아래 조작 영역: [행동 중 인물] → [행동 Dock] → [턴 종료] → (조회 정보). 위 세 줄은 높이 고정 */
+  #panel { margin-top: 8px; min-height: 120px; display: flex; flex-direction: column; gap: 6px; }
+  #actor {
+    display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 4px 4px 4px 6px;
+    background: var(--ink-900); border: 1px solid var(--byeoksa-light); border-radius: var(--radius);
+  }
+  #actor.idle { border-color: var(--ink-800); }
+  #actor.enemy { border-color: var(--vermilion-dark); }
+  /* 초상 자리: 지금은 이모지. 나중에 실제 초상 이미지로 바꿔 끼울 수 있게 칸만 만든다 (data-unit 로 인물 구분) */
+  .portrait {
+    flex: none; width: 40px; height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; line-height: 1; background: var(--ink-800) center / cover no-repeat; border: 2px solid var(--byeoksa-line);
+  }
+  #actor.idle .portrait, #actor.enemy .portrait { border-color: var(--ink-800); }
+  .actor-text { flex: 1; min-width: 0; }
+  .actor-name { font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .actor-name .lead { font-size: 11px; font-weight: 800; color: var(--ink-950); background: var(--byeoksa-line); border-radius: 3px; padding: 2px 5px; margin-right: 6px; vertical-align: 2px; letter-spacing: .04em; }
+  #actor.enemy .actor-name .lead { background: var(--vermilion); color: var(--paper-100); }
+  .actor-stats { font-size: 12px; color: var(--text-secondary); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dock-mini {
+    flex: none; min-height: var(--btn-h); min-width: 64px; padding: 0 10px; border-radius: var(--radius);
+    border: 1px solid var(--paper-700); background: transparent; color: var(--text-secondary);
+    font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; touch-action: manipulation;
+  }
+  #dock { min-height: var(--btn-h); }
+  #skills { display: flex; flex-direction: column; gap: 6px; }
+  .skill-row {
+    width: 100%; min-height: 48px; display: flex; align-items: center; gap: 8px; padding: 4px 12px; text-align: left;
+    border: 1px solid var(--paper-700); border-radius: var(--radius); background: var(--ink-900); color: var(--text-primary);
+    font: inherit; touch-action: manipulation;
+  }
+  .skill-row .sk-main { flex: 1; min-width: 0; }
+  .skill-row .sk-name { display: block; font-size: 15px; font-weight: 800; white-space: nowrap; }
+  .skill-row .sk-desc { display: block; font-size: 12px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .skill-row .sk-cost { flex: none; font-size: 12px; font-weight: 700; color: var(--mission); white-space: nowrap; }
+  .skill-row:disabled { opacity: .45; }
+  .skill-row:disabled .sk-cost { color: var(--text-secondary); }
+  .skill-row:not(:disabled):active { background: var(--ink-800); }
+  /* 정보 조회: 행동 중 인물과 헷갈리지 않게 한지색 카드 + "정보 조회" 머리표 */
   #info {
     display: flex;
     gap: 10px;
     align-items: center;
-    background: var(--panel);
-    border: 1px solid #2c303c;
-    border-radius: 8px;
-    padding: 8px 10px;
+    background: var(--paper-100);
+    color: var(--ink-900);
+    border: 1px solid var(--paper-700);
+    border-radius: var(--radius);
+    padding: 6px 10px;
     font-size: 13px;
   }
-  #info .face { font-size: 30px; line-height: 1; }
+  #info .face { font-size: 24px; line-height: 1; }
+  #info > div:last-child { min-width: 0; flex: 1; }
+  /* 기본은 두 줄 (머리표 + 이름·핵심 수치). 카드를 누르면 소속·수련 같은 긴 설명까지 */
+  #info:not(.more) .detail { display: none; }
+  #info .name-line { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  #info .more-hint { font-size: 11px; color: var(--paper-700); margin-left: 6px; font-weight: 600; }
+  #info .info-head { font-size: 11px; font-weight: 800; color: var(--paper-700); letter-spacing: .04em; margin-bottom: 1px; }
+  #info .info-head b { color: var(--ink-950); background: var(--paper-200); border: 1px solid var(--paper-700); border-radius: 3px; padding: 0 4px; margin-right: 4px; font-weight: 800; }
   #info .name { font-size: 15px; font-weight: 700; }
-  #info .guest { font-size: 11px; font-weight: 600; color: #111; background: var(--guest); border-radius: 3px; padding: 0 4px; margin-left: 4px; }
-  #info .sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  #info .guest { font-size: 11px; font-weight: 600; color: var(--paper-100); background: var(--byeoksa); border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+  #info .sub { color: #5c5343; font-size: 12px; margin-top: 1px; }
   #info .stats { margin-top: 3px; }
   #info .stats b { font-weight: 600; }
-  .btns { display: flex; gap: 6px; margin-top: 6px; }
+  /* 버튼 규칙: 높이 44 이상 · 한 줄 · 같은 모서리 · 선택/비활성 구분 */
+  .btns { display: flex; gap: 6px; }
   .btns button {
     flex: 1;
-    min-height: 44px;
-    border: 1px solid #3a3f4d;
-    border-radius: 8px;
-    background: var(--panel);
-    color: var(--text);
+    min-width: 0;
+    min-height: var(--btn-h);
+    border: 1px solid var(--paper-700);
+    border-radius: var(--radius);
+    background: var(--ink-900);
+    color: var(--text-primary);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     touch-action: manipulation;
   }
-  .btns button small { display: block; font-size: 10px; font-weight: 400; color: var(--muted); }
-  .btns button:disabled { opacity: .35; }
-  .btns button:not(:disabled):active { background: #262a36; }
+  .btns button:disabled { opacity: .38; border-style: dashed; }
+  .btns button:not(:disabled):active { background: var(--ink-800); }
+  .btns button[aria-pressed="true"] { background: var(--byeoksa); border-color: var(--byeoksa-line); }
 
   /* 대사 장면: 맵이 비쳐 보이게 옅게 덮고, 아래에 초상화 + 말풍선 */
   #scene {
@@ -756,9 +878,11 @@
     display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 12px;
   }
   #scene:not([hidden]) ~ #toasts { bottom: auto; top: 12px; } /* 대사 상자(아래)를 가리지 않게 */
+  /* 전투 중(첫 화면·지도·결과가 모두 닫힘)에는 위쪽 임무 바 자리에: 행동 Dock 을 가리지 않고, 터치도 막지 않는다 */
+  #title[hidden] ~ #world[hidden] ~ #result[hidden] ~ #toasts { bottom: auto; top: 6px; }
   .toast {
     width: 100%; max-width: 440px; padding: 8px 12px; border-radius: 8px;
-    background: rgba(24, 27, 36, .96); border: 1px solid #3a3f4d; box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+    background: rgba(29, 27, 23, .96); border: 1px solid var(--paper-700); box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
     font-size: 13px; line-height: 1.5; text-align: center; word-break: keep-all;
     animation: toast var(--ms, 2800ms) ease forwards;
   }
@@ -778,22 +902,37 @@
     <span id="top-merit"></span>
     <button class="lore-open" id="lore-open-battle" type="button" aria-label="벽사록 열기">📖</button>
   </header>
-  <div id="objective" hidden></div>
+  <div id="objective" hidden role="button" tabindex="0" aria-label="임무 자세히 보기">
+    <span class="obj-tag">임무</span>
+    <div class="obj-text"><div class="obj-goal" id="obj-goal"></div><div class="obj-status" id="obj-status"></div></div>
+  </div>
   <div id="board"></div>
   <div id="panel">
-    <div id="info" hidden></div>
-    <div id="menu" class="btns" hidden>
-      <button id="btn-attack">공격</button>
-      <button id="btn-skill">스킬</button>
-      <button id="btn-control" hidden>견제사격</button>
-      <button id="btn-seal" hidden>봉인 복구</button>
-      <button id="btn-barrier" hidden>결계</button>
-      <button id="btn-lamp" hidden>봉인등 밝히기</button>
-      <button id="btn-wait">대기</button>
-      <button id="btn-cancel">취소</button>
+    <!-- 행동 중 인물: 다른 유닛을 눌러 정보를 봐도 이 줄의 주인은 바뀌지 않는다 -->
+    <div id="actor" class="idle">
+      <div class="portrait" id="actor-face"></div>
+      <div class="actor-text"><div class="actor-name" id="actor-name"></div><div class="actor-stats" id="actor-stats"></div></div>
+      <button class="dock-mini" id="btn-cancel" type="button" hidden>이동 취소</button>
+      <button class="dock-mini" id="btn-skills-close" type="button" hidden>닫기</button>
     </div>
-    <div class="btns"><button id="btn-end">턴 종료</button></div>
-    <div id="phase-note"></div>
+    <!-- 행동 Dock: [공격] [기술] [임무] [대기] 최대 4개. 기술은 아래 패널에서 고른다 -->
+    <div id="dock">
+      <div id="menu" class="btns" hidden>
+        <button id="btn-attack" type="button">공격</button>
+        <button id="btn-skills" type="button" aria-pressed="false">기술</button>
+        <button id="btn-seal" type="button" hidden>임무</button>
+        <button id="btn-lamp" type="button" hidden>임무</button>
+        <button id="btn-wait" type="button">대기</button>
+      </div>
+      <div id="skills" hidden>
+        <button class="skill-row" id="btn-skill" type="button"></button>
+        <button class="skill-row" id="btn-control" type="button" hidden></button>
+        <button class="skill-row" id="btn-barrier" type="button" hidden></button>
+      </div>
+      <div id="phase-note"></div>
+    </div>
+    <div class="btns" id="end-row"><button id="btn-end" type="button">턴 종료</button></div>
+    <div id="info" hidden></div>
     <!-- 개발용: 주소에 ?dev=1 이 있을 때만 보인다 (specs/immersion.md 1장) -->
     <button id="open-editor" type="button" hidden>🛠 맵 에디터</button>
     <button class="dev-link" id="playlog-open-battle" type="button" hidden>🧪 플레이 기록</button>
@@ -3525,6 +3664,8 @@ var Core = (function () {
     KI_MAX: KI_MAX,
     KI_START: KI_START,
     SKILL_COST: SKILL_COST,
+    HEAL_RANGE: HEAL_RANGE, HEAL_AMOUNT: HEAL_AMOUNT, CONTROL_RATE: CONTROL_RATE, // 기술 패널 설명용 (읽기만)
+    BARRIER_RANGE: BARRIER_RANGE, BARRIER_TURNS: BARRIER_TURNS,
     HEAL_SKILL: HEAL_SKILL,
     newBattle: newBattle,
     getUnit: getUnit,
@@ -3979,7 +4120,8 @@ var Core = (function () {
   var board = document.getElementById('board');
   var cells = [];
   // 조작 상태. step: 'none' 선택 없음 / 'move' 파란 칸 고르는 중 / 'menu' 이동 후 행동 고르는 중
-  var ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null };
+  // panel: 'skills' 면 [기술] 패널이 열림 / inspect: 'objective'·'actor' 면 아래 정보 칸에 임무 전체·행동 중 인물 자세히
+  var ui = { step: 'none', id: null, kind: null, busy: false, infoId: null, infoCell: null, dallaeGone: false, orb: null, panel: null, inspect: null };
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -4015,14 +4157,40 @@ var Core = (function () {
   }
   function factionClass(u) {
     if (u.side === 'neutral') return seonangHidden() ? 'f-unknown' : 'f-neutral';
-    if (u.side === 'enemy') return 'f-enemy';
+    if (u.side === 'enemy') return u.entityType === 'HUMAN' ? 'f-enemy k-human' : 'f-enemy';
     return u.guest ? 'f-guest' : 'f-bs';
+  }
+  // 작은 표식 (SVG 단순 도형): 적대 인간 = 사람, 귀물 = 불꽃, 중립 = 마름모 / 조사 = 돋보기, 조사함 = 점검
+  var ICON = {
+    human: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="3.6" r="2.3" fill="#151411"/><path d="M1.6 11.4C1.8 7.8 3.8 6.8 6 6.8s4.2 1 4.4 4.6Z" fill="#151411"/></svg>',
+    anomaly: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .6c1.7 2.3 3.8 3.9 3.8 6.8a3.8 3.8 0 0 1-7.6 0c0-1.9 1.2-3 1.9-4.2.4 1.3 1 1.8 1.5 1.8C5.6 3.6 5.4 2.1 6 .6Z" fill="#151411"/></svg>',
+    neutral: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="2.6" fill="#151411"/></svg>',
+    lens: '<svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="5" cy="5" r="3" fill="none" stroke="#151411" stroke-width="1.8"/><path d="M7.3 7.3l3.2 3.2" stroke="#151411" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    check: '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.6 6.3l2.4 2.4 4.5-5" fill="none" stroke="#E7DEC8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+  function unitKind(u) {
+    if (u.side === 'neutral') return seonangHidden() ? null : 'neutral';
+    if (u.side !== 'enemy') return null;
+    return u.entityType === 'HUMAN' ? 'human' : 'anomaly';
+  }
+  // 지금 임무의 대상: 5장 찾을 관리(찾기 단계) · 쫓을 장부 운반자(추격 단계)
+  function missionTarget(u) {
+    var o = state.objective;
+    return !!o && ((o.phase === 'chase' && u.runner) || (o.phase === 'find' && u.type === 'official'));
   }
 
   function unitTile(u) {
     var tile = el('div', 'unit ' + factionClass(u), u.emoji);
     tile.dataset.id = u.id;
+    if (missionTarget(u)) tile.className += ' k-target';
     if (u.guest) tile.appendChild(el('span', 'badge', '객'));
+    var kind = unitKind(u);
+    if (kind) {
+      var mark = el('span', 'kind ' + kind);
+      mark.innerHTML = ICON[kind];
+      mark.title = { human: '적대 인간', anomaly: '귀물', neutral: '중립' }[kind];
+      tile.appendChild(mark);
+    }
     var bar = el('div', 'hpbar');
     var fill = el('i');
     var ratio = u.hp / u.maxHp;
@@ -4123,6 +4291,7 @@ var Core = (function () {
     });
     if (ui.orb) cellAt(ui.orb.r, ui.orb.c).appendChild(el('span', 'orb', '🔮'));
     renderPoints();
+    renderGates();
     cells.forEach(function (cell) { cell.classList.remove('barrier-cell'); });
     if (state.barrier) {
       var bc = cellAt(state.barrier.r, state.barrier.c);
@@ -4140,9 +4309,71 @@ var Core = (function () {
       var tag = u.side !== 'ally' || ui.kind === 'skill' ? affinityTag(u) : null;
       if (tag && marksHas(marks, u)) cellAt(u.r, u.c).appendChild(tag);
     });
+    renderActor();
     renderInfo();
     renderMenu();
     renderPhase();
+  }
+
+  // 5장 성문 표찰: 성문 칸에 "북문", 옆 성문 칸에 "탈출". 운반자가 향하는 성문은 주홍 테두리로 약하게
+  function gateCells(g) {
+    var list = [{ r: g.r, c: g.c }];
+    [g.c - 1, g.c + 1].forEach(function (c) {
+      if (c >= 0 && c < state.cols && Core.terrainAt(state, g.r, c) === 'E') list.push({ r: g.r, c: c });
+    });
+    return list;
+  }
+  function renderGates() {
+    cells.forEach(function (cell) {
+      cell.classList.remove('gate-target');
+      cell.querySelectorAll('.gate-plaque').forEach(function (n) { cell.removeChild(n); });
+    });
+    if (!state.exitsList) return;
+    var heading = state.objective && state.objective.phase === 'chase' && Core.runnerGates(state)[0];
+    state.exitsList.forEach(function (g) {
+      var side = g.r === state.rows - 1 ? 'bottom' : 'top';
+      gateCells(g).forEach(function (p, i) {
+        var cell = cellAt(p.r, p.c);
+        cell.classList.add('gate');
+        cell.appendChild(el('span', 'gate-plaque ' + side + (i ? ' exit' : ''), i ? '탈출' : g.name));
+        if (heading && heading.id === g.id) cell.classList.add('gate-target');
+      });
+    });
+  }
+
+  // 행동 중 인물: 지금 명령을 받는 아군. 다른 유닛을 눌러 정보를 봐도 바뀌지 않는다
+  function actorUnit() {
+    return state.phase === 'ally' && ui.step !== 'none' && ui.id ? Core.getUnit(state, ui.id) : null;
+  }
+  function renderActor() {
+    var box = document.getElementById('actor'), face = document.getElementById('actor-face');
+    var name = document.getElementById('actor-name'), stats = document.getElementById('actor-stats');
+    var u = actorUnit();
+    name.innerHTML = '';
+    face.textContent = '';
+    delete face.dataset.unit;
+    if (u) {
+      box.className = '';
+      face.textContent = u.emoji;
+      face.dataset.unit = u.id;
+      name.appendChild(el('span', 'lead', '행동 중'));
+      name.appendChild(document.createTextNode(u.name + (u.guest ? ' (객장)' : '')));
+      var tr = u.training && Core.trainingDef(u.id, u.training);
+      stats.textContent = 'HP ' + u.hp + ' / ' + u.maxHp + (u.skill ? ' · 기력 ' + u.ki + ' / ' + u.maxKi : '') + (tr ? ' · 수련 ' + tr.name : '');
+    } else if (state.phase === 'enemy') {
+      box.className = 'enemy';
+      name.appendChild(el('span', 'lead', '적 차례'));
+      name.appendChild(document.createTextNode(enemyTurnLabel()));
+      stats.textContent = '적이 움직이는 동안 기다린다';
+    } else {
+      box.className = 'idle';
+      name.appendChild(document.createTextNode(state.result === null ? '행동할 아군을 고르세요' : '전투 끝'));
+      stats.textContent = state.result === null ? '남청 테두리의 아군을 누르세요' : '';
+    }
+    var menuOpen = !!u && ui.step === 'menu';
+    document.getElementById('btn-cancel').hidden = !menuOpen || ui.panel === 'skills';
+    document.getElementById('btn-cancel').textContent = u && u.from && (u.from.r !== u.r || u.from.c !== u.c) ? '이동 취소' : '취소';
+    document.getElementById('btn-skills-close').hidden = !menuOpen || ui.panel !== 'skills';
   }
 
   // ── 3장 지점 표시·임무 줄 (specs/chapter3.md 3장) ──
@@ -4180,7 +4411,13 @@ var Core = (function () {
       if (!m) return;
       if (o.phase === 'lamps' && Core.lampAt(state, p.r, p.c)) return; // 봉인등 단계에는 등 표시만
       var cell = cellAt(p.r, p.c);
-      cell.appendChild(el('span', 'pt ' + m[0], m[1]));
+      var ptEl = el('span', 'pt ' + m[0], m[1]);
+      if (m[0] === 'clue' || (m[0] === 'done' && m[1] === '조사함')) { // 조사 지점은 글자 대신 작은 아이콘
+        ptEl.className += ' icon';
+        ptEl.innerHTML = m[0] === 'clue' ? ICON.lens : ICON.check;
+        ptEl.title = m[1];
+      }
+      cell.appendChild(ptEl);
       marked[p.r + ',' + p.c] = true;
       if (m[0] === 'seal') cell.classList.add('goal');
     });
@@ -4193,18 +4430,23 @@ var Core = (function () {
         l.lit ? (l.dim ? '약한 등' : '등불') : '꺼짐'));
       if (off) cell.classList.add('goal');
     });
-    var goal = CHAPTERS[chapterId] && Core.STAGES[chapterId].objective;
-    box.innerHTML = '';
-    box.appendChild(el('b', '', '임무 '));
+    var line = objectiveLine();
+    document.getElementById('obj-goal').textContent = line.goal;
+    document.getElementById('obj-status').textContent = line.status;
+    box.title = line.goal + (line.status ? ' (' + line.status + ')' : '');
+  }
+  // 임무 바 두 줄: 목표 / 진행 상황 (문구는 기존 그대로, 줄만 나눴다)
+  function objectiveLine() {
+    var o = state.objective, goal = Core.STAGES[chapterId].objective;
     var lamps = state.lamps && Core.litLamps(state).length + '/' + state.lamps.length;
-    box.appendChild(document.createTextNode(o.phase === 'investigate'
-      ? goal.before + ' (조사 ' + o.investigated.length + '/' + o.need + ')'
-      : o.phase === 'find' ? goal.find
-      : o.phase === 'chase' ? goal.after + ' (' + runnerGateText() + ')'
-      : o.phase === 'lamps'
-        ? goal.after + ' (켜진 등 ' + lamps + ' · 봉인 유지 ' + o.hold + '/' + goal.holdNeed + ')'
-          + (omenSpawns().length ? ' · 귀기: ' + omenSpawns().map(function (sp) { return sp.name; }).join('·') : '')
-        : goal.after + ' (복구 ' + o.repaired.length + '/' + Core.STAGES[chapterId].points.filter(function (p) { return p.seal; }).length + ')'));
+    if (o.phase === 'investigate') return { goal: goal.before, status: '조사 ' + o.investigated.length + '/' + o.need };
+    if (o.phase === 'find') return { goal: goal.find, status: '' };
+    if (o.phase === 'chase') return { goal: goal.after, status: runnerGateText() };
+    if (o.phase === 'lamps') {
+      return { goal: goal.after, status: '켜진 등 ' + lamps + ' · 봉인 유지 ' + o.hold + '/' + goal.holdNeed
+        + (omenSpawns().length ? ' · 귀기: ' + omenSpawns().map(function (sp) { return sp.name; }).join('·') : '') };
+    }
+    return { goal: goal.after, status: '복구 ' + o.repaired.length + '/' + Core.STAGES[chapterId].points.filter(function (p) { return p.seal; }).length };
   }
   // 5장: 운반자가 향하는 성문과 남은 칸 수 — "어디로 도망가려 하지?"를 보고 병력을 배치한다
   function runnerGateText() {
@@ -4243,87 +4485,85 @@ var Core = (function () {
     return null;
   }
 
-  // 정보창: 이름 / 소속 / 칭호 / HP / 기력 / 속성. 빈 특수 지형 칸을 눌렀으면 지형 설명 카드
+  // 정보창 (정보 조회): 행동 중 인물이 아닌 것을 눌렀을 때만 뜬다 — 한지색 카드 + "정보 조회" 머리표로 행동 줄과 구분
+  // 이름 / 소속 / 칭호 / HP / 기력 / 속성. 빈 특수 지형 칸을 눌렀으면 지형 설명 카드
+  function infoHead(text, tag) {
+    var h = el('div', 'info-head');
+    h.appendChild(el('b', '', tag || '정보 조회'));
+    h.appendChild(document.createTextNode(text));
+    return h;
+  }
+  function infoCard(box, face, head, name, body, tag) {
+    box.hidden = false;
+    box.innerHTML = '';
+    box.appendChild(el('div', 'face', face));
+    var t = el('div');
+    t.appendChild(infoHead(head, tag));
+    t.appendChild(el('div', 'name', name));
+    var b = el('div', 'stats', body);
+    b.style.whiteSpace = 'pre-line';
+    t.appendChild(b);
+    box.appendChild(t);
+  }
   function renderInfo() {
     var box = document.getElementById('info');
+    if (ui.inspect === 'objective' && state.objective) {
+      var line = objectiveLine();
+      return infoCard(box, '📜', '현재 임무', line.goal, line.status, '임무');
+    }
+    var actor = actorUnit();
+    var infoId = ui.inspect === 'actor' && actor ? actor.id : ui.infoId;
+    if (!ui.infoCell && (!infoId || (actor && infoId === actor.id && ui.inspect !== 'actor'))) {
+      box.hidden = true; // 행동 중 인물은 위 줄에 이미 있다
+      return;
+    }
     var pt = ui.infoCell && state.objective && Core.pointAt(state, ui.infoCell.r, ui.infoCell.c);
     var lp = ui.infoCell && Core.lampAt(state, ui.infoCell.r, ui.infoCell.c);
     var pInfo = lp && (state.objective.phase === 'lamps' || !pt || state.objective.investigated.indexOf(pt.id) !== -1)
       ? lampInfo(lp) : pt && pointInfo(pt);
-    if (pInfo) {
-      box.hidden = false;
-      box.innerHTML = '';
-      box.appendChild(el('div', 'face', pInfo.mark));
-      var t = el('div');
-      t.appendChild(el('div', 'name', pInfo.name));
-      var body = el('div', 'stats', pInfo.text);
-      body.style.whiteSpace = 'pre-line';
-      t.appendChild(body);
-      box.appendChild(t);
-      return;
-    }
+    if (pInfo) return infoCard(box, pInfo.mark, '칸 정보', pInfo.name, pInfo.text);
     var om = ui.infoCell && omenSpawns().filter(function (sp) { return sp.r === ui.infoCell.r && sp.c === ui.infoCell.c; })[0];
     if (om) {
-      box.hidden = false;
-      box.innerHTML = '';
-      box.appendChild(el('div', 'face', '👻'));
-      var ot = el('div');
-      ot.appendChild(el('div', 'name', '귀기 · ' + om.name));
-      ot.appendChild(el('div', 'stats', '다음 적 차례에 이 자리에서 귀화가 나타난다.\n자리가 막혀 있으면 가장 가까운 빈 칸에 나온다.'));
-      ot.lastChild.style.whiteSpace = 'pre-line';
-      box.appendChild(ot);
-      return;
+      return infoCard(box, '👻', '칸 정보', '귀기 · ' + om.name,
+        '다음 적 차례에 이 자리에서 귀화가 나타난다.\n자리가 막혀 있으면 가장 가까운 빈 칸에 나온다.');
     }
     if (ui.infoCell && Core.barrierAt(state, ui.infoCell.r, ui.infoCell.c)) {
-      box.hidden = false;
-      box.innerHTML = '';
-      box.appendChild(el('div', 'face', '🧿'));
-      var bt = el('div');
-      bt.appendChild(el('div', 'name', '결계 · 소운의 진법'));
       var left = state.barrier.until - state.turn;
-      bt.appendChild(el('div', 'stats', '적이 이 칸에 들어오지 못한다. 아군은 지나간다.\n' + (left > 1 ? '다음 턴 적 차례까지' : '이번 턴 적 차례까지') + ' 남는다.'));
-      bt.lastChild.style.whiteSpace = 'pre-line';
-      box.appendChild(bt);
-      return;
+      return infoCard(box, '🧿', '칸 정보', '결계 · 소운의 진법',
+        '적이 이 칸에 들어오지 못한다. 아군은 지나간다.\n' + (left > 1 ? '다음 턴 적 차례까지' : '이번 턴 적 차례까지') + ' 남는다.');
     }
     var cellInfo = ui.infoCell && terrainInfo(Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c));
     if (cellInfo) return renderTerrainInfo(box, Core.terrainAt(state, ui.infoCell.r, ui.infoCell.c));
-    var u = ui.infoId && Core.getUnit(state, ui.infoId);
+    var u = infoId && Core.getUnit(state, infoId);
     box.hidden = !u || !u.alive;
     if (box.hidden) return;
     box.innerHTML = '';
     box.appendChild(el('div', 'face', u.emoji));
     var text = el('div');
-    var name = el('div', 'name', u.name);
-    if (u.guest) name.appendChild(el('span', 'guest', '객장'));
-    text.appendChild(name);
-    text.appendChild(el('div', 'sub', u.type === 'seonang'
-      ? (seonangHidden() ? '정체를 알 수 없다' : u.faction + ' · 원귀를 막고 있는 신령')
-      : u.faction + ' · ' + u.title));
-    if (u.ai === 'lamp') text.appendChild(el('div', 'sub', '봉인등을 노린다 — 등이나 그 옆 칸까지 오면 그 차례에 끈다'));
-    if (u.untargetable) text.appendChild(el('div', 'sub', u.ai === 'still' ? '공격할 수 없다' : '공격할 수 없다 · 옆에 온 귀물을 친다'));
-    text.appendChild(el('div', 'stats',
+    var who = { ally: u.guest ? '아군 (객장)' : '아군', enemy: u.entityType === 'HUMAN' ? '적대 인간' : '귀물', neutral: '중립' }[u.side];
+    var head = u.id === (actor && actor.id) ? infoHead(u.name + ' 자세히', '행동 중') : infoHead(u.name + ' 정보 · ' + who);
+    head.appendChild(el('span', 'more-hint', box.classList.contains('more') ? '접기 ▲' : '자세히 ▼'));
+    text.appendChild(head);
+    text.appendChild(el('div', 'stats name-line',
       'HP ' + u.hp + '/' + u.maxHp +
-      ' · 기력 ' + (u.ki === null ? '—' : u.ki + '/' + u.maxKi) +
-      ' · 속성 ' + u.elem));
+      (u.ki === null ? ' · 이동 ' + u.mov : ' · 기력 ' + u.ki + '/' + u.maxKi) + // 기력이 없는 적은 이동력을 대신 보여 준다
+      ' · 속성 ' + u.elem + (u.slow ? ' · 이동 −' + Core.CHUJEOK_SLOW : '')));
+    function detail(t) { text.appendChild(el('div', 'sub detail', t)); }
+    detail(u.type === 'seonang'
+      ? (seonangHidden() ? '정체를 알 수 없다' : u.faction + ' · 원귀를 막고 있는 신령')
+      : u.faction + ' · ' + u.title);
+    if (u.ai === 'lamp') detail('봉인등을 노린다 — 등이나 그 옆 칸까지 오면 그 차례에 끈다');
+    if (u.untargetable) detail(u.ai === 'still' ? '공격할 수 없다' : '공격할 수 없다 · 옆에 온 귀물을 친다');
     var tr = u.training && Core.trainingDef(u.id, u.training);
-    if (tr) text.appendChild(el('div', 'sub', '수련 · ' + tr.name + ' — ' + tr.desc));
-    if (u.slow) text.appendChild(el('div', 'sub', '추적에 걸림 — 다음 차례 이동 −' + Core.CHUJEOK_SLOW));
+    if (tr) detail('수련 · ' + tr.name + ' — ' + tr.desc);
+    if (u.slow) detail('추적에 걸림 — 다음 차례 이동 −' + Core.CHUJEOK_SLOW);
     var under = Core.terrainAt(state, u.r, u.c);
-    if (under !== 'D' && terrainInfo(under)) {
-      text.appendChild(el('div', 'sub', terrainMark(under) + ' ' + terrainInfo(under).name + ' 위 · ' + terrainInfo(under).text));
-    }
+    if (under !== 'D' && terrainInfo(under)) detail(terrainMark(under) + ' ' + terrainInfo(under).name + ' 위 · ' + terrainInfo(under).text);
     box.appendChild(text);
   }
 
   function renderTerrainInfo(box, t) {
-    box.hidden = false;
-    box.innerHTML = '';
-    box.appendChild(el('div', 'face', terrainMark(t)));
-    var text = el('div');
-    text.appendChild(el('div', 'name', terrainInfo(t).name));
-    text.appendChild(el('div', 'stats', terrainInfo(t).text));
-    box.appendChild(text);
+    infoCard(box, terrainMark(t), '칸 정보', terrainInfo(t).name, terrainInfo(t).text);
   }
 
   // 화면 아래에 잠깐 뜨는 알림. lines: [{ b: 굵게, small: 작게, text: 보통 }], kind: 'lore' 면 한지 색.
@@ -4337,10 +4577,15 @@ var Core = (function () {
     toastQueue.push({ lines: lines, kind: kind, ms: ms || 2800, rank: rank || TOAST_RANK.other, seq: toastSeq++ });
     if (!toastTimer) nextToast();
   }
+  // 우선순위: 대사 > 임무 변경 > 긴급 > 일반. 대사가 떠 있는 동안에는 알림을 띄우지 않고 기다린다 (두 개를 겹쳐 보이지 않게)
+  function sceneOpen() {
+    return !document.getElementById('scene').hidden;
+  }
   function nextToast() {
     toastTimer = null;
     toastCurrent = null;
     if (!toastQueue.length) return;
+    if (sceneOpen()) { toastTimer = setTimeout(nextToast, 300); return; }
     toastQueue.sort(function (a, b) { return a.rank - b.rank || a.seq - b.seq; });
     var item = toastQueue.shift();
     toastCurrent = { node: showToast(item.lines, item.kind, item.ms), rank: item.rank };
@@ -4402,6 +4647,7 @@ var Core = (function () {
     document.getElementById('btn-end').disabled = !canEnd;
     var note = document.getElementById('phase-note');
     note.className = '';
+    note.hidden = ui.step === 'menu'; // 행동 버튼(또는 기술 패널)이 있으면 그 자리를 버튼이 쓴다
     if (ui.step === 'target' && canEnd) {
       // 대상 고르는 중: 무엇을 쓰는지 크게 (specs/immersion.md 9장)
       note.className = 'aim';
@@ -4420,33 +4666,63 @@ var Core = (function () {
       note.appendChild(document.createTextNode(hint[1]));
       return;
     }
-    note.textContent = state.phase === 'enemy' ? enemyTurnLabel() : (canEnd ? '아군 차례 — 유닛을 눌러 움직이세요' : '');
+    note.textContent = !canEnd ? '' : ui.step === 'move' ? '밝은 칸으로 이동 · 제자리를 누르면 행동'
+      : '아군 차례 — 유닛을 눌러 움직이세요'; // 적 차례 문구는 위 행동 줄에
   }
 
+  // 행동 Dock: [공격] [기술] [임무] [대기]. 기술이 늘어도 버튼을 줄에 더하지 않고 [기술] 패널에 모은다
+  function skillRows(u) {
+    var rows = [];
+    if (u.skill) {
+      var heal = u.skill === Core.HEAL_SKILL;
+      rows.push({ id: 'btn-skill', name: u.skill, ok: Core.canSkill(state, u),
+        desc: heal ? '거리 ' + Core.HEAL_RANGE + ' 안 아군 HP +' + Core.HEAL_AMOUNT
+          : '강한 공격 ×1.5 · 속성 ' + u.elem + ' · 사거리 ' + Core.skillRange(u),
+        cost: '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')',
+        why: u.ki < Core.SKILL_COST ? '기력 부족' : '닿는 대상 없음' });
+    }
+    var ctl = Core.controlAction(u); // v0.9.3 추적 견제사격 / 교란 밀어내기
+    if (ctl) {
+      rows.push({ id: 'btn-control', name: ctl, ok: Core.canControl(state, u),
+        desc: '피해 ' + Math.round(Core.CONTROL_RATE * 100) + '% · ' + (u.training === 'chujeok' ? '다음 이동 −' + Core.CHUJEOK_SLOW : '대상 1칸 밀기'),
+        cost: '기력 0', why: '닿는 대상 없음' });
+    }
+    if (u.training === 'jinbeop') { // 소운 진법
+      rows.push({ id: 'btn-barrier', name: '결계', ok: Core.canBarrier(state, u),
+        desc: '거리 ' + Core.BARRIER_RANGE + ' 빈 칸 · ' + Core.BARRIER_TURNS + '턴 동안 적이 못 들어온다',
+        cost: '기력 ' + Core.SKILL_COST, why: u.ki < Core.SKILL_COST ? '기력 부족' : '칠 칸 없음' });
+    }
+    return rows;
+  }
   function renderMenu() {
-    var menu = document.getElementById('menu');
-    menu.hidden = ui.step !== 'menu';
-    if (menu.hidden) return;
+    var menu = document.getElementById('menu'), panel = document.getElementById('skills');
+    if (ui.step !== 'menu') ui.panel = null;
+    var open = ui.panel === 'skills';
+    menu.hidden = ui.step !== 'menu' || open;
+    panel.hidden = !open;
+    document.getElementById('end-row').hidden = open; // 기술을 고르는 동안은 턴 종료를 치운다 (행동 중 인물 줄은 그대로)
+    if (ui.step !== 'menu') return;
     var u = Core.getUnit(state, ui.id);
     document.getElementById('btn-attack').disabled = !Core.canAttack(state, u);
-    var skill = document.getElementById('btn-skill');
-    skill.disabled = !Core.canSkill(state, u);
-    skill.innerHTML = '';
-    skill.appendChild(document.createTextNode(u.skill || '스킬'));
-    skill.appendChild(el('small', '', u.skill ? '기력 ' + Core.SKILL_COST + ' (' + u.ki + '/' + u.maxKi + ')' : '없음')); // 관군은 스킬 없음
-    var control = document.getElementById('btn-control'); // v0.9.3 추적 견제사격 / 교란 밀어내기
-    control.hidden = !Core.controlAction(u);
-    if (!control.hidden) {
-      control.disabled = !Core.canControl(state, u);
-      control.innerHTML = '';
-      control.appendChild(document.createTextNode(Core.controlAction(u)));
-      control.appendChild(el('small', '', u.training === 'chujeok' ? '이동 −' + Core.CHUJEOK_SLOW : '1칸 밀기'));
-    }
+    var rows = skillRows(u);
+    var btn = document.getElementById('btn-skills');
+    btn.disabled = !rows.length; // 관군은 기술 없음
+    btn.setAttribute('aria-pressed', open ? 'true' : 'false');
     document.getElementById('btn-seal').hidden = !Core.repairablePoint(state, u); // 3장 봉인 칸에 섰을 때만
     document.getElementById('btn-lamp').hidden = !Core.lightableLamp(state, u); // 4장 꺼진 등 위에 섰을 때만
-    var barrier = document.getElementById('btn-barrier');
-    barrier.hidden = u.training !== 'jinbeop'; // 소운 진법만
-    barrier.disabled = !Core.canBarrier(state, u);
+    ['btn-skill', 'btn-control', 'btn-barrier'].forEach(function (id) {
+      var b = document.getElementById(id);
+      var row = rows.filter(function (x) { return x.id === id; })[0];
+      b.hidden = !row;
+      if (!row) return;
+      b.disabled = !row.ok;
+      b.innerHTML = '';
+      var main = el('span', 'sk-main');
+      main.appendChild(el('span', 'sk-name', row.name));
+      main.appendChild(el('span', 'sk-desc', row.desc));
+      b.appendChild(main);
+      b.appendChild(el('span', 'sk-cost', row.ok ? row.cost : row.why));
+    });
   }
   function trainingName(id) {
     var u = Core.getUnit(state, id);
@@ -4466,11 +4742,14 @@ var Core = (function () {
     ui.step = 'none';
     ui.id = null;
     ui.kind = null;
+    ui.panel = null;
   }
 
   // 맵 칸을 눌렀을 때. 터치와 클릭 모두 click 이벤트로 온다.
   function onCell(r, c) {
     if (ui.busy || state.phase !== 'ally') return;
+    ui.inspect = null;
+    document.getElementById('info').classList.remove('more');
     var u = Core.unitAt(state, r, c);
     if (u) ui.infoId = u.id;
     ui.infoCell = u ? null : { r: r, c: c }; // 빈 칸이면 지형 설명
@@ -4996,6 +5275,12 @@ var Core = (function () {
         scene.onclick = null;
         line.run();
         return setTimeout(show, line.pause);
+      }
+      // 대사 줄이 뜨면 떠 있던 알림은 바로 걷는다 (예: 5장 "시장 쪽에서 소란!" 뒤 관리의 "저 자요!")
+      if (toastCurrent && toastCurrent.node.parentNode) {
+        toastCurrent.node.parentNode.removeChild(toastCurrent.node);
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(nextToast, 300);
       }
       document.getElementById('scene-face').textContent = line.face;
       document.getElementById('scene-who').textContent = line.who;
@@ -5800,6 +6085,30 @@ var Core = (function () {
     if (ui.step !== 'menu') return;
     ui.step = 'target';
     ui.kind = 'control';
+    render();
+  });
+  // [기술] 패널 열기/닫기 — 패널 안에서 고른 기술은 위 핸들러로 (규칙 호출은 그대로)
+  document.getElementById('btn-skills').addEventListener('click', function () {
+    if (ui.step !== 'menu') return;
+    ui.panel = ui.panel === 'skills' ? null : 'skills';
+    render();
+  });
+  document.getElementById('btn-skills-close').addEventListener('click', function () {
+    ui.panel = null;
+    render();
+  });
+  // 임무 바를 누르면 아래 정보 칸에 전체 문장 / 행동 줄을 누르면 행동 중 인물의 자세한 정보
+  document.getElementById('objective').addEventListener('click', function () {
+    ui.inspect = ui.inspect === 'objective' ? null : 'objective';
+    render();
+  });
+  document.getElementById('info').addEventListener('click', function () {
+    this.classList.toggle('more');
+    render();
+  });
+  document.getElementById('actor').addEventListener('click', function (ev) {
+    if (ev.target.closest('button') || !actorUnit()) return;
+    ui.inspect = ui.inspect === 'actor' ? null : 'actor';
     render();
   });
 
