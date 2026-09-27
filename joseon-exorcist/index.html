@@ -149,7 +149,11 @@
     transform: translate(calc(50% - var(--fx, 50%)), calc(50% - var(--fy, 50%))) scale(var(--z, 1));
     transform-origin: var(--fx, 50%) var(--fy, 50%);
   }
-  .portrait .art img { object-fit: cover; }
+  .art.cover img { object-fit: cover; }     /* 플레이어 초상: 얼굴 중심 확대 */
+  .art.contain img { object-fit: contain; } /* NPC·적: 전투 그림 전체를 원래 비율로 (과도한 확대 없음) */
+  /* ART-PHASE-B-01 (5장만): 정보 조회 카드의 인물 썸네일 — 한지색 카드 위계를 해치지 않게 얇은 테두리 */
+  #info .face.pic { position: relative; overflow: hidden; flex: none; width: 36px; height: 36px; border-radius: 6px;
+    background: var(--ink-800); border: 1px solid var(--paper-700); }
   .unit.has-art .hpbar { z-index: 2; background: rgba(21, 20, 17, .8); }
   .unit.has-art .badge { z-index: 2; }
   /* 그림 뒤 바탕은 옅게 (테두리 색은 그대로): 적갈 바탕에 인물이 탁해 보이지 않게 */
@@ -4213,19 +4217,32 @@ var Core = (function () {
   };
   var artFailed = {};
   function artFor(u, kind) {
-    var a = chapterId === ART_CHAPTER && ART[u.type];
+    return artForType(u.type, kind);
+  }
+  function artForType(type, kind) {
+    var a = chapterId === ART_CHAPTER && ART[type];
     var src = a && a[kind];
     return src && !artFailed[src] ? src : null;
   }
-  function artBox(src, crop, alt) {
-    var box = el('span', 'art');
+  // ART-PHASE-B-01: 대사 화자 이름 → 그림 (5장만). 목록에 없는 화자는 기존 이모지
+  var ART_BY_WHO = { '윤무겸': 'yoon', '한결': 'hangyeol', '소운': 'soun', '여울': 'yeoul',
+    '실종된 관리': 'official', '관리': 'official', '장부 운반자': 'runner', '관군': 'gwangun' };
+  // 인물 그림 상자: 플레이어는 초상(얼굴 중심, 행동 중 패널과 같은 crop) / NPC·적은 전투 그림을 확대 없이 contain. 없으면 null
+  function faceArt(type, alt, onFail) {
+    var portrait = artForType(type, 'portrait');
+    if (portrait) return artBox(portrait, ART[type].face, alt, 'cover', onFail);
+    var battle = artForType(type, 'battle');
+    return battle ? artBox(battle, [50, 50, 1], alt, 'contain', onFail) : null;
+  }
+  function artBox(src, crop, alt, fit, onFail) {
+    var box = el('span', 'art' + (fit ? ' ' + fit : ''));
     var img = document.createElement('img');
     img.alt = alt;
     img.draggable = false;
     img.style.setProperty('--fx', crop[0] + '%');
     img.style.setProperty('--fy', crop[1] + '%');
     img.style.setProperty('--z', crop[2]);
-    img.onerror = function () { artFailed[src] = true; render(); }; // 게임은 멈추지 않고 이모지로
+    img.onerror = function () { artFailed[src] = true; (onFail || render)(); }; // 게임·대사는 멈추지 않고 이모지로
     img.src = src;
     box.appendChild(img);
     return box;
@@ -4422,7 +4439,7 @@ var Core = (function () {
     if (u) {
       box.className = '';
       var portrait = artFor(u, 'portrait');
-      if (portrait) face.appendChild(artBox(portrait, ART[u.type].face, u.name)); // 5장: 초상 (실패하면 이모지)
+      if (portrait) face.appendChild(artBox(portrait, ART[u.type].face, u.name, 'cover')); // 5장: 초상 (실패하면 이모지)
       else face.textContent = u.emoji;
       face.dataset.unit = u.id;
       name.appendChild(el('span', 'lead', '행동 중'));
@@ -4607,7 +4624,10 @@ var Core = (function () {
     box.hidden = !u || !u.alive;
     if (box.hidden) return;
     box.innerHTML = '';
-    box.appendChild(el('div', 'face', u.emoji));
+    var pic = faceArt(u.type, u.name); // 5장: 인물 썸네일 (실패하면 다시 그려 이모지로)
+    var faceEl = el('div', pic ? 'face pic' : 'face', pic ? undefined : u.emoji);
+    if (pic) faceEl.appendChild(pic);
+    box.appendChild(faceEl);
     var text = el('div');
     var who = { ally: u.guest ? '아군 (객장)' : '아군', enemy: u.entityType === 'HUMAN' ? '적대 인간' : '귀물', neutral: '중립' }[u.side];
     var head = u.id === (actor && actor.id) ? infoHead(u.name + ' 자세히', '행동 중') : infoHead(u.name + ' 정보 · ' + who);
@@ -5329,6 +5349,16 @@ var Core = (function () {
 
   // 대사를 한 줄씩 보여 주고, 다 넘기면 done 을 부른다. 그동안 맵 입력은 잠근다.
   // 줄 대신 { pause: 밀리초, run: 함수 } 를 넣으면 연출을 돌리고 그 시간 동안 기다린다.
+  // 대사 초상: 5장은 화자 그림 (72×72 그대로), 매핑에 없거나 그림 실패면 기존 이모지. 대사 진행은 막지 않는다
+  function renderSceneFace(line) {
+    var face = document.getElementById('scene-face');
+    face.textContent = '';
+    var pic = faceArt(ART_BY_WHO[line.who], line.who, function () {
+      if (face.contains(pic)) face.textContent = line.face; // 아직 같은 줄이면 이모지로 바꾼다
+    });
+    if (pic) face.appendChild(pic);
+    else face.textContent = line.face;
+  }
   function playScene(lines, done) {
     var scene = document.getElementById('scene');
     var i = 0;
@@ -5353,7 +5383,7 @@ var Core = (function () {
         clearTimeout(toastTimer);
         toastTimer = setTimeout(nextToast, 300);
       }
-      document.getElementById('scene-face').textContent = line.face;
+      renderSceneFace(line);
       document.getElementById('scene-who').textContent = line.who;
       document.getElementById('scene-line').textContent = line.text;
       scene.hidden = false;
