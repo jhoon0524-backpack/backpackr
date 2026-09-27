@@ -4208,11 +4208,13 @@ var Core = (function () {
 
   // ── 실제 아트 (ART-PHASE-A-01 5장 · C-01 1장, 나머지 장은 이모지 그대로). assets/ 의 개별 파일만 쓴다 ──
   // crop = [가로 중심 %, 세로 중심 %, 확대] — 원본은 자르지 않고 CSS 로만 맞춘다. 불러오기 실패하면 이모지로 돌아간다
-  // 장마다 그림을 쓰는 유닛 종류 (ART-PHASE-C-01: 1장 · C-02: 2장 추가). 목록에 없는 장·종류는 이모지 그대로 (3~4장)
+  // 장마다 그림을 쓰는 유닛 종류 (ART-PHASE-C-01: 1장 · C-02: 2장 · C-03: 3~4장 추가). 목록에 없는 종류는 이모지 그대로
   var ART_ALLOW = {
     ch1: ['yoon', 'hangyeol', 'soun', 'yeoul', 'dallae', 'gwangun', 'dokkaebi', 'jangsan', 'bulgasari', 'heuklin'],
     ch2: ['yoon', 'hangyeol', 'soun', 'yeoul', 'gwangun', 'munyeo', 'dokkaebi_p', 'jangsan_p', 'dallae_boss',
       'dallae'], // 'dallae' = 2장 대사 화자 달래의 초상
+    ch3: ['yoon', 'hangyeol', 'soun', 'yeoul', 'gwangun', 'seonang', 'wongwi'],
+    ch4: ['yoon', 'hangyeol', 'soun', 'yeoul', 'gwangun', 'wongwi_b', 'gwihwa', 'dosa'],
     ch5: ['yoon', 'hangyeol', 'soun', 'yeoul', 'gwangun', 'official', 'runner', 'gwihwa']
   };
   var TOKEN_CROP = [50, 50, 1.42]; // 전투 토큰: 둘레 여백을 줄여 인물이 테두리 안을 채우게
@@ -4235,7 +4237,12 @@ var Core = (function () {
     munyeo: { battle: 'assets/enemies/shindang_munyeo_battle.webp', crop: [50, 50, 1] },
     dallae_boss: { battle: 'assets/characters/dallae_battle.webp', portrait: 'assets/characters/dallae_portrait.webp', face: [53, 47, 1.6], crop: [50, 50, 1] },
     dokkaebi_p: { battle: 'assets/enemies/dokkaebi_battle.webp', crop: [50, 50, 1], purified: true },
-    jangsan_p: { battle: 'assets/enemies/jangsan_battle.webp', crop: [50, 50, 1], purified: true }
+    jangsan_p: { battle: 'assets/enemies/jangsan_battle.webp', crop: [50, 50, 1], purified: true },
+    // ART-PHASE-C-03 (3~4장): 새 그림 3개 (서낭신·원귀·도문 술사). 4장 원귀는 3장과 같은 파일, 귀화는 5장 파일 그대로
+    seonang: { battle: 'assets/enemies/seonang_spirit.webp', crop: [50, 50, 1] },
+    wongwi: { battle: 'assets/enemies/wongwi_battle.webp', crop: [50, 50, 1] },
+    wongwi_b: { battle: 'assets/enemies/wongwi_battle.webp', crop: [50, 50, 1] },
+    dosa: { battle: 'assets/npcs/domun_sorcerer.webp', crop: [50, 50, 1] }
   };
   var artFailed = {};
   function artFor(u, kind) {
@@ -4249,7 +4256,8 @@ var Core = (function () {
   // ART-PHASE-B-01: 대사 화자 이름 → 그림 (그 장에서 허용된 종류만). 목록에 없는 화자는 기존 이모지
   var ART_BY_WHO = { '윤무겸': 'yoon', '한결': 'hangyeol', '소운': 'soun', '여울': 'yeoul',
     '실종된 관리': 'official', '관리': 'official', '장부 운반자': 'runner', '관군': 'gwangun', '달래': 'dallae',
-    '흑린': 'heuklin' }; // ART-POLISH-C-01: 흑린 대사 = 기존 전투 그림 (흑린은 1장 허용 목록에만 있어 1장에서만 보인다)
+    '흑린': 'heuklin', // ART-POLISH-C-01: 흑린 대사 = 기존 전투 그림 (흑린은 1장 허용 목록에만 있어 1장에서만 보인다)
+    '서낭신': 'seonang', '도문 술사': 'dosa' }; // ART-PHASE-C-03: 3장 서낭신 · 4장 도문 술사 대사 = 전투 그림
   // 인물 그림 상자: 플레이어는 초상(얼굴 중심, 행동 중 패널과 같은 crop) / NPC·적은 전투 그림을 확대 없이 contain. 없으면 null
   function faceArt(type, alt, onFail) {
     var portrait = artForType(type, 'portrait');
