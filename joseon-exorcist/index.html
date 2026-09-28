@@ -89,7 +89,8 @@
   .t-spring { background: var(--spring); }
   /* ENV-PHASE-A (1장만): 지형 칸 배경 그림. 그림이 없거나 실패하면 위 지형 색이 그대로 보인다 */
   .cell.env-ch1, .cell.env-ch2, .cell.env-ch3, .cell.env-ch4 { background-size: cover; background-position: center; background-repeat: no-repeat; }
-  .cell.env-ch1.t-rock .mark, .cell.env-ch2.t-rock .mark, .cell.env-ch3.t-rock .mark, .cell.env-ch4.t-rock .mark { opacity: .2; } /* 그림 속 집·바위·절벽과 🛖 이 겹쳐 보여 D 표식만 조금 옅게 (숨기지 않음). 🏮 💧 🌲 는 그대로 */
+  .cell.env-ch1.t-rock .mark, .cell.env-ch2.t-rock .mark, .cell.env-ch3.t-rock .mark { opacity: .2; } /* 그림 속 집·바위·절벽과 🛖 이 겹쳐 보여 D 표식만 조금 옅게 (숨기지 않음). 🏮 💧 🌲 는 그대로 */
+  .cell.env-ch4.t-rock .mark { opacity: .1; filter: grayscale(1) brightness(.6); } /* 4장: 🛖 의 주황 창이 봉인등 빛과 겹쳐서 색을 빼고 더 옅게 (그림 실패 대비 보조 표시로만 남김) */
   /* ENV-POLISH-A (1장 환경 칸만): 흙 그림 위에서도 이동 범위가 보이게 조금 진하게 — 공격(.38 · 주홍 2px)보다는 약하게 */
   .cell.env-ch1.hl-move::after { background: rgba(126, 156, 176, .35); box-shadow: inset 0 0 0 1px rgba(150, 182, 202, .72); }
   /* 🏮 💧 가 그림에 묻히지 않게 (표식·배경 상자는 그대로, 진하기와 그림자만) */
@@ -4264,6 +4265,10 @@ var Core = (function () {
         if (env) {
           cell.className += ' env-' + chapterId;
           cell.style.backgroundImage = 'url(' + env + ')';
+        }
+        if (env && env === ENV_ART.ch4.hall) { // 4장 본당 8칸: 같은 그림을 칸마다 반복하지 않고 4×2 에 한 장으로 펼쳐 칸마다 제 조각을 보인다
+          cell.style.backgroundSize = '400% 200%';
+          cell.style.backgroundPosition = ((c - 2) * 100 / 3).toFixed(2) + '% ' + (r - 2) * 100 + '%';
         }
         cell.dataset.r = r;
         cell.dataset.c = c;
