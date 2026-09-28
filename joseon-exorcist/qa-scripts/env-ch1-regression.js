@@ -140,17 +140,17 @@ const hlAfter = (p, sel) => p.evaluate((sel) => { const c = document.querySelect
   rec('fallback', '환경 그림 실패 → 기존 지형 색 · 유닛 그림 그대로 · 턴 진행 · 팝업 없음', new Set(fb).size >= 4 && (await f.p.evaluate(() => document.querySelectorAll('#board .unit .art img').length)) > 0 && t1 === t0 + 1 && !(await f.p.isVisible('#ask')), [...new Set(fb)].join(' ') + ' turn ' + t0 + '→' + t1);
   rec('fallback', '스크립트 오류 없음', f.errs.every((e) => /Failed to load resource|ERR_FAILED/.test(e)));
   await f.b.close();
-  // 다른 장: 자기 장 환경 그림만 (2장 ch2 7개 · 3장 ch3 7개 · 4장 ch4 6개 · 5장 없음) · 1장 전용 보정(이동 강조 · 🏮💧 그림자)이 번지지 않음
+  // 다른 장: 자기 장 환경 그림만 (2장 ch2 7개 · 3장 ch3 7개 · 4장 ch4 6개 · 5장 ch5 7개) · 1장 전용 보정(이동 강조 · 🏮💧 그림자)이 번지지 않음
   // (3장은 ENV-PHASE-C 에서 서낭당 🏮 에만 같은 그림자를 따로 허용받았다)
   for (const ch of ['ch2', 'ch3', 'ch4', 'ch5']) {
     const x = await page(NEW); await start(x.p, ch);
-    const e = await x.p.evaluate(() => ({ cells: document.querySelectorAll('#board .cell').length, ch1: document.querySelectorAll('#board .cell.env-ch1').length, ch2: document.querySelectorAll('#board .cell.env-ch2').length, ch3: document.querySelectorAll('#board .cell.env-ch3').length, ch4: document.querySelectorAll('#board .cell.env-ch4').length, bg: [...document.querySelectorAll('#board .cell')].filter((c) => c.style.backgroundImage).length }));
+    const e = await x.p.evaluate(() => ({ cells: document.querySelectorAll('#board .cell').length, ch1: document.querySelectorAll('#board .cell.env-ch1').length, ch2: document.querySelectorAll('#board .cell.env-ch2').length, ch3: document.querySelectorAll('#board .cell.env-ch3').length, ch4: document.querySelectorAll('#board .cell.env-ch4').length, ch5: document.querySelectorAll('#board .cell.env-ch5').length, bg: [...document.querySelectorAll('#board .cell')].filter((c) => c.style.backgroundImage).length }));
     const envReq = [...new Set(x.reqs.filter((u) => /^environment\//.test(u)))];
     const gm = await hlAfter(x.p, '#board .cell.hl-move');
     const shadow = await x.p.evaluate((ch) => [...document.querySelectorAll('#board .mark')].some((m) => getComputedStyle(m).textShadow !== 'none' && !(ch === 'ch3' && m.closest('.cell').classList.contains('t-shrine'))), ch);
-    const has = ch === 'ch2' || ch === 'ch3' || ch === 'ch4', n = ch === 'ch4' ? 6 : has ? 7 : 0;
-    const own = has ? envReq.length === n && envReq.every((u) => u.indexOf('environment/' + ch + '/') === 0) && e[ch] === e.cells && e.bg === e.cells && ['ch1', 'ch2', 'ch3', 'ch4'].filter((k) => k !== ch).every((k) => e[k] === 0)
-      : envReq.length === 0 && e.ch1 === 0 && e.ch2 === 0 && e.ch3 === 0 && e.ch4 === 0 && e.bg === 0;
+    const has = ch === 'ch2' || ch === 'ch3' || ch === 'ch4' || ch === 'ch5', n = ch === 'ch4' ? 6 : has ? 7 : 0;
+    const own = has ? envReq.length === n && envReq.every((u) => u.indexOf('environment/' + ch + '/') === 0) && e[ch] === e.cells && e.bg === e.cells && ['ch1', 'ch2', 'ch3', 'ch4', 'ch5'].filter((k) => k !== ch).every((k) => e[k] === 0)
+      : envReq.length === 0 && e.ch1 === 0 && e.ch2 === 0 && e.ch3 === 0 && e.ch4 === 0 && e.ch5 === 0 && e.bg === 0;
     rec('장 구분', ch + (has ? ': ' + ch.slice(2) + '장 환경 그림(' + ch + '/)만 요청 · 모든 칸 env-' + ch + ' · 다른 장 환경 섞이지 않음' : ': 환경 그림 요청 0 · env 클래스 0 (아직 환경 없는 장)'), own, JSON.stringify(e) + ' / 요청 ' + (envReq.join(',') || '없음'));
     rec('장 구분', ch + ': 1장 전용 보정 없음 — 이동 강조 전역값 · 지형 표식 그림자 없음' + (ch === 'ch3' ? ' (3장 서낭당 🏮 제외)' : ''), gm === hlMoveOld && !shadow, (gm || '이동 강조 없음') + ' / 그림자 ' + shadow);
     await x.b.close();

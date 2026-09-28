@@ -88,9 +88,9 @@
   .t-shrine { background: var(--shrine); }
   .t-spring { background: var(--spring); }
   /* ENV-PHASE-A (1장만): 지형 칸 배경 그림. 그림이 없거나 실패하면 위 지형 색이 그대로 보인다 */
-  .cell.env-ch1, .cell.env-ch2, .cell.env-ch3, .cell.env-ch4 { background-size: cover; background-position: center; background-repeat: no-repeat; }
+  .cell.env-ch1, .cell.env-ch2, .cell.env-ch3, .cell.env-ch4, .cell.env-ch5 { background-size: cover; background-position: center; background-repeat: no-repeat; }
   .cell.env-ch1.t-rock .mark, .cell.env-ch2.t-rock .mark, .cell.env-ch3.t-rock .mark { opacity: .2; } /* 그림 속 집·바위·절벽과 🛖 이 겹쳐 보여 D 표식만 조금 옅게 (숨기지 않음). 🏮 💧 🌲 는 그대로 */
-  .cell.env-ch4.t-rock .mark { opacity: .1; filter: grayscale(1) brightness(.6); } /* 4장: 🛖 의 주황 창이 봉인등 빛과 겹쳐서 색을 빼고 더 옅게 (그림 실패 대비 보조 표시로만 남김) */
+  .cell.env-ch4.t-rock .mark, .cell.env-ch5.t-rock .mark { opacity: .1; filter: grayscale(1) brightness(.6); } /* 4·5장: 🛖 의 주황 창이 봉인등·성문·운반자 신호와 겹쳐서 색을 빼고 더 옅게 (그림 실패 대비 보조 표시로만 남김) */
   /* ENV-POLISH-A (1장 환경 칸만): 흙 그림 위에서도 이동 범위가 보이게 조금 진하게 — 공격(.38 · 주홍 2px)보다는 약하게 */
   .cell.env-ch1.hl-move::after { background: rgba(126, 156, 176, .35); box-shadow: inset 0 0 0 1px rgba(150, 182, 202, .72); }
   /* 🏮 💧 가 그림에 묻히지 않게 (표식·배경 상자는 그대로, 진하기와 그림자만) */
@@ -106,6 +106,7 @@
   /* 5장 성문: 등장 전에는 조용한 먹색 + 표찰, 운반자가 향하는 성문만 주홍 테두리 */
   .t-escape.gate { background: var(--gate); box-shadow: inset 0 0 0 1px rgba(117, 106, 88, .75); }
   .t-escape.gate .mark { opacity: .5; }
+  .cell.env-ch5.t-escape.gate { background-size: cover; background-position: center; background-repeat: no-repeat; } /* 5장 성문 그림: 위 .gate 의 background 줄임말이 그림 크기·위치를 되돌리지 않게 (색·테두리는 그대로) */
   /* 5장 성문 표찰 "북문 / 탈출" — 운반자 등장 전에는 조용히, 도주 방향이 드러난 성문만 약하게 강조 */
   .gate-plaque {
     position: absolute; left: 50%; transform: translateX(-50%); z-index: 0; pointer-events: none; white-space: nowrap;
@@ -4208,6 +4209,18 @@ var Core = (function () {
       hall: 'assets/environment/ch4/env_block_hall.webp',
       lamp: 'assets/environment/ch4/env_lamp_stone.webp',
       door: 'assets/environment/ch4/env_point_door.webp'
+    },
+    // 5장 큰고을: 기본은 골목(.)·민가(D)·성문(E). 큰길·성벽·관청·객사 칸은 아래 ch5Env 가 고른다
+    ch5: {
+      floor: 'assets/environment/ch5/env_city_alley.webp',
+      floorAlt: 'assets/environment/ch5/env_city_alley.webp',
+      block: 'assets/environment/ch5/env_block_town.webp',
+      blockAlt: 'assets/environment/ch5/env_block_town.webp',
+      escape: 'assets/environment/ch5/env_city_gate.webp',
+      road: 'assets/environment/ch5/env_city_road.webp',
+      wall: 'assets/environment/ch5/env_city_wall.webp',
+      office: 'assets/environment/ch5/env_block_office.webp',
+      gaeksa: 'assets/environment/ch5/env_point_gaeksa.webp'
     }
   };
   function envArtForCell(ch, t, r, c) {
@@ -4246,6 +4259,19 @@ var Core = (function () {
     return null;
   }
 
+  // ENV-PHASE-E: 5장 큰길 = 3행 전체 + 북문 진입부(1~2행 3~4열), 나머지 길은 골목 (뒷골목·관리 칸도 골목 — 정답을 먼저 말하지 않게).
+  // 0·9행 D = 성벽, 객사 옆 3칸·가운데 4칸 D = 관청, 객사 조사 칸 = 객사. 좌표·지점 데이터는 그대로, 그림만
+  var CH5_OFFICE = ['1,1', '2,1', '2,2', '4,3', '4,4', '5,3', '5,4'];
+  function ch5Env(t, r, c) {
+    if (chapterId !== 'ch5') return null;
+    var e = ENV_ART.ch5;
+    if ((state.points || []).some(function (pt) { return pt.id === 'gaeksa' && pt.r === r && pt.c === c; })) return e.gaeksa;
+    if (t === '.' && (r === 3 || (r >= 1 && r <= 2 && c >= 3 && c <= 4))) return e.road;
+    if (t === 'D' && (r === 0 || r === state.rows - 1)) return e.wall;
+    if (t === 'D' && CH5_OFFICE.indexOf(r + ',' + c) !== -1) return e.office;
+    return null;
+  }
+
   // withEnv: 장을 시작할 때만 배경 그림 (첫 화면 뒤에 숨은 판은 그림을 부르지 않는다)
   function buildBoard(withEnv) {
     board.innerHTML = '';
@@ -4260,7 +4286,7 @@ var Core = (function () {
         var t = Core.terrainAt(state, r, c);
         var cell = el('div', 'cell ' + TERRAIN_CLASS[t]);
         var env = withEnv && envArtForCell(chapterId, t, r, c);
-        if (env) env = ch3PointEnv(r, c) || ch4Env(t, r, c) || env;
+        if (env) env = ch3PointEnv(r, c) || ch4Env(t, r, c) || ch5Env(t, r, c) || env;
         if (env && (ch3PointAt(r, c) || {}).id === 'dolmudeom') cell.className += ' env-trace-dim'; // 돌무덤: 가운데 빛만 누름 (위 CSS)
         if (env) {
           cell.className += ' env-' + chapterId;
