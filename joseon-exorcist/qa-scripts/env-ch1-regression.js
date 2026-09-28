@@ -1,7 +1,7 @@
 // 1장 환경 회귀 (ENV-PHASE-A · POLISH-A · POLISH-A2 기준, ENV-PHASE-B 뒤 현행화) — 헤드리스 크롬 360×740 (DPR 2)
 // 확인: 환경 작업 전(eb2c703) 대비 맵·통과 64칸·M/K·판 크기·유닛 크기 동일 / 1장 칸 그림 규칙 / 이동·공격 강조 / 표식 /
 //       환경 타일 이음새 (기획자 확정 기준: 실제 게임 표시 크기에서 인위적 반복 세로 이음새가 보이지 않는가 — lib/seamcheck.js) /
-//       그림 실패 fallback / 장마다 자기 장 환경 그림만 요청 (1장 ch1 · 2장 ch2 · 3~5장 없음, 서로 섞이지 않음)
+//       그림 실패 fallback / 장마다 자기 장 환경 그림만 요청 (1장 ch1 · 2장 ch2 · 3장 ch3 · 4~5장 없음, 서로 섞이지 않음)
 // 실행: 1) joseon-exorcist 폴더를 http 로 띄운다 (기본 http://127.0.0.1:8765/index.html, NEW_URL 로 바꿈)
 //       2) 환경 작업 전 기준판: `git show eb2c703:joseon-exorcist/index.html` 을 빈 폴더에 index.html 로 두고 assets 를 연결해 띄운다
 //          (기본 http://127.0.0.1:8766/index.html, OLD_URL 로 바꿈)
@@ -140,17 +140,19 @@ const hlAfter = (p, sel) => p.evaluate((sel) => { const c = document.querySelect
   rec('fallback', '환경 그림 실패 → 기존 지형 색 · 유닛 그림 그대로 · 턴 진행 · 팝업 없음', new Set(fb).size >= 4 && (await f.p.evaluate(() => document.querySelectorAll('#board .unit .art img').length)) > 0 && t1 === t0 + 1 && !(await f.p.isVisible('#ask')), [...new Set(fb)].join(' ') + ' turn ' + t0 + '→' + t1);
   rec('fallback', '스크립트 오류 없음', f.errs.every((e) => /Failed to load resource|ERR_FAILED/.test(e)));
   await f.b.close();
-  // 다른 장: 자기 장 환경 그림만 (2장 ch2 · 3~5장 없음) · 1장 전용 보정(이동 강조 · 🏮💧 그림자)이 번지지 않음
+  // 다른 장: 자기 장 환경 그림만 (2장 ch2 7개 · 3장 ch3 7개 · 4~5장 없음) · 1장 전용 보정(이동 강조 · 🏮💧 그림자)이 번지지 않음
+  // (3장은 ENV-PHASE-C 에서 서낭당 🏮 에만 같은 그림자를 따로 허용받았다)
   for (const ch of ['ch2', 'ch3', 'ch4', 'ch5']) {
     const x = await page(NEW); await start(x.p, ch);
-    const e = await x.p.evaluate(() => ({ cells: document.querySelectorAll('#board .cell').length, ch1: document.querySelectorAll('#board .cell.env-ch1').length, ch2: document.querySelectorAll('#board .cell.env-ch2').length, bg: [...document.querySelectorAll('#board .cell')].filter((c) => c.style.backgroundImage).length }));
+    const e = await x.p.evaluate(() => ({ cells: document.querySelectorAll('#board .cell').length, ch1: document.querySelectorAll('#board .cell.env-ch1').length, ch2: document.querySelectorAll('#board .cell.env-ch2').length, ch3: document.querySelectorAll('#board .cell.env-ch3').length, bg: [...document.querySelectorAll('#board .cell')].filter((c) => c.style.backgroundImage).length }));
     const envReq = [...new Set(x.reqs.filter((u) => /^environment\//.test(u)))];
     const gm = await hlAfter(x.p, '#board .cell.hl-move');
-    const shadow = await x.p.evaluate(() => [...document.querySelectorAll('#board .mark')].some((m) => getComputedStyle(m).textShadow !== 'none'));
-    const own = ch === 'ch2' ? envReq.length === 7 && envReq.every((u) => /^environment\/ch2\//.test(u)) && e.ch2 === e.cells && e.bg === e.cells && e.ch1 === 0
-      : envReq.length === 0 && e.ch1 === 0 && e.ch2 === 0 && e.bg === 0;
-    rec('장 구분', ch + (ch === 'ch2' ? ': 2장 환경 그림(ch2/)만 요청 · 모든 칸 env-ch2 · 1장 환경 섞이지 않음' : ': 환경 그림 요청 0 · env 클래스 0 (아직 환경 없는 장)'), own, JSON.stringify(e) + ' / 요청 ' + (envReq.join(',') || '없음'));
-    rec('장 구분', ch + ': 1장 전용 보정 없음 — 이동 강조 전역값 · 지형 표식 그림자 없음', gm === hlMoveOld && !shadow, (gm || '이동 강조 없음') + ' / 그림자 ' + shadow);
+    const shadow = await x.p.evaluate((ch) => [...document.querySelectorAll('#board .mark')].some((m) => getComputedStyle(m).textShadow !== 'none' && !(ch === 'ch3' && m.closest('.cell').classList.contains('t-shrine'))), ch);
+    const has = ch === 'ch2' || ch === 'ch3', n = has ? 7 : 0;
+    const own = has ? envReq.length === n && envReq.every((u) => u.indexOf('environment/' + ch + '/') === 0) && e[ch] === e.cells && e.bg === e.cells && ['ch1', 'ch2', 'ch3'].filter((k) => k !== ch).every((k) => e[k] === 0)
+      : envReq.length === 0 && e.ch1 === 0 && e.ch2 === 0 && e.ch3 === 0 && e.bg === 0;
+    rec('장 구분', ch + (has ? ': ' + ch.slice(2) + '장 환경 그림(' + ch + '/)만 요청 · 모든 칸 env-' + ch + ' · 다른 장 환경 섞이지 않음' : ': 환경 그림 요청 0 · env 클래스 0 (아직 환경 없는 장)'), own, JSON.stringify(e) + ' / 요청 ' + (envReq.join(',') || '없음'));
+    rec('장 구분', ch + ': 1장 전용 보정 없음 — 이동 강조 전역값 · 지형 표식 그림자 없음' + (ch === 'ch3' ? ' (3장 서낭당 🏮 제외)' : ''), gm === hlMoveOld && !shadow, (gm || '이동 강조 없음') + ' / 그림자 ' + shadow);
     await x.b.close();
   }
   console.log(`PASS ${R.filter(Boolean).length} FAIL ${R.filter((x) => !x).length}`);
