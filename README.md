@@ -14,4 +14,5 @@
 - `booking/` — 예약 서비스 실험
 - `dropbid/`, `dropbid-mobile/` — 입찰 서비스 실험 (웹 + 네이티브)
 - `agent-starter/` — 에이전트 스타터 실험
+- `knowledge-vault/` — LLM Wiki + Main Vault 지식 관리 템플릿 (옵시디언)
 - `docs/prd/` — 기획 문서
