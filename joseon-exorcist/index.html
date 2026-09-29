@@ -1014,7 +1014,7 @@
   .bar-track b { display: block; height: 100%; background: linear-gradient(180deg, #6fb2e8, #2f74b8); box-shadow: inset 0 0 0 1px #1b3f66; }
   .bar-row.ki .bar-track b { background: linear-gradient(180deg, #c9a44a, #8a6a1e); box-shadow: inset 0 0 0 1px #4e3a0c; }
   .bar-num { font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
-  .bar-note { font-size: 11px; color: #5a4a36; font-weight: 700; }
+  #actor .tr-tag { font-size: 10px; line-height: 1.2; font-weight: 700; color: #5a4a36; }
   .dock-mini { border-radius: 0; background: linear-gradient(180deg, var(--fr-slate-hi), var(--fr-slate)); color: var(--fr-text); border: 1px solid var(--fr-edge); clip-path: var(--fr-notch); }
   /* 명령 버튼: 금속 테 판 + 아이콘. 공격할 수 있을 때만 붉게 */
   .btns button {
@@ -1068,6 +1068,66 @@
   .unit .kind.human { border-color: var(--human-line); border-radius: 3px; } /* 적대 인간은 각진 네모 (테두리 모양 규칙과 같게) */
   .unit .kind.anomaly { border-color: var(--anomaly-line); }
   .unit .kind.neutral { border-color: var(--neutral-line); }
+  /* UI-FRAME 2단계 (기획자 확정 2026-09-29): 한 장의 기록화 — 위 두루마리 · 가운데 전장 · 아래 먹빛 목재 명령판이 틈 없이 이어진다.
+     유닛은 네모 상자 없이 맵 위에 서고 (발밑 그림자 · 세력 아이콘 · HP 막대), 선택은 황금 모서리 */
+  :root { --ink0: #0c0a08; --wood: linear-gradient(180deg, #221c16 0%, #16120e 100%); --paper-line: rgba(214, 196, 150, .45); }
+  body { background: radial-gradient(ellipse at 50% 30%, #1f1b17 0%, #0b0a09 70%); }
+  #app { padding: 6px 6px 8px; }
+  /* 위: 두루마리 (양끝 나무 축 · 먹선 위아래) */
+  #banner { margin: 0 6px; height: 88px; border: none; border-top: 2px solid var(--ink0); border-bottom: 2px solid var(--ink0);
+    box-shadow: inset 0 1px 0 var(--paper-line), inset 0 -1px 0 var(--paper-line), 0 6px 10px rgba(0, 0, 0, .55); z-index: 2; }
+  #banner::before, #banner::after { content: ""; position: absolute; top: -5px; bottom: -5px; width: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, #120e0a, #4a3a2a 45%, #1a140f); box-shadow: 0 2px 4px rgba(0, 0, 0, .7); }
+  #banner::before { left: -7px; } #banner::after { right: -7px; }
+  #banner .lore-open { width: 28px; height: 34px; border: 1px solid #3a3026; background: #1c1814; box-shadow: none; font-size: 14px; }
+  /* 전장: 두루마리 바로 아래에 붙인다 (둥근 모서리·금테 없음) */
+  #board { margin-top: -2px; border-radius: 0; box-shadow: 0 0 0 2px var(--ink0), 0 0 0 3px rgba(214, 196, 150, .18); }
+  /* 유닛: 네모 상자 없이 그림이 맵 위에 선다. 발밑 그림자 + HP 막대 + 세력 아이콘으로 읽는다 */
+  .unit, .unit.f-bs, .unit.f-guest, .unit.f-enemy, .unit.k-human, .unit.f-neutral, .unit.has-art.k-human, .unit.has-art.f-bs, .unit.has-art.f-guest, .unit.has-art.k-boss {
+    border-color: transparent; background: transparent; border-radius: 0; }
+  .unit::before { content: ""; position: absolute; left: 8%; right: 8%; bottom: -1px; height: 26%; border-radius: 50%; z-index: 0;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, .6) 0%, rgba(0, 0, 0, 0) 70%); }
+  .unit .art { overflow: visible; inset: -34% -14% -2% -14%; } /* 발은 칸 안, 머리는 위 칸으로 살짝 — 맵 위에 선 인물 */
+  .unit .art img { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .8)); }
+  .unit.selected, .unit.acting { box-shadow: none; }
+  .unit.selected::after, .unit.acting::after { content: ""; position: absolute; inset: -4px; z-index: 5; pointer-events: none;
+    background:
+      linear-gradient(#e8c66a, #e8c66a) left top / 9px 2px no-repeat, linear-gradient(#e8c66a, #e8c66a) left top / 2px 9px no-repeat,
+      linear-gradient(#e8c66a, #e8c66a) right top / 9px 2px no-repeat, linear-gradient(#e8c66a, #e8c66a) right top / 2px 9px no-repeat,
+      linear-gradient(#e8c66a, #e8c66a) left bottom / 9px 2px no-repeat, linear-gradient(#e8c66a, #e8c66a) left bottom / 2px 9px no-repeat,
+      linear-gradient(#e8c66a, #e8c66a) right bottom / 9px 2px no-repeat, linear-gradient(#e8c66a, #e8c66a) right bottom / 2px 9px no-repeat;
+    filter: drop-shadow(0 0 3px rgba(232, 198, 106, .8)); }
+  .unit.k-target { box-shadow: none; }
+  .unit.k-target::before { left: -6%; right: -6%; top: -6%; bottom: -6%; height: auto; background: radial-gradient(circle, rgba(226, 182, 74, .18) 0%, rgba(226, 182, 74, 0) 70%); border: 2px solid #e2b64a; box-shadow: 0 0 8px 2px rgba(226, 182, 74, .75), inset 0 0 6px rgba(226, 182, 74, .5); } /* 임무 대상(운반자·관리): 금빛 원 */
+  /* 아래: 먹빛 목재 명령판 한 장 — 초상 두루마리 + 명령 */
+  #panel { margin: -2px 0 0; padding: 18px 8px 8px; gap: 6px; background: var(--wood);
+    border-top: 2px solid var(--ink0); box-shadow: inset 0 1px 0 rgba(214, 196, 150, .22), 0 -4px 10px rgba(0, 0, 0, .5); }
+  #actor, #actor.idle, #actor.enemy { margin: 0 6px; overflow: visible; min-height: 74px; border: none; border-top: 2px solid var(--ink0); border-bottom: 2px solid var(--ink0);
+    box-shadow: inset 0 1px 0 var(--paper-line), inset 0 -1px 0 var(--paper-line); padding-left: 118px; }
+  #actor .portrait { top: -20px; bottom: -2px; width: 100px; }
+  #actor .actor-name .lead { left: 94px; }
+  #actor .actor-name { font-size: 19px; }
+  /* 명령: 얇은 금속선 판 네 개 [공격][기술][임무][대기] — 임무는 쓸 수 없을 때 흐리게 자리만 */
+  .btns button { min-height: 40px; clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+    background: linear-gradient(180deg, #27313c 0%, #182028 100%); border: 1px solid rgba(160, 176, 192, .55);
+    box-shadow: inset 0 0 0 1px #0a0d11, inset 0 1px 0 rgba(233, 223, 198, .12); font-size: 15px; font-weight: 700; letter-spacing: .14em; gap: 5px; }
+  .btns button::before { width: 16px; height: 16px; }
+  #menu.btns { gap: 5px; }
+  #btn-attack:not(:disabled) { background: linear-gradient(180deg, #7e2a23 0%, #521812 100%); border-color: rgba(214, 120, 100, .7); }
+  #btn-end { min-height: 34px; font-size: 13px; letter-spacing: .2em; background: linear-gradient(180deg, #1d252e, #12181e); border-color: rgba(120, 136, 152, .45); }
+  #phase-note { background: rgba(0, 0, 0, .25); border-color: rgba(214, 196, 150, .15); }
+  .dev-link { opacity: .6; }
+  #board .cell:has(.unit) { overflow: visible; z-index: 2; } /* 인물 머리가 위 칸으로 넘어가도 잘리지 않게 */
+  /* 기술: 명령 버튼은 그대로 두고 [턴 종료] 자리에 기술 카드가 가로로 펼쳐진다 (둘 이상이면 옆으로 넘김) */
+  #skills { display: grid; grid-auto-flow: column; grid-auto-columns: calc(50% - 3px); grid-template-columns: none; gap: 6px; padding: 0; background: none; border: none; overflow-x: auto; scrollbar-width: none; }
+  #skills::before { content: none; }
+  #skills .skill-row { position: relative; min-height: 50px; grid-template-columns: 30px minmax(0, 1fr); grid-template-rows: auto auto; padding: 5px 6px; row-gap: 1px; }
+  #skills .skill-row::before { width: 30px; height: 30px; grid-row: 1 / 3; background-size: 18px, auto; }
+  #skills .skill-row .sk-main { grid-row: 1 / 3; }
+  #skills .skill-row .sk-name { font-size: 13px; }
+  #skills .skill-row .sk-desc { white-space: normal; font-size: 10px; line-height: 1.25; }
+  #skills .skill-row .sk-cost { position: absolute; top: 5px; right: 6px; grid-column: auto; grid-row: auto; width: auto; font-size: 9px; padding: 0 4px; line-height: 1.5; white-space: nowrap; }
+  @media (min-width: 420px) { #skills .skill-row .sk-desc { white-space: normal; } }
 </style>
 </head>
 <body>
@@ -4803,7 +4863,7 @@ var Core = (function () {
       stats.textContent = 'HP ' + u.hp + ' / ' + u.maxHp + (u.skill ? ' · 기력 ' + u.ki + ' / ' + u.maxKi : '') + (tr ? ' · 수련 ' + tr.name : '');
       bars.appendChild(barRow('HP', u.hp, u.maxHp, 'hp'));
       if (u.skill) bars.appendChild(barRow('기력', u.ki, u.maxKi, 'ki'));
-      if (tr) bars.appendChild(el('div', 'bar-note', '수련 · ' + tr.name));
+      if (tr) bars.appendChild(el('div', 'tr-tag', '수련 · ' + tr.name));
     } else if (state.phase === 'enemy') {
       box.className = 'enemy';
       name.appendChild(el('span', 'lead', '적 차례'));
@@ -5145,7 +5205,7 @@ var Core = (function () {
     var menu = document.getElementById('menu'), panel = document.getElementById('skills');
     if (ui.step !== 'menu') ui.panel = null;
     var open = ui.panel === 'skills';
-    menu.hidden = !menuShown() || open;
+    menu.hidden = !menuShown(); // 기술 패널이 열려도 명령 줄은 그대로 ([기술] 눌림 표시)
     panel.hidden = !open;
     document.getElementById('end-row').hidden = open; // 기술을 고르는 동안은 턴 종료를 치운다 (행동 중 인물 줄은 그대로)
     if (!menuShown()) return;
@@ -5155,8 +5215,10 @@ var Core = (function () {
     var btn = document.getElementById('btn-skills');
     btn.disabled = !rows.length; // 관군은 기술 없음
     btn.setAttribute('aria-pressed', open ? 'true' : 'false');
-    document.getElementById('btn-seal').hidden = !Core.repairablePoint(state, u); // 3장 봉인 칸에 섰을 때만
-    document.getElementById('btn-lamp').hidden = !Core.lightableLamp(state, u); // 4장 꺼진 등 위에 섰을 때만
+    var lamp = !!Core.lightableLamp(state, u); // 4장 꺼진 등 위에 섰을 때만
+    document.getElementById('btn-lamp').hidden = !lamp;
+    document.getElementById('btn-seal').hidden = lamp; // [임무] 자리는 늘 있다 — 3장 봉인 칸에 섰을 때만 누를 수 있다
+    document.getElementById('btn-seal').disabled = !Core.repairablePoint(state, u);
     ['btn-skill', 'btn-control', 'btn-barrier'].forEach(function (id) {
       var b = document.getElementById(id);
       var row = rows.filter(function (x) { return x.id === id; })[0];

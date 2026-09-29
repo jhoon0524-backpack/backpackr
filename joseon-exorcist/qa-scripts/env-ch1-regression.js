@@ -73,8 +73,8 @@ const hlAfter = (p, sel) => p.evaluate((sel) => { const c = document.querySelect
   rec('동일', 'M/K 좌표 동일', before.mk === after.mk, after.mk);
   rec('동일', '판(board) 전체 폭·높이 동일 · 8×8 칸 64개', JSON.stringify(before.board) === JSON.stringify(after.board) && after.cells === 64, JSON.stringify(after.board));
   const ids = Object.keys(before.units);
-  const same = ids.every((id) => after.units[id] && ['w', 'h', 'occ', 'art', 'tf', 'pos'].every((k) => after.units[id][k] === before.units[id][k]));
-  rec('유닛 크기', '유닛 ' + ids.length + '개 전부 폭·높이·칸 점유율·그림 상자·확대값·자리 작업 전후 동일', same && ids.length >= 10, ids.map((id) => id + ' ' + after.units[id].w + '×' + after.units[id].h + ' ' + Math.round(after.units[id].occ * 100) + '%').join(' / '));
+  const same = ids.every((id) => after.units[id] && ['w', 'h', 'occ', 'tf', 'pos'] /* UI-FRAME(2026-09-29): 인물 그림 상자(art)는 머리가 위 칸으로 올라오게 일부러 키움 — 토큰 폭·높이·자리는 그대로 */.every((k) => after.units[id][k] === before.units[id][k]));
+  rec('유닛 크기', '유닛 ' + ids.length + '개 전부 폭·높이·칸 점유율·확대값·자리 작업 전후 동일 (그림 상자는 UI-FRAME 에서 일부러 키움)', same && ids.length >= 10, ids.map((id) => id + ' ' + after.units[id].w + '×' + after.units[id].h + ' ' + Math.round(after.units[id].occ * 100) + '%').join(' / '));
   const typesCovered = ['yoon', 'dallae', 'dokkaebi', 'jangsan', 'bulgasari', 'heuklin'].every((t) => ids.some((id) => id.indexOf(t) === 0));
   rec('유닛 크기', '대표 종류 포함 (아군·달래·도깨비·장산범·불가사리·흑린)', typesCovered);
   // 배경 그림
