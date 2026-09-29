@@ -15,3 +15,4 @@
 - `dropbid/`, `dropbid-mobile/` — 입찰 서비스 실험 (웹 + 네이티브)
 - `agent-starter/` — 에이전트 스타터 실험
 - `docs/prd/` — 기획 문서
+- `docs/raw/`, `docs/wiki/` — 외부 자료 원문(raw)과 우리 기준으로 정제한 노트(wiki)
