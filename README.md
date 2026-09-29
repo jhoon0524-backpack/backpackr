@@ -14,4 +14,5 @@
 - `booking/` — 예약 서비스 실험
 - `dropbid/`, `dropbid-mobile/` — 입찰 서비스 실험 (웹 + 네이티브)
 - `agent-starter/` — 에이전트 스타터 실험
+- `joseon-exorcist/` — 조선 퇴마전, 턴제 전술 게임 1장 전투 (AI 자율 개발 루프로 진행)
 - `docs/prd/` — 기획 문서

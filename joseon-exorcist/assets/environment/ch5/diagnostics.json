@@ -1,0 +1,44 @@
+{
+  "env_city_road.webp": {
+    "left": 41.9,
+    "right": 46.6,
+    "top": 36.6,
+    "bottom": 61.6
+  },
+  "env_city_alley.webp": {
+    "left": 80.6,
+    "right": 60.7,
+    "top": 80.6,
+    "bottom": 57.8
+  },
+  "env_city_wall.webp": {
+    "left": 168.0,
+    "right": 134.6,
+    "top": 176.5,
+    "bottom": 131.5
+  },
+  "env_city_gate.webp": {
+    "left": 141.2,
+    "right": 132.1,
+    "top": 128.4,
+    "bottom": 102.1
+  },
+  "env_block_office.webp": {
+    "left": 88.5,
+    "right": 91.5,
+    "top": 88.9,
+    "bottom": 88.9
+  },
+  "env_block_town.webp": {
+    "left": 59.9,
+    "right": 60.2,
+    "top": 59.9,
+    "bottom": 67.7
+  },
+  "env_point_gaeksa.webp": {
+    "left": 111.3,
+    "right": 115.6,
+    "top": 61.8,
+    "bottom": 102.9
+  }
+}
