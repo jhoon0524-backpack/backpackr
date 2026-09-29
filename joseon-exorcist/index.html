@@ -940,26 +940,146 @@
   .toast.lore small { color: #6b5f48; }
   .toast.lore b small { display: inline; font-size: 12px; margin-left: 4px; }
   @keyframes toast { 0% { opacity: 0; transform: translateY(8px); } 8% { opacity: 1; transform: none; } 88% { opacity: 1; } 100% { opacity: 0; } }
+  /* ── UI-FRAME 전투 화면 틀 (기획자 레퍼런스 2026-09-29, 조조전풍): 위 한지 현판 · 아래 초상 카드 + 금속 테 명령 버튼 ──
+     규칙·자리·조작은 그대로. 한지(바탕)·먹(글씨)·붉은 인장(장 표시·공격)은 청령현 지도·벽사록과 같은 계열 */
+  :root {
+    --fr-ink: #1a1612; --fr-gilt: #8a7a5c; --fr-text: #e9dfc6; --fr-slate: #1c242e; --fr-slate-hi: #2c3744; --fr-edge: #66788a;
+    --fr-parch: linear-gradient(180deg, #ece2c9 0%, #dccdab 100%); --fr-myeongjo: "Nanum Myeongjo", "AppleMyungjo", "Noto Serif KR", serif;
+    --fr-mountain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60' preserveAspectRatio='none'%3E%3Cpath d='M0 60 L18 44 L30 50 L52 28 L70 46 L86 38 L104 52 L128 22 L148 44 L168 32 L200 46 L200 60Z' fill='%233b3326' opacity='.13'/%3E%3Cpath d='M0 60 L28 52 L58 56 L88 45 L118 54 L150 47 L200 56 L200 60Z' fill='%233b3326' opacity='.1'/%3E%3C/svg%3E");
+    --ic-sword: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e9dfc6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 5 9.5 14.5'/%3E%3Cpath d='M19 5l-4 .6M19 5l-.6 4'/%3E%3Cpath d='M7 12.5l4.5 4.5'/%3E%3Cpath d='M8.8 15.2 5 19'/%3E%3C/svg%3E"); --ic-swirl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e9dfc6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4a8 8 0 1 1-7.2 4.5'/%3E%3Cpath d='M12 8.5a3.5 3.5 0 1 1-3.2 2'/%3E%3C/svg%3E"); --ic-scroll: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e9dfc6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8'/%3E%3Cpath d='M7 4a2 2 0 0 0-2 2v1h3'/%3E%3Cpath d='M8 20a2 2 0 0 1-2-2V7'/%3E%3Cpath d='M10 9h5M10 12h5M10 15h3'/%3E%3C/svg%3E"); --ic-hourglass: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e9dfc6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4h10M7 20h10'/%3E%3Cpath d='M8 4c0 5 8 5 8 8s-8 3-8 8M16 4c0 5-8 5-8 8s8 3 8 8'/%3E%3C/svg%3E"); --ic-cycle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e9dfc6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18.5 9A7 7 0 0 0 6 7.5'/%3E%3Cpath d='M5.5 15A7 7 0 0 0 18 16.5'/%3E%3Cpath d='M6 3.5v4h4M18 20.5v-4h-4'/%3E%3C/svg%3E");
+    --ic-bolt: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4eaff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 3 6 13h5l-1 8 7-10h-5z'/%3E%3C/svg%3E"); --ic-vortex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f4eaff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4a8 8 0 1 1-7.2 4.5'/%3E%3Cpath d='M12 8.5a3.5 3.5 0 1 1-3.2 2'/%3E%3Cpath d='M12 12h.01'/%3E%3C/svg%3E"); --ic-ward: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eaf4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 4v10l-7 4-7-4V7z'/%3E%3Cpath d='M12 8v8M8.5 10l7 4M15.5 10l-7 4'/%3E%3C/svg%3E"); --ic-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a2118' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E");
+    --fr-notch: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+  }
+  body { background: radial-gradient(ellipse at 50% 0%, #262a2f 0%, transparent 55%), radial-gradient(ellipse at 50% 100%, #1d2126 0%, transparent 50%), #0e0f11; }
+  /* 위 현판: 높이 고정 (문구가 바뀌어도 맵이 움직이지 않는다) */
+  #banner {
+    position: relative; display: grid; grid-template-columns: 26px minmax(118px, 1fr) minmax(0, auto) 30px; grid-template-rows: auto auto 1fr;
+    column-gap: 8px; height: 92px; max-width: 464px; margin: 0 auto 8px; padding: 7px 8px;
+    background: var(--fr-mountain) right bottom / 70% 60% no-repeat, var(--fr-parch); color: #2a2118;
+    border: 2px solid var(--fr-ink); box-shadow: inset 0 0 0 1px var(--fr-gilt), 0 4px 10px rgba(0, 0, 0, .6);
+  }
+  #banner .bn-main { display: contents; }
+  #banner .ch-tag {
+    grid-row: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    background: linear-gradient(180deg, #9a3027, #6e1f19); color: #f3e3bd; border: 1px solid #4e140f; box-shadow: inset 0 0 0 1px rgba(243, 227, 189, .35);
+    font-family: var(--fr-myeongjo); font-size: 13px; font-weight: 800; line-height: 1.1;
+  }
+  #banner .ch-tag b { font-size: 15px; }
+  #banner .bn-title { grid-column: 2; grid-row: 1; font-family: var(--fr-myeongjo); font-size: 17px; font-weight: 900; letter-spacing: .02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #banner #objective { grid-column: 2; grid-row: 2; margin: 2px 0 0; }
+  #banner #objective { height: auto; max-width: none; padding: 0; gap: 0; background: none; border: none; border-radius: 0; }
+  #banner #objective .obj-tag { display: none; }
+  #banner #objective .obj-goal { font-size: 13px; color: #2a2118; font-family: var(--fr-myeongjo); font-weight: 800; }
+  #banner #objective .obj-status { font-size: 11px; color: #8e2a22; font-weight: 700; }
+  #banner #top { grid-column: 2 / -1; grid-row: 3; align-self: end; justify-content: flex-start; gap: 4px; padding: 0; margin: 0; font-size: 11px; font-weight: 700; color: #5a4a36; letter-spacing: 0; }
+  #banner #top .sep { color: #a0906c; }
+  #banner .bn-steps { grid-column: 3; grid-row: 1 / 3; list-style: none; margin: 0; padding: 0 0 0 8px; border-left: 1px solid rgba(58, 47, 34, .35); display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  #banner .bn-steps { min-width: 0; }
+  #banner .bn-steps li { display: flex; align-items: center; gap: 5px; line-height: 1.2; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  #banner .bn-steps li::before { content: ""; flex: none; width: 12px; height: 12px; box-sizing: border-box; }
+  #banner .bn-steps li.done { color: #4a3d2c; }
+  #banner .bn-steps li.done::before { border: 1.5px solid #2a2118; background: var(--ic-check) center / 11px no-repeat; }
+  #banner .bn-steps li.now { color: #2a2118; }
+  #banner .bn-steps li.now::before { border-radius: 50%; border: 2px solid #b8872e; box-shadow: 0 0 4px rgba(184, 135, 46, .7); }
+  #banner .bn-steps li.later { color: #8a7a5c; }
+  #banner .bn-steps li.later::before { border-radius: 50%; border: 1.5px solid #a0906c; }
+  #banner .lore-open { position: static; grid-column: 4; grid-row: 1 / 3; align-self: center; width: 30px; height: 40px; border-radius: 0; border: 1px solid #5a4a36; background: linear-gradient(180deg, #2c3744, #1c242e); font-size: 15px; box-shadow: inset 0 0 0 1px rgba(233, 223, 198, .2); }
+  #board { box-shadow: 0 0 0 2px var(--fr-ink), 0 0 0 3px rgba(138, 122, 92, .6); }
+  /* 아래: 초상 카드 (한지 + 먹 산수) */
+  #panel { margin-top: 10px; gap: 6px; }
+  #actor, #actor.idle, #actor.enemy {
+    position: relative; min-height: 84px; padding: 6px 8px 6px 124px; overflow: hidden; border-radius: 0;
+    background: var(--fr-mountain) right bottom / 75% 70% no-repeat, var(--fr-parch); color: #2a2118;
+    border: 2px solid var(--fr-ink); box-shadow: inset 0 0 0 1px var(--fr-gilt), 0 4px 10px rgba(0, 0, 0, .6);
+  }
+  #actor .portrait {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 96px; height: auto; border: none; border-radius: 0; font-size: 44px;
+    background-color: transparent; -webkit-mask-image: linear-gradient(90deg, #000 72%, transparent); mask-image: linear-gradient(90deg, #000 72%, transparent);
+  }
+  #actor .actor-name { font-family: var(--fr-myeongjo); font-size: 20px; font-weight: 900; color: #2a2118; letter-spacing: .04em; }
+  #actor .actor-name .lead {
+    position: absolute; left: 98px; top: 7px; bottom: 7px; width: 20px; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center;
+    writing-mode: vertical-rl; font-size: 11px; letter-spacing: .25em; border-radius: 0; vertical-align: 0;
+    background: #2a241c; color: #e2c46a; border: 1px solid var(--fr-gilt);
+  }
+  #actor.enemy .actor-name .lead { background: #6e1f19; color: #f3e3bd; }
+  #actor.idle, #actor.enemy { padding-left: 16px; } /* 초상이 없을 때는 글자를 왼쪽부터 */
+  #actor.idle .portrait, #actor.enemy .portrait { display: none; }
+  #actor.enemy .actor-name .lead { position: static; display: inline-block; width: auto; writing-mode: horizontal-tb; letter-spacing: .04em; padding: 2px 6px; margin-right: 6px; vertical-align: 2px; }
+  #actor .actor-stats { color: #5a4a36; }
+  #actor.idle .actor-name, #actor.enemy .actor-name { font-size: 16px; }
+  .actor-bars { display: grid; gap: 3px; margin-top: 4px; }
+  .bar-row { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; color: #3a2f22; }
+  .bar-track { display: block; height: 7px; background: #cbbd9c; box-shadow: inset 0 0 0 1px #6b5a3e; }
+  .bar-track b { display: block; height: 100%; background: linear-gradient(180deg, #6fb2e8, #2f74b8); box-shadow: inset 0 0 0 1px #1b3f66; }
+  .bar-row.ki .bar-track b { background: linear-gradient(180deg, #c9a44a, #8a6a1e); box-shadow: inset 0 0 0 1px #4e3a0c; }
+  .bar-num { font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+  .bar-note { font-size: 11px; color: #5a4a36; font-weight: 700; }
+  .dock-mini { border-radius: 0; background: linear-gradient(180deg, var(--fr-slate-hi), var(--fr-slate)); color: var(--fr-text); border: 1px solid var(--fr-edge); clip-path: var(--fr-notch); }
+  /* 명령 버튼: 금속 테 판 + 아이콘. 공격할 수 있을 때만 붉게 */
+  .btns button {
+    display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; border-radius: 0; clip-path: var(--fr-notch);
+    background: linear-gradient(180deg, var(--fr-slate-hi), var(--fr-slate)); color: var(--fr-text); border: 1px solid var(--fr-edge);
+    box-shadow: inset 0 0 0 2px #121820, inset 0 0 0 3px rgba(233, 223, 198, .16); font-family: var(--fr-myeongjo); font-size: 16px; font-weight: 800; letter-spacing: .06em;
+  }
+  .btns button::before { content: ""; flex: none; width: 19px; height: 19px; background: center / contain no-repeat; }
+  #btn-attack::before { background-image: var(--ic-sword); }
+  #btn-skills::before { background-image: var(--ic-swirl); }
+  #btn-seal::before, #btn-lamp::before { background-image: var(--ic-scroll); }
+  #btn-wait::before { background-image: var(--ic-hourglass); }
+  #btn-end::before { background-image: var(--ic-cycle); }
+  #btn-attack:not(:disabled) { background: linear-gradient(180deg, #8e2c25, #5c1a15); border-color: #c0604f; }
+  .btns button:disabled { opacity: .42; border-style: solid; }
+  .btns button:not(:disabled):active { filter: brightness(1.3); }
+  .btns button[aria-pressed="true"] { background: linear-gradient(180deg, #3d5566, #26394a); border-color: var(--byeoksa-line); }
+  #btn-end { min-height: 44px; background: linear-gradient(180deg, #25303c, #182029); color: #cfd6dc; border-color: #4f5f70; font-size: 15px; }
+  #phase-note { color: #cbbd9c; background: rgba(28, 36, 46, .6); border: 1px solid #3a4553; border-radius: 0; }
+  #phase-note:empty { background: none; border-color: transparent; }
+  /* 기술 패널: 카드 두 줄 */
+  #skills { display: grid; grid-template-columns: 1fr; gap: 5px; padding: 5px; background: #141a21; border: 1px solid #3a4553; }
+  #skills::before { content: "기술 선택"; grid-column: 1 / -1; padding: 0 2px 3px; border-bottom: 1px solid #3a4553; font-family: var(--fr-myeongjo); font-size: 13px; font-weight: 800; color: var(--fr-text); }
+  .skill-row {
+    display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 7px; row-gap: 2px; align-items: center;
+    min-height: 48px; padding: 5px 7px; border-radius: 0; clip-path: var(--fr-notch);
+    background: linear-gradient(180deg, #232c37, #181f27); border: 1px solid #4b5866; color: var(--fr-text);
+  }
+  .skill-row::before { content: ""; grid-row: 1 / 3; width: 34px; height: 34px; background: var(--ic-bolt) center / 22px no-repeat, radial-gradient(circle at 30% 25%, #b58ce8, #43246e); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); }
+  #btn-control::before { background: var(--ic-vortex) center / 22px no-repeat, radial-gradient(circle at 30% 25%, #c07ad8, #4a1f5e); }
+  #btn-barrier::before { background: var(--ic-ward) center / 22px no-repeat, radial-gradient(circle at 30% 25%, #7eb3d8, #1f3f5e); }
+  .skill-row .sk-name { font-family: var(--fr-myeongjo); font-size: 14px; }
+  .skill-row .sk-main { grid-row: 1 / 3; }
+  .skill-row .sk-desc { font-size: 11px; line-height: 1.3; color: #b7ad9a; }
+  @media (min-width: 420px) { #skills { grid-template-columns: 1fr 1fr; } .skill-row .sk-desc { white-space: normal; } } /* 넓은 화면만 두 칸 */
+  .skill-row .sk-cost { grid-column: 3; grid-row: 1 / 3; justify-self: end; font-size: 10px; padding: 1px 6px; border: 1px solid #5b6b7c; border-radius: 8px; color: #cbbd9c; }
+  #info { border-radius: 0; background: var(--fr-parch); border: 2px solid var(--fr-ink); box-shadow: inset 0 0 0 1px var(--fr-gilt); }
 </style>
 </head>
 <body>
 <div id="app">
-  <header id="top">
-    <span id="top-turn"></span><span class="sep">·</span>
-    <span id="top-weather"></span><span class="sep">·</span>
-    <span id="top-merit"></span>
+  <!-- 위 현판 (조조전풍, 기획자 레퍼런스 2026-09-29): [제N장] 장 제목 · 지금 임무 · 턴/날씨/공적 | 임무 단계 체크 -->
+  <div id="banner">
+    <div class="ch-tag" id="ch-tag"></div>
+    <div class="bn-main">
+      <div class="bn-title" id="bn-title"></div>
+      <div id="objective" hidden role="button" tabindex="0" aria-label="임무 자세히 보기">
+        <span class="obj-tag">임무</span>
+        <div class="obj-text"><div class="obj-goal" id="obj-goal"></div><div class="obj-status" id="obj-status"></div></div>
+      </div>
+      <header id="top">
+        <span id="top-turn"></span><span class="sep">·</span>
+        <span id="top-weather"></span><span class="sep">·</span>
+        <span id="top-merit"></span>
+      </header>
+    </div>
+    <ul class="bn-steps" id="bn-steps"></ul>
     <button class="lore-open" id="lore-open-battle" type="button" aria-label="벽사록 열기">📖</button>
-  </header>
-  <div id="objective" hidden role="button" tabindex="0" aria-label="임무 자세히 보기">
-    <span class="obj-tag">임무</span>
-    <div class="obj-text"><div class="obj-goal" id="obj-goal"></div><div class="obj-status" id="obj-status"></div></div>
   </div>
   <div id="board"></div>
   <div id="panel">
     <!-- 행동 중 인물: 다른 유닛을 눌러 정보를 봐도 이 줄의 주인은 바뀌지 않는다 -->
     <div id="actor" class="idle">
       <div class="portrait" id="actor-face"></div>
-      <div class="actor-text"><div class="actor-name" id="actor-name"></div><div class="actor-stats" id="actor-stats"></div></div>
+      <div class="actor-text"><div class="actor-name" id="actor-name"></div><div class="actor-stats" id="actor-stats"></div><div class="actor-bars" id="actor-bars"></div></div>
       <button class="dock-mini" id="btn-cancel" type="button" hidden>이동 취소</button>
       <button class="dock-mini" id="btn-skills-close" type="button" hidden>닫기</button>
     </div>
@@ -4472,6 +4592,30 @@ var Core = (function () {
     document.getElementById('top-turn').textContent = CHAPTERS[chapterId].label + ' · 턴 ' + state.turn + '/' + state.maxTurn;
     document.getElementById('top-weather').textContent = WEATHER_ICON[state.weather] + ' ' + state.weather;
     document.getElementById('top-merit').textContent = '공적 ' + state.merit;
+    renderBanner();
+  }
+
+  // 위 현판: [제N장] 세로 인장 + 장 제목 + 임무 단계 체크 (3~5장). 임무가 없는 장(1·2장)은 제목만
+  var BANNER_STEPS = {
+    ch3: [{ phase: 'investigate', text: '괴변 원인 조사', count: true }, { phase: 'seal', text: '봉인 지점 복구' }],
+    ch4: [{ phase: 'investigate', text: '괴변 원인 조사', count: true }, { phase: 'lamps', text: '봉인등 밝히고 지키기' }],
+    ch5: [{ phase: 'investigate', text: '단서 조사', count: true }, { phase: 'find', text: '숨은 관리 발견' }, { phase: 'chase', text: '장부 운반자 제압' }]
+  };
+  function renderBanner() {
+    var n = CHAPTERS[chapterId].label.replace('장', '');
+    document.getElementById('ch-tag').innerHTML = '제<b>' + n + '</b>장';
+    document.getElementById('bn-title').textContent = CHAPTERS[chapterId].title.replace(/^제?\d+장\s*(—\s*)?/, '');
+    var o = state.objective, steps = o && BANNER_STEPS[chapterId];
+    var list = document.getElementById('bn-steps');
+    list.hidden = !steps;
+    list.innerHTML = '';
+    if (!steps) return;
+    var at = steps.map(function (st) { return st.phase; }).indexOf(o.phase);
+    if (at === -1) at = steps.length - 1; // 봉인 복구 단계 이름이 다른 장 대비: 마지막 단계로 본다
+    steps.forEach(function (st, i) {
+      var text = st.text + (st.count ? ' (' + (i < at ? o.need : o.investigated.length) + '/' + o.need + ')' : '');
+      list.appendChild(el('li', i < at ? 'done' : i === at ? 'now' : 'later', text));
+    });
   }
 
   function highlights() {
@@ -4607,11 +4751,26 @@ var Core = (function () {
   function actorUnit() {
     return state.phase === 'ally' && ui.step !== 'none' && ui.id ? Core.getUnit(state, ui.id) : null;
   }
+  // 행동 중 인물의 HP·기력 막대 (글자 줄 #actor-stats 는 그대로 두고 화면에는 막대로 보인다)
+  function barRow(label, v, max, kind) {
+    var row = el('div', 'bar-row ' + kind);
+    row.appendChild(el('span', 'bar-label', label));
+    var track = el('i', 'bar-track');
+    var fill = el('b', '');
+    fill.style.width = Math.max(0, Math.min(100, v / max * 100)) + '%';
+    track.appendChild(fill);
+    row.appendChild(track);
+    row.appendChild(el('span', 'bar-num', v + ' / ' + max));
+    return row;
+  }
   function renderActor() {
     var box = document.getElementById('actor'), face = document.getElementById('actor-face');
     var name = document.getElementById('actor-name'), stats = document.getElementById('actor-stats');
+    var bars = document.getElementById('actor-bars');
     var u = actorUnit();
     name.innerHTML = '';
+    bars.innerHTML = '';
+    stats.hidden = false;
     face.textContent = '';
     delete face.dataset.unit;
     if (u) {
@@ -4623,7 +4782,11 @@ var Core = (function () {
       name.appendChild(el('span', 'lead', '행동 중'));
       name.appendChild(document.createTextNode(u.name + (u.guest ? ' (객장)' : '')));
       var tr = u.training && Core.trainingDef(u.id, u.training);
+      stats.hidden = true; // 화면에는 막대 (#actor-bars)
       stats.textContent = 'HP ' + u.hp + ' / ' + u.maxHp + (u.skill ? ' · 기력 ' + u.ki + ' / ' + u.maxKi : '') + (tr ? ' · 수련 ' + tr.name : '');
+      bars.appendChild(barRow('HP', u.hp, u.maxHp, 'hp'));
+      if (u.skill) bars.appendChild(barRow('기력', u.ki, u.maxKi, 'ki'));
+      if (tr) bars.appendChild(el('div', 'bar-note', '수련 · ' + tr.name));
     } else if (state.phase === 'enemy') {
       box.className = 'enemy';
       name.appendChild(el('span', 'lead', '적 차례'));
@@ -4635,7 +4798,7 @@ var Core = (function () {
       stats.textContent = state.result === null ? '남청 테두리의 아군을 누르세요' : '';
     }
     var menuOpen = !!u && ui.step === 'menu';
-    document.getElementById('btn-cancel').hidden = !menuOpen || ui.panel === 'skills';
+    document.getElementById('btn-cancel').hidden = !menuOpen || ui.panel === 'skills' || ui.noUndo === ui.id;
     document.getElementById('btn-cancel').textContent = u && u.from && (u.from.r !== u.r || u.from.c !== u.c) ? '이동 취소' : '취소';
     document.getElementById('btn-skills-close').hidden = !menuOpen || ui.panel !== 'skills';
   }
@@ -4914,7 +5077,7 @@ var Core = (function () {
     document.getElementById('btn-end').disabled = !canEnd;
     var note = document.getElementById('phase-note');
     note.className = '';
-    note.hidden = ui.step === 'menu'; // 행동 버튼(또는 기술 패널)이 있으면 그 자리를 버튼이 쓴다
+    note.hidden = menuShown(); // 행동 버튼(또는 기술 패널)이 있으면 그 자리를 버튼이 쓴다
     if (ui.step === 'target' && canEnd) {
       // 대상 고르는 중: 무엇을 쓰는지 크게 (specs/immersion.md 9장)
       note.className = 'aim';
@@ -4965,10 +5128,10 @@ var Core = (function () {
     var menu = document.getElementById('menu'), panel = document.getElementById('skills');
     if (ui.step !== 'menu') ui.panel = null;
     var open = ui.panel === 'skills';
-    menu.hidden = ui.step !== 'menu' || open;
+    menu.hidden = !menuShown() || open;
     panel.hidden = !open;
     document.getElementById('end-row').hidden = open; // 기술을 고르는 동안은 턴 종료를 치운다 (행동 중 인물 줄은 그대로)
-    if (ui.step !== 'menu') return;
+    if (!menuShown()) return;
     var u = Core.getUnit(state, ui.id);
     document.getElementById('btn-attack').disabled = !Core.canAttack(state, u);
     var rows = skillRows(u);
@@ -5005,7 +5168,29 @@ var Core = (function () {
     return !!u && Core.canCommand(state, u) && !u.from;
   }
 
+  // 차례가 온 아군은 이동 범위와 행동 버튼이 함께 보인다 (기획자 피드백: 한 번 더 누르지 않고 바로 행동)
+  function menuShown() {
+    return ui.step === 'menu' || (ui.step === 'move' && !!ui.id);
+  }
+  // 이동 고르는 중에 행동 버튼을 누르면 제자리를 누른 것과 같게 처리한다 (제자리 도착으로 조사가 일어나면 장면부터)
+  function stay() {
+    if (ui.busy) return false;
+    if (ui.step === 'menu') return true;
+    if (ui.step !== 'move' || !ui.id) return false;
+    var id = ui.id, u = Core.getUnit(state, id);
+    if (!Core.moveUnit(state, id, u.r, u.c)) return false;
+    ui.step = 'menu';
+    ui.infoId = id;
+    ui.infoCell = null;
+    var events = Core.arrive(state, id);
+    if (!events.length) return true;
+    render();
+    arrival(id, events);
+    return false;
+  }
+
   function clearSelection() {
+    ui.noUndo = null;
     ui.step = 'none';
     ui.id = null;
     ui.kind = null;
@@ -5133,6 +5318,7 @@ var Core = (function () {
   function arrival(id, pre, after) {
     var events = pre || Core.arrive(state, id);
     if (!events.length) return after && after();
+    if (ui.step === 'menu' && ui.id === id) ui.noUndo = id; // 조사·발견은 되돌릴 수 없으니 이동 취소도 막는다
     Core.logEvents(playLog, state, events);
     var lines = [];
     events.forEach(function (e) {
@@ -6315,20 +6501,24 @@ var Core = (function () {
   });
 
   document.getElementById('btn-wait').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     var from = startPos(ui.id), actor = ui.id;
     Core.wait(state, ui.id);
     logAllyAction(actor, from, []);
     afterAction();
   });
   document.getElementById('btn-cancel').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
-    Core.cancelMove(state, ui.id);
+    if (ui.step !== 'menu' || ui.noUndo === ui.id) return;
+    var id = ui.id;
+    Core.cancelMove(state, id);
     clearSelection();
+    ui.step = 'move'; // 같은 인물로 돌아가 다시 고른다 (이동 범위 + 행동 버튼)
+    ui.id = id;
+    ui.infoId = id;
     render();
   });
   document.getElementById('btn-seal').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     var from = startPos(ui.id), actor = ui.id;
     var events = Core.repairSeal(state, ui.id);
     if (!events) return;
@@ -6336,7 +6526,7 @@ var Core = (function () {
     afterAction(events);
   });
   document.getElementById('btn-lamp').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     var from = startPos(ui.id), actor = ui.id;
     var events = Core.lightLamp(state, ui.id);
     if (!events) return;
@@ -6344,32 +6534,32 @@ var Core = (function () {
     afterAction(events);
   });
   document.getElementById('btn-barrier').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     ui.step = 'barrier';
     ui.kind = 'barrier';
     render();
   });
   document.getElementById('btn-attack').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     ui.step = 'target';
     ui.kind = 'attack';
     render();
   });
   document.getElementById('btn-skill').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     ui.step = 'target';
     ui.kind = 'skill';
     render();
   });
   document.getElementById('btn-control').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     ui.step = 'target';
     ui.kind = 'control';
     render();
   });
   // [기술] 패널 열기/닫기 — 패널 안에서 고른 기술은 위 핸들러로 (규칙 호출은 그대로)
   document.getElementById('btn-skills').addEventListener('click', function () {
-    if (ui.step !== 'menu') return;
+    if (!stay()) return;
     ui.panel = ui.panel === 'skills' ? null : 'skills';
     render();
   });
