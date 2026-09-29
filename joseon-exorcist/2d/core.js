@@ -1,37 +1,41 @@
-// 「조선 퇴마전」 2D 파일럿 — 규칙만 (이동·충돌·운반자 AI·구속/제압·귀화·패배).
+// 「조선 퇴마전」 2D 파일럿 v2 — 규칙만 (이동·충돌·전투·운반자·귀화·패배).
 // 화면(DOM)과 난수를 쓰지 않는다 → Node 에서 그대로 시험할 수 있다.
-// 수치 출처: DESIGN-BRIEF 6-1 · 8장 · 9장. 바꾸면 안 되는 설계값은 K 에 모았다.
+// 수치 출처: 2d/DESIGN-BRIEF.md (v2, [v2-수정1]) 6-1 · 8장 · 9장. 설계값은 K 와 stage-ch5.js 에 모았다.
 (function (root) {
   'use strict';
 
   const K = {
-    R_BODY: 12,        // 충돌 지름 24u
-    R_GUARD: 18,       // 지킴 폭 36u
-    R_RUNNER: 14,      // 통과 최소 틈 28u (운반자 ↔ 몸)
-    ARM: 36,           // 팔 길이 (중심 거리)
-    NEAR: 72,          // 아군 근처 벌점 반경
-    PENALTY: 5.5,      // 아군 1명당 벌점 (초)
-    SWITCH_GAIN: 3,    // 새 길이 3초 이상 나을 때만 바꾼다
-    WARN: 0.8,         // 바꾸기 0.8초 전 "!" 예고
-    RECALC: 1,         // 1초마다 다시 계산
-    WINDUP: 1.5,       // 조작이 넘어온 뒤 장부를 추스르는 1.5초
-    RUN: 44, WALK: 22,
-    BREATH: 100, BREATH_HIT: 25, BREATH_WALK_T: 3, BREATH_CD: 1.5,
-    GAUGE: 28, GAUGE_RATE: 6, GAUGE_RATE_MASH: 9, SEAL_AT: 14, SEAL_FALLBACK_T: 150,
-    TIME_LIMIT: 180,
-    SOLO_HOLD: 0.4, SHAKE_PUSH: 24, SHAKE_STUN: 0.6, GRAB_CD: 1.0, RUNNER_IMMUNE: 0.6,
-    MASH_WINDOW: 0.35,
-    SHOT_RANGE: 200, SHOT_SLOW: 0.4, SHOT_T: 4, SHOT_CD: 10, SHOT_HIT_R: 16,
-    BARRIER_MAX: 45, BARRIER_MIN: 16, BARRIER_T: 12, BARRIER_CD: 15,
-    GW_HP: 12, GW_SPEED: 32, GW_ATTACK_T: 2, GW_DMG: 4, GW_PUSH: 48, GW_STUN: 1, GW_LEASH: 220,
-    HIT_DMG: 4, HIT_INTERVAL: 0.4, COUNTER_T: 1.2,
-    MARKET_SLOW: 0.7,
-    // [2차 수정] 8-5 성문 구역 예외: 게이지 14 에 닿은 곳이 성문 선 200u 안이면 뿌리치지 못한다
-    GATE_ZONE: 200,
-    // [2차 수정] 8-5 귀화 피어오름: 나타난 뒤 2.5초 동안 움직이지도 치지도 않는다
-    GW_RISE: 2.5,
-    // [2차 수정] 8-2 규칙 7: 이미 지나친 몸(진행 방향 뒤쪽·이 거리 안)은 막힘 계산에서 뺀다
-    PASSED_R: 60,
+    R_BODY: 16,          // 충돌 지름 32u
+    R_RUNNER: 16,
+    RUN: 150,            // 운반자 150 u/초
+    MARKET_SLOW: 1,      // v2 는 시장 감속 없음
+    PREP: 1.0,           // 출발 준비
+    LATCH_T: 7.0,        // 빗장 다 풀기 (성문마다 진행이 남는다)
+    LATCH_HIT: 2.0,      // 빗장 푸는 운반자를 한 번 칠 때 진행 −2초 (옆·뒤 타격만)
+    PUSH_SOLDIER_T: 2.5, // 관군 한 명 밀쳐 내기
+    SOLDIER_DOWN_T: 6,   // 밀쳐진 관군 쓰러짐
+    GATE_HITS: 2,        // 성문에서 옆·뒤로 2번 맞으면 그 성문 포기 (봉인 뒤 1번)
+    ABANDON_R: 56, ABANDON_PUSH: 48, ABANDON_STUN: 0.4,
+    SHOVE_REACH: 44, SHOVE_WIND: 0.4, SHOVE_PUSH: 48, SHOVE_DMG: 2, SHOVE_STUN: 0.5, SHOVE_CD: 2,
+    FLINCH_T: 0.3, FLINCH_CD: 3,
+    GAUGE: 28, SEAL_AT: 14, SEAL_FALLBACK_T: 100, TIME_LIMIT: 150,
+    BACK_MULT: 1, SEG_CAP: 2,
+    SEAL_R: 56, SEAL_PUSH: 48, SEAL_STUN: 0.5,
+    GW_HP: 12, GW_SPEED: 130, GW_ATK_T: 1.2, GW_DMG: 4, GW_PUSH: 24, GW_RISE: 1.5, GW_RESPAWN: 6, GW_MAX: 2,
+    DOC_PICK_T: 1.0, DOC_PICK_T_SOUN: 0.5, DOC_R: 44,
+    SKILL_CD: 6, DODGE_T: 0.25, DODGE_DIST: 90, DODGE_CD: 1, SWITCH_CD: 0.5,
+    ALLY_AUTO_R: 60, ALLY_AUTO_T: 1.5, ALLY_AUTO_DMG: 1,
+    FOLLOW_FAR: 80, FOLLOW_NEAR: 48,
+    COMBO_RESET: 0.8, ATK_BUFFER: 0.25, AUTO_FACE_R: 120,
+    // [v2-수정2] 성문 경계·정면 막기 (브리프 8-2 규칙 2·2-1·2-2·3, 8-5). 값은 설계 재현 설정 simv2/D.json 과 같다.
+    TURN: 95 * Math.PI / 180, TURN_SEAL: 2.4, // 경계 회전 초당 95° [기획자 결정 90°/초 → 우회 경계값 때문에 마스터 조정 95°/초] / 봉인 문서 뒤 ≈140° (그대로)
+    ALERT_R: 110, ARRIVE_FACE: true,  // 조종 인물이 110u 안이면 그쪽을 본다 (도착 때 이미 안이면 처음부터)
+    ALERT_LATCH: 0.5,                 // 경계하는 동안 빗장 절반 속도
+    FRONT_ZERO: true, BACK_COS: -0.5, // 바라보는 방향 ±60° 안에서 친 것은 막힘
+    GATE_SHOVE: true,                 // 성문에서도 정면 76u 안이면 밀치기
+    GATE_HITS_SEAL: 1,                // 봉인 문서 뒤에는 옆·뒤 1타로 포기
+    GW2_ON_ARRIVE: true, GW2_GUARD_R: 140, // 귀화 ② 는 운반자가 그 성문에 닿을 때, 성문 140u 를 지킨다
+    DOC_BANISH: true,                 // 문서를 수습하면 문서 귀화가 사그라든다
   };
 
   // ── 기하 ───────────────────────────────────────────────
@@ -269,109 +273,22 @@
     return samplesBlocked(edgeSamples(w, A, B), near);
   }
 
-  // ── 상태 ───────────────────────────────────────────────
-  function makeUnit(def, kind, x, y) {
-    return {
-      id: def.id, name: def.name, short: def.short, kind, speed: def.speed, hp: def.hp, maxHp: def.hp,
-      skill: def.skill || null, x, y, state: 'guard', home: { x, y }, path: [], target: null, slot: -1,
-      stunT: 0, grabCd: 0, holding: false, counterT: 0, hitT: 0, skillCd: 0, down: false, facing: 0, moving: false,
-    };
-  }
 
-  function createChase(stage, opts) {
-    opts = opts || {};
-    const g = opts.graph || buildGraph(stage);
-    const st = {
-      stage, g, w: g.w, t: 0, over: null, events: [],
-      units: [], control: stage.CHASE_START.control,
-      runner: null, gwihwa: [], barriers: [], doc: null, sealDone: false,
-      recalcT: 0, distT: 0, gateDist: { N: 0, S: 0 }, gateDist0: { N: 1, S: 1 },
-      mashT: -99, log: null,
-    };
-    for (const h of stage.HEROES) {
-      const p = stage.CHASE_START[h.id];
-      st.units.push(makeUnit(h, 'hero', p[0], p[1]));
-    }
-    for (const s of stage.SOLDIERS) {
-      const p = stage.CHASE_START[s.id];
-      st.units.push(makeUnit(s, 'soldier', p[0], p[1]));
-    }
-    const ctl = unit(st, st.control);
-    if (ctl) ctl.state = 'controlled';
-    const rp = stage.CHASE_START.runner;
-    st.runner = {
-      x: rp[0], y: rp[1], windup: K.WINDUP, breath: K.BREATH, walkT: 0, slowT: 0,
-      route: [], routeName: '', exit: null, cost: Infinity, pending: null, warnT: 0,
-      cornered: false, crouch: false, gauge: K.GAUGE, held: false, soloT: 0, restrained: false,
-      immuneT: 0, subdued: false, facing: -Math.PI / 2, lastDir: { x: 0, y: -1 }, stuckT: 0,
-      nearCd: {}, path: [], trailT: 0,
-    };
-    st.log = {
-      commands: [], switches: 0, skills: [], grabs: [], routeChanges: [], corneredAt: [],
-      sealAt: null, gwihwaDown: 0, alliesDown: [], result: null, endT: null,
-    };
-    // 첫 길 고르기 (1.5초 추스르는 동안에도 계산은 한다)
-    replan(st, true);
-    updateGateDist(st);
-    st.gateDist0 = { N: st.gateDist.N, S: st.gateDist.S };
-    return st;
-  }
-
-  function unit(st, id) { return st.units.find((u) => u.id === id); }
-  function alive(st) { return st.units.filter((u) => !u.down); }
-
-  function bodyRadius(u) {
-    return u.state === 'guard' && u.stunT <= 0 ? K.R_GUARD : K.R_BODY;
-  }
-
-  function obstacles(st) {
-    const out = [];
-    for (const u of st.units) if (!u.down) out.push({ x: u.x, y: u.y, r: bodyRadius(u), id: u.id });
-    for (const b of st.barriers) {
-      const L = hyp(b.x2 - b.x1, b.y2 - b.y1);
-      const n = Math.max(1, Math.ceil(L / 4));
-      for (let i = 0; i <= n; i++) out.push({ x: b.x1 + (b.x2 - b.x1) * i / n, y: b.y1 + (b.y2 - b.y1) * i / n, r: 3, barrier: true });
-    }
-    return out;
-  }
-
-  // [2차 수정] 규칙 7: 운반자가 이미 지나친 몸(진행 방향 뒤 또는 옆, PASSED_R 안)은 길 계산에서 뺀다.
-  // "진행 방향"은 운반자의 순간 걸음 방향이 아니라 **따져 보는 경로의 방향**(북문 길 = 북쪽, 남문 길 = 남쪽)이다.
-  // 순간 방향을 쓰면 막힌 성문 앞에서 한 걸음 물러설 때마다 앞/뒤 판정이 뒤집혀 1초마다 길을 바꿨다 (구현 검수 N-1).
-  // 결계는 선이라 지나쳤는지 판단하지 않고 항상 센다.
-  const EXIT_DIR = { N: { x: 0, y: -1 }, S: { x: 0, y: 1 } };
-  function aheadObstacles(st, obs, exit) {
-    const r = st.runner, d = EXIT_DIR[exit];
-    return obs.filter((o) => o.barrier || !((o.x - r.x) * d.x + (o.y - r.y) * d.y <= 1e-6 && hyp(o.x - r.x, o.y - r.y) < K.PASSED_R));
-  }
-
-  // 길 계산용 문맥: 그 성문 방향으로 지나친 몸을 뺀 장애물과 그에 맞는 막힌 간선
-  function aheadCtx(st, ctx, exit) {
-    const key = 'ahead' + exit;
-    if (ctx[key]) return ctx[key];
-    const obs = aheadObstacles(st, ctx.obs, exit);
-    ctx[key] = obs.length === ctx.obs.length ? { obs, blocked: ctx.blocked } : { obs, blocked: blockedEdges(st, obs) };
-    return ctx[key];
-  }
-
-  // ── 운반자 길 고르기 (8-2 규칙 1·2·3·7) ───────────────────
-  function attachNodes(st, p, maxD, allowDead) {
+  // ── 길 찾기 (막힌 간선 제외 가능) ──────────────────────────
+  function attachNodes(st, p, maxD) {
     const g = st.g, out = [];
     for (let i = 0; i < g.pos.length; i++) {
-      if (!allowDead && g.dead.has(g.ids[i])) continue;
       const q = g.pos[i];
       const d = hyp(q.x - p.x, q.y - p.y);
       if (d > maxD) continue;
       if (d > 1 && !los(g.w, p, q)) continue;
       out.push({ i, d });
     }
-    // 긴 골목 한가운데에 있을 때: 지금 서 있는 간선의 양 끝에 붙는다
     for (const e of g.edges) {
       const A = g.pos[e.a], B = g.pos[e.b];
-      if (distPointSeg(p.x, p.y, A.x, A.y, B.x, B.y) > 16) continue;
+      if (distPointSeg(p.x, p.y, A.x, A.y, B.x, B.y) > 24) continue;
       for (const i of [e.a, e.b]) {
         if (out.some((o) => o.i === i)) continue;
-        if (!allowDead && g.dead.has(g.ids[i])) continue;
         const q = g.pos[i];
         if (!los(g.w, p, q)) continue;
         out.push({ i, d: hyp(q.x - p.x, q.y - p.y) });
@@ -380,815 +297,890 @@
     return out;
   }
 
-  function blockedEdges(st, obs) {
-    const set = new Set();
-    for (const e of st.g.edges) {
-      const A = st.g.pos[e.a], B = st.g.pos[e.b];
-      const near = obs.filter((o) => distPointSeg(o.x, o.y, A.x, A.y, B.x, B.y) < NEAR_FILTER);
-      if (near.length && samplesBlocked(e.samples, near)) set.add(e.i);
-    }
-    return set;
+  // avoid: 곧게 질러가는 선이 이 몸들 곁(몸 두 개 폭)을 지나면 질러가지 않는다 (운반자용)
+  function clearOf(avoid, a, b) {
+    if (!avoid) return true;
+    for (const o of avoid) if (distPointSeg(o.x, o.y, a.x, a.y, b.x, b.y) < K.R_BODY * 2 + 4) return false;
+    return true;
   }
-
-  function routePenalty(st, p, nodes) {
+  function planPath(st, from, to, blocked, avoid) {
     const g = st.g;
-    const pts = [p].concat(nodes.map((i) => g.pos[i]));
-    let n = 0;
-    for (const u of st.units) {
-      if (u.down) continue;
-      let hit = false;
-      for (let k = 0; k < pts.length - 1 && !hit; k++) {
-        if (distPointSeg(u.x, u.y, pts[k].x, pts[k].y, pts[k + 1].x, pts[k + 1].y) <= K.NEAR) hit = true;
-      }
-      if (pts.length === 1 && hyp(u.x - p.x, u.y - p.y) <= K.NEAR) hit = true;
-      if (hit) n++;
-    }
-    return n * K.PENALTY;
-  }
-
-  // 성문까지의 모든 단순 경로 중 (예상 도착 시간 + 벌점) 이 가장 낮은 길. 막힌 간선은 무한대.
-  function bestGateRoute(st, p, ctx0) {
-    let best = null;
-    for (const exit of ['N', 'S']) {
-      const b = bestGateRouteTo(st, p, aheadCtx(st, ctx0, exit), exit);
-      if (b && (!best || b.cost < best.cost - 1e-9)) best = b;
-    }
-    return best;
-  }
-  function bestGateRouteTo(st, p, ctx, exitName) {
-    const g = st.g;
-    const target = exitName === 'N' ? g.exitN : g.exitS;
-    const starts = attachNodes(st, p, 140, false).filter((s) => !segBlocked(g.w, p, g.pos[s.i], ctx.obs));
-    const windup = Math.max(0, st.runner.windup);
-    let best = null;
-    const H = (i) => g.T[i][target];
-    const visited = new Set();
-    let budget = 20000;
-    const dfs = (i, base, nodes) => {
-      if (--budget < 0) return;
-      if (best && base + H(i) >= best.cost) return;
-      if (i === g.exitN || i === g.exitS) {
-        if (i !== target) return;
-        const cost = base + routePenalty(st, p, nodes);
-        if (!best || cost < best.cost - 1e-9) best = { nodes: nodes.slice(), base, cost, exit: exitName };
-        return;
-      }
-      for (const e of g.adj[i]) {
-        if (ctx.blocked.has(e.i)) continue;
-        const j = e.a === i ? e.b : e.a;
-        if (visited.has(j) || g.dead.has(g.ids[j])) continue;
-        visited.add(j); nodes.push(j);
-        dfs(j, base + e.time, nodes);
-        nodes.pop(); visited.delete(j);
-      }
-    };
-    // 가까운 붙음점부터 (좋은 답을 먼저 찾아 가지치기가 잘 되게)
-    starts.sort((a, b) => (a.d / K.RUN + H(a.i)) - (b.d / K.RUN + H(b.i)));
-    for (const s of starts) {
-      const t0 = windup + pathTime(g.w, p, g.pos[s.i], K.RUN);
-      visited.clear(); visited.add(s.i);
-      dfs(s.i, t0, [s.i]);
-    }
-    if (best) best.name = routeName(st, best.nodes, best.exit);
-    return best;
-  }
-
-  function routeCost(st, p, nodes, ctx) {
-    if (!nodes.length) return Infinity;
-    const last = nodes[nodes.length - 1];
-    if (last === st.g.exitN || last === st.g.exitS) ctx = aheadCtx(st, ctx, last === st.g.exitN ? 'N' : 'S');
-    const g = st.g;
-    if (segBlocked(g.w, p, g.pos[nodes[0]], ctx.obs)) return Infinity;
-    let base = Math.max(0, st.runner.windup) + pathTime(g.w, p, g.pos[nodes[0]], K.RUN);
-    for (let k = 0; k < nodes.length - 1; k++) {
-      const e = g.adj[nodes[k]].find((ed) => (ed.a === nodes[k] && ed.b === nodes[k + 1]) || (ed.b === nodes[k] && ed.a === nodes[k + 1]));
-      if (!e || ctx.blocked.has(e.i)) return Infinity;
-      base += e.time;
-    }
-    return base + routePenalty(st, p, nodes);
-  }
-
-  function routeName(st, nodes, exit) {
-    const ids = nodes.map((i) => st.g.ids[i]);
-    const has = (s) => ids.includes(s);
-    if (exit === 'N') return has('E1') ? 'N1' : has('W1') ? 'NW' : 'N2';
-    return has('E5') ? 'S1' : has('W5') ? 'SW' : 'S2';
-  }
-
-  function nearestDeadEnd(st, p, ctx) {
-    const g = st.g;
-    // 막히지 않은 간선만으로 가장 가까운 막다른 갈래까지 (다익스트라)
-    const n = g.pos.length;
-    const dist = new Array(n).fill(Infinity), prev = new Array(n).fill(-1);
-    const done = new Array(n).fill(false);
-    for (const s of attachNodes(st, p, 140, true)) {
-      if (segBlocked(g.w, p, g.pos[s.i], ctx.obs)) continue;
-      dist[s.i] = Math.min(dist[s.i], s.d);
-    }
-    for (;;) {
-      let u = -1;
-      for (let i = 0; i < n; i++) if (!done[i] && dist[i] < Infinity && (u < 0 || dist[i] < dist[u])) u = i;
-      if (u < 0) break;
-      done[u] = true;
-      if (g.dead.has(g.ids[u])) {
-        const nodes = [];
-        for (let v = u; v >= 0; v = prev[v]) nodes.unshift(v);
-        return nodes;
-      }
-      for (const e of g.adj[u]) {
-        if (ctx.blocked.has(e.i)) continue;
-        const v = e.a === u ? e.b : e.a;
-        if (dist[u] + e.len < dist[v]) { dist[v] = dist[u] + e.len; prev[v] = u; }
-      }
-    }
-    return null;
-  }
-
-  function replan(st, initial) {
-    const r = st.runner;
-    if (r.subdued) return;
-    const obs = obstacles(st);
-    const ctx = { obs, blocked: blockedEdges(st, obs) };
-    const p = { x: r.x, y: r.y };
-    const best = bestGateRoute(st, p, ctx);
-    const curCost = r.cornered ? Infinity : routeCost(st, p, r.route, ctx);
-    r.cost = curCost;
-    if (!best) {
-      // 규칙 7: 어느 성문으로도 길이 없다 → 가장 가까운 막다른 갈래로 = 궁지
-      if (!r.cornered) {
-        r.cornered = true;
-        r.pending = null; r.warnT = 0;
-        const dn = nearestDeadEnd(st, p, ctx);
-        r.route = dn || [];
-        r.routeName = 'dead';
-        r.crouch = !dn;
-        st.log.corneredAt.push(round(st.t));
-        st.events.push({ type: 'cornered' });
-      } else if (!r.route.length) {
-        r.crouch = true;
-      }
-      return;
-    }
-    if (initial) {
-      setRoute(st, best);
-      return;
-    }
-    if (r.cornered) {
-      // 궁지에서 길이 다시 열리면 예고 후 달아난다
-      r.cornered = false; r.crouch = false;
-      r.pending = best; r.warnT = K.WARN;
-      st.events.push({ type: 'routeWarn', name: best.name });
-      return;
-    }
-    if (r.pending) return;
-    const same = best.nodes.length === r.route.length && best.nodes.every((v, k) => v === r.route[k]);
-    if (same) { r.cost = best.cost; return; }
-    // 규칙 2: 새 길이 3초 이상 나을 때만 바꾼다
-    if (best.cost <= curCost - K.SWITCH_GAIN || curCost === Infinity) {
-      r.pending = best; r.warnT = K.WARN; // 규칙 3: 0.8초 전 예고
-      st.events.push({ type: 'routeWarn', name: best.name });
-    }
-  }
-
-  function setRoute(st, best) {
-    const r = st.runner;
-    const prevName = r.routeName;
-    r.route = best.nodes.slice();
-    r.routeName = best.name;
-    r.exit = best.exit;
-    r.cost = best.cost;
-    if (prevName && prevName !== best.name) st.log.routeChanges.push({ t: round(st.t), from: prevName, to: best.name });
-    else if (!prevName) st.log.routeChanges.push({ t: round(st.t), from: null, to: best.name });
-  }
-
-  // 성문 거리 막대 (막힘 무시한 최단 거리)
-  function gateDistance(st, p) {
-    const g = st.g;
-    const NG = g.idx.NG, SG = g.idx.SG;
-    let n = Infinity, s = Infinity;
-    for (const a of attachNodes(st, p, 200, true)) {
-      n = Math.min(n, a.d + g.D[a.i][NG]);
-      s = Math.min(s, a.d + g.D[a.i][SG]);
-    }
-    return { N: n, S: s };
-  }
-  function updateGateDist(st) {
-    st.gateDist = gateDistance(st, st.runner);
-  }
-
-  // ── 아군 이동 ────────────────────────────────────────────
-  function planPath(st, from, to) {
-    const g = st.g;
+    if (los(g.w, from, to) && segValid(g.w, from, to, K.R_BODY - 2, 4) && clearOf(avoid, from, to)) return [{ x: to.x, y: to.y }];
     const n = g.pos.length;
     const dist = new Array(n).fill(Infinity), prev = new Array(n).fill(-1), done = new Array(n).fill(false);
-    if (hyp(to.x - from.x, to.y - from.y) < 150 && los(g.w, from, to)) return [{ x: to.x, y: to.y }];
-    for (const s of attachNodes(st, from, 170, true)) dist[s.i] = s.d;
-    const ends = attachNodes(st, to, 170, true);
+    for (const s of attachNodes(st, from, 260)) dist[s.i] = Math.min(dist[s.i], s.d);
+    const ends = attachNodes(st, to, 260);
     for (;;) {
       let u = -1;
       for (let i = 0; i < n; i++) if (!done[i] && dist[i] < Infinity && (u < 0 || dist[i] < dist[u])) u = i;
       if (u < 0) break;
       done[u] = true;
       for (const e of g.adj[u]) {
+        if (blocked && blocked.has(e.i)) continue;
         const v = e.a === u ? e.b : e.a;
         if (dist[u] + e.len < dist[v]) { dist[v] = dist[u] + e.len; prev[v] = u; }
       }
     }
     let bestEnd = null, bestD = Infinity;
     for (const e of ends) if (dist[e.i] + e.d < bestD) { bestD = dist[e.i] + e.d; bestEnd = e.i; }
-    if (bestEnd === null) return [{ x: to.x, y: to.y }];
+    if (bestEnd === null) return blocked ? null : [{ x: to.x, y: to.y }];
     const pts = [];
     for (let v = bestEnd; v >= 0; v = prev[v]) pts.unshift({ x: g.pos[v].x, y: g.pos[v].y });
     pts.push({ x: to.x, y: to.y });
-    return pts;
+    return smoothPath(g.w, from, pts, avoid);
   }
 
-  function commandNodeDef(st, nodeId) {
-    const s = st.stage;
-    return s.COMMAND_NODES.find((c) => c.id === nodeId) || (s.EXTRA_INVESTIGATION_NODE.id === nodeId ? s.EXTRA_INVESTIGATION_NODE : null);
-  }
-
-  function slotFor(st, u, nodeId) {
-    const def = commandNodeDef(st, nodeId);
-    const used = new Set(st.units.filter((o) => o !== u && !o.down && o.target === nodeId).map((o) => o.slot));
-    let k = 0;
-    while (used.has(k) && k < def.slots.length - 1) k++;
-    return { k, x: def.slots[k][0], y: def.slots[k][1] };
-  }
-
-  // 명령판 매듭 탭 → 그 인물이 그 길목까지 알아서 가서 선다 (지킴)
-  function command(st, id, nodeId) {
-    const u = unit(st, id);
-    if (!u || u.down || u.state === 'controlled') return false;
-    const s = slotFor(st, u, nodeId);
-    u.target = nodeId; u.slot = s.k;
-    u.home = { x: s.x, y: s.y };
-    u.path = planPath(st, u, u.home);
-    u.state = 'moving';
-    u.holding = false;
-    if (st.log && st.runner) {
-      st.log.commands.push({ t: round(st.t), unit: id, node: nodeId, runnerRoute: st.runner.routeName, ahead: isAhead(st, nodeId) });
+  // 줄 당기기: 몸(반지름 16)이 곧게 갈 수 있는 가장 먼 점으로 건너뛴다 → 모서리를 깎아 도는 길
+  function smoothPath(w, from, pts, avoid) {
+    const out = [];
+    let cur = { x: from.x, y: from.y }, i = 0;
+    while (i < pts.length) {
+      let j = pts.length - 1;
+      while (j > i && !(segValid(w, cur, pts[j], K.R_BODY - 1, 4) && clearOf(avoid, cur, pts[j]))) j--;
+      out.push(pts[j]); cur = pts[j]; i = j + 1;
     }
-    return true;
+    return out;
   }
 
-  // H1: 명령 매듭이 운반자가 가려는 성문 쪽(앞쪽)인가
-  function isAhead(st, nodeId) {
-    const r = st.runner;
-    if (!r || !r.exit) return null;
-    const g = st.g;
-    const gate = r.exit === 'N' ? g.idx.NG : g.idx.SG;
-    const nodePos = st.stage.NODES[nodeId];
-    if (!nodePos) return null;
-    const nodeToGate = g.D[g.idx[nodeId]][gate];
-    const runnerToGate = r.exit === 'N' ? st.gateDist.N : st.gateDist.S;
-    return nodeToGate < runnerToGate;
+  function pathLength(from, pts) {
+    let L = 0, c = from;
+    for (const p of pts) { L += hyp(p.x - c.x, p.y - c.y); c = p; }
+    return L;
   }
 
-  // [조종] → 그 인물로 갈아타기. 방금 조종하던 인물은 그 자리에 선다.
+  // ── 상태 ───────────────────────────────────────────────
+  function makeHero(def, x, y) {
+    return {
+      id: def.id, name: def.name, short: def.short, kind: 'hero', def, speed: def.speed, hp: def.hp, maxHp: def.hp,
+      x, y, facing: { x: 0, y: -1 }, down: false, moving: false,
+      atkT: 0, combo: 0, comboT: 0, atkQueue: 0, skillCd: 0, dodgeCd: 0, dodgeT: 0, dodgeDir: null,
+      stunT: 0, invulnT: 0, hitFlash: 0, autoT: 0, path: [], pathT: 0, pickT: 0, lungeT: 0,
+    };
+  }
+  function makeSoldier(def, x, y) {
+    return {
+      id: def.id, name: def.name, short: def.short, kind: 'soldier', def, speed: def.speed, hp: def.hp, maxHp: def.hp,
+      x, y, facing: { x: 0, y: 1 }, down: false, moving: false, order: 'idle', post: null, gate: null, slot: -1,
+      path: [], pathT: 0, downT: 0, stunT: 0, hitFlash: 0, home: { x, y },
+    };
+  }
+
+  function createChase(stage, opts) {
+    opts = opts || {};
+    const g = opts.graph || buildGraph(stage);
+    const S0 = stage.CHASE_START;
+    const st = {
+      stage, g, w: g.w, t: 0, over: null, events: [], control: S0.control, switchCd: 0,
+      units: [], runner: null, gwihwa: [], doc: null, sealDone: false, projectiles: [], respawns: [],
+      log: null, gwSeq: 0,
+    };
+    for (const h of stage.HEROES) st.units.push(makeHero(h, S0[h.id][0], S0[h.id][1]));
+    for (const s of stage.SOLDIERS) st.units.push(makeSoldier(s, S0[s.id][0], S0[s.id][1]));
+    st.runner = {
+      x: S0.runner[0], y: S0.runner[1], state: 'prep', prepT: K.PREP, target: 'N', path: [], pathT: 0,
+      latch: { N: 0, S: 0 }, gateHits: 0, pushQueue: [], pushT: 0, pushing: null,
+      shoveCd: 0, shoveWind: 0, flinchT: 0, flinchCd: 0, slowT: 0,
+      gauge: K.GAUGE, segSum: 0, facing: { x: -1, y: 0 }, lastDir: { x: -1, y: 0 }, subdued: false, trailT: 0, trail: [],
+      hitFlash: 0, engagement: null,
+    };
+    st.log = {
+      engagements: [], hits: { back: 0, front: 0, running: 0, capped: 0, ranged: 0 }, subdueTotal: 0,
+      firstAttackT: null, firstHitT: null, sealAt: null, docPickedAt: null, docSkipped: null,
+      gwihwaDown: 0, gwihwaSpawned: 0, alliesDown: [], damageTaken: 0, switches: 0, soldierOrders: [], skills: [], dodges: 0,
+      attacks: 0, result: null, endT: null, latchAtEnd: null,
+    };
+    return st;
+  }
+
+  function unit(st, id) { return st.units.find((u) => u.id === id); }
+  function ctlUnit(st) { return unit(st, st.control); }
+  function heroes(st) { return st.units.filter((u) => u.kind === 'hero'); }
+  function norm(x, y) { const d = hyp(x, y); return d > 1e-9 ? { x: x / d, y: y / d } : { x: 0, y: 0 }; }
+
+  // ── 조종 · 명령 ─────────────────────────────────────────
   function switchControl(st, id) {
     const u = unit(st, id);
-    if (!u || u.down || u.kind !== 'hero' || st.control === id) return false;
-    const prev = unit(st, st.control);
-    if (prev && !prev.down) {
-      prev.state = 'guard'; prev.home = { x: prev.x, y: prev.y }; prev.target = null; prev.path = []; prev.holding = false;
-    }
-    u.state = 'controlled'; u.path = []; u.target = null; u.holding = false;
-    st.control = id;
-    if (st.log) st.log.switches++;
+    if (!u || u.down || u.kind !== 'hero' || st.control === id || st.switchCd > 0) return false;
+    const prev = ctlUnit(st);
+    if (prev) { prev.atkQueue = 0; prev.pickT = 0; }
+    st.control = id; st.switchCd = K.SWITCH_CD; u.path = [];
+    st.log.switches++;
+    st.events.push({ type: 'switch', id });
     return true;
   }
 
-  function follow(st, id) {
+  // 관군 [북문] [남문] [따라와]
+  function commandSoldier(st, id, order) {
     const u = unit(st, id);
-    if (!u || u.down || u.state === 'controlled') return false;
-    u.state = 'follow'; u.target = null; u.path = [];
+    if (!u || u.kind !== 'soldier' || u.down) return false;
+    st.log.soldierOrders.push({ t: round(st.t), id, order });
+    if (order === 'follow') { u.order = 'follow'; u.gate = null; u.post = null; u.path = []; return true; }
+    const gate = st.stage.GATES[order];
+    const other = st.units.find((o) => o !== u && o.kind === 'soldier' && !o.down && o.gate === order);
+    const slot = other ? 1 - other.slot : 0;
+    u.order = 'post'; u.gate = order; u.slot = slot;
+    u.post = { x: gate.posts[slot][0], y: gate.posts[slot][1] };
+    u.path = planPath(st, u, u.post);
     return true;
-  }
-
-  function stepAlong(st, u, dt) {
-    if (!u.path.length) return true;
-    let budget = u.speed * dt * (inMarket(st.w, u.x, u.y) ? K.MARKET_SLOW : 1);
-    while (budget > 0 && u.path.length) {
-      const q = u.path[0];
-      const d = hyp(q.x - u.x, q.y - u.y);
-      if (d <= budget) {
-        if (blockedByGwihwa(st, u, q.x, q.y)) return false;
-        u.x = q.x; u.y = q.y; budget -= d; u.path.shift();
-      } else {
-        const nx = u.x + (q.x - u.x) / d * budget, ny = u.y + (q.y - u.y) / d * budget;
-        if (blockedByGwihwa(st, u, nx, ny)) return false;
-        u.facing = Math.atan2(q.y - u.y, q.x - u.x);
-        u.x = nx; u.y = ny; budget = 0;
-      }
-    }
-    u.moving = true;
-    return !u.path.length;
-  }
-
-  // 귀화 몸: 아군은 못 지나간다
-  function blockedByGwihwa(st, u, nx, ny) {
-    // 운반자 몸도 뚫고 지나가지 않는다
-    const r = st.runner;
-    if (r && !r.subdued) {
-      const d0 = hyp(u.x - r.x, u.y - r.y), d1 = hyp(nx - r.x, ny - r.y);
-      if (d1 < K.R_BODY + K.R_RUNNER && d1 < d0) return true;
-    }
-    for (const gw of st.gwihwa) {
-      const d0 = hyp(u.x - gw.x, u.y - gw.y), d1 = hyp(nx - gw.x, ny - gw.y);
-      if (d1 < K.R_BODY * 2 && d1 < d0) return true;
-    }
-    return false;
   }
 
   // ── 한 걸음 ──────────────────────────────────────────────
-  // input: { mx, my (−1..1 스틱), action (이번 틱에 눌림) }
+  // input: { mx, my (−1..1), attack (이번 틱에 눌림), attackHeld, skill, dodge }
   function step(st, dt, input) {
     if (st.over) return;
     input = input || {};
     st.t += dt;
+    st.switchCd = Math.max(0, st.switchCd - dt);
     const r = st.runner;
 
-    // 조종 인물
-    const ctl = unit(st, st.control);
+    // 조종 인물이 퇴장했으면 다음 인물로
+    let me = ctlUnit(st);
+    if (!me || me.down) {
+      const next = heroes(st).find((u) => !u.down);
+      if (next) { st.control = next.id; me = next; st.events.push({ type: 'switch', id: next.id, forced: true }); }
+    }
+
     for (const u of st.units) {
-      u.moving = false;
+      u.hitFlash = Math.max(0, u.hitFlash - dt);
+      u.invulnT = Math.max(0, (u.invulnT || 0) - dt);
       if (u.down) continue;
-      u.grabCd = Math.max(0, u.grabCd - dt);
-      u.skillCd = Math.max(0, u.skillCd - dt);
-      u.hitT = Math.max(0, u.hitT - dt);
-      if (u.stunT > 0) {
-        u.stunT -= dt;
-        if (u.stunT <= 0 && u.state !== 'controlled' && hyp(u.home.x - u.x, u.home.y - u.y) > 2) {
-          // 밀린 아군은 굳음이 풀리면 제자리로 걸어 돌아간다 (8-5)
-          u.path = planPath(st, u, u.home);
-          u.state = u.state === 'follow' ? 'follow' : 'moving';
-        }
-        continue;
+      if (u.kind === 'hero') {
+        u.skillCd = Math.max(0, u.skillCd - dt); u.dodgeCd = Math.max(0, u.dodgeCd - dt);
+        u.atkT = Math.max(0, u.atkT - dt); u.comboT = Math.max(0, u.comboT - dt);
+        if (u.comboT <= 0) u.combo = 0;
+        u.lungeT = Math.max(0, u.lungeT - dt);
       }
-      if (u.state === 'controlled') {
-        const m = Math.min(1, hyp(input.mx || 0, input.my || 0));
-        if (m > 0.05) {
-          const sp = u.speed * m * (inMarket(st.w, u.x, u.y) ? K.MARKET_SLOW : 1) * dt;
-          const ang = Math.atan2(input.my, input.mx);
-          const q = moveCircle(st.w, u, Math.cos(ang) * sp, Math.sin(ang) * sp, K.R_BODY);
-          if (!blockedByGwihwa(st, u, q.x, q.y) && !(hyp(q.x - r.x, q.y - r.y) < K.R_BODY + K.R_RUNNER && hyp(q.x - r.x, q.y - r.y) < hyp(u.x - r.x, u.y - r.y))) {
-            u.x = q.x; u.y = q.y;
-          }
-          u.facing = ang; u.moving = true;
-        }
-      } else if (u.state === 'moving' && !u.holding) {
-        // 붙잡고 있는 동안은 멈춰 선다
-        if (stepAlong(st, u, dt)) { u.state = 'guard'; u.path = []; }
-      }
+      u.moving = false;
+      if (u.stunT > 0) { u.stunT -= dt; continue; }
+      if (u === me) stepControlled(st, u, dt, input);
+      else if (u.kind === 'hero') stepCompanion(st, u, dt);
+      else stepSoldier(st, u, dt);
     }
 
-    // 행동 버튼 (조종 인물): 붙잡기 > 치기
-    if (input.action && ctl && !ctl.down && ctl.stunT <= 0) {
-      st.mashT = st.t;
-      // 가까운 것에 맞춰: 운반자와 귀화가 둘 다 팔 길이 안이면 더 가까운 쪽 (붙잡는 중이면 계속 붙잡기)
-      const kind = actionKind(st);
-      if (kind === 'grab') {
-        if (ctl.grabCd <= 0 && r.immuneT <= 0 && !ctl.holding) ctl.holding = true;
-      } else if (kind === 'hit') {
-        const gw = nearestGwihwa(st, ctl, K.ARM);
-        if (gw && ctl.hitT <= 0) { hitGwihwa(st, gw, K.HIT_DMG); ctl.hitT = K.HIT_INTERVAL; }
-      }
-    }
-
+    stepProjectiles(st, dt);
     stepRunner(st, dt);
-    stepGrab(st, dt);
     stepGwihwa(st, dt);
-    for (const b of st.barriers) b.t -= dt;
-    st.barriers = st.barriers.filter((b) => b.t > 0);
+    stepRespawn(st, dt);
 
-    // 조종 중이던 인물이 퇴장하면 다음 인물로
-    if (ctl && ctl.down) {
-      const next = st.units.find((u) => u.kind === 'hero' && !u.down);
-      if (next) { next.state = 'controlled'; next.path = []; st.control = next.id; }
-    }
+    if (!st.sealDone && !r.subdued && st.t >= K.SEAL_FALLBACK_T) seal(st, false);
 
-    // 파일럿 보조: 2분 30초가 지나도 봉인 문서가 안 나왔으면 그때 발생
-    if (!st.sealDone && st.t >= K.SEAL_FALLBACK_T && !r.subdued) seal(st, false);
-
-    // 패배 (9장)
     if (!st.over) {
-      if (r.y < st.stage.EXITS.N.lineY) end(st, 'escape', 'N');
-      else if (r.y > st.stage.EXITS.S.lineY) end(st, 'escape', 'S');
-      else if (st.units.filter((u) => u.kind === 'hero').every((u) => u.down)) end(st, 'wipe');
+      if (r.latch.N >= K.LATCH_T) end(st, 'escape', 'N');
+      else if (r.latch.S >= K.LATCH_T) end(st, 'escape', 'S');
+      else if (heroes(st).every((u) => u.down)) end(st, 'wipe');
       else if (st.t >= K.TIME_LIMIT) end(st, 'timeout');
     }
-    // 운반자 경로 기록 (결과 화면 경로선)
     r.trailT -= dt;
-    if (r.trailT <= 0) { r.trailT = 0.25; r.path.push([round(st.t), Math.round(r.x), Math.round(r.y)]); }
+    if (r.trailT <= 0) { r.trailT = 0.25; r.trail.push([round(st.t), Math.round(r.x), Math.round(r.y)]); }
   }
 
   function end(st, result, gate) {
+    const r = st.runner;
+    closeEngagement(st, result);
     st.over = { result, gate: gate || null, t: st.t };
     st.log.result = result + (gate ? ':' + gate : '');
     st.log.endT = round(st.t);
+    st.log.latchAtEnd = { N: round(r.latch.N / K.LATCH_T * 100), S: round(r.latch.S / K.LATCH_T * 100) };
+    st.log.gaugeAtEnd = round(r.gauge);
+    if (result === 'win') st.gwihwa = [];
     st.events.push({ type: result === 'win' ? 'subdued' : 'defeat', result, gate });
   }
 
+  // ── 조종 인물 ───────────────────────────────────────────
+  function stepControlled(st, u, dt, input) {
+    const m = Math.min(1, hyp(input.mx || 0, input.my || 0));
+    const stick = m > 0.05 ? { x: input.mx / m, y: input.my / m } : null;
+    // 회피: 0.25초 대시 90u, 무적
+    if (input.dodge && u.dodgeCd <= 0 && u.dodgeT <= 0) {
+      u.dodgeT = K.DODGE_T; u.dodgeCd = K.DODGE_CD; u.invulnT = K.DODGE_T;
+      u.dodgeDir = stick || u.facing; u.pickT = 0;
+      st.log.dodges++;
+      st.events.push({ type: 'dodge', id: u.id });
+    }
+    if (u.dodgeT > 0) {
+      const sp = K.DODGE_DIST / K.DODGE_T * Math.min(dt, u.dodgeT);
+      u.dodgeT -= dt;
+      moveUnit(st, u, u.dodgeDir.x * sp, u.dodgeDir.y * sp, true);
+      u.moving = true;
+      return;
+    }
+    if (stick) {
+      const sp = u.speed * m * dt;
+      moveUnit(st, u, stick.x * sp, stick.y * sp, false);
+      u.facing = stick; u.moving = true;
+    }
+    // 문서 수습: 문서 옆에서 공격 버튼을 누르고 있기
+    const doc = st.doc;
+    const nearDoc = doc && !doc.picked && hyp(doc.x - u.x, doc.y - u.y) <= K.DOC_R;
+    if (nearDoc && input.attackHeld) {
+      u.pickT += dt;
+      const need = u.id === 'soun' ? K.DOC_PICK_T_SOUN : K.DOC_PICK_T;
+      if (u.pickT >= need) {
+        doc.picked = true; u.pickT = 0;
+        if (K.DOC_BANISH) { const n0 = st.gwihwa.length; st.gwihwa = st.gwihwa.filter((g) => g.from !== 'doc'); st.log.gwihwaBanished = n0 - st.gwihwa.length; }
+        st.log.docPickedAt = round(st.t);
+        st.events.push({ type: 'docPicked', by: u.id });
+      }
+    } else u.pickT = 0;
+    if (input.attack && !nearDoc) u.atkQueue = K.ATK_BUFFER;
+    else u.atkQueue = Math.max(0, u.atkQueue - dt);
+    if (u.atkQueue > 0 && u.atkT <= 0) { u.atkQueue = 0; attack(st, u); }
+    if (input.skill && u.skillCd <= 0) useSkill(st, u, stick || u.facing);
+  }
+
+  function moveUnit(st, u, dx, dy, dodging) {
+    const q = moveCircle(st.w, u, dx, dy, K.R_BODY);
+    // 운반자·귀화 몸은 뚫지 못한다 (회피 중에는 귀화를 빠져나갈 수 있다)
+    const r = st.runner;
+    const blockers = [];
+    if (!r.subdued) blockers.push({ x: r.x, y: r.y });
+    if (!dodging) for (const gw of st.gwihwa) if (gw.riseT <= 0) blockers.push(gw);
+    for (const b of blockers) {
+      const d0 = hyp(u.x - b.x, u.y - b.y), d1 = hyp(q.x - b.x, q.y - b.y);
+      if (d1 < K.R_BODY * 2 && d1 < d0) {
+        // 몸 둘레를 따라 미끄러지게: 접선 방향 성분만 남긴다
+        const n = norm(u.x - b.x, u.y - b.y);
+        const along = dx * -n.y + dy * n.x;
+        const q2 = moveCircle(st.w, u, -n.y * along, n.x * along, K.R_BODY);
+        if (hyp(q2.x - b.x, q2.y - b.y) >= K.R_BODY * 2 - 0.5) { u.x = q2.x; u.y = q2.y; }
+        return;
+      }
+    }
+    u.x = q.x; u.y = q.y;
+  }
+
+  // 가까운 적 (운반자·피어오른 귀화)
+  function nearestEnemy(st, u, within) {
+    let best = null, bd = within;
+    const r = st.runner;
+    if (!r.subdued) { const d = hyp(r.x - u.x, r.y - u.y); if (d <= bd) { bd = d; best = { kind: 'runner', ref: r, d }; } }
+    for (const gw of st.gwihwa) {
+      if (gw.riseT > 0) continue;
+      const d = hyp(gw.x - u.x, gw.y - u.y);
+      if (d <= bd) { bd = d; best = { kind: 'gw', ref: gw, d }; }
+    }
+    return best;
+  }
+
+  // ── 기본 공격 (연타 콤보) ─────────────────────────────────
+  function attack(st, u) {
+    const a = u.def.atk;
+    const idx = u.combo % a.waits.length;
+    const tgt = nearestEnemy(st, u, a.kind === 'melee' ? K.AUTO_FACE_R : a.range + 16);
+    if (tgt) u.facing = norm(tgt.ref.x - u.x, tgt.ref.y - u.y);
+    u.atkT = a.waits[idx];
+    u.combo = idx + 1; u.comboT = a.waits[idx] + K.COMBO_RESET;
+    if (u.combo >= a.waits.length) u.combo = 0;
+    st.log.attacks++;
+    if (st.log.firstAttackT === null) st.log.firstAttackT = round(st.t);
+    const last = idx === a.waits.length - 1;
+    st.events.push({ type: 'swing', id: u.id, kind: a.kind, idx, last });
+    if (a.kind === 'melee') {
+      u.lungeT = 0.12;
+      const reach = a.reach + K.R_BODY;
+      for (const gw of st.gwihwa.slice()) {
+        if (gw.riseT > 0) continue;
+        if (inFan(u, gw, reach, a.arc)) hitGwihwa(st, gw, a.dmg[idx], u, 10);
+      }
+      const r = st.runner;
+      if (!r.subdued && inFan(u, r, reach, a.arc)) hitRunner(st, u, { subdue: a.subdue[idx], ranged: false, kind: 'melee' });
+    } else if (a.kind === 'arrow') {
+      // 자동 조준 · 즉시 명중 (건물에 가리면 못 쏨)
+      if (tgt && tgt.d <= a.range + 16 && los(st.w, u, tgt.ref)) {
+        st.events.push({ type: 'arrow', x1: u.x, y1: u.y, x2: tgt.ref.x, y2: tgt.ref.y });
+        if (tgt.kind === 'gw') hitGwihwa(st, tgt.ref, a.dmg[0], u, 6);
+        else hitRunner(st, u, { subdue: 0, ranged: true, kind: 'arrow' });
+      } else st.events.push({ type: 'arrow', x1: u.x, y1: u.y, x2: u.x + u.facing.x * a.range, y2: u.y + u.facing.y * a.range, miss: true });
+    } else if (a.kind === 'charm') {
+      const dir = tgt && tgt.d <= a.range + 16 ? norm(tgt.ref.x - u.x, tgt.ref.y - u.y) : u.facing;
+      st.projectiles.push({ x: u.x, y: u.y, vx: dir.x * a.speed, vy: dir.y * a.speed, left: a.range, dmg: a.dmg[0], owner: u.id });
+    }
+  }
+
+  function inFan(u, t, reach, arc) {
+    const dx = t.x - u.x, dy = t.y - u.y, d = hyp(dx, dy);
+    if (d > reach + K.R_BODY) return false;
+    if (d < K.R_BODY * 2 + 2) return true; // 몸이 닿아 있으면 방향과 상관없이
+    const c = (dx * u.facing.x + dy * u.facing.y) / d;
+    return c >= Math.cos(arc);
+  }
+
+  function stepProjectiles(st, dt) {
+    for (const p of st.projectiles) {
+      const s = hyp(p.vx, p.vy) * dt;
+      const nx = p.x + p.vx * dt, ny = p.y + p.vy * dt;
+      p.left -= s;
+      if (!valid(st.w, nx, ny, 0)) { p.dead = true; continue; }
+      p.x = nx; p.y = ny;
+      const owner = unit(st, p.owner);
+      for (const gw of st.gwihwa) {
+        if (gw.riseT > 0) continue;
+        if (hyp(gw.x - p.x, gw.y - p.y) <= K.R_BODY + 6) { hitGwihwa(st, gw, p.dmg, owner, 4); p.dead = true; break; }
+      }
+      const r = st.runner;
+      if (!p.dead && !r.subdued && hyp(r.x - p.x, r.y - p.y) <= K.R_BODY + 6) {
+        // 조종 인물이 던진 부적만 운반자에 "맞음" (제압치 0)
+        if (owner && owner.id === st.control) hitRunner(st, owner, { subdue: 0, ranged: true, kind: 'charm' });
+        p.dead = true;
+      }
+      if (p.left <= 0) p.dead = true;
+    }
+    st.projectiles = st.projectiles.filter((p) => !p.dead);
+  }
+
+  // ── 기술 (재사용 6초, 조종 인물만) ──────────────────────────
+  function useSkill(st, u, dir) {
+    const sk = u.def.skill;
+    dir = norm(dir.x, dir.y);
+    if (!dir.x && !dir.y) dir = u.facing;
+    const tgt = nearestEnemy(st, u, 160);
+    if (tgt && sk.id !== 'chukji' && sk.id !== 'byeoksa') dir = norm(tgt.ref.x - u.x, tgt.ref.y - u.y);
+    u.facing = dir; u.skillCd = K.SKILL_CD;
+    st.log.skills.push({ t: round(st.t), who: u.id, skill: sk.id });
+    if (st.log.firstAttackT === null) st.log.firstAttackT = round(st.t);
+    const r = st.runner;
+    const ev = { type: 'skill', id: u.id, skill: sk.id, x1: u.x, y1: u.y };
+    if (sk.id === 'byeoksa') {
+      // 앞으로 100u 돌진 베기. 경로의 귀화를 밀쳐 내며 피해 10
+      const from = { x: u.x, y: u.y };
+      const hitSet = new Set();
+      const n = 10;
+      for (let i = 0; i < n; i++) {
+        moveUnit(st, u, dir.x * sk.dash / n, dir.y * sk.dash / n, true);
+        for (const gw of st.gwihwa) {
+          if (gw.riseT > 0 || hitSet.has(gw)) continue;
+          if (hyp(gw.x - u.x, gw.y - u.y) <= K.R_BODY * 2 + 12) { hitSet.add(gw); hitGwihwa(st, gw, sk.dmg, u, 36); }
+        }
+        if (!r.subdued && !hitSet.has(r) && hyp(r.x - u.x, r.y - u.y) <= K.R_BODY * 2 + 14) { hitSet.add(r); hitRunner(st, u, { subdue: sk.subdue, ranged: false, kind: 'skill' }); }
+      }
+      ev.x1 = from.x; ev.y1 = from.y; ev.x2 = u.x; ev.y2 = u.y;
+    } else if (sk.id === 'gyeonje') {
+      // 관통 화살 300u: 운반자 2.5초 −40%, 귀화 피해 8 (제압치 0)
+      let ex = u.x, ey = u.y;
+      const hitSet = new Set();
+      for (let s = 0; s <= sk.range; s += 4) {
+        const x = u.x + dir.x * s, y = u.y + dir.y * s;
+        if (!valid(st.w, x, y, 0)) break;
+        ex = x; ey = y;
+        for (const gw of st.gwihwa) if (gw.riseT <= 0 && !hitSet.has(gw) && hyp(gw.x - x, gw.y - y) <= K.R_BODY + 4) { hitSet.add(gw); hitGwihwa(st, gw, sk.dmg, u, 8); }
+        if (!r.subdued && !hitSet.has(r) && hyp(r.x - x, r.y - y) <= K.R_BODY + 4) { hitSet.add(r); r.slowT = sk.slowT; hitRunner(st, u, { subdue: 0, ranged: true, kind: 'skill' }); }
+      }
+      ev.x2 = ex; ev.y2 = ey;
+    } else if (sk.id === 'chukji') {
+      // 바라보는 쪽 140u 순간 이동 (벽 통과 불가) + 도착 지점 치기
+      let bx = u.x, by = u.y;
+      for (let s = 4; s <= sk.dist; s += 4) {
+        const x = u.x + dir.x * s, y = u.y + dir.y * s;
+        if (!valid(st.w, x, y, K.R_BODY)) break;
+        const blockedBody = (!r.subdued && hyp(r.x - x, r.y - y) < K.R_BODY * 2) || st.gwihwa.some((gw) => gw.riseT <= 0 && hyp(gw.x - x, gw.y - y) < K.R_BODY * 2);
+        if (blockedBody) break;
+        bx = x; by = y;
+      }
+      u.x = bx; u.y = by;
+      for (const gw of st.gwihwa.slice()) if (gw.riseT <= 0 && hyp(gw.x - u.x, gw.y - u.y) <= sk.reach + K.R_BODY * 2) hitGwihwa(st, gw, sk.dmg, u, 12);
+      if (!r.subdued && hyp(r.x - u.x, r.y - u.y) <= sk.reach + K.R_BODY * 2) {
+        u.facing = norm(r.x - u.x, r.y - u.y);
+        hitRunner(st, u, { subdue: sk.subdue, ranged: false, kind: 'skill' });
+      }
+      ev.x2 = u.x; ev.y2 = u.y;
+    } else if (sk.id === 'hwayeom') {
+      // 앞쪽 원형 불 (반지름 45, 중심은 45u 앞) — 귀화 피해 12 = 한 번에 퇴송
+      const cx = u.x + dir.x * sk.ahead, cy = u.y + dir.y * sk.ahead;
+      for (const gw of st.gwihwa.slice()) if (gw.riseT <= 0 && hyp(gw.x - cx, gw.y - cy) <= sk.radius + K.R_BODY) hitGwihwa(st, gw, sk.dmg, u, 20);
+      if (!r.subdued && hyp(r.x - cx, r.y - cy) <= sk.radius + K.R_BODY) hitRunner(st, u, { subdue: sk.subdue, ranged: false, kind: 'skill' });
+      ev.x2 = cx; ev.y2 = cy; ev.radius = sk.radius;
+    }
+    st.events.push(ev);
+  }
+
+  // ── 운반자가 맞았을 때 (8-2 규칙 3·5, 8-3) ─────────────────
+  function runnerWorking(r) { return r.state === 'push' || r.state === 'work'; }
+
+  function hitRunner(st, u, h) {
+    const r = st.runner;
+    if (r.subdued) return;
+    const isCtl = u && u.id === st.control;
+    let amount = 0, back = false, capped = false;
+    r.hitFlash = 0.12;
+    if (st.log.firstHitT === null) st.log.firstHitT = round(st.t);
+    if (runnerWorking(r)) {
+      // 성문에서 일하는 중 [v2-수정2]: 바라보는 쪽 ±60° 는 막힘(0), 옆·뒤 ×1, 빗장 진행 −2초, 옆·뒤 2타(봉인 뒤 1타)에 포기
+      const f = K.TURN ? r.facing : st.stage.GATES[r.target].face;
+      { const v = norm(u.x - r.x, u.y - r.y); back = (v.x * f.x + v.y * f.y) < -K.BACK_COS; }
+      if (K.FRONT_ZERO && !back) {
+        st.log.hits.blocked = (st.log.hits.blocked || 0) + 1;
+        st.events.push({ type: 'hitRunner', by: u ? u.id : null, amount: 0, back: false, blocked: true, working: true });
+        return;
+      }
+      if (isCtl && !h.ranged) amount = h.subdue * (back ? K.BACK_MULT : 1);
+      r.latch[r.target] = Math.max(0, r.latch[r.target] - K.LATCH_HIT);
+      r.gateHits++;
+      const eg = r.engagement || openEngagement(st);
+      eg.hits++; if (back) eg.back++; eg.subdue += amount;
+      if (h.ranged) st.log.hits.ranged++; else if (back) st.log.hits.back++; else st.log.hits.front++;
+    } else {
+      // 달리는 중: 한 구간 제압치 합 ≤ 2, 비틀은 3초에 한 번
+      if (isCtl && !h.ranged) {
+        const room = Math.max(0, K.SEG_CAP - r.segSum);
+        amount = Math.min(h.subdue, room);
+        capped = h.subdue > room;
+        r.segSum += amount;
+      }
+      if (r.flinchCd <= 0 && r.state === 'run') { r.flinchT = K.FLINCH_T; r.flinchCd = K.FLINCH_CD; }
+      st.log.hits.running++;
+      if (capped) st.log.hits.capped++;
+      if (h.ranged) st.log.hits.ranged++;
+    }
+    if (amount > 0) { r.gauge = Math.max(0, r.gauge - amount); st.log.subdueTotal = round(st.log.subdueTotal + amount); }
+    st.events.push({ type: 'hitRunner', by: u ? u.id : null, amount, back, capped, ranged: !!h.ranged, working: runnerWorking(r) });
+    if (r.gauge <= 0) { r.subdued = true; r.state = 'subdued'; end(st, 'win'); return; }
+    if (!st.sealDone && r.gauge <= K.SEAL_AT) { seal(st, true); return; }
+    if (runnerWorking(r) && r.gateHits >= (st.sealDone && K.GATE_HITS_SEAL ? K.GATE_HITS_SEAL : K.GATE_HITS)) abandonGate(st);
+  }
+
+  function openEngagement(st) {
+    const r = st.runner;
+    r.engagement = { gate: r.target, t: round(st.t), hits: 0, back: 0, subdue: 0, end: null };
+    st.log.engagements.push(r.engagement);
+    return r.engagement;
+  }
+  function closeEngagement(st, why) {
+    const r = st.runner;
+    if (r.engagement) { r.engagement.end = why; r.engagement.subdue = round(r.engagement.subdue); r.engagement.endT = round(st.t); r.engagement = null; }
+  }
+
+  // 규칙 3 [v2-수정2]: 성문에서 옆·뒤로 2번(봉인 뒤 1번) 맞으면 주변 아군을 밀쳐 내고 반대 성문으로
+  function abandonGate(st) {
+    const r = st.runner;
+    pushAround(st, K.ABANDON_R, K.ABANDON_PUSH, K.ABANDON_STUN);
+    closeEngagement(st, 'abandon');
+    const other = r.target === 'N' ? 'S' : 'N';
+    startRun(st, other);
+    st.events.push({ type: 'abandon', to: other });
+  }
+
+  function pushAround(st, radius, dist, stun) {
+    const r = st.runner;
+    for (const u of st.units) {
+      if (u.down || (u.kind === 'soldier' && u.downT > 0)) continue;
+      const d = hyp(u.x - r.x, u.y - r.y);
+      if (d > radius + K.R_BODY) continue;
+      if (u.invulnT > 0) continue;
+      const n = d > 1e-6 ? norm(u.x - r.x, u.y - r.y) : { x: 0, y: 1 };
+      pushUnit(st, u, n.x, n.y, dist);
+      u.stunT = Math.max(u.stunT, stun); u.atkQueue = 0; u.pickT = 0;
+    }
+  }
+
+  function pushUnit(st, u, nx, ny, dist) {
+    const n = 8;
+    for (let i = 0; i < n; i++) { const q = moveCircle(st.w, u, nx * dist / n, ny * dist / n, K.R_BODY); u.x = q.x; u.y = q.y; }
+  }
+
+  function startRun(st, gate) {
+    const r = st.runner;
+    r.target = gate; r.state = 'run'; r.gateHits = 0; r.segSum = 0; r.pushQueue = []; r.pushing = null; r.pathT = 0; r.path = [];
+  }
+
+  // 먼 성문 = 조종 인물에게서 길이 먼 성문
+  function farGate(st) {
+    const me = ctlUnit(st);
+    if (!me) return 'N';
+    const dN = pathLength(me, planPath(st, me, pt(st.stage.GATES.N.latch)));
+    const dS = pathLength(me, planPath(st, me, pt(st.stage.GATES.S.latch)));
+    return dN >= dS ? 'N' : 'S';
+  }
+  function pt(a) { return { x: a[0], y: a[1] }; }
+
+  // ── 운반자 (8-2) ───────────────────────────────────────
   function stepRunner(st, dt) {
     const r = st.runner;
     if (r.subdued) return;
-    r.immuneT = Math.max(0, r.immuneT - dt);
+    r.hitFlash = Math.max(0, r.hitFlash - dt);
+    r.flinchCd = Math.max(0, r.flinchCd - dt);
     r.slowT = Math.max(0, r.slowT - dt);
-    for (const k of Object.keys(r.nearCd)) r.nearCd[k] = Math.max(0, r.nearCd[k] - dt);
-
-    if (r.windup > 0) { r.windup -= dt; }
-
-    // 1초마다 다시 계산 (규칙 2)
-    r.recalcT = (r.recalcT || 0) - dt;
-    if (r.recalcT <= 0 && !r.held) { r.recalcT = K.RECALC; replan(st, false); }
-    st.distT -= dt;
-    if (st.distT <= 0) { st.distT = 0.25; updateGateDist(st); }
-
-    // 예고가 끝나면 길을 바꾼다
-    if (r.pending) {
-      r.warnT -= dt;
-      if (r.warnT <= 0) { setRoute(st, r.pending); r.pending = null; st.events.push({ type: 'routeSwitch', name: r.routeName }); }
-    }
-
-    // 숨 (규칙 5): 아군이 72u 안에 오면 비켜 달림 = 숨 −25
-    for (const u of st.units) {
-      if (u.down) continue;
-      const d = hyp(u.x - r.x, u.y - r.y);
-      const was = r.nearCd[u.id + ':in'];
-      if (d <= K.NEAR) {
-        if (!was && !(r.nearCd[u.id] > 0) && r.windup <= 0 && !r.held) {
-          loseBreath(st, K.BREATH_HIT, 'near');
-          r.nearCd[u.id] = K.BREATH_CD;
-        }
-        r.nearCd[u.id + ':in'] = 1;
-      } else if (d > K.NEAR + 8) {
-        r.nearCd[u.id + ':in'] = 0;
+    r.shoveCd = Math.max(0, r.shoveCd - dt);
+    if (r.state === 'prep') { r.prepT -= dt; if (r.prepT <= 0) startRun(st, 'N'); return; }
+    if (r.flinchT > 0) { r.flinchT -= dt; return; }
+    const gate = st.stage.GATES[r.target];
+    if (r.state === 'run') {
+      stepShove(st, dt);
+      const goal = pt(gate.latch);
+      r.pathT -= dt;
+      if (r.pathT <= 0 || !r.path.length) { r.pathT = 0.5; r.path = runnerPath(st, goal); }
+      const sp = K.RUN * (r.slowT > 0 ? 1 - st.stage.HEROES.find((h) => h.id === 'hangyeol').skill.slow : 1) * dt;
+      const x0 = r.x, y0 = r.y;
+      runnerMove(st, sp);
+      // 빗장 28u 안에서 몸에 막혀 못 다가가면 그 자리에서 일을 시작한다 (빗장 옆에 서서 영원히 못 붙게 하는 끼임 방지)
+      const stuckNear = hyp(goal.x - r.x, goal.y - r.y) <= 28 && hyp(r.x - x0, r.y - y0) < sp * 0.2;
+      // 성문 앞 관군이 있으면 밀쳐 내기부터
+      const guards = st.units.filter((u) => u.kind === 'soldier' && !u.down && u.downT <= 0 && u.gate === r.target && u.order === 'post' && hyp(u.x - u.post.x, u.y - u.post.y) < 20);
+      const nearGuard = guards.find((u) => hyp(u.x - r.x, u.y - r.y) <= K.R_BODY * 2 + 20);
+      if (nearGuard) {
+        r.state = 'push'; r.pushQueue = guards.slice(); r.pushT = K.PUSH_SOLDIER_T; r.pushing = r.pushQueue[0];
+        r.facing = { x: gate.face.x, y: gate.face.y };
+        arriveFace(st, r);
+        st.events.push({ type: 'gateArrive', gate: r.target });
+        pendingGw2(st);
+        return;
       }
-    }
-    if (r.walkT > 0) { r.walkT -= dt; if (r.walkT <= 0) r.breath = K.BREATH; }
-
-    if (r.windup > 0 || r.held || r.crouch) return;
-    if (!r.route.length) {
-      if (r.cornered) r.crouch = true;
+      if (hyp(goal.x - r.x, goal.y - r.y) <= 6 || stuckNear) {
+        r.state = 'work'; r.facing = { x: gate.face.x, y: gate.face.y };
+        arriveFace(st, r);
+        st.events.push({ type: 'gateArrive', gate: r.target });
+        pendingGw2(st);
+      }
       return;
     }
-    const g = st.g;
-    let sp = (r.walkT > 0 ? K.WALK : K.RUN) * (r.slowT > 0 ? 1 - K.SHOT_SLOW : 1) * (inMarket(st.w, r.x, r.y) ? K.MARKET_SLOW : 1);
-    let budget = sp * dt;
-    const obs = obstacles(st);
-    let guard = 0;
-    const startX = r.x, startY = r.y;
-    while (budget > 1e-6 && r.route.length && guard++ < 4) {
-      const q = g.pos[r.route[0]];
-      const d = hyp(q.x - r.x, q.y - r.y);
-      if (d < 4) {
-        r.route.shift();
-        if (!r.route.length && r.cornered) { r.crouch = true; break; }
-        continue;
+    if (r.state === 'push' || r.state === 'work') { alertTurn(st, r, gate, dt); if (K.GATE_SHOVE) stepShove(st, dt, true); }
+    if (r.state === 'push') {
+      if (!K.TURN) r.facing = { x: gate.face.x, y: gate.face.y };
+      const s = r.pushing;
+      if (!s || s.down || s.downT > 0) { nextPush(st); return; }
+      r.pushT -= dt;
+      if (r.pushT <= 0) {
+        // 관군 한 명 밀쳐 냄: 6초 동안 쓰러짐
+        const n = norm(s.x - r.x, s.y - r.y);
+        pushUnit(st, s, n.x || 0.3, n.y || 1, 24);
+        s.downT = K.SOLDIER_DOWN_T; s.path = [];
+        st.events.push({ type: 'soldierShoved', id: s.id });
+        nextPush(st);
       }
-      const stepLen = Math.min(budget, d);
-      const moved = steerStep(st, r, (q.x - r.x) / d, (q.y - r.y) / d, stepLen, obs);
-      budget -= stepLen;
-      if (!moved) break;
+      return;
     }
-    const mv = hyp(r.x - startX, r.y - startY);
-    if (mv > 0.01) { r.lastDir = { x: (r.x - startX) / mv, y: (r.y - startY) / mv }; r.facing = Math.atan2(r.lastDir.y, r.lastDir.x); r.stuckT = 0; }
-    else if (r.route.length) {
-      r.stuckT += dt;
-      if (r.stuckT > 0.6) { r.stuckT = 0; r.recalcT = 0; }
+    if (r.state === 'work') {
+      const goal = pt(gate.latch);
+      if (hyp(goal.x - r.x, goal.y - r.y) > 4) { runnerMove(st, K.RUN * dt, [goal]); if (hyp(goal.x - r.x, goal.y - r.y) > 28) return; }
+      if (!K.TURN) r.facing = { x: gate.face.x, y: gate.face.y };
+      r.latch[r.target] = Math.min(K.LATCH_T, r.latch[r.target] + dt * (r.alert ? K.ALERT_LATCH : 1));
     }
   }
 
-  function loseBreath(st, n, why) {
+  // v2-수정2: 성문에서 일하는 중 조종 인물이 ALERT_R 안이면 그쪽으로 돌아선다 (초당 TURN 라디안)
+  function alertTurn(st, r, gate, dt) {
+    if (!K.TURN) return;
+    const me = ctlUnit(st);
+    let want = { x: gate.face.x, y: gate.face.y };
+    r.alert = false;
+    if (me && !me.down && hyp(me.x - r.x, me.y - r.y) <= K.ALERT_R) { want = norm(me.x - r.x, me.y - r.y); r.alert = true; }
+    const a0 = Math.atan2(r.facing.y, r.facing.x), a1 = Math.atan2(want.y, want.x);
+    let da = a1 - a0; while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+    const stp = (st.sealDone && K.TURN_SEAL ? K.TURN_SEAL : K.TURN) * dt;
+    const a = Math.abs(da) <= stp ? a1 : a0 + Math.sign(da) * stp;
+    r.facing = { x: Math.cos(a), y: Math.sin(a) };
+  }
+
+  function nextPush(st) {
     const r = st.runner;
-    if (r.walkT > 0) return;
-    r.breath = Math.max(0, r.breath - n);
-    if (r.breath <= 0) { r.walkT = K.BREATH_WALK_T; st.events.push({ type: 'breathOut' }); }
-    void why;
+    r.pushQueue.shift();
+    while (r.pushQueue.length && (r.pushQueue[0].down || r.pushQueue[0].downT > 0)) r.pushQueue.shift();
+    if (r.pushQueue.length) { r.pushing = r.pushQueue[0]; r.pushT = K.PUSH_SOLDIER_T; }
+    else { r.pushing = null; r.state = 'work'; }
   }
 
-  // 가려는 방향을 중심으로 조금씩 틀어 가며 몸·결계에 막히지 않는 쪽으로 한 걸음
-  function steerStep(st, r, ux, uy, len, obs) {
+  // 운반자 길: 동료·관군 몸으로 막힌 골목은 피한다 (조종 인물은 밀치기로 상대)
+  function runnerPath(st, goal) {
+    const r = st.runner;
+    const obs = st.units.filter((u) => !u.down && u.id !== st.control && !(u.kind === 'soldier' && (u.downT > 0 || (u.gate === r.target && u.order === 'post'))))
+      .map((u) => ({ x: u.x, y: u.y, r: K.R_BODY }));
+    const blocked = new Set();
+    for (const e of st.g.edges) {
+      const A = st.g.pos[e.a], B = st.g.pos[e.b];
+      const near = obs.filter((o) => distPointSeg(o.x, o.y, A.x, A.y, B.x, B.y) < 100);
+      if (near.length && samplesBlocked(e.samples, near)) blocked.add(e.i);
+    }
+    return planPath(st, r, goal, blocked, obs) || planPath(st, r, goal, null, obs);
+  }
+
+  function runnerMove(st, len, pathOverride) {
+    const r = st.runner;
+    const path = pathOverride || r.path;
+    let budget = len, guard = 0;
+    const x0 = r.x, y0 = r.y;
+    while (budget > 1e-6 && path.length && guard++ < 4) {
+      const q = path[0];
+      const d = hyp(q.x - r.x, q.y - r.y);
+      if (d < 3) { path.shift(); continue; }
+      const stepLen = Math.min(budget, d);
+      if (!steerStep(st, r, (q.x - r.x) / d, (q.y - r.y) / d, stepLen)) break;
+      budget -= stepLen;
+    }
+    const mv = hyp(r.x - x0, r.y - y0);
+    if (mv > 0.01) { r.lastDir = { x: (r.x - x0) / mv, y: (r.y - y0) / mv }; r.facing = r.lastDir; }
+  }
+
+  function bodyObstacles(st) {
+    return st.units.filter((u) => !u.down && !(u.kind === 'soldier' && u.downT > 0)).map((u) => ({ x: u.x, y: u.y, r: K.R_BODY }));
+  }
+
+  // 가려는 방향을 조금씩 틀며 몸을 비켜 달린다 (8-2 규칙 5)
+  function steerStep(st, r, ux, uy, len) {
+    const obs = bodyObstacles(st);
     const base = Math.atan2(uy, ux);
-    const tries = [0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.4, -1.4];
-    // 막힌 쪽 반대로 먼저 틀도록: 가까운 몸이 왼쪽에 있으면 오른쪽부터
     let side = 0;
     for (const o of obs) {
-      const dx = o.x - r.x, dy = o.y - r.y;
-      const d = hyp(dx, dy);
-      if (d > 70) continue;
-      const cross = ux * dy - uy * dx;
-      side += (cross > 0 ? 1 : -1) / Math.max(10, d);
+      const dx = o.x - r.x, dy = o.y - r.y, d = hyp(dx, dy);
+      if (d > 90) continue;
+      side += ((ux * dy - uy * dx) > 0 ? 1 : -1) / Math.max(10, d);
     }
-    const order = side > 0 ? tries.map((a) => -a) : tries;
-    for (const a of order) {
-      const ang = base + a;
-      const q = moveCircle(st.w, r, Math.cos(ang) * len, Math.sin(ang) * len, K.R_BODY);
+    const tries = [0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.4, -1.4, 1.57, -1.57, 2.1, -2.1, 2.6, -2.6, 3.14];
+    for (const a0 of tries) {
+      const a = side > 0 ? -a0 : a0;
+      const q = moveCircle(st.w, r, Math.cos(base + a) * len, Math.sin(base + a) * len, K.R_RUNNER);
       const moved = hyp(q.x - r.x, q.y - r.y);
       if (moved < len * 0.25) continue;
-      if ((q.x - r.x) * ux + (q.y - r.y) * uy < len * 0.1) continue;
-      if (!runnerFreeMove(r, q, obs)) continue;
+      // 정면이 막히면 옆걸음(±90°)까지 허용해 몸 사이 틈을 찾는다
+      // 정면이 막히면 옆걸음·뒷걸음까지 허용해 몸 사이에서 빠져나온다
+      if (Math.abs(a0) <= 1.5 && (q.x - r.x) * ux + (q.y - r.y) * uy < len * 0.1) continue;
+      let ok = true;
+      for (const o of obs) {
+        const d1 = hyp(o.x - q.x, o.y - q.y);
+        if (d1 < K.R_RUNNER + o.r - 0.01 && d1 <= hyp(o.x - r.x, o.y - r.y)) { ok = false; break; }
+      }
+      if (!ok) continue;
       r.x = q.x; r.y = q.y;
       return true;
     }
     return false;
   }
 
-  // 이미 겹쳐 있던 몸에서 멀어지는 움직임은 허용 (밀려난 직후 갇히지 않게)
-  function runnerFreeMove(r, q, obs) {
-    for (const o of obs) {
-      const need = K.R_RUNNER + o.r - 0.01;
-      const d1 = hyp(o.x - q.x, o.y - q.y);
-      if (d1 < need) {
-        const d0 = hyp(o.x - r.x, o.y - r.y);
-        if (d1 <= d0) return false;
+  // 규칙 4: 달리는 중 앞 44u 안에 조종 인물 → 0.4초 예고 후 밀치기
+  function stepShove(st, dt, atGate) {
+    const r = st.runner, me = ctlUnit(st);
+    if (!me || me.down) { r.shoveWind = 0; return; }
+    const dx = me.x - r.x, dy = me.y - r.y, d = hyp(dx, dy);
+    const dir = atGate ? r.facing : r.lastDir;
+    const ahead = d > 0 && (dx * dir.x + dy * dir.y) / d > (atGate ? 0.5 : 0.2);
+    const inReach = d <= K.SHOVE_REACH + K.R_BODY * 2;
+    if (r.shoveWind > 0) {
+      r.shoveWind -= dt;
+      if (r.shoveWind <= 0) {
+        if (inReach && me.invulnT <= 0) {
+          const n = norm(dx, dy);
+          pushUnit(st, me, n.x, n.y, K.SHOVE_PUSH);
+          me.stunT = Math.max(me.stunT, K.SHOVE_STUN); me.atkQueue = 0;
+          damage(st, me, K.SHOVE_DMG, 'shove');
+          st.events.push({ type: 'shove', hit: true });
+        } else st.events.push({ type: 'shove', hit: false });
+        r.shoveCd = K.SHOVE_CD;
       }
+      return;
+    }
+    if (r.shoveCd <= 0 && ahead && inReach) { r.shoveWind = K.SHOVE_WIND; st.events.push({ type: 'shoveWarn' }); }
+  }
+
+  // ── 동료 · 관군 ────────────────────────────────────────
+  function followPoint(st, u) {
+    const me = ctlUnit(st);
+    return me;
+  }
+  function walkPath(st, u, dt, target, speedMul) {
+    u.pathT -= dt;
+    if (u.pathT <= 0 || !u.path.length) { u.pathT = 0.4; u.path = planPath(st, u, target); }
+    let budget = u.speed * (speedMul || 1) * dt, guard = 0;
+    while (budget > 1e-6 && u.path.length && guard++ < 4) {
+      const q = u.path[0];
+      const d = hyp(q.x - u.x, q.y - u.y);
+      if (d < 3) { u.path.shift(); continue; }
+      const s = Math.min(budget, d);
+      const x0 = u.x, y0 = u.y;
+      moveUnit(st, u, (q.x - u.x) / d * s, (q.y - u.y) / d * s, false);
+      const mv = hyp(u.x - x0, u.y - y0);
+      if (mv < s * 0.2) { u.pathT = 0; break; }
+      u.facing = norm(q.x - x0, q.y - y0);
+      budget -= s; u.moving = true;
+    }
+  }
+
+  function stepCompanion(st, u, dt) {
+    const me = ctlUnit(st);
+    // 귀화가 60u 안이면 자동으로 친다 (1.5초마다 1)
+    u.autoT = Math.max(0, u.autoT - dt);
+    const gw = st.gwihwa.find((g) => g.riseT <= 0 && hyp(g.x - u.x, g.y - u.y) <= K.ALLY_AUTO_R + K.R_BODY);
+    if (gw && u.autoT <= 0) { u.autoT = K.ALLY_AUTO_T; u.facing = norm(gw.x - u.x, gw.y - u.y); hitGwihwa(st, gw, K.ALLY_AUTO_DMG, u, 2); st.events.push({ type: 'autoHit', id: u.id }); }
+    if (!me) return;
+    const d = hyp(me.x - u.x, me.y - u.y);
+    if (d > K.FOLLOW_FAR || (u.path.length && d > K.FOLLOW_NEAR)) walkPath(st, u, dt, me, 1);
+    else u.path = [];
+  }
+
+  function stepSoldier(st, u, dt) {
+    if (u.downT > 0) {
+      u.downT -= dt;
+      if (u.downT <= 0) { u.path = []; st.events.push({ type: 'soldierUp', id: u.id }); }
+      return;
+    }
+    if (u.order === 'post' && u.post) {
+      if (hyp(u.post.x - u.x, u.post.y - u.y) > 3) walkPath(st, u, dt, u.post, 1);
+      else { u.path = []; u.facing = { x: 0, y: u.gate === 'N' ? 1 : -1 }; }
+    } else if (u.order === 'follow') {
+      const me = ctlUnit(st);
+      if (me) { const d = hyp(me.x - u.x, me.y - u.y); if (d > K.FOLLOW_FAR + 20) walkPath(st, u, dt, me, 1); else u.path = []; }
+    }
+  }
+
+  function damage(st, u, n, why) {
+    if (u.down || u.invulnT > 0) return false;
+    u.hp = Math.max(0, u.hp - n);
+    u.hitFlash = 0.15;
+    if (u.kind === 'hero') st.log.damageTaken += n;
+    st.events.push({ type: 'hurt', id: u.id, n, why });
+    if (u.hp <= 0) {
+      u.down = true; u.path = []; u.pickT = 0;
+      st.log.alliesDown.push({ t: round(st.t), id: u.id });
+      st.events.push({ type: 'allyDown', id: u.id });
     }
     return true;
   }
 
-  // ── 붙잡기 · 구속 · 제압 (8-3) ─────────────────────────────
-  function stepGrab(st, dt) {
-    const r = st.runner;
-    if (r.subdued || r.windup > 0) return;
-    const holders = [];
-    for (const u of st.units) {
-      if (u.down || u.stunT > 0) { u.holding = false; continue; }
-      const d = hyp(u.x - r.x, u.y - r.y);
-      if (d > K.ARM) { u.holding = false; continue; }
-      if (u.state !== 'controlled') {
-        // 조종하지 않는 인물·관군: 팔 길이 안에 오면 자동 붙잡기
-        if (!u.holding && u.grabCd <= 0 && r.immuneT <= 0) u.holding = true;
-      }
-      if (u.holding) holders.push(u);
-    }
-    const restrain = holders.length >= 2 || (r.cornered && holders.length >= 1);
-    if (restrain) {
-      if (!r.restrained) {
-        r.restrained = true; r.held = true; r.soloT = 0;
-        st.log.grabs.push({ t: round(st.t), type: 'restraint', by: holders.map((u) => u.id) });
-        st.events.push({ type: 'restraintStart' });
-      }
-      const ctl = unit(st, st.control);
-      const mash = ctl && ctl.holding && st.t - st.mashT <= K.MASH_WINDOW;
-      r.gauge = Math.max(0, r.gauge - (mash ? K.GAUGE_RATE_MASH : K.GAUGE_RATE) * dt);
-      if (!st.sealDone && r.gauge <= K.SEAL_AT) {
-        const ex = st.stage.EXITS;
-        const nearGate = r.y < ex.N.lineY + K.GATE_ZONE || r.y > ex.S.lineY - K.GATE_ZONE;
-        if (nearGate) seal(st, false); // 성문 구역: 문서·귀화는 나오지만 구속은 이어진다
-        else { seal(st, true); return; }
-      }
-      if (r.gauge <= 0) {
-        r.subdued = true; r.held = true;
-        st.gwihwa = [];
-        end(st, 'win');
-      }
-      return;
-    }
-    if (r.restrained) {
-      // 구속 조건이 깨지면 즉시 뿌리치고 달아남 (게이지는 회복 안 됨)
-      r.restrained = false; r.held = false; r.immuneT = K.RUNNER_IMMUNE;
-      for (const u of holders) { u.holding = false; u.grabCd = K.GRAB_CD; }
-      st.events.push({ type: 'restraintBreak' });
-      return;
-    }
-    if (holders.length === 1) {
-      if (!r.held) {
-        r.held = true; r.soloT = K.SOLO_HOLD;
-        st.log.grabs.push({ t: round(st.t), type: 'solo', by: [holders[0].id] });
-        st.events.push({ type: 'soloGrab', by: holders[0].id });
-      }
-      r.soloT -= dt;
-      if (r.soloT <= 0) shakeOff(st, holders, K.SHAKE_PUSH, K.SHAKE_STUN);
-      return;
-    }
-    if (r.held && !r.restrained) { r.held = false; r.soloT = 0; }
-  }
-
-  // 뿌리침: 붙잡은 쪽이 24u 밀리고 0.6초 굳음. 운반자 숨 −25
-  function shakeOff(st, list, push, stun) {
-    const r = st.runner;
-    for (const u of list) {
-      pushUnit(st, u, u.x - r.x, u.y - r.y, push);
-      u.stunT = stun; u.holding = false; u.grabCd = K.GRAB_CD;
-    }
-    r.held = false; r.soloT = 0; r.restrained = false; r.immuneT = K.RUNNER_IMMUNE;
-    loseBreath(st, K.BREATH_HIT, 'shake');
-    st.events.push({ type: 'shake' });
-  }
-
-  function pushUnit(st, u, dx, dy, dist) {
-    const d = hyp(dx, dy) || 1;
-    const n = 8;
-    for (let i = 0; i < n; i++) {
-      const q = moveCircle(st.w, u, dx / d * dist / n, dy / d * dist / n, K.R_BODY);
-      u.x = q.x; u.y = q.y;
-    }
-  }
-
-  // ── 전환점 ③ 봉인 문서 · 귀화 (8-5) ───────────────────────
-  function seal(st, forced) {
+  // ── 전환점 ③ 봉인 문서 · 귀화 (8-5) ─────────────────────
+  function seal(st, fromHit) {
     const r = st.runner;
     st.sealDone = true;
     st.log.sealAt = round(st.t);
-    if (forced) {
-      // 구속을 강제로 뿌리침 — 팔 길이 안 아군 전원 24u 밀림
-      const near = st.units.filter((u) => !u.down && hyp(u.x - r.x, u.y - r.y) <= K.ARM + 2);
-      shakeOff(st, near, K.SHAKE_PUSH, K.SHAKE_STUN);
-    }
-    st.doc = { x: r.x, y: r.y };
-    // 귀화 ① 문서가 떨어진 자리, ② 운반자에게 가장 가까운 "서 있는" 아군 옆
-    const standing = st.units.filter((u) => !u.down && u.state === 'guard');
-    const pool = standing.length ? standing : st.units.filter((u) => !u.down);
-    pool.sort((a, b) => hyp(a.x - r.x, a.y - r.y) - hyp(b.x - r.x, b.y - r.y));
-    const t2 = pool[0];
-    const p1 = placeNear(st, r.x, r.y - 28, r);
-    const nearest1 = st.units.filter((u) => !u.down).sort((a, b) => hyp(a.x - p1.x, a.y - p1.y) - hyp(b.x - p1.x, b.y - p1.y))[0];
-    st.gwihwa.push(makeGwihwa(1, p1.x, p1.y, nearest1 ? nearest1.id : null));
-    if (t2) {
-      const p2 = placeNear(st, t2.x + (r.x - t2.x) * 0.2, t2.y + (r.y - t2.y) * 0.2, t2);
-      st.gwihwa.push(makeGwihwa(2, p2.x, p2.y, t2.id));
-    }
-    st.events.push({ type: 'seal', forced });
+    pushAround(st, K.SEAL_R, K.SEAL_PUSH, K.SEAL_STUN);
+    closeEngagement(st, 'seal');
+    st.doc = { x: r.x, y: r.y, picked: false };
+    // 조종 인물에게서 먼 성문으로 (성문에서 일하던 중이면 그 성문이 아닌 쪽)
+    let gate = farGate(st);
+    if (runnerWorking(r) && gate === r.target) gate = r.target === 'N' ? 'S' : 'N';
+    startRun(st, gate);
+    const docSpot = placeNear(st, r.x, r.y - 30, r);
+    spawnGwihwa(st, docSpot.x, docSpot.y, 'doc');
+    const g = st.stage.GATES[gate];
+    if (K.GW2_ON_ARRIVE) st.pendingGw2 = gate; else spawnGwihwa(st, g.front[0], g.front[1], 'gate', gate);
+    st.events.push({ type: 'seal', gate, fromHit });
+  }
+
+  // v2-수정2: 성문에 닿을 때 조종 인물이 ALERT_R 안에 있으면 그쪽을 보며 붙는다 (뒷걸음으로 빗장에 붙음)
+  function arriveFace(st, r) {
+    if (!K.ARRIVE_FACE) return;
+    const me = ctlUnit(st);
+    if (me && !me.down && hyp(me.x - r.x, me.y - r.y) <= K.ALERT_R) r.facing = norm(me.x - r.x, me.y - r.y);
+  }
+
+  function pendingGw2(st) {
+    if (!st.pendingGw2 || st.pendingGw2 !== st.runner.target) return;
+    const g = st.stage.GATES[st.pendingGw2];
+    spawnGwihwa(st, g.front[0], g.front[1], 'gate', st.pendingGw2);
+    st.pendingGw2 = null;
   }
 
   function placeNear(st, x, y, fallback) {
-    const tries = [[0, 0], [0, -24], [24, 0], [-24, 0], [0, 24], [18, -18], [-18, 18], [18, 18], [-18, -18]];
+    const tries = [[0, 0], [0, -30], [30, 0], [-30, 0], [0, 30], [24, -24], [-24, 24], [24, 24], [-24, -24]];
     for (const [dx, dy] of tries) if (valid(st.w, x + dx, y + dy, K.R_BODY)) return { x: x + dx, y: y + dy };
     return { x: fallback.x, y: fallback.y };
   }
 
-  function segCross(a, b, c, d) {
-    const o = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
-    return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
-  }
-  // 몸(반지름 12)이 결계 선을 넘거나 선에 닿게 되는 걸음인가
-  function crossesBarrier(st, from, to) {
-    for (const b of st.barriers) {
-      const P = { x: b.x1, y: b.y1 }, Q = { x: b.x2, y: b.y2 };
-      if (segCross(from, to, P, Q)) return true;
-      const d1 = distPointSeg(to.x, to.y, P.x, P.y, Q.x, Q.y), d0 = distPointSeg(from.x, from.y, P.x, P.y, Q.x, Q.y);
-      if (d1 < K.R_BODY + 3 && d1 < d0) return true;
-    }
-    return false;
+  function spawnGwihwa(st, x, y, from, gate) {
+    st.gwSeq++;
+    const gw = { id: 'gw' + st.gwSeq, x, y, hp: K.GW_HP, riseT: K.GW_RISE, atkT: 0.4, from, gate: gate || null, target: null, path: [], pathT: 0, hitFlash: 0, facing: { x: 0, y: 1 } };
+    st.gwihwa.push(gw);
+    st.log.gwihwaSpawned++;
+    st.events.push({ type: 'gwihwaSpawn', id: gw.id, from });
+    return gw;
   }
 
-  function makeGwihwa(n, x, y, target) {
-    return { id: 'gw' + n, x, y, hp: K.GW_HP, target, atkT: K.GW_ATTACK_T * 0.5, facing: 0, riseT: K.GW_RISE };
-  }
-
-  function nearestGwihwa(st, u, within) {
-    let best = null, bd = within;
-    for (const gw of st.gwihwa) {
-      const d = hyp(gw.x - u.x, gw.y - u.y);
-      if (d <= bd) { bd = d; best = gw; }
-    }
-    return best;
-  }
-
-  function hitGwihwa(st, gw, dmg) {
+  function hitGwihwa(st, gw, dmg, by, knock) {
     gw.hp -= dmg;
-    st.events.push({ type: 'gwihwaHit', id: gw.id });
+    gw.hitFlash = 0.12;
+    if (by && knock) { const n = norm(gw.x - by.x, gw.y - by.y); const q = moveCircle(st.w, gw, n.x * knock, n.y * knock, K.R_BODY); gw.x = q.x; gw.y = q.y; }
+    st.events.push({ type: 'hitGwihwa', id: gw.id, dmg, by: by ? by.id : null, x: gw.x, y: gw.y });
     if (gw.hp <= 0) {
-      st.gwihwa = st.gwihwa.filter((x) => x !== gw);
+      st.gwihwa = st.gwihwa.filter((g) => g !== gw);
       st.log.gwihwaDown++;
-      st.events.push({ type: 'gwihwaDown', id: gw.id });
+      st.events.push({ type: 'gwihwaDown', id: gw.id, x: gw.x, y: gw.y });
+      // 문서가 땅에 있으면 6초 뒤 문서 자리에서 다시 피어난다
+      if (st.doc && !st.doc.picked) st.respawns.push({ t: K.GW_RESPAWN });
     }
   }
 
-  // 표적 유지 (REVIEW-2 선택 5, 브리프가 비워 둔 한 줄): 귀화는 표적을 속도 32 로 따라간다.
-  // 표적이 퇴장하거나 220u 넘게 멀어지면 가장 가까운 아군으로 바꾼다.
+  function stepRespawn(st, dt) {
+    for (const s of st.respawns) s.t -= dt;
+    const ready = st.respawns.filter((s) => s.t <= 0);
+    st.respawns = st.respawns.filter((s) => s.t > 0);
+    for (const s of ready) {
+      void s;
+      if (!st.doc || st.doc.picked || st.runner.subdued) continue;
+      if (st.gwihwa.length >= K.GW_MAX) { st.respawns.push({ t: 0.5 }); continue; }
+      const p = placeNear(st, st.doc.x, st.doc.y, st.doc);
+      spawnGwihwa(st, p.x, p.y, 'doc');
+    }
+  }
+
+  function gwTarget(st, gw) {
+    const me = ctlUnit(st);
+    if (gw.from === 'gate') {
+      const sol = st.units.find((u) => u.kind === 'soldier' && !u.down && u.gate === gw.gate && u.order === 'post');
+      if (sol) return sol;
+    }
+    return me && !me.down ? me : st.units.find((u) => u.kind === 'hero' && !u.down) || null;
+  }
+
   function stepGwihwa(st, dt) {
-    for (const gw of st.gwihwa.slice()) {
-      if (gw.riseT > 0) { gw.riseT -= dt; continue; } // 피어오르는 중
-      let tgt = gw.target ? unit(st, gw.target) : null;
-      if (!tgt || tgt.down || hyp(tgt.x - gw.x, tgt.y - gw.y) > K.GW_LEASH) {
-        const cand = st.units.filter((u) => !u.down).sort((a, b) => hyp(a.x - gw.x, a.y - gw.y) - hyp(b.x - gw.x, b.y - gw.y));
-        tgt = cand[0] || null;
-        gw.target = tgt ? tgt.id : null;
-      }
+    for (const gw of st.gwihwa) {
+      gw.hitFlash = Math.max(0, gw.hitFlash - dt);
+      if (gw.riseT > 0) { gw.riseT -= dt; continue; }
+      let tgt = gwTarget(st, gw);
       if (!tgt) continue;
+      if (K.GW2_ON_ARRIVE && gw.from === 'gate' && tgt.kind === 'hero') {
+        const gl = st.stage.GATES[gw.gate].latch;
+        if (hyp(tgt.x - gl[0], tgt.y - gl[1]) > K.GW2_GUARD_R) {
+          const gf = st.stage.GATES[gw.gate].front; const dd = hyp(gf[0] - gw.x, gf[1] - gw.y);
+          if (dd > 4) { const q = moveCircle(st.w, gw, (gf[0] - gw.x) / dd * Math.min(dd, K.GW_SPEED * dt), (gf[1] - gw.y) / dd * Math.min(dd, K.GW_SPEED * dt), K.R_BODY); gw.x = q.x; gw.y = q.y; }
+          continue;
+        }
+      }
+      gw.target = tgt.id;
       const d = hyp(tgt.x - gw.x, tgt.y - gw.y);
       if (d > K.R_BODY * 2 + 2) {
         const sp = K.GW_SPEED * dt;
-        const q = moveCircle(st.w, gw, (tgt.x - gw.x) / d * sp, (tgt.y - gw.y) / d * sp, K.R_BODY);
-        // 결계: 12초 동안 귀화도 통과 불가 (8-4)
-        if (!crossesBarrier(st, gw, q)) { gw.x = q.x; gw.y = q.y; }
-        gw.facing = Math.atan2(tgt.y - gw.y, tgt.x - gw.x);
+        if (los(st.w, gw, tgt) && segValid(st.w, gw, tgt, K.R_BODY - 2, 6)) {
+          const q = moveCircle(st.w, gw, (tgt.x - gw.x) / d * sp, (tgt.y - gw.y) / d * sp, K.R_BODY);
+          gw.x = q.x; gw.y = q.y; gw.path = [];
+        } else {
+          gw.pathT -= dt;
+          if (gw.pathT <= 0 || !gw.path.length) { gw.pathT = 0.5; gw.path = planPath(st, gw, tgt); }
+          const q0 = gw.path[0];
+          if (q0) {
+            const dq = hyp(q0.x - gw.x, q0.y - gw.y);
+            if (dq < 4) gw.path.shift();
+            else { const q = moveCircle(st.w, gw, (q0.x - gw.x) / dq * sp, (q0.y - gw.y) / dq * sp, K.R_BODY); gw.x = q.x; gw.y = q.y; }
+          }
+        }
+        gw.facing = norm(tgt.x - gw.x, tgt.y - gw.y);
       }
       gw.atkT -= dt;
-      if (gw.atkT <= 0 && hyp(tgt.x - gw.x, tgt.y - gw.y) <= K.R_BODY * 2 + 8) {
-        gw.atkT = K.GW_ATTACK_T;
-        damage(st, tgt, K.GW_DMG);
-        if (!tgt.down) {
-          pushUnit(st, tgt, tgt.x - gw.x, tgt.y - gw.y, K.GW_PUSH);
-          tgt.stunT = K.GW_STUN; tgt.holding = false;
-          if (tgt.state === 'moving') tgt.state = 'guard';
-        }
-        st.events.push({ type: 'gwihwaAttack', id: gw.id, target: tgt.id });
-      } else if (gw.atkT < 0) gw.atkT = 0;
-    }
-    // 조종하지 않는 인물의 자동 반격 (관군은 반격 못 함)
-    for (const u of st.units) {
-      if (u.down || u.kind !== 'hero' || u.state === 'controlled' || u.stunT > 0) continue;
-      u.counterT = Math.max(0, u.counterT - dt);
-      const gw = nearestGwihwa(st, u, K.ARM);
-      if (gw && u.counterT <= 0) { hitGwihwa(st, gw, K.HIT_DMG); u.counterT = K.COUNTER_T; }
+      gw.warn = gw.atkT <= 0.3 && hyp(tgt.x - gw.x, tgt.y - gw.y) <= K.R_BODY * 2 + 8;
+      if (gw.atkT <= 0) {
+        if (hyp(tgt.x - gw.x, tgt.y - gw.y) <= K.R_BODY * 2 + 8) {
+          gw.atkT = K.GW_ATK_T;
+          if (damage(st, tgt, K.GW_DMG, 'gwihwa')) {
+            const n = norm(tgt.x - gw.x, tgt.y - gw.y);
+            pushUnit(st, tgt, n.x, n.y, K.GW_PUSH);
+            if (tgt.kind === 'hero') { tgt.combo = 0; tgt.atkQueue = 0; tgt.pickT = 0; }
+          }
+          st.events.push({ type: 'gwihwaAttack', id: gw.id, target: tgt.id });
+        } else gw.atkT = 0;
+      }
     }
   }
 
-  function damage(st, u, n) {
-    u.hp = Math.max(0, u.hp - n);
-    if (u.hp <= 0 && !u.down) {
-      u.down = true; u.holding = false; u.path = [];
-      st.log.alliesDown.push({ t: round(st.t), id: u.id });
-      st.events.push({ type: 'allyDown', id: u.id });
-    }
-  }
-
-  // ── 기술 (조종 중인 인물만, 8-4) ───────────────────────────
-  // 한결 견제사격: 직선 200u, 건물·좌판에 가리면 멈춤. 맞으면 4초 −40%. 재사용 10초. 게이지 효과 0.
-  function shoot(st, dx, dy) {
-    const u = unit(st, st.control);
-    if (!u || u.skill !== 'shot' || u.skillCd > 0 || u.down || u.stunT > 0) return null;
-    const d = hyp(dx, dy);
-    if (d < 1e-6) return null;
-    const ux = dx / d, uy = dy / d;
-    const r = st.runner;
-    let hit = false, endX = u.x, endY = u.y;
-    for (let s = 0; s <= K.SHOT_RANGE; s += 3) {
-      const x = u.x + ux * s, y = u.y + uy * s;
-      if (!valid(st.w, x, y, 0)) break;
-      endX = x; endY = y;
-      if (!r.subdued && hyp(r.x - x, r.y - y) <= K.SHOT_HIT_R) { hit = true; break; }
-    }
-    u.skillCd = K.SHOT_CD;
-    if (hit) { r.slowT = K.SHOT_T; }
-    st.log.skills.push({ t: round(st.t), who: u.id, kind: 'shot', hit });
-    const ev = { type: 'shot', hit, x1: u.x, y1: u.y, x2: endX, y2: endY };
-    st.events.push(ev);
-    return ev;
-  }
-
-  function shotPreview(st, dx, dy) {
-    const u = unit(st, st.control);
-    const d = hyp(dx, dy);
-    if (!u || d < 1e-6) return null;
-    const ux = dx / d, uy = dy / d, r = st.runner;
-    let endX = u.x, endY = u.y, hit = false;
-    for (let s = 0; s <= K.SHOT_RANGE; s += 3) {
-      const x = u.x + ux * s, y = u.y + uy * s;
-      if (!valid(st.w, x, y, 0)) break;
-      endX = x; endY = y;
-      if (hyp(r.x - x, r.y - y) <= K.SHOT_HIT_R) { hit = true; break; }
-    }
-    return { x1: u.x, y1: u.y, x2: endX, y2: endY, hit };
-  }
-
-  // 소운 결계: 소운 자리에서 끈 방향으로 선 (최대 45u). 12초 동안 운반자·귀화 통과 불가. 재사용 15초.
-  function barrierLine(st, dx, dy, len) {
-    const u = unit(st, st.control);
-    const d = hyp(dx, dy);
-    if (!u || d < 1e-6) return null;
-    const L = clamp(len || K.BARRIER_MAX, K.BARRIER_MIN, K.BARRIER_MAX);
-    return { x1: u.x, y1: u.y, x2: u.x + dx / d * L, y2: u.y + dy / d * L };
-  }
-  function barrier(st, dx, dy, len) {
-    const u = unit(st, st.control);
-    if (!u || u.skill !== 'barrier' || u.skillCd > 0 || u.down || u.stunT > 0) return null;
-    const b = barrierLine(st, dx, dy, len);
-    if (!b) return null;
-    b.t = K.BARRIER_T;
-    st.barriers.push(b);
-    u.skillCd = K.BARRIER_CD;
-    st.log.skills.push({ t: round(st.t), who: u.id, kind: 'barrier', len: round(hyp(b.x2 - b.x1, b.y2 - b.y1)) });
-    st.events.push({ type: 'barrier' });
-    // 결계가 운반자 몸을 가로지르면 운반자는 그 선 밖으로 밀려난다
-    return b;
-  }
-
-  // 행동 버튼이 지금 무엇인가 (UI 표시용)
+  // 공격 버튼이 지금 무엇인가 (UI 표시용)
   function actionKind(st) {
-    const u = unit(st, st.control);
-    if (!u || u.down) return null;
-    const r = st.runner;
-    const dR = !r.subdued && r.windup <= 0 ? hyp(u.x - r.x, u.y - r.y) : Infinity;
-    const gw = nearestGwihwa(st, u, K.ARM);
-    const dG = gw ? hyp(u.x - gw.x, u.y - gw.y) : Infinity;
-    if (dR <= K.ARM && (u.holding || dR <= dG)) return 'grab';
-    if (gw) return 'hit';
-    return null;
+    const me = ctlUnit(st);
+    if (!me || me.down) return null;
+    if (st.doc && !st.doc.picked && hyp(st.doc.x - me.x, st.doc.y - me.y) <= K.DOC_R) return 'pick';
+    return 'attack';
   }
 
   function round(v) { return Math.round(v * 100) / 100; }
 
   const Core = {
-    K, clamp, makeWorld, valid, segValid, moveCircle, los, section, distPointSeg, inMarket,
-    buildGraph, pathTime, samplesBlocked, segBlocked, blockedEdges, obstacles,
-    createChase, step, command, switchControl, follow, planPath, unit, alive, makeUnit, stepAlong,
-    replan, bestGateRoute, routeCost, gateDistance, attachNodes, aheadObstacles, crossesBarrier,
-    shoot, shotPreview, barrier, barrierLine, actionKind, seal, hitGwihwa, damage, isAhead,
+    K, clamp, makeWorld, valid, segValid, moveCircle, los, section, distPointSeg,
+    buildGraph, samplesBlocked, planPath, smoothPath, pathLength, attachNodes,
+    createChase, step, switchControl, commandSoldier, unit, ctlUnit, heroes, makeHero,
+    hitRunner, hitGwihwa, damage, seal, spawnGwihwa, actionKind, farGate, runnerWorking, useSkill, attack,
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Core;

@@ -1,204 +1,159 @@
-// 「조선 퇴마전」 2D 파일럿 — 5장 「사라진 장부」 스테이지 데이터.
-// 설계 기준: DESIGN-BRIEF (6장 공간 구조 · 6-1 시작 수치 · 7장 조사 · 부록 A 엔딩).
-// 규칙은 core.js 에 있고, 여기에는 도형·좌표·대사만 둔다. DOM 을 쓰지 않는다 (Node 에서 시험).
-// 단위: 1u = 360폭 화면의 CSS 1px. 좌표 (x, y), 위가 y=0.
+// 「조선 퇴마전」 2D 파일럿 v2 — 5장 「사라진 장부」 스테이지 데이터.
+// 설계 기준: 2d/DESIGN-BRIEF.md (v2, [v2-수정1] 포함) — 6장 공간 · 6-1 수치표 · 7장 조사 · 8장 추격 · 부록 A 엔딩.
+// 규칙은 core.js, 여기에는 도형·좌표·수치·대사만 둔다. DOM 을 쓰지 않는다 (Node 에서 시험).
+// 단위: 1u = 360폭 화면의 CSS 1px (확대 1배). 좌표 (x, y), 위가 y=0. 맵 480u × 1080u.
 (function (root) {
   'use strict';
 
-  // ── 도시 한 장 (360u × 2160u) ─────────────────────────────
-  // 걸을 수 있는 땅 = 직사각형들의 합집합. 서로 겹치게 두어 교차점이 끊기지 않게 한다.
-  // kind: gate(성문 72u) · yard(마당) · road(큰길 120u) · alley(골목 30u) · dead(막다른 갈래) · market(시장)
+  // ── 도시 한 장 (480u × 1080u) ─────────────────────────────
+  // 걸을 수 있는 땅 = 직사각형 합집합. 이어지는 곳은 몸 반지름(16u)의 두 배 이상 겹치게 둔다.
+  // 골목 48u (한 몸 32u 지나감, 한 명이 서면 막힘) · 큰길 128u · 성문 쪽문 앞 96u
   const WALK = [
-    { id: 'gateN', kind: 'gate', x0: 144, y0: -90, x1: 216, y1: 110 },
-    { id: 'yardN', kind: 'yard', x0: 0, y0: 48, x1: 360, y1: 120 },
-    { id: 'alleyW', kind: 'alley', x0: 0, y0: 48, x1: 30, y1: 2112 },
-    { id: 'road', kind: 'road', x0: 120, y0: 48, x1: 240, y1: 2112 },
-    { id: 'alleyE1', kind: 'alley', x0: 330, y0: 48, x1: 360, y1: 930 },
-    { id: 'crossA', kind: 'alley', x0: 0, y0: 465, x1: 360, y1: 495 },
-    { id: 'dead3', kind: 'dead', x0: 60, y0: 300, x1: 90, y1: 495 },
-    { id: 'central', kind: 'alley', x0: 0, y0: 1065, x1: 150, y1: 1095 },
-    { id: 'yard1', kind: 'dead', x0: 48, y0: 1060, x1: 112, y1: 1140 },
-    // 갈래 ① 마당과 중앙 가로골목이 만나는 모서리를 둥글게 (대각선으로 밀어도 걸리지 않게 — 구현 검수 E-1)
-    { id: 'yard1corner', kind: 'dead', x0: 80, y0: 1060, x1: 150, y1: 1095 },
-    { id: 'dead1', kind: 'dead', x0: 55, y0: 1100, x1: 85, y1: 1200 },
-    { id: 'market', kind: 'market', x0: 240, y0: 900, x1: 360, y1: 1200 },
-    { id: 'marketMouth', kind: 'market', x0: 200, y0: 900, x1: 270, y1: 960 },
-    { id: 'alleyE2', kind: 'alley', x0: 330, y0: 1170, x1: 360, y1: 2112 },
-    { id: 'crossC', kind: 'alley', x0: 0, y0: 1665, x1: 360, y1: 1695 },
-    { id: 'dead2', kind: 'dead', x0: 250, y0: 1455, x1: 360, y1: 1485 },
-    { id: 'yardS', kind: 'yard', x0: 0, y0: 2040, x1: 360, y1: 2112 },
-    { id: 'gateS', kind: 'gate', x0: 144, y0: 2050, x1: 216, y1: 2250 },
+    { id: 'gateN', kind: 'gate', x0: 192, y0: -60, x1: 288, y1: 130 },
+    { id: 'yardN', kind: 'yard', x0: 0, y0: 40, x1: 480, y1: 120 },
+    { id: 'alleyW', kind: 'alley', x0: 0, y0: 40, x1: 48, y1: 1040 },
+    { id: 'alleyE', kind: 'alley', x0: 432, y0: 40, x1: 480, y1: 1040 },
+    { id: 'road', kind: 'road', x0: 176, y0: 40, x1: 304, y1: 1040 },
+    { id: 'crossA', kind: 'alley', x0: 0, y0: 276, x1: 480, y1: 324 },
+    { id: 'dead3', kind: 'dead', x0: 96, y0: 276, x1: 144, y1: 440 },
+    { id: 'central', kind: 'alley', x0: 0, y0: 516, x1: 304, y1: 564 },
+    { id: 'dead1', kind: 'dead', x0: 96, y0: 516, x1: 144, y1: 704 },
+    { id: 'market', kind: 'market', x0: 270, y0: 440, x1: 480, y1: 640 },
+    { id: 'crossC', kind: 'alley', x0: 0, y0: 776, x1: 480, y1: 824 },
+    { id: 'dead2', kind: 'dead', x0: 336, y0: 876, x1: 480, y1: 924 },
+    { id: 'yardS', kind: 'yard', x0: 0, y0: 960, x1: 480, y1: 1040 },
+    { id: 'gateS', kind: 'gate', x0: 192, y0: 950, x1: 288, y1: 1140 },
   ];
 
-  // 걸을 수 있는 땅 안의 막힌 것: 시장 서쪽 담(큰길과는 광장 쪽 60u 어귀로만 통함) · 좌판
+  // 좌판 (통과 불가) — 시장 출발 첫 몇 걸음이 꺾인다
   const BLOCKS = [
-    { id: 'marketWall', kind: 'wall', x0: 236, y0: 960, x1: 250, y1: 1200 },
-    { id: 'stallA', kind: 'stall', x0: 252, y0: 1040, x1: 282, y1: 1072 },
-    { id: 'stallB', kind: 'stall', x0: 262, y0: 1120, x1: 300, y1: 1165 },
+    { id: 'stallA', kind: 'stall', x0: 312, y0: 486, x1: 356, y1: 512 },
+    { id: 'stallB', kind: 'stall', x0: 396, y0: 470, x1: 426, y1: 500 },
+    { id: 'stallC', kind: 'stall', x0: 330, y0: 588, x1: 372, y1: 614 },
+  ];
+  // 시장은 특별히 느리지 않다 (v2 표에 시장 감속 없음)
+  const MARKET = null;
+
+  // ── 길 그래프 (운반자·관군·동료 이동) ───────────────────────
+  const NODES = {
+    WN: [240, 40], NY: [240, 100], NYW: [24, 100], NYE: [456, 100],
+    RA: [240, 300], AW: [24, 300], AE: [456, 300], D3J: [120, 300], D3: [120, 420],
+    RC: [240, 540], MNW: [288, 458], CW: [24, 540], C1: [120, 540], D1: [120, 680], MK: [380, 540], ME: [456, 540],
+    RCC: [240, 800], CCW: [24, 800], CCE: [456, 800], D2J: [456, 900], D2: [360, 900],
+    SY: [240, 1000], SYW: [24, 1000], SYE: [456, 1000], WS: [240, 1040],
+  };
+  const EDGES = [
+    ['WN', 'NY'], ['NY', 'NYW'], ['NY', 'NYE'], ['NY', 'RA'], ['NYW', 'AW'], ['NYE', 'AE'],
+    ['AW', 'D3J'], ['D3J', 'RA'], ['D3J', 'D3'], ['RA', 'AE'], ['RA', 'RC'], ['AW', 'CW'], ['AE', 'ME'],
+    ['CW', 'C1'], ['C1', 'RC'], ['C1', 'D1'], ['RC', 'MK'], ['MK', 'MNW'], ['MNW', 'RA'], ['MNW', 'RC'], ['MK', 'ME'], ['RC', 'RCC'],
+    ['CW', 'CCW'], ['ME', 'CCE'], ['CCW', 'RCC'], ['RCC', 'CCE'], ['CCE', 'D2J'], ['D2J', 'D2'],
+    ['D2J', 'SYE'], ['RCC', 'SY'], ['CCW', 'SYW'], ['SYW', 'SY'], ['SYE', 'SY'], ['SY', 'WS'],
+  ];
+  const DEAD_ENDS = [
+    { id: 'd1', name: '①', node: 'D1' }, { id: 'd2', name: '②', node: 'D2' }, { id: 'd3', name: '③', node: 'D3' },
   ];
 
-  const MARKET = { x0: 240, y0: 900, x1: 360, y1: 1200, slow: 0.7 };
-
-  // ── 길 그래프 (운반자·명령 이동이 따라가는 골목 가운데 선) ─────────
-  const NODES = {
-    NX: [180, -70], NG: [180, 30], NGm: [180, 50],
-    NY: [180, 120], NYW: [15, 120], NYE: [345, 120],
-    W1: [15, 300], WA: [15, 480], WC: [15, 1080], WCC: [15, 1680], W5: [15, 1860], SYW: [15, 2040],
-    AW: [75, 480], D3: [75, 318], RA: [180, 480], AE: [285, 480], EA: [345, 480], E1: [345, 300],
-    PL: [180, 960], MW: [250, 930], MK: [310, 1060], MN: [345, 905], MS: [345, 1195],
-    RC: [180, 1080], CW: [116, 1080], YJ: [80, 1090], CWW: [39, 1080], D1: [70, 1184],
-    RCC: [180, 1680], CCW: [75, 1680], CCE: [285, 1680], EC: [345, 1680],
-    ED2: [345, 1470], D2: [266, 1470], E5: [345, 1860],
-    SY: [180, 2040], SYE: [345, 2040], SGm: [180, 2110], SG: [180, 2130], SX: [180, 2230],
+  // ── 성문 · 빗장 (6-1 성문 쪽 시간) ─────────────────────────
+  // 운반자는 쪽문 빗장 자리(latch)에 붙어 성문 쪽을 보고(등은 마당 쪽) 빗장을 푼다.
+  // 관군 지킴 자리 2곳 = 쪽문 앞 96u 를 다 막는다.
+  const GATES = {
+    N: { name: '북문', latch: [240, 40], face: { x: 0, y: -1 }, posts: [[216, 86], [264, 86]], front: [240, 110], node: 'WN' },
+    S: { name: '남문', latch: [240, 1040], face: { x: 0, y: 1 }, posts: [[216, 994], [264, 994]], front: [240, 970], node: 'WS' },
   };
 
-  const EDGES = [
-    ['NX', 'NG'], ['NG', 'NGm'], ['NGm', 'NY'], ['NGm', 'NYW'], ['NGm', 'NYE'],
-    ['NYW', 'W1'], ['W1', 'WA'], ['WA', 'WC'], ['WC', 'WCC'], ['WCC', 'W5'], ['W5', 'SYW'],
-    ['WA', 'AW'], ['AW', 'RA'], ['AW', 'D3'], ['RA', 'AE'], ['AE', 'EA'],
-    ['NYE', 'E1'], ['E1', 'EA'], ['EA', 'MN'],
-    ['NY', 'RA'], ['RA', 'PL'], ['PL', 'RC'], ['RC', 'RCC'], ['RCC', 'SY'],
-    ['PL', 'MW'], ['MW', 'MK'], ['MK', 'MN'], ['MK', 'MS'],
-    ['RC', 'CW'], ['CW', 'YJ'], ['YJ', 'CWW'], ['CWW', 'WC'], ['YJ', 'D1'],
-    ['WCC', 'CCW'], ['CCW', 'RCC'], ['RCC', 'CCE'], ['CCE', 'EC'],
-    ['MS', 'ED2'], ['ED2', 'EC'], ['ED2', 'D2'], ['EC', 'E5'], ['E5', 'SYE'],
-    ['SYW', 'SGm'], ['SY', 'SGm'], ['SYE', 'SGm'], ['SGm', 'SG'], ['SG', 'SX'],
-  ];
-
-  // 성문 선: 이 선을 넘으면 탈출 (9장)
-  const EXITS = { N: { node: 'NX', lineY: 0 }, S: { node: 'SX', lineY: 2160 } };
-
-  // 막다른 갈래 ①②③ — 운반자는 궁지일 때만 들어간다 (8-2 규칙 7)
-  const DEAD_ENDS = [
-    { id: 'd1', name: '①', node: 'D1', rect: 'dead1' },
-    { id: 'd2', name: '②', node: 'D2', rect: 'dead2' },
-    { id: 'd3', name: '③', node: 'D3', rect: 'dead3' },
-  ];
-
-  // ── 명령판 매듭 15개 (10장). row/col 은 명령판 그림에서의 자리 ─────
-  // slots: 여러 명이 같은 매듭에 서면 차례로 채우는 자리. 성문 2자리(72u = 36u × 2), 큰길 3자리(120u 에 36u × 3).
-  const COMMAND_NODES = [
-    { id: 'W1', label: '서쪽골목', row: 0, col: 0, slots: [[15, 300], [15, 272], [15, 328]] },
-    { id: 'NG', label: '북문', row: 0, col: 1, slots: [[162, 30], [198, 30], [180, 66]] },
-    { id: 'E1', label: '시장뒷골목', row: 0, col: 2, slots: [[345, 300], [345, 272], [345, 328]] },
-    { id: 'AW', label: '가로A서', row: 1, col: 0, slots: [[75, 480], [47, 480], [103, 480]] },
-    { id: 'RA', label: '큰길북', row: 1, col: 1, slots: [[138, 540], [180, 540], [222, 540]] },
-    { id: 'AE', label: '가로A동', row: 1, col: 2, slots: [[285, 480], [257, 480], [313, 480]] },
-    { id: 'CW', label: '중앙서', row: 2, col: 0, slots: [[116, 1080], [88, 1080], [60, 1080]] },
-    { id: 'PL', label: '광장', row: 2, col: 1, slots: [[138, 960], [180, 960], [222, 960]] },
-    { id: 'MW', label: '시장 어귀', row: 2, col: 2, slots: [[250, 930], [266, 912], [266, 948]] },
-    { id: 'CCW', label: '가로C서', row: 3, col: 0, slots: [[75, 1680], [47, 1680], [103, 1680]] },
-    { id: 'RCC', label: '큰길남', row: 3, col: 1, slots: [[138, 1620], [180, 1620], [222, 1620]] },
-    { id: 'CCE', label: '가로C동', row: 3, col: 2, slots: [[285, 1680], [257, 1680], [313, 1680]] },
-    { id: 'W5', label: '민가골목', row: 4, col: 0, slots: [[15, 1860], [15, 1832], [15, 1888]] },
-    { id: 'SG', label: '남문', row: 4, col: 1, slots: [[162, 2130], [198, 2130], [180, 2094]] },
-    { id: 'E5', label: '창고골목', row: 4, col: 2, slots: [[345, 1860], [345, 1832], [345, 1888]] },
-  ];
-  // 뒷골목 조사 때만 쓰는 갈래 매듭 (7-2): 관아 뒤 막다른 갈래 ③
-  const INVESTIGATION_NODES = ['W1', 'AW', 'RA', 'AE'];
-  const EXTRA_INVESTIGATION_NODE = { id: 'D3', label: '관아 뒤 갈래', row: 0.5, col: 0.5, slots: [[75, 330], [75, 358], [75, 386]] };
-
-  // ── 인물 (8-1 속도 · 8-5 체력) ───────────────────────────
+  // ── 인물 (8-1, 체력은 specs/battle.md 값) ─────────────────
+  // atk.waits: 한 타 뒤 다음 타까지 기다리는 시간 (마지막 값 = 콤보 끝 쉼 포함)
+  // atk.subdue: 운반자 제압치 (근접만. 콤보 마지막 타 3). atk.ranged = true 면 제압치 0
   const HEROES = [
-    { id: 'yoon', name: '윤무겸', short: '윤', speed: 44, hp: 30, skill: null, token: 'characters/yoon_battle.webp', portrait: 'characters/yoon_portrait.webp' },
-    { id: 'hangyeol', name: '한결', short: '한', speed: 42, hp: 24, skill: 'shot', token: 'characters/hangyeol_battle.webp', portrait: 'characters/hangyeol_portrait.webp' },
-    { id: 'yeoul', name: '여울', short: '여', speed: 50, hp: 34, skill: null, token: 'characters/yeoul_battle.webp', portrait: 'characters/yeoul_portrait.webp' },
-    { id: 'soun', name: '소운', short: '소', speed: 40, hp: 22, skill: 'barrier', token: 'characters/soun_battle.webp', portrait: 'characters/soun_portrait.webp' },
+    { id: 'yoon', name: '윤무겸', short: '윤', speed: 160, hp: 30, token: 'characters/yoon_battle.webp', portrait: 'characters/yoon_portrait.webp',
+      atk: { kind: 'melee', reach: 50, arc: 1.1, dmg: [4, 4, 6], subdue: [2, 2, 3], waits: [0.3, 0.3, 0.4] },
+      skill: { id: 'byeoksa', name: '벽사검', dash: 100, dmg: 10, subdue: 4 } },
+    { id: 'hangyeol', name: '한결', short: '한', speed: 150, hp: 24, token: 'characters/hangyeol_battle.webp', portrait: 'characters/hangyeol_portrait.webp',
+      atk: { kind: 'arrow', range: 220, dmg: [3], subdue: [0], waits: [0.5], ranged: true },
+      skill: { id: 'gyeonje', name: '견제사격', range: 300, dmg: 8, slow: 0.4, slowT: 2.5, subdue: 0, ranged: true } },
+    { id: 'yeoul', name: '여울', short: '여', speed: 190, hp: 34, token: 'characters/yeoul_battle.webp', portrait: 'characters/yeoul_portrait.webp',
+      atk: { kind: 'melee', reach: 40, arc: 1.1, dmg: [3, 3], subdue: [2, 3], waits: [0.25, 0.55] },
+      skill: { id: 'chukji', name: '축지격', dist: 140, dmg: 6, reach: 44, subdue: 4 } },
+    { id: 'soun', name: '소운', short: '소', speed: 145, hp: 22, token: 'characters/soun_battle.webp', portrait: 'characters/soun_portrait.webp',
+      atk: { kind: 'charm', range: 160, speed: 260, dmg: [4], subdue: [0], waits: [0.7], ranged: true },
+      skill: { id: 'hwayeom', name: '화염부', ahead: 45, radius: 45, dmg: 12, subdue: 4 } },
   ];
   const SOLDIERS = [
-    { id: 'sol1', name: '관군1', short: '관1', speed: 34, hp: 20, token: 'npcs/soldier_battle.webp' },
-    { id: 'sol2', name: '관군2', short: '관2', speed: 34, hp: 20, token: 'npcs/soldier_battle.webp' },
+    { id: 'sol1', name: '관군1', short: '관1', speed: 120, hp: 20, token: 'npcs/soldier_battle.webp' },
+    { id: 'sol2', name: '관군2', short: '관2', speed: 120, hp: 20, token: 'npcs/soldier_battle.webp' },
   ];
 
-  // 6-1 추격 시작 배치 (고정). [2차 수정] 파티는 큰길 가운데(중앙 가로골목 어귀), 관군은 광장 북쪽.
+  // 추격 시작 자리 (항상 같다, 7-3). 파티는 갈래 ① 입구, 관군은 객사 앞.
   const CHASE_START = {
-    yeoul: [156, 1080], yoon: [180, 1080], hangyeol: [204, 1080], soun: [180, 1104],
-    sol1: [168, 880], sol2: [192, 880],
-    runner: [310, 1060],
+    yoon: [120, 590], yeoul: [120, 632], hangyeol: [88, 540], soun: [152, 540],
+    sol1: [196, 366], sol2: [196, 402], // 브리프 (220,380)(260,380) 은 큰길 가운데라 운반자가 두 몸 사이에 끼어 멈춘다 → 큰길 서쪽 가에 앞뒤로 (DESIGN-ISSUES v2)
+    runner: [380, 540],
     control: 'yoon',
   };
 
-  // 6-1 표 ([2차 수정] 시뮬레이션 측정값). 테스트가 이 값과 실제 시뮬레이션을 비교한다.
+  // 6-1 표 (설계값). 테스트가 비교한다.
   const DESIGN_TABLE = {
-    allies: {
-      yeoul: { N: 21.1, S: 21.5 }, yoon: { N: 23.9, S: 23.9 }, hangyeol: { N: 25.1, S: 25.6 },
-      soun: { N: 26.9, S: 25.7 }, sol1: { N: 25.0, S: 36.8 },
-    },
-    // 지킴 선 도착 (방해 없음)
-    runner: { N1: 29.2, S1: 29.9 },
-    // 시작 비용 (성문 밖 점까지 시간 + 벌점). S2 는 시작 순간 파티가 큰길을 막아 ∞
-    startCost: { N1: 31.4, S1: 32.1, N2: 42.4, S2: Infinity },
-    guardLine: { N: 30, S: 2130 },
+    runnerToGate: 4.9,       // 출발 준비 1.0 포함
+    nothing: 11.9,           // 아무것도 안 함 → 탈출
+    soldiersNorth: 16.9,     // 관군 2 → 북문(0.5초에 탭)만 → 탈출
+    soldierToN: 2.6, soldierToS: 5.3,
+    yoonToGate: 3.9, yeoulToGate: 3.3, hangyeolToGate: 4.1, sounToGate: 4.3,
   };
 
-  // 등롱 (8-2 규칙 4): 이 빛 안에서만 운반자의 가려는 방향이 보인다. 골목은 어둡다.
+  // 등롱 (빛웅덩이). 성문 앞 마당이 가장 밝다 (전투 무대).
   const LANTERNS = [
-    [162, 12, 70], [198, 12, 70], [162, 2148, 70], [198, 2148, 70],
-    [180, 300, 80], [180, 700, 80], [180, 960, 95], [180, 1300, 80], [180, 1680, 80], [180, 1900, 80],
-    [300, 1050, 85], [290, 1160, 70], [260, 930, 60], [90, 1100, 45],
+    [200, 60, 110], [280, 60, 110], [200, 1020, 110], [280, 1020, 110],
+    [240, 300, 90], [240, 540, 90], [240, 800, 90], [380, 540, 100], [120, 590, 60], [24, 440, 50], [456, 300, 50],
   ];
 
-  // 건물 덩어리 (그림 전용 · 충돌은 WALK 밖이면 전부 막힘). 크기 제각각, 모서리 둥글게 (11장)
+  // 건물 덩어리 (그림 전용 · 충돌은 WALK 밖이면 전부 막힘)
   const BUILDINGS = [
-    { x0: 36, y0: 128, x1: 114, y1: 292, kind: 'office', name: '관아' },
-    { x0: 96, y0: 300, x1: 114, y1: 458, kind: 'wall' },
-    { x0: 36, y0: 500, x1: 114, y1: 700, kind: 'office', name: '관아' },
-    { x0: 36, y0: 712, x1: 114, y1: 1056, kind: 'town' },
-    { x0: 246, y0: 128, x1: 324, y1: 300, kind: 'town' },
-    { x0: 246, y0: 310, x1: 324, y1: 458, kind: 'town' },
-    { x0: 246, y0: 502, x1: 324, y1: 640, kind: 'gaeksa', name: '객사' },
-    { x0: 246, y0: 650, x1: 324, y1: 892, kind: 'town' },
-    { x0: 36, y0: 1148, x1: 50, y1: 1200, kind: 'wall' },
-    { x0: 90, y0: 1148, x1: 114, y1: 1320, kind: 'town' },
-    { x0: 36, y0: 1208, x1: 84, y1: 1440, kind: 'town', name: '민가' },
-    { x0: 36, y0: 1452, x1: 114, y1: 1658, kind: 'town', name: '민가' },
-    { x0: 246, y0: 1208, x1: 324, y1: 1448, kind: 'store', name: '창고' },
-    { x0: 246, y0: 1492, x1: 324, y1: 1658, kind: 'store', name: '창고' },
-    { x0: 36, y0: 1702, x1: 114, y1: 2034, kind: 'town', name: '민가' },
-    { x0: 246, y0: 1702, x1: 324, y1: 2034, kind: 'store' },
+    { x0: 52, y0: 124, x1: 172, y1: 272, kind: 'office', name: '관아' },
+    { x0: 308, y0: 124, x1: 428, y1: 272, kind: 'gaeksa', name: '객사' },
+    { x0: 52, y0: 328, x1: 92, y1: 512, kind: 'town' },
+    { x0: 148, y0: 328, x1: 172, y1: 512, kind: 'wall' },
+    { x0: 96, y0: 444, x1: 144, y1: 512, kind: 'town' },
+    { x0: 308, y0: 328, x1: 428, y1: 436, kind: 'town', name: '민가' },
+    { x0: 52, y0: 568, x1: 92, y1: 772, kind: 'town', name: '민가' },
+    { x0: 148, y0: 568, x1: 172, y1: 772, kind: 'wall' },
+    { x0: 96, y0: 708, x1: 144, y1: 772, kind: 'town' },
+    { x0: 308, y0: 644, x1: 428, y1: 772, kind: 'store', name: '창고' },
+    { x0: 52, y0: 828, x1: 172, y1: 956, kind: 'town', name: '민가' },
+    { x0: 308, y0: 828, x1: 428, y1: 872, kind: 'store' },
+    { x0: 308, y0: 928, x1: 428, y1: 956, kind: 'store' },
+    { x0: 308, y0: 876, x1: 332, y1: 924, kind: 'wall' },
   ];
 
-  // ── 조사 장면 ───────────────────────────────────────────
-  // 도입: 객사 마당 (메뉴 없이 바로 시작, 3장)
-  const YARD_SCENE = {
-    w: 360, h: 620,
-    walk: [{ id: 'court', kind: 'yard', x0: 30, y0: 150, x1: 330, y1: 600 }, { id: 'door', kind: 'yard', x0: 160, y0: 118, x1: 200, y1: 180 }],
-    blocks: [],
-    door: [180, 150],
-    start: { yoon: [180, 560], hangyeol: [150, 590], yeoul: [210, 590], soun: [180, 610] },
-  };
-  // 객사 방 안 (7-1). 동료는 서 있고 움직이지 않는다.
+  // ── 조사 (7장) ────────────────────────────────────────────
+  // 객사 방 (360 × 420, 스크롤 없음). 방 안에서 바로 시작.
   const ROOM_SCENE = {
-    w: 360, h: 480,
-    walk: [{ id: 'floor', kind: 'yard', x0: 40, y0: 70, x1: 320, y1: 440 }, { id: 'back', kind: 'yard', x0: 160, y0: 40, x1: 200, y1: 100 }],
+    w: 360, h: 420,
+    walk: [{ id: 'floor', kind: 'yard', x0: 16, y0: 40, x1: 344, y1: 404 }, { id: 'back', kind: 'yard', x0: 150, y0: 0, x1: 210, y1: 80 }],
     blocks: [],
-    start: { yoon: [180, 410] },
-    companions: { hangyeol: [236, 418], yeoul: [292, 236], soun: [176, 250] },
+    start: { yoon: [180, 290] },
+    companions: { hangyeol: [250, 372], yeoul: [320, 250], soun: [44, 300] },
     spots: [
-      { id: 'bolt', name: '빗장', pos: [180, 438], note: '빗장 — 안에서 걸려 있다' },
-      { id: 'window', name: '창', pos: [318, 196], note: '창 — 닫혀 있다' },
-      { id: 'bundle', name: '보따리', pos: [92, 150], note: '보따리 — 물건 그대로. 싸움 흔적·피 없음' },
-      { id: 'hook', name: '출입패 걸이', pos: [42, 330], note: '출입패 걸이 — 관청 출입패만 없다' },
+      { id: 'bolt', name: '빗장', pos: [180, 392], note: '빗장 — 안에서 걸려 있다' },
+      { id: 'bundle', name: '보따리', pos: [80, 160], note: '보따리 — 물건 그대로. 싸움 흔적·피 없음' },
+      { id: 'hook', name: '출입패 걸이', pos: [300, 160], note: '출입패 걸이 — 관청 출입패만 없다' },
     ],
-    backDoor: [180, 56],
+    spotRadius: 48,
+    backDoor: [180, 30],
+    introLineSec: 1.6,
   };
-
-  // 뒷골목 (7-2): 객사 뒷문 → 가로골목 A → 갈래 → 서쪽골목 → 갈래 ① 관리
+  // 뒷골목 (추격 맵 그대로). 흔적 3개, 가까이(60u) 가면 뛰는 중에 켜진다.
   const ALLEY_INVESTIGATION = {
-    spawn: [290, 481],
-    followers: [[306, 481], [322, 481], [338, 481]],
+    spawn: [340, 300],
+    followers: [[380, 300], [416, 300], [452, 300]],
     traces: [
-      { id: 't1', name: '발자국', pos: [236, 480] },
-      { id: 't2', name: '관청 문서 조각', pos: [15, 690] },
-      { id: 't3', name: '끌고 간 자국', pos: [15, 960] },
+      { id: 't1', name: '발자국', pos: [300, 300] },
+      { id: 't2', name: '관청 문서 조각', pos: [140, 300] },
+      { id: 't3', name: '끌고 간 자국', pos: [24, 440] },
     ],
-    fork: { pos: [75, 480], dead: [75, 318], trueDir: [15, 560] },
-    omen: [120, 452],
-    official: [70, 1184],
+    omen: [220, 262],
+    official: [120, 680],
     officialTalkRadius: 48,
     traceRadius: 60,
-    // 관리 앞에 모이는 자리 = 추격 시작 자리 (7-3)
-    gather: { yeoul: [60, 1120], yoon: [80, 1096], hangyeol: [100, 1072], soun: [100, 1112] },
   };
 
   // ── 대사 (specs/chapter5.md 글자 그대로) ──────────────────
@@ -267,6 +222,7 @@
     soldier: { name: '관군', img: 'npcs/soldier_battle.webp' },
   };
 
+
   const OBJECTIVES = {
     gaeksa: '사라진 관리의 흔적을 찾아라',
     exit: '객사 밖으로 나간 길을 찾아라',
@@ -280,15 +236,18 @@
     chapter6: '제6장 — 잠김',
     result: '관리 확보 · 장부 운반자 확보 · 봉인처 장부 일부 회수',
     runnerName: '장부 운반자',
+    // UI 안내 문구 (인물 대사 아님, 브리프 10장)
+    chaseHint: '빗장에 붙은 운반자를 쳐서 떼어 내라',
+    capHint: '달리는 자는 붙잡을 수 없다 — 성문에서 쳐라',
   };
 
   const STAGE = {
-    W: 360, H: 2160,
-    WALK, BLOCKS, MARKET, NODES, EDGES, EXITS, DEAD_ENDS,
-    COMMAND_NODES, INVESTIGATION_NODES, EXTRA_INVESTIGATION_NODE,
+    W: 480, H: 1080,
+    WALK, BLOCKS, MARKET, NODES, EDGES, DEAD_ENDS, GATES,
     HEROES, SOLDIERS, CHASE_START, DESIGN_TABLE, LANTERNS, BUILDINGS,
-    YARD_SCENE, ROOM_SCENE, ALLEY_INVESTIGATION,
+    ROOM_SCENE, ALLEY_INVESTIGATION,
     LINES, SPEAKERS, OBJECTIVES, TEXT,
+    EXITS: { N: { node: 'WN' }, S: { node: 'WS' } },
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = STAGE;
