@@ -971,7 +971,7 @@
   #banner #objective .obj-tag { display: none; }
   #banner #objective .obj-goal { font-size: 13px; color: #2a2118; font-family: var(--fr-myeongjo); font-weight: 800; }
   #banner #objective .obj-status { font-size: 11px; color: #8e2a22; font-weight: 700; }
-  #banner #top { grid-column: 2 / -1; grid-row: 3; align-self: end; justify-content: flex-start; gap: 4px; padding: 0; margin: 0; font-size: 11px; font-weight: 700; color: #5a4a36; letter-spacing: 0; }
+  #banner #top { grid-column: 2 / 4; grid-row: 3; align-self: end; justify-content: flex-start; gap: 4px; padding: 0; margin: 0; font-size: 11px; font-weight: 700; color: #5a4a36; letter-spacing: 0; }
   #banner #top .sep { color: #a0906c; }
   #banner .bn-steps { grid-column: 3; grid-row: 1 / 3; list-style: none; margin: 0; padding: 0 0 0 8px; border-left: 1px solid rgba(58, 47, 34, .35); display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 11px; font-weight: 700; white-space: nowrap; }
   #banner .bn-steps { min-width: 0; }
@@ -1128,6 +1128,22 @@
   #skills .skill-row .sk-desc { white-space: normal; font-size: 10px; line-height: 1.25; }
   #skills .skill-row .sk-cost { position: absolute; top: 5px; right: 6px; grid-column: auto; grid-row: auto; width: auto; font-size: 9px; padding: 0 4px; line-height: 1.5; white-space: nowrap; }
   @media (min-width: 420px) { #skills .skill-row .sk-desc { white-space: normal; } }
+  /* 두루마리 접기: 펼친 상태는 [제N장·제목·임무·체크] 그대로, 접으면 한 줄 [제N장 · 지금 단계(없으면 제목) · 턴 · 📖 · ▼] */
+  #banner .bn-fold { grid-column: 4; grid-row: 3; align-self: end; width: 30px; height: 20px; padding: 0; border: 1px solid #5a4a36; background: #1c1814; color: #e9dfc6; font-size: 10px; line-height: 1; cursor: pointer; touch-action: manipulation; }
+  #banner .bn-fold::before { content: "▲"; } /* 접기 */
+  #banner.folded { height: 36px; padding-top: 4px; padding-bottom: 4px; grid-template-columns: auto minmax(0, 1fr) auto 30px 30px; grid-template-rows: 1fr; align-items: center; }
+  #banner.folded .ch-tag { grid-row: 1; flex-direction: row; padding: 0 6px; height: 24px; font-size: 12px; gap: 0; }
+  #banner.folded .ch-tag b { font-size: 12px; }
+  #banner.folded #objective { display: none; }
+  #banner.folded .bn-title { grid-column: 2; grid-row: 1; font-size: 14px; }
+  #banner.folded .bn-steps:not([hidden]) { grid-column: 2; grid-row: 1; border-left: none; padding: 0; }
+  #banner.folded.has-steps .bn-title { display: none; } /* 단계가 있으면 제목 대신 지금 단계 */
+  #banner.folded .bn-steps li:not(.now) { display: none; }
+  #banner.folded #top { grid-column: 3; grid-row: 1; align-self: center; }
+  #banner.folded #top .sep, #banner.folded #top-weather, #banner.folded #top-merit { display: none; }
+  #banner.folded .lore-open { grid-column: 4; grid-row: 1; height: 26px; }
+  #banner.folded .bn-fold { grid-column: 5; grid-row: 1; align-self: center; height: 26px; }
+  #banner.folded .bn-fold::before { content: "▼"; } /* 펴기 */
 </style>
 </head>
 <body>
@@ -1149,6 +1165,7 @@
     </div>
     <ul class="bn-steps" id="bn-steps"></ul>
     <button class="lore-open" id="lore-open-battle" type="button" aria-label="벽사록 열기">📖</button>
+    <button class="bn-fold" id="bn-fold" type="button" aria-label="임무 두루마리 접기" aria-expanded="true"></button>
   </div>
   <div id="board"></div>
   <div id="panel">
@@ -4685,6 +4702,7 @@ var Core = (function () {
     var o = state.objective, steps = o && BANNER_STEPS[chapterId];
     var list = document.getElementById('bn-steps');
     list.hidden = !steps;
+    document.getElementById('banner').classList.toggle('has-steps', !!steps);
     list.innerHTML = '';
     if (!steps) return;
     var at = steps.map(function (st) { return st.phase; }).indexOf(o.phase);
@@ -5911,6 +5929,20 @@ var Core = (function () {
   }
   document.getElementById('lore-open-title').addEventListener('click', openLore);
   document.getElementById('lore-open-battle').addEventListener('click', openLore);
+  // 위 두루마리 접기/펴기 (기획자 피드백: 맵을 너무 덮는다). 접은 상태는 이 브라우저에 기억
+  var BANNER_KEY = 'joseon-exorcist.bannerFolded';
+  function setBannerFolded(folded) {
+    document.getElementById('banner').classList.toggle('folded', folded);
+    var b = document.getElementById('bn-fold');
+    b.setAttribute('aria-expanded', folded ? 'false' : 'true');
+    b.setAttribute('aria-label', folded ? '임무 두루마리 펴기' : '임무 두루마리 접기');
+  }
+  try { setBannerFolded(localStorage.getItem(BANNER_KEY) === '1'); } catch (e) { /* 저장이 막혀 있으면 펼친 채로 */ }
+  document.getElementById('bn-fold').addEventListener('click', function () {
+    var folded = !document.getElementById('banner').classList.contains('folded');
+    setBannerFolded(folded);
+    try { localStorage.setItem(BANNER_KEY, folded ? '1' : '0'); } catch (e) { /* 무시 */ }
+  });
   document.getElementById('lore-close').addEventListener('click', closeLore);
   document.getElementById('lore').addEventListener('click', function (ev) {
     if (ev.target.id === 'lore') closeLore(); // 종이 바깥을 누르면 닫힌다
