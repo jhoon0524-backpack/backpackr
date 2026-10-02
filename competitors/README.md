@@ -26,6 +26,10 @@
 | 킥스타터 | 유튜브 | `youtube.com/feeds/videos.xml?channel_id=UCPV33YGEVLwtOotz9ZG0XQw` |
 | 게임파운드 | 블로그 [What's new] 시리즈 | 사이트 차단 → 웹검색 `site:gamefound.com/en/blog "What's new"` |
 | 게임파운드 | 도움말센터 수정 문서 | `help.gamefound.com/sitemap.xml` lastmod |
+| 공통 | 앱스토어 리뷰 (최신순 50건) | `itunes.apple.com/{kr|us}/rss/customerreviews/page=1/id={앱ID}/sortby=mostrecent/json` — 와디즈 1107828621, 킥스타터 596961532, 게임파운드 6504344271 |
+| 공통 | 구글플레이 리뷰 (최신순) | `pip install google-play-scraper` → `reviews(앱, sort=Sort.NEWEST)` — com.markmount.wadiz, com.kickstarter.kickstarter, com.gamefound.app |
 | 공통 | 앱 릴리즈노트, 채용, 외부 뉴스(최근 2일) | 각 baseline.md 참고 |
+
+리뷰 기록 규칙: 리뷰 1건 = 1행, 태그 수요, 확실도 외부. 원문발췌는 `[iOS|Android ★별점 v버전] 제목 — 본문` 150자 이내.
 
 사이트 봇 차단으로 읽을 수 없는 곳: 와디즈 공지·메이커센터·메인, 킥스타터 메인·프레스, 게임파운드 메인·블로그 직접 접속.
