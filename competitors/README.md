@@ -35,6 +35,8 @@
 | 공통 | 구글플레이 리뷰 (최신순) | `pip install google-play-scraper` → `reviews(앱, sort=Sort.NEWEST)` — com.markmount.wadiz, com.kickstarter.kickstarter, com.gamefound.app, com.ca_crowdfunding.makuake_android |
 | 공통 | 앱 릴리즈노트, 채용, 외부 뉴스(최근 2일) | 각 baseline.md 참고 |
 
+앱스토어 RSS가 0건을 돌려주는 날이 있다(애플 쪽 일시 현상, 2026-10-03 확인). 그날은 baseline을 그대로 두고 실패로 보고한다. RSS는 최신 50건을 주므로 다음 날 정상화되면 밀린 리뷰를 함께 잡는다. 앱스토어 웹 페이지는 최신순이 아니라 대체 소스로 쓰지 않는다.
+
 리뷰 기록 규칙: 리뷰 1건 = 1행, 태그 수요, 확실도 외부. 원문발췌는 `[iOS|Android ★별점 v버전] 제목 — 본문` 150자 이내.
 
 사이트 봇 차단으로 읽을 수 없는 곳: 와디즈 공지·메이커센터·메인, 킥스타터 메인·프레스, 게임파운드 메인·블로그 직접 접속.
