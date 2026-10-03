@@ -21,7 +21,8 @@
 |---|---|---|
 | 와디즈 | 공식 블로그 전 카테고리(와디즈 뉴스·와디즈 소식·서비스 이야기·기획노트·기술 이야기·일하는 법) | `blog.wadiz.io/wp-json/wp/v2/posts` (헤드리스 브라우저) |
 | 와디즈 | 도움말센터 최근 수정 문서 | `helpcenter.wadiz.io/api/v2/help_center/ko/articles.json?sort_by=updated_at&sort_order=desc` |
-| 킥스타터 | 공식 블로그 | `updates.kickstarter.com/rss/` |
+| 킥스타터 | **블로그 News·Product Updates 태그 (전략·기능 우선)** | `updates.kickstarter.com/tag/news/rss/`, `updates.kickstarter.com/tag/product-updates/rss/` |
+| 킥스타터 | 공식 블로그 전체 | `updates.kickstarter.com/rss/` |
 | 킥스타터 | 기능 소개 페이지(출시·Coming Soon 목록) | `features.kickstarter.com` (헤드리스 브라우저) |
 | 킥스타터 | 유튜브 | `youtube.com/feeds/videos.xml?channel_id=UCPV33YGEVLwtOotz9ZG0XQw` |
 | 게임파운드 | 블로그 [What's new] 시리즈 | 사이트 차단 → 웹검색 `site:gamefound.com/en/blog "What's new"` |

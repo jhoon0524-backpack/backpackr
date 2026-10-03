@@ -2,6 +2,8 @@
 
 | 소스 | 마지막 확인 ID | 마지막 확인 날짜 | 비고 |
 |---|---|---|---|
+| 블로그 News 태그 (updates.kickstarter.com/tag/news/rss/) — 전략 우선 소스 | more-than-1-million-jobs-created-kickstarters-growing-impact-on-the-global-economy | 2026-05-26 | |
+| 블로그 Product Updates 태그 (updates.kickstarter.com/tag/product-updates/rss/) — 전략 우선 소스 | whats-new-on-kickstarter-this-summer-better-discovery-and-fulfillment-flexibility | 2026-06-30 | |
 | 블로그 (updates.kickstarter.com/rss) | kickstarter-is-coming-to-new-york-comic-con | 2026-09-25 | 2026-10-02 확인 |
 | 메인 페이지·프레스 (kickstarter.com) | 미확인 | - | 2026-10-02 사이트 봇 차단(Cloudflare 403) |
 | 도움말센터 (help.kickstarter.com, Intercom) | 미확인 | - | 최근 수정 목록/sitemap 없음 |
