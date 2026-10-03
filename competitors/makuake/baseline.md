@@ -12,4 +12,4 @@
 | 구글플레이 릴리즈노트 (com.ca_crowdfunding.makuake_android) | 4.7.0 | 2026-09-09 | |
 | 구글플레이 리뷰 (google-play-scraper NEWEST, ja/jp) | b830f50c-ffa1-407b-b433-20acea904770 | 2026-09-24 | |
 | 매거진 (magazine.makuake.com) | 미확인 | - | 피드/API 403·404 |
-| 외부 뉴스 검색 "マクアケ" | - | 2026-10-02 | |
+| 외부 뉴스 검색 "マクアケ" | - | 2026-10-03 | |
