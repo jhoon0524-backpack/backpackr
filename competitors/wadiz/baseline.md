@@ -16,4 +16,4 @@
 | 외부 뉴스 검색 "와디즈" | - | 2026-10-03 | |
 | 메인 페이지 (배너·기획전·GNB) | 미확인 | - | 2026-10-02 사이트 봇 차단(Akamai 403) |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, kr) | 14507448070 | 2026-09-03 | |
-| 구글플레이 리뷰 (google-play-scraper NEWEST, ko/kr) | 7e83a509-9ac7-47b9-a9b7-89565bae289e | 2026-09-29 | |
+| 구글플레이 리뷰 (google-play-scraper NEWEST, ko/kr) | 8152f64b-16ab-4eea-8a06-f3f1a11413f5 | 2026-10-02 | |

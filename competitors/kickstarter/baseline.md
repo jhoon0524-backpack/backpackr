@@ -14,4 +14,4 @@
 | 기능 소개 (features.kickstarter.com) | 출시: Late Pledges, Backer Survey, Pre-Launch Editor, Rewards Tab/Images on Rewards / Coming Soon: Backings Dashboard, Pledge Redemption / 베타: Kickstarter Performance | 2026-10-02 | 페이지 하단 © 2024 |
 | 유튜브 (UCPV33YGEVLwtOotz9ZG0XQw) | Meet the recipients of the Next Wave Fund | 2026-09-29 | |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, us) | 14613224202 | 2026-09-30 | |
-| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | ca657bbb-694b-4e8f-8e18-05e7e5fd8403 | 2026-10-01 | |
+| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | 12e17290-5b00-4789-b43e-916ce46f6061 | 2026-10-02 | |

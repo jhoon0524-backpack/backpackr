@@ -12,3 +12,4 @@ WZ-20260930-03 | 2026-09-30 | https://play.google.com/store/apps/details?id=com.
 WZ-20261001-04 | 2026-10-01 | https://blog.wadiz.io/?p=370773 | 와디즈파트너스는 '2026 환동해 소셜벤처 스케일업 라운드'를 운영하고, 참여 기업 10개사를 오는 10월 5일까지 모집한다 | 수익 | 공식
 WZ-20261001-05 | 2026-10-01 | https://blog.wadiz.io/?p=370773 | 와디즈파트너스는 참여 기업 가운데 최소 1개사에 1억 원 이상의 지분 투자를 진행하고, 해당 기업을 중소벤처기업부의 'LIPS Ⅱ'에 추천 | 수익 | 공식
 WZ-20261001-06 | 2026-10-01 | https://apps.apple.com/kr/app/id1107828621 | 앱스토어 버전 26.40.0 (2026-10-02 기준 "1일 전") 새로운 소식: "사용성 개선 및 안정화를 위해 업데이트 했습니다." | 수요 | 관찰
+WZ-20261002-01 | 2026-10-02 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=8152f64b-16ab-4eea-8a06-f3f1a11413f5 | [Android ★5 v26.38.0] 만족함 | 수요 | 외부

@@ -11,3 +11,6 @@
 | KS-20261001-01 | 2026-10-01 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 킥스타터 정말 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=f457600b-f0ca-4d00-89b7-cc46ac3836b5) |
 | KS-20261001-02 | 2026-10-01 | 수요 | 외부 | [안드로이드 ★1 v3.42.0] 구매자 보호가 없고, 앱이 링크(Link) 가입을 하도록 속이려 든다. 앱에 여전히 빠진 기능이 있다는 점은 말할 것도 없다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=c27c2d2e-f269-4f0b-9934-c86065840188) |
 | KS-20261001-03 | 2026-10-01 | 수요 | 외부 | [안드로이드 ★1 v3.42.0] 끔찍하다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ca657bbb-694b-4e8f-8e18-05e7e5fd8403) |
+| KS-20261002-01 | 2026-10-02 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 킥스타터 웹사이트를 앱으로 만든 것이다. 마음에 안 들 이유가 뭐가 있나? | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=12e17290-5b00-4789-b43e-916ce46f6061) |
+| KS-20261002-02 | 2026-10-02 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 훌륭한 앱이지만 계속 돈이 많이 든다!! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=8488027c-fdaa-44fc-8d4d-c3f45302eddf) |
+| KS-20261002-03 | 2026-10-02 | 수요 | 외부 | [안드로이드 ★1 v3.42.0] 예전엔 좋았지만 이제는 조직범죄의 일부다. 래티튜드 파이낸스와 ANU의 특정 개인들을 포함해 … | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=70df33c7-43ac-4f69-8810-8183b38002bc) |
