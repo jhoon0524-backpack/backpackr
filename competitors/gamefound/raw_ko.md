@@ -7,3 +7,4 @@
 | GF-20261001-01 | 2026-10-01 | 공급 | 관찰 | 2026년 9월 30일 이전에 프로젝트를 공개했다면, 새 편집기로 바꾸지 않는 한 프로젝트는 이전 편집기를 사용합니다. | [링크](https://help.gamefound.com/article/745-how-to-use-text-editor) |
 | GF-20261001-02 | 2026-10-01 | 공급 | 관찰 | 게임파운드 프로젝트의 댓글을 엑셀(Excel) 파일로 내보낼 수 있으며, 프로젝트 업데이트에 달린 댓글과 답글도 포함됩니다. | [링크](https://help.gamefound.com/article/746-export-comments) |
 | GF-20261002-01 | 2026-10-02 | 공급 | 관찰 | '팔로워 선물(Follower gifts)' 문서 수정됨 (최종 수정일: 2026년 10월 2일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/119-gifts) |
+| GF-20261003-01 | 2026-10-03 | 수요 | 외부 | [안드로이드 ★5 v1.93.1] 최고야!!! | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=5eb026fd-adb8-412e-96cf-919fad35583b) |
