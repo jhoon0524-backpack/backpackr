@@ -13,3 +13,5 @@ WZ-20261001-04 | 2026-10-01 | https://blog.wadiz.io/?p=370773 | 와디즈파트�
 WZ-20261001-05 | 2026-10-01 | https://blog.wadiz.io/?p=370773 | 와디즈파트너스는 참여 기업 가운데 최소 1개사에 1억 원 이상의 지분 투자를 진행하고, 해당 기업을 중소벤처기업부의 'LIPS Ⅱ'에 추천 | 수익 | 공식
 WZ-20261001-06 | 2026-10-01 | https://apps.apple.com/kr/app/id1107828621 | 앱스토어 버전 26.40.0 (2026-10-02 기준 "1일 전") 새로운 소식: "사용성 개선 및 안정화를 위해 업데이트 했습니다." | 수요 | 관찰
 WZ-20261002-01 | 2026-10-02 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=8152f64b-16ab-4eea-8a06-f3f1a11413f5 | [Android ★5 v26.38.0] 만족함 | 수요 | 외부
+WZ-20261004-01 | 2026-10-04 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=938fa7a8-7f8a-404d-aa09-4df2952f58e7 | [Android ★5 v26.38.0] 맨날쳐다보게됨 | 수요 | 외부
+WZ-20261004-02 | 2026-10-04 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=2a767ae4-7730-4b2e-8c6e-465e4e2dd5d6 | [Android ★4 v26.40.0] 메이커의 팬이라고 해야하나? 그 많은 펀딩기록 중에 내가 믿고사는 메이커가 있거든요? 내가 이 메이커의 제품을 뭘 샀더라 뒤적거려보고 싶은데 펀딩기록 보기가 쉽지않습니다. | 수요 | 외부

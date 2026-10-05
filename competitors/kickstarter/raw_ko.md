@@ -17,3 +17,4 @@
 | KS-20261002-04 | 2026-10-02 | 수요 | 외부 | [iOS ★1 v5.38.0] 킥스타터를 너무 좋아한다 — 가장 필요한 기능 하나: 검색할 때 캠페인 숨기기 | [링크](https://apps.apple.com/us/app/id596961532) |
 | KS-20261003-01 | 2026-10-03 | 수요 | 외부 | [안드로이드 ★1 v3.42.0] 끔찍한 경험, 앱 제공자는 지원을 전혀 하지 않고 책임도 지지 않는다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=75791e76-7825-477d-914d-bfa6feea00ec) |
 | KS-20261003-02 | 2026-10-03 | 수요 | 외부 | [안드로이드 ★2 v3.42.0] 몇몇 프로젝트의 후원자였는데 몇 년이 지난 지금 강제 로그아웃되고 계정이 완전히 지워졌다. 내역이 전혀 없다.. 이제 여기서 새 프로젝트를 올리거나 후원하지 않을 것 같다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=66c4cc07-c336-44a7-b8ca-adc8cd528c9f) |
+| KS-20261003-03 | 2026-10-03 | 수요 | 외부 | [iOS ★3 v5.38.0] 개선이 필요하다 — 내가 못 찾은 것일 수도 있지만, 아직 배송되지 않은 것만 보여 주는 방법이 있으면 좋겠다. | [링크](https://apps.apple.com/us/app/id596961532) |
