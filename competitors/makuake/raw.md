@@ -10,3 +10,4 @@ MK-20260930-04 | 2026-09-30 | https://www.makuake.co.jp/makuake_story/archives/1
 MK-20261001-01 | 2026-10-01 | https://ssl4.eir-parts.net/doc/4479/tdnet/2889816/00.pdf | 当社は、2026年10月27日（火）に2026年９月期 決算説明会を開催します。本説明会では、当社の直近の業績や取り組み及び今後の成⻑戦略等についてご説明する予定です。 | 수익 | 공식
 MK-20261001-02 | 2026-10-01 | https://mkhelp.makuake.com/hc/ja/articles/13796422248857 | 'メールアドレスを変更したい' 문서 수정됨 (edited_at 2026-10-01). 변경 내용 본문에 명시 없음 | 수요 | 관찰
 MK-20261005-01 | 2026-10-05 | https://apps.apple.com/jp/app/id1274816320 | 앱스토어 버전 4.8.0 (2026-10-05T05:00Z 배포) アップデート: "・決済機能の改善をしました。・軽微な修正をしました。" | 수요 | 관찰
+MK-20261001-03 | 2026-10-01 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android | 구글플레이 com.ca_crowdfunding.makuake_android 버전 4.7.0, 스토어 표기 업데이트일 2026-10-01 (기존 확인 2026-09-09). 릴리즈노트 미표기 | 수요 | 관찰

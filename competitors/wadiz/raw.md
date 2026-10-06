@@ -15,3 +15,4 @@ WZ-20261001-06 | 2026-10-01 | https://apps.apple.com/kr/app/id1107828621 | 앱�
 WZ-20261002-01 | 2026-10-02 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=8152f64b-16ab-4eea-8a06-f3f1a11413f5 | [Android ★5 v26.38.0] 만족함 | 수요 | 외부
 WZ-20261004-01 | 2026-10-04 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=938fa7a8-7f8a-404d-aa09-4df2952f58e7 | [Android ★5 v26.38.0] 맨날쳐다보게됨 | 수요 | 외부
 WZ-20261004-02 | 2026-10-04 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=2a767ae4-7730-4b2e-8c6e-465e4e2dd5d6 | [Android ★4 v26.40.0] 메이커의 팬이라고 해야하나? 그 많은 펀딩기록 중에 내가 믿고사는 메이커가 있거든요? 내가 이 메이커의 제품을 뭘 샀더라 뒤적거려보고 싶은데 펀딩기록 보기가 쉽지않습니다. | 수요 | 외부
+WZ-20261006-01 | 2026-10-06 | https://job.wadiz.io/ko/o/239524 | 서비스 운영 담당자 와디즈 운영 경력 3년 이상 정규직 와디즈 2026. 10. 26, 14:59까지 (신규 채용공고, 게시일 미표기) | 조직 | 관찰
