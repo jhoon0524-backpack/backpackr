@@ -11,3 +11,4 @@ MK-20261001-01 | 2026-10-01 | https://ssl4.eir-parts.net/doc/4479/tdnet/2889816/
 MK-20261001-02 | 2026-10-01 | https://mkhelp.makuake.com/hc/ja/articles/13796422248857 | 'メールアドレスを変更したい' 문서 수정됨 (edited_at 2026-10-01). 변경 내용 본문에 명시 없음 | 수요 | 관찰
 MK-20261005-01 | 2026-10-05 | https://apps.apple.com/jp/app/id1274816320 | 앱스토어 버전 4.8.0 (2026-10-05T05:00Z 배포) アップデート: "・決済機能の改善をしました。・軽微な修正をしました。" | 수요 | 관찰
 MK-20261001-03 | 2026-10-01 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android | 구글플레이 com.ca_crowdfunding.makuake_android 버전 4.7.0, 스토어 표기 업데이트일 2026-10-01 (기존 확인 2026-09-09). 릴리즈노트 미표기 | 수요 | 관찰
+MK-20261005-02 | 2026-10-05 | https://apps.apple.com/jp/app/id1274816320 | [iOS ★4 v4.8.0] ログインできなくなりました（解決済） — iPhone用アプリをiPad miniで利用していますが、iPadにも最適化してもらえると嬉しいです。（2026/09/17追記）→2026/10/06にログイン可を確認 | 수요 | 외부

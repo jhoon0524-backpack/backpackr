@@ -12,3 +12,4 @@
 | MK-20261001-02 | 2026-10-01 | 수요 | 관찰 | '메일 주소를 변경하고 싶다' 문서 수정됨 (edited_at 2026-10-01). 변경 내용 본문에 명시 없음 | [링크](https://mkhelp.makuake.com/hc/ja/articles/13796422248857) |
 | MK-20261005-01 | 2026-10-05 | 수요 | 관찰 | 앱스토어 버전 4.8.0 (2026-10-05T05:00Z 배포) 업데이트: "결제 기능을 개선했습니다. 경미한 수정을 했습니다." | [링크](https://apps.apple.com/jp/app/id1274816320) |
 | MK-20261001-03 | 2026-10-01 | 수요 | 관찰 | 구글플레이 com.ca_crowdfunding.makuake_android 버전 4.7.0, 스토어 표기 업데이트일 2026-10-01 (기존 확인 2026-09-09). 릴리즈노트 미표기 | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android) |
+| MK-20261005-02 | 2026-10-05 | 수요 | 외부 | [iOS ★4 v4.8.0] 로그인할 수 없게 되었습니다(해결됨) — iPhone용 앱을 iPad mini에서 쓰고 있는데 iPad에도 최적화해 주시면 좋겠습니다. (2026/09/17 추기)→2026/10/06에 로그인 가능 확인 | [링크](https://apps.apple.com/jp/app/id1274816320) |

@@ -9,3 +9,4 @@ GF-20261002-01 | 2026-10-02 | https://help.gamefound.com/article/119-gifts | 'Fo
 GF-20261003-01 | 2026-10-03 | https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=5eb026fd-adb8-412e-96cf-919fad35583b | [Android ★5 v1.93.1] AwEsOmE !!! | 수요 | 외부
 GF-20261005-01 | 2026-10-05 | https://help.gamefound.com/article/745-how-to-use-text-editor | 'How to use the text editor' 문서 수정됨 (Last updated on October 5, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261005-02 | 2026-10-05 | https://help.gamefound.com/article/214-project-detailed-description | 'Project detailed description' 문서 수정됨 (Last updated on October 5, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261007-01 | 2026-10-07 | https://help.gamefound.com/article/744-manage-target-groups-and-budgets-in-adfound | 'Manage Target Groups and Budgets in Adfound' 문서 수정됨 (Last updated on October 7, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰

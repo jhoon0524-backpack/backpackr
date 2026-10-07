@@ -10,3 +10,4 @@
 | GF-20261003-01 | 2026-10-03 | 수요 | 외부 | [안드로이드 ★5 v1.93.1] 최고야!!! | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=5eb026fd-adb8-412e-96cf-919fad35583b) |
 | GF-20261005-01 | 2026-10-05 | 공급 | 관찰 | '텍스트 편집기 사용법(How to use the text editor)' 문서 수정됨 (최종 수정일: 2026년 10월 5일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/745-how-to-use-text-editor) |
 | GF-20261005-02 | 2026-10-05 | 공급 | 관찰 | '프로젝트 상세 설명(Project detailed description)' 문서 수정됨 (최종 수정일: 2026년 10월 5일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/214-project-detailed-description) |
+| GF-20261007-01 | 2026-10-07 | 공급 | 관찰 | 'Adfound에서 타깃 그룹과 예산 관리하기(Manage Target Groups and Budgets in Adfound)' 문서 수정됨 (최종 수정일: 2026년 10월 7일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/744-manage-target-groups-and-budgets-in-adfound) |
