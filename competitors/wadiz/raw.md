@@ -19,3 +19,9 @@ WZ-20261006-01 | 2026-10-06 | https://job.wadiz.io/ko/o/239524 | 서비스 운�
 WZ-20261006-02 | 2026-10-06 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=612c2c52-a787-4a81-acc5-a6e57f32ea81 | [Android ★5 v26.40.0] 좋아요 | 수요 | 외부
 WZ-20261007-01 | 2026-10-07 | https://job.wadiz.io/ko/o/237021 | 와디즈에디션 뷰티 BM 와디즈 뷰티 경력 5년 이상 정규직 와디즈 2026. 10. 26, 14:59까지 (신규 채용공고, 게시일 미표기) | 조직 | 관찰
 WZ-20261007-02 | 2026-10-07 | https://job.wadiz.io/ko/o/239179 | 광고 운영 담당자 (인턴) 와디즈 운영 경력 무관 인턴 와디즈 2026. 10. 26, 14:59까지 (신규 채용공고, 게시일 미표기) | 조직 | 관찰
+WZ-20261008-01 | 2026-10-08 | https://blog.wadiz.io/%ec%99%80%eb%94%94%ec%a6%88%ec%97%90%ec%84%9c-%eb%a8%bc%ec%a0%80-%eb%aa%a8%ec%9d%b8-%ed%8c%ac%ec%8b%ac%eb%b3%b4%eb%93%9c%ea%b2%8c%ec%9e%84-%eb%b3%b4%ec%9d%b4/ | “와디즈에서 먼저 모인 팬심”…보드게임 ‘보이드폴’, 목표의 4배 넘겨 4억 돌파 | 공급 | 공식
+WZ-20261008-02 | 2026-10-08 | https://helpcenter.wadiz.io/hc/ko/articles/32293275711769 | 발송정보를 등록할 때 선택할 수 있는 택배사가 정해져있나요? (도움말 문서 수정 2026-10-08T09:04Z) | 공급 | 관찰
+WZ-20261008-03 | 2026-10-08 | https://helpcenter.wadiz.io/hc/ko/articles/30715265408793 | 리워드 발송 후 메이커 스튜디오에서 계속 "배송 중"으로 표시되는 이유가 무엇인가요? (도움말 문서 수정 2026-10-08T08:37Z) | 공급 | 관찰
+WZ-20261008-04 | 2026-10-08 | https://helpcenter.wadiz.io/hc/ko/articles/31534255871513 | 직접 전달 처리란 무엇이며, 언제 사용하나요? (도움말 문서 수정 2026-10-08T08:35Z) | 공급 | 관찰
+WZ-20261007-03 | 2026-10-07 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=db5aca5a-477e-4aed-aec9-6d93ea3d7ee8 | [Android ★5 v26.40.0] 아이디어 국산물품 | 수요 | 외부
+WZ-20261007-04 | 2026-10-07 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=903d6258-b1ed-435e-adb6-dae4595114e6 | [Android ★5 v26.40.0] good | 수요 | 외부
