@@ -1,0 +1,14 @@
+# 게임파운드 변화 기록 (raw)
+
+사실 1개 = 1행. 기존 행은 수정·삭제하지 않고 맨 아래에만 추가한다. ID 접두어 GF-. 원문발췌는 원어 그대로.
+
+ID | 날짜 | 출처URL | 원문발췌 | 태그 | 확실도
+GF-20261001-01 | 2026-10-01 | https://help.gamefound.com/article/745-how-to-use-text-editor | If you published your project before 30th of September 2026, your project uses the previous editor unless you switch to the new one. | 공급 | 관찰
+GF-20261001-02 | 2026-10-01 | https://help.gamefound.com/article/746-export-comments | You can export comments from your Gamefound project to an Excel file, including comments on project updates and replies. | 공급 | 관찰
+GF-20261002-01 | 2026-10-02 | https://help.gamefound.com/article/119-gifts | 'Follower gifts' 문서 수정됨 (Last updated on October 2, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261003-01 | 2026-10-03 | https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=5eb026fd-adb8-412e-96cf-919fad35583b | [Android ★5 v1.93.1] AwEsOmE !!! | 수요 | 외부
+GF-20261005-01 | 2026-10-05 | https://help.gamefound.com/article/745-how-to-use-text-editor | 'How to use the text editor' 문서 수정됨 (Last updated on October 5, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261005-02 | 2026-10-05 | https://help.gamefound.com/article/214-project-detailed-description | 'Project detailed description' 문서 수정됨 (Last updated on October 5, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261007-01 | 2026-10-07 | https://help.gamefound.com/article/744-manage-target-groups-and-budgets-in-adfound | 'Manage Target Groups and Budgets in Adfound' 문서 수정됨 (Last updated on October 7, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261008-01 | 2026-10-08 | https://help.gamefound.com/article/303-project-monitor | 'Understand Your Project Analytics' 문서 수정됨 (Last updated on October 8, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261008-02 | 2026-10-08 | https://apps.apple.com/us/app/id6504344271 | 앱스토어 버전 1.95.0 (2026-10-08T13:18Z 배포) Fixed the "Back this project" button sometimes unexpectedly opening a browser. | 수요 | 관찰
