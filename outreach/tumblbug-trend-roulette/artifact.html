@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>텀블벅 트렌드 룰렛</title>
+<style>
+:root { color-scheme: light; --org: #FF6B35; --org-lt: #FFF0EB; --org-dk: #E55A25; --bg: #F5F4F0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif; background: var(--bg); color: #1A1A1A; min-height: 100vh; padding: 28px 16px 60px; }
+.wrap { max-width: 660px; margin: 0 auto; }
+.hd { text-align: center; margin-bottom: 24px; }
+.hd h1 { font-size: 21px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px; }
+.hd h1 span { color: var(--org); }
+.hd p { font-size: 13px; color: #888; }
+.card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.input-row { display: flex; gap: 8px; }
+.kw { flex: 1; height: 48px; padding: 0 14px; border: 2px solid #E8E6E0; border-radius: 12px; font-size: 15px; font-family: inherit; outline: none; background: var(--bg); transition: border-color .2s; }
+.kw:focus { border-color: var(--org); }
+.spin-btn { height: 48px; padding: 0 18px; background: var(--org); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .2s; white-space: nowrap; }
+.spin-btn:hover:not(:disabled) { background: var(--org-dk); transform: translateY(-1px); }
+.spin-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.exs { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ex-lbl { font-size: 12px; color: #888; }
+.ex { font-size: 12px; color: #888; background: var(--bg); padding: 3px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #E8E6E0; transition: all .15s; }
+.ex:hover { border-color: var(--org); color: var(--org); }
+
+/* Slot */
+.slot-wrap { display: none; }
+.slot-lbl { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-bottom: 12px; }
+.slot { position: relative; height: 72px; overflow: hidden; border-radius: 12px; background: var(--bg); border: 2px solid #E8E6E0; }
+.slot-hl { position: absolute; top: 50%; left: 0; right: 0; height: 50px; transform: translateY(-50%); background: var(--org-lt); border-top: 2px solid var(--org); border-bottom: 2px solid var(--org); z-index: 1; pointer-events: none; }
+.slot::before,.slot::after { content:''; position:absolute; left:0; right:0; height:16px; z-index:2; pointer-events:none; }
+.slot::before { top:0; background: linear-gradient(to bottom,rgba(245,244,240,.92),transparent); }
+.slot::after { bottom:0; background: linear-gradient(to top,rgba(245,244,240,.92),transparent); }
+.strip { position: absolute; width: 100%; }
+.si { height: 72px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: #1A1A1A; }
+
+/* Status / error */
+.status { display:none; text-align:center; padding:12px; color:#888; font-size:13px; margin-bottom:14px; }
+.sp { width:22px; height:22px; border:2px solid #E8E6E0; border-top-color:var(--org); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 8px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.err { display:none; background:#FFF0F0; border:1px solid #FFCCCC; border-radius:12px; padding:14px 16px; font-size:13px; color:#C0392B; margin-bottom:14px; }
+
+/* Guide card */
+.guide { display:none; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:14px; }
+.g-hd { background:var(--org); padding:22px 24px 20px; color:#fff; }
+.g-badge { font-size:10px; font-weight:700; background:rgba(255,255,255,.25); padding:2px 10px; border-radius:20px; display:inline-block; margin-bottom:8px; }
+.g-title { font-size:28px; font-weight:900; letter-spacing:-0.5px; margin-bottom:6px; }
+.g-sub { font-size:13px; opacity:.9; line-height:1.5; }
+.g-body { padding:22px 24px; }
+
+/* Momentum meter */
+.momentum-row { display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
+.momentum-box { flex:1; min-width:120px; background:var(--bg); border-radius:12px; padding:14px 16px; }
+.momentum-lbl { font-size:10px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+.momentum-val { font-size:18px; font-weight:900; color:#1A1A1A; }
+.momentum-sub { font-size:11px; color:#888; margin-top:2px; }
+.bar-wrap { margin-top:8px; height:5px; background:#E8E6E0; border-radius:3px; overflow:hidden; }
+.bar-fill { height:100%; background:var(--org); border-radius:3px; transition:width .6s ease; }
+
+/* Trend cards */
+.sec { margin-bottom:22px; }
+.sec-t { font-size:11px; font-weight:700; color:var(--org); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+.trend-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.tcard { background:var(--bg); border-radius:12px; padding:14px 16px; border-left:3px solid var(--org); }
+.tcard-icon { font-size:20px; margin-bottom:6px; }
+.tcard-lbl { font-size:10px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.8px; margin-bottom:4px; }
+.tcard-data { font-size:15px; font-weight:800; color:#1A1A1A; margin-bottom:4px; }
+.tcard-desc { font-size:12px; color:#666; line-height:1.5; }
+
+/* Keywords */
+.kw-row { display:flex; flex-wrap:wrap; gap:7px; }
+.kw-chip { font-size:13px; padding:5px 13px; background:var(--org-lt); color:var(--org-dk); border-radius:20px; font-weight:700; }
+.kw-chip.secondary { background:var(--bg); color:#888; border:1px solid #E8E6E0; font-weight:400; }
+
+/* Outlook */
+.outlook-box { background:linear-gradient(135deg,#FFF0EB 0%,#F5F4F0 100%); border:1px solid #FFDDD0; border-radius:12px; padding:16px 18px; }
+.outlook-lbl { font-size:10px; font-weight:700; color:var(--org); text-transform:uppercase; letter-spacing:.8px; margin-bottom:8px; }
+.outlook-txt { font-size:14px; line-height:1.7; color:#2A2A2A; }
+
+/* Actions */
+.act-row { display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; }
+.act { padding:9px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-family:inherit; border:1px solid #E8E6E0; background:var(--bg); color:#888; transition:all .15s; }
+.act:hover { border-color:var(--org); color:var(--org); }
+.act.primary { background:var(--org); color:#fff; border-color:var(--org); }
+.act.primary:hover { background:var(--org-dk); }
+
+@media(max-width:480px){ .trend-grid { grid-template-columns:1fr; } .momentum-row { flex-direction:column; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>텀블벅 트렌드 <span>룰렛 🎰</span></h1>
+    <p>키워드를 넣으면 2025–2026 트렌드 심층 분석이 뚝딱</p>
+  </div>
+
+  <div class="card">
+    <div class="input-row">
+      <input class="kw" id="kw" type="text" placeholder="키워드 입력 (예: 수영, 요가, 커피...)">
+      <button class="spin-btn" id="spinBtn" onclick="go()">🎰 돌려!</button>
+    </div>
+    <div class="exs">
+      <span class="ex-lbl">예시:</span>
+      <span class="ex" onclick="sk('수영')">수영</span>
+      <span class="ex" onclick="sk('요가')">요가</span>
+      <span class="ex" onclick="sk('커피')">커피</span>
+      <span class="ex" onclick="sk('명상')">명상</span>
+      <span class="ex" onclick="sk('캠핑')">캠핑</span>
+      <span class="ex" onclick="sk('빵')">빵</span>
+      <span class="ex" onclick="sk('향수')">향수</span>
+      <span class="ex" onclick="sk('독서')">독서</span>
+    </div>
+  </div>
+
+  <div class="card slot-wrap" id="slotWrap">
+    <div class="slot-lbl" id="slotLbl">트렌드 분석 중 ✨</div>
+    <div class="slot">
+      <div class="slot-hl"></div>
+      <div class="strip" id="strip"></div>
+    </div>
+  </div>
+
+  <div class="status" id="status"><div class="sp"></div><span id="statusTxt"></span></div>
+  <div class="err" id="err"></div>
+
+  <div class="guide" id="guide">
+    <div class="g-hd">
+      <div class="g-badge">트렌드 분석 리포트</div>
+      <div class="g-title" id="gTitle"></div>
+      <div class="g-sub" id="gSub"></div>
+    </div>
+    <div class="g-body">
+
+      <!-- 시장 모멘텀 -->
+      <div class="momentum-row" id="momentumRow"></div>
+
+      <!-- 트렌드 카드 -->
+      <div class="sec">
+        <div class="sec-t">📊 배경 &amp; 트렌드 (2025–2026)</div>
+        <div class="trend-grid" id="trendGrid"></div>
+      </div>
+
+      <!-- 연관 키워드 -->
+      <div class="sec">
+        <div class="sec-t">🔑 연관 키워드 &amp; 해시태그</div>
+        <div class="kw-row" id="kwRow"></div>
+      </div>
+
+      <!-- 2026 전망 -->
+      <div class="sec">
+        <div class="sec-t">🔮 2026 전망</div>
+        <div class="outlook-box">
+          <div class="outlook-lbl">AI 트렌드 분석</div>
+          <div class="outlook-txt" id="outlook"></div>
+        </div>
+      </div>
+
+      <div class="act-row">
+        <button class="act" onclick="cpAll()">📋 전체 복사</button>
+        <button class="act primary" onclick="go()">🎰 다시 돌리기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORDS=["러버","트렌드","무브먼트","웨이브","씬","라이프","컬처","바이브","무드","크루","피플","클럽"];
+let cur=null, kw='', busy=false;
+
+function sk(w){ document.getElementById('kw').value=w; }
+function setStatus(t){ const el=document.getElementById('status'); el.style.display=t?'block':'none'; document.getElementById('statusTxt').textContent=t||''; }
+function showErr(m){ const el=document.getElementById('err'); el.textContent=m; el.style.display='block'; }
+
+function bld(ns){ const s=document.getElementById('strip'); s.innerHTML=ns.map(n=>`<div class="si">${n}</div>`).join(''); s.style.transition='none'; s.style.transform='translateY(0)'; }
+function anim(fin,done){
+  const pool=[...WORDS.map(w=>kw+' '+w)]; const all=[...pool,...pool,...pool,fin]; bld(all);
+  const s=document.getElementById('strip'); const H=72; let i=0; const tot=all.length; const sl=tot-6;
+  s.style.transform=`translateY(${36-H/2}px)`; let d=40;
+  function t(){ i++; const y=-(i*H)+36-H/2; if(i>=sl){d=Math.min(d+55,400); s.style.transition=`transform ${d}ms cubic-bezier(0.25,0.8,0.5,1)`;} else s.style.transition='none'; s.style.transform=`translateY(${y}px)`; if(i>=tot-1)setTimeout(done,d+150); else setTimeout(t,d); }
+  setTimeout(t,d);
+}
+
+async function go(){
+  const k=document.getElementById('kw').value.trim();
+  if(!k||busy)return;
+  busy=true; kw=k;
+  const btn=document.getElementById('spinBtn'); btn.disabled=true; btn.textContent='분석 중...';
+  document.getElementById('guide').style.display='none';
+  document.getElementById('err').style.display='none';
+  document.getElementById('slotWrap').style.display='block';
+  document.getElementById('slotLbl').textContent='트렌드 데이터 수집 중 🔍';
+  setStatus('2025–2026 트렌드 분석 중...');
+
+  const prompt = `당신은 시장 트렌드 분석 전문가입니다. 키워드: "${k}"
+
+아래 JSON 형식으로만 응답하세요. 코드블록 없이 순수 JSON만.
+2025~2026년 최신 데이터 기준으로 분석하세요. 수치와 출처를 최대한 구체적으로.
+
+{
+  "name": "${k} 트렌드",
+  "headline": "이 키워드를 한 줄로 정의하는 포지셔닝 문장 (20자 이내)",
+  "momentum": {
+    "level": "HIGH 또는 MID 또는 LOW",
+    "growth": "성장률 수치 (예: YoY +43%)",
+    "market_size": "시장 규모 (예: 국내 3,200억원 / 글로벌 $2.1B)",
+    "peak_season": "성수기 (예: 6~8월, 연중, 12~1월)"
+  },
+  "trends": [
+    {
+      "icon": "🔍",
+      "label": "검색 트렌드",
+      "data": "구체적 수치 (예: 네이버 검색량 전년比 67% 증가)",
+      "insight": "2~3줄 인사이트. 어떤 세그먼트에서 증가하는지."
+    },
+    {
+      "icon": "📱",
+      "label": "SNS 트렌드",
+      "data": "수치 (예: 인스타그램 #수영 게시물 420만건)",
+      "insight": "어떤 콘텐츠 포맷/해시태그가 뜨고 있는지."
+    },
+    {
+      "icon": "🛒",
+      "label": "커머스 트렌드",
+      "data": "수치 (예: 관련 상품 크라우드펀딩 성공률 89%)",
+      "insight": "어떤 카테고리/제품군이 팔리는지."
+    },
+    {
+      "icon": "👥",
+      "label": "소비자 인사이트",
+      "data": "핵심 소비자 특징 (예: 2030 여성, MZ세대 중심)",
+      "insight": "이 키워드를 소비하는 사람들의 심리와 니즈."
+    },
+    {
+      "icon": "🌍",
+      "label": "글로벌 트렌드",
+      "data": "해외 동향 수치",
+      "insight": "일본/미국/유럽 등 해외에서 어떻게 진행되는지."
+    },
+    {
+      "icon": "⚡",
+      "label": "경쟁 강도",
+      "data": "시장 포화도 (예: 블루오션 / 레드오션 경계)",
+      "insight": "진입 기회와 차별화 포인트."
+    }
+  ],
+  "keywords": {
+    "primary": ["핵심 키워드1", "핵심 키워드2", "핵심 키워드3"],
+    "secondary": ["연관 키워드1", "연관 키워드2", "연관 키워드3", "연관 키워드4", "연관 키워드5"]
+  },
+  "outlook_2026": "2026년 이 키워드의 전망을 3~4문장으로. 어떤 방향으로 진화할지, 텀블벅에서 어떤 기회가 있는지 포함."
+}`;
+
+  let data=null;
+  try{
+    const raw=await window.cowork.askClaude(prompt,[]);
+    const txt=typeof raw==='string'?raw:(raw?.content?.[0]?.text||raw?.text||JSON.stringify(raw));
+    const m=txt.match(/\{[\s\S]*\}/);
+    if(m) data=JSON.parse(m[0]);
+  }catch(e){
+    setStatus('');
+    showErr('오류가 발생했어요: '+e.message);
+    busy=false; btn.disabled=false; btn.textContent='🎰 돌려!';
+    return;
+  }
+
+  setStatus('');
+  const fin=data?.name||(k+' 트렌드');
+  document.getElementById('slotLbl').textContent='트렌드 발굴 완료 ✨';
+  anim(fin,()=>{
+    if(data) render(data);
+    else showErr('결과를 가져오지 못했어요. 다시 시도해주세요.');
+    busy=false; btn.disabled=false; btn.textContent='🎰 돌려!';
+  });
+}
+
+function momentumBar(level){ return level==='HIGH'?90:level==='MID'?55:25; }
+function momentumColor(level){ return level==='HIGH'?'#FF6B35':level==='MID'?'#F0A500':'#888'; }
+
+function render(d){
+  cur=d;
+  document.getElementById('gTitle').textContent=d.name;
+  document.getElementById('gSub').textContent=d.headline||'';
+
+  const m=d.momentum||{};
+  const pct=momentumBar(m.level);
+  document.getElementById('momentumRow').innerHTML=`
+    <div class="momentum-box">
+      <div class="momentum-lbl">모멘텀</div>
+      <div class="momentum-val" style="color:${momentumColor(m.level)}">${m.level||'—'}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="momentum-box">
+      <div class="momentum-lbl">성장률</div>
+      <div class="momentum-val">${m.growth||'—'}</div>
+      <div class="momentum-sub">전년 대비</div>
+    </div>
+    <div class="momentum-box">
+      <div class="momentum-lbl">시장 규모</div>
+      <div class="momentum-val" style="font-size:14px;line-height:1.3">${m.market_size||'—'}</div>
+    </div>
+    <div class="momentum-box">
+      <div class="momentum-lbl">성수기</div>
+      <div class="momentum-val" style="font-size:14px">${m.peak_season||'—'}</div>
+    </div>`;
+
+  document.getElementById('trendGrid').innerHTML=(d.trends||[]).map(t=>`
+    <div class="tcard">
+      <div class="tcard-icon">${t.icon||'📌'}</div>
+      <div class="tcard-lbl">${t.label}</div>
+      <div class="tcard-data">${t.data}</div>
+      <div class="tcard-desc">${t.insight}</div>
+    </div>`).join('');
+
+  const kws=d.keywords||{};
+  document.getElementById('kwRow').innerHTML=
+    (kws.primary||[]).map(k=>`<span class="kw-chip">${k}</span>`).join('')+
+    (kws.secondary||[]).map(k=>`<span class="kw-chip secondary">${k}</span>`).join('');
+
+  document.getElementById('outlook').textContent=d.outlook_2026||'';
+
+  const g=document.getElementById('guide'); g.style.display='block';
+  setTimeout(()=>g.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function cpAll(){
+  if(!cur)return; const d=cur; const m=d.momentum||{};
+  const tl=(d.trends||[]).map(t=>`[${t.label}]\n수치: ${t.data}\n인사이트: ${t.insight}`).join('\n\n');
+  const txt=`# ${d.name}\n${d.headline}\n\n## 모멘텀\n성장률: ${m.growth}\n시장 규모: ${m.market_size}\n성수기: ${m.peak_season}\n\n## 배경 & 트렌드 (2025–2026)\n${tl}\n\n## 연관 키워드\n${[...(d.keywords?.primary||[]),...(d.keywords?.secondary||[])].join(', ')}\n\n## 2026 전망\n${d.outlook_2026}`;
+  navigator.clipboard.writeText(txt).then(()=>{const b=document.querySelectorAll('.act')[0];b.textContent='✅ 복사됨!';setTimeout(()=>b.textContent='📋 전체 복사',2000);});
+}
+
+document.getElementById('kw').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+</script>
+</body>
+</html>
