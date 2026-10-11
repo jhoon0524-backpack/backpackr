@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+/*
+ * 이 서비스는 **밝은 화면 한 벌만** 쓴다.
+ *
+ * 왜 이걸 명시하나 —
+ * create-next-app 이 만들어 준 기본 globals.css 가 그대로 남아 있었고, 거기
+ * `@media (prefers-color-scheme: dark)` 가 배경을 #0a0a0a, 글자를 #ededed 로
+ * 바꿨다. 그런데 카드·헤더는 Tailwind 의 `bg-white` 라 흰색 그대로였다.
+ * 결과는 **흰 카드 위의 흰 글자** — 휴대폰을 어두운 테마로 쓰는 사람에게는
+ * 목록이 통째로 안 읽혔다 (실제 기기에서 발견).
+ *
+ * 게다가 그 `/*
+ * 검정 판의 결. 완전한 평면은 인쇄물처럼 보이지 않는다.
+ * 눈에 띄면 실패다 — 색을 알아보라는 게 아니라 "만져지는 면" 이라는 느낌만 남기는 정도.
+ */
+.grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+body { }` 규칙은 레이어 밖에 있어서, 레이어 안에 있는 Tailwind
+ * 유틸리티(`bg-zinc-50` `text-zinc-900`)를 **specificity 와 무관하게 항상 이긴다.**
+ * 그래서 레이아웃에 색을 적어 둔 것이 아무 소용이 없었다.
+ *
+ * 어두운 화면을 제대로 지원하려면 색을 한 벌 더 설계해야 한다. 지금 브랜드
+ * 색은 밝은 쪽 한 벌뿐이므로, 밝은 쪽만 쓴다고 브라우저에 알리는 쪽을 택했다.
+ * `only` 를 붙여야 브라우저가 제 마음대로 어둡게 뒤집지 않는다.
+ */
+:root {
+  color-scheme: only light;
+}
+
+/*
+ * 텀블벅 팀 라이브러리 "[Tumblbug] NEW Colors + Icons" 에서 읽은 실제 값.
+ * `design/_head.part` 의 토큰을 앱으로 옮긴 것이다 — 시안에만 있고 앱에는
+ * 한 번도 안 들어와 있었다. 앱은 Tailwind 기본 zinc 를 133번 쓰고 브랜드색은
+ * 0번 썼다. 그래서 상점이 아니라 관리자 화면처럼 보였다.
+ *
+ * 대비를 재 보고 쓰임을 갈랐다 (흰 바탕 기준) —
+ *   urgent #EB4B38 → 3.75. **큰 글자와 테두리·배경에만.** 작은 흰 글자를 얹으면 안 된다
+ *   good   #0152CC → 6.8.  작은 글자·흰 글자 배지 모두 안전하다
+ *   muted  #6D6D6D → 5.2.  본문 보조 글자로 안전
+ *   faint  #9E9E9E → 2.65. 그들 체계에서도 "Disabled" 다. 읽어야 하는 글자에 쓰지 않는다
+ */
+@theme {
+  /*
+   * "게시판" 방향 (design 캔버스 B안). 흰 바탕, 검정 3px 테두리, 딱딱한 그림자, 형광 노랑, 스티커.
+   * 대비를 잰 값 —
+   *   ink #111111 / white → 18.9, / yellow #f6ef4f → 16.3
+   *   strong #333333 / white → 12.6 · muted #555555 / white → 7.5 (작은 글자에도 안전)
+   *   accent #eb4b38 위 흰 글자 → 3.75. 그래서 굵은 디스플레이 글자(18px 이상)에만 얹는다
+   *   urgent-text #c0361f / white → 5.5 (작은 붉은 글자)
+   */
+  --color-paper: #fbfaf6;
+  --color-card: #ffffff;
+  --color-ink: #111111;
+  --color-strong: #333333;
+  --color-muted: #555555;
+  /*
+   * 흐린 글자. #8a8a8a 는 흰 바탕에서 대비 3.1 이라 **읽어야 하는 글자에 못 쓴다** —
+   * 입력칸 안내 글(placeholder)과 마감한 줄의 가격이 이 색이었다 (검사표 B1, 실패 5·6).
+   * #6d6d6d 는 5.2. 텀블벅 색 체계의 muted 값과 같다.
+   */
+  --color-faint: #6d6d6d;
+  --color-line: #111111;
+  --color-fill: #f2f2f2;
+  --color-ash: #111111;
+  --color-yellow: #f0d84a;
+  --color-accent: #d6301f;
+  --color-accent-deep: #d43a27;
+  --color-urgent: #eb4b38;
+  --color-urgent-text: #c0361f;
+  --color-urgent-wash: #fde5e0;
+  --color-urgent-line: #f0c9bf;
+  --color-good: #0152cc;
+  --color-good-wash: #e8f1ff;
+  --color-sky: #0152cc;
+  --color-sky-wash: #e8f1ff;
+  --shadow-card: 0 0.8px 0 rgba(0, 0, 0, 0.031), 0 4px 12px rgba(0, 0, 0, 0.039);
+  /*
+   * 값은 둘. **선은 3px 하나**, **그림자는 6px 하나**. 예외는 없다.
+   *
+   * 그리고 세 가지 규칙 —
+   *  1. **그림자 = 누를 수 있다.** 메뉴 카드와 주요 버튼만 갖는다.
+   *     안내 상자·표·목록처럼 읽기만 하는 것은 선만 두른다.
+   *  2. **노랑은 큰 면으로 깔지 않는다.** 검정 위의 글자로만 쓴다 (버튼 글자, 마감 띠 글자).
+   *     하나뿐인 예외가 로고 칩이다 — 그건 색이 아니라 이름이다.
+   *  3. 빨강은 자리가 걸린 곳에만. 남은 자리 딱지 하나.
+   */
+  --shadow-hard: 8px 8px 0 #111111;
+}
+
+@theme inline {
+  /*
+   * 전에는 `var(--font-geist-sans)` 를 가리켰는데 그 변수는 어디에도 정의된
+   * 적이 없다. 값이 비어 본문이 Arial 로 떨어졌고, 한글은 Arial 에 없으니
+   * 기기마다 제각각인 글꼴로 나왔다.
+   */
+  /*
+   * **글꼴은 한 벌이다.** 본문도 제목도 Noto Sans KR 하나이고, 다른 것은 굵기뿐이다.
+   * 제목용 활자를 따로 두면 화면에 굵은 목소리가 둘이 되고, 그 둘이 서로 다른 손에서 나온 것처럼 보인다.
+   * 100~900 을 다 가진 가변 글꼴이라 900 자소가 **진짜로 있다** — 없는 굵기를 부르면
+   * 브라우저가 흉내를 내고, 그러면 크게 키운 제목일수록 뭉개진다.
+   */
+  --font-sans: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  /*
+   * 화면에서 가장 크게 말하는 자리에 쓰는 활자 (`.poster`).
+   *
+   * 검은고딕에서 나눔명조로 바꿨다. 검은고딕은 크고 굵게는 나오지만 **그 얼굴이 요즘
+   * 한국어 랜딩 페이지의 기본값**이라, 크게 외칠 뿐 이 판이 무엇인지는 말하지 않는다.
+   * 이 서비스가 흉내 내는 것은 인쇄된 메뉴판이고, 인쇄된 판의 큰 글자는 명조다.
+   * 획 대비가 뚜렷해 160px 로 키우면 진짜 인쇄된 제호처럼 보인다.
+   *
+   * **화면의 얼굴은 둘이다.** 제호와 로고는 명조, 표와 본문은 고딕(Noto Sans KR).
+   * 하나는 판의 이름을 말하고 하나는 값을 적는다 — 인쇄된 메뉴판이 원래 그렇게 짜인다.
+   */
+  --font-poster: "Hahmlet", "Nanum Myeongjo", var(--font-sans);
+}
+
+body {
+  font-family: var(--font-sans);
+  /* 텀블벅 본문 글자 간격. Pretendard 는 살짝 조여야 그들 화면과 같아 보인다. */
+  letter-spacing: -0.01em;
+  /* 한글은 낱말 중간에서 줄이 갈라지면 "9월 17 / 일" 처럼 읽힌다 (UI/UX 2회차 발견 3). 낱말 단위로만 접는다. */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* 금액·날짜는 표 숫자다. 값이 바뀌어도 자리가 안 흔들린다. */
+.num { font-variant-numeric: tabular-nums; }
+
+/*
+ * 제목은 검은고딕. 전단지 헤드라인은 굵고, 좁고, 줄 사이가 붙어 있어야 한다.
+ * `font-synthesis: none` 이 중요하다 — 검은고딕은 한 굵기뿐이라 800 을 요구하면 브라우저가
+ * 가짜 굵기를 덧칠해 뭉갠다. 합성을 끄면 검은고딕은 제 굵기로, 대체 글꼴(Pretendard 등)은
+ * 진짜 800 자소로 그려진다. 글꼴이 막힌 곳에서도 헤드라인이 물러 보이지 않는다.
+ */
+/*
+ * 제목과 금액.
+ *
+ * `-webkit-text-stroke` 로 획을 한 겹 덧입힌다. 한글에는 900 자소를 가진 글꼴이 흔치 않아,
+ * 글꼴이 없는 기기에서는 굵기 요청이 그냥 무시되고 제목만 홀쭉해진다 —
+ * **화면에서 가장 중요한 글자가 가장 얇아지는 셈이다.** 잉크를 직접 얹어 그 구멍을 막는다.
+ * 전단지 헤드라인은 굵고 좁고 줄 사이가 붙어 있어야 한다.
+ */
+/*
+ * 제목·버튼·값·로고가 다 이 얼굴로 말한다. 화면에서 굵은 목소리는 이것 하나다.
+ */
+.poster {
+  font-family: var(--font-poster);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+
+.disp {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+/*
+ * 제호 활자의 **가벼운 굵기**. Hahmlet 은 100~900 을 다 가진 가변 명조라,
+ * 제호(900)·제목(800)·설명(400)이 한 얼굴에서 굵기만 달리해 나온다.
+ * 굵은 얼굴 하나만 쓰면 그건 활자를 고른 것이 아니라 큰 글자를 쓴 것이다.
+ */
+.serif {
+  font-family: var(--font-poster);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+ /*
+ * 스티커 — "N자리 남음".
+ *
+ * **기울이지 않는다.** 붙은 종이처럼 보이려고 각도를 주는 건 이 스타일에서 가장 흔한 상투다.
+ * 게다가 기울이면 그림자까지 같이 돌아가 카드 그림자와 방향이 어긋난다.
+ * 카드 밖으로 걸쳐 나가는 것만으로 "얹혀 있다" 는 말은 충분히 된다.
+ * 상태를 읽는 단서는 빨강이냐 흰색이냐 하나뿐이다.
+ */
+.stamp {
+  display: inline-block;
+  border-radius: 0;
+  border: 3px solid #111111;
+  padding: 0.3em 0.6em;
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 1;
+}
+
+/*
+ * 사진이 아직 없는 자리.
+ * 세 칸을 똑같은 회색으로 두면 눈이 가장 먼저 닿는 자리에서 아무 말도 못 듣는다.
+ * 분류마다 바탕색을 달리해 최소한 "서로 다른 것" 이라는 말은 하게 한다.
+ */
+/*
+ * 메뉴판의 점선 — 이름과 값을 잇는 줄.
+ * `border-dotted` 로 그으면 점이 글자 가운데쯤에 뜨고 굵기도 테두리를 따라간다. 그건 잇는 줄이 아니라 그어 둔 선이다.
+ * 진짜 리더는 **글자가 앉는 밑선**에 점이 놓인다. 그래서 배경으로 그리고 아래에 붙인다.
+ */
+.leader {
+  background-image: radial-gradient(currentColor 1.5px, transparent 1.6px);
+  background-position: left bottom 0;
+  background-size: 8px 8px;
+  background-repeat: repeat-x;
+}
+
+.hatch {
+  background-color: var(--hatch-bg, #f2f2f2);
+  background-image: repeating-linear-gradient(45deg, rgba(17, 17, 17, 0.09) 0 3px, transparent 3px 14px);
+}

@@ -1,0 +1,52 @@
+name: commission
+
+# commission/CLAUDE.md 3장의 검증 명령 3개를 그대로 돌린다.
+# 이 파일과 3장이 어긋나면 3장이 원본이다.
+on:
+  push:
+    paths:
+      - 'commission/**'
+      - '.github/workflows/commission.yml'
+  pull_request:
+    paths:
+      - 'commission/**'
+      - '.github/workflows/commission.yml'
+
+defaults:
+  run:
+    working-directory: commission
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    # DB 테스트가 진짜 Postgres 를 쓴다. 인수 조건(동시 수락 시 슬롯 초과 방지 등)이 매 푸시마다 확인된다.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: commission
+          POSTGRES_PASSWORD: commission
+          POSTGRES_DB: commission_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://commission:commission@127.0.0.1:5432/commission_dev
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: commission/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      - run: npm run typecheck
