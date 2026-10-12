@@ -13,3 +13,4 @@
 | GF-20261007-01 | 2026-10-07 | 공급 | 관찰 | 'Adfound에서 타깃 그룹과 예산 관리하기(Manage Target Groups and Budgets in Adfound)' 문서 수정됨 (최종 수정일: 2026년 10월 7일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/744-manage-target-groups-and-budgets-in-adfound) |
 | GF-20261008-01 | 2026-10-08 | 공급 | 관찰 | 'Understand Your Project Analytics' 문서 수정됨 (2026년 10월 8일 최종 수정). 변경 내용은 본문에 명시되어 있지 않음 | [링크](https://help.gamefound.com/article/303-project-monitor) |
 | GF-20261008-02 | 2026-10-08 | 수요 | 관찰 | 앱스토어 버전 1.95.0 (2026-10-08T13:18Z 배포) 업데이트 내용: "'Back this project' 버튼이 가끔 예기치 않게 브라우저를 여는 문제를 수정함." | [링크](https://apps.apple.com/us/app/id6504344271) |
+| GF-20261012-01 | 2026-10-12 | 수요 | 관찰 | '후원자용 기프트 카드(Gift Cards for Backers)' 문서 수정됨 (최종 수정 2026년 10월 12일). 변경 내용은 본문에 명시되어 있지 않음 | [링크](https://help.gamefound.com/article/738-gift-cards-for-backers) |

@@ -12,3 +12,4 @@ GF-20261005-02 | 2026-10-05 | https://help.gamefound.com/article/214-project-det
 GF-20261007-01 | 2026-10-07 | https://help.gamefound.com/article/744-manage-target-groups-and-budgets-in-adfound | 'Manage Target Groups and Budgets in Adfound' 문서 수정됨 (Last updated on October 7, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261008-01 | 2026-10-08 | https://help.gamefound.com/article/303-project-monitor | 'Understand Your Project Analytics' 문서 수정됨 (Last updated on October 8, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261008-02 | 2026-10-08 | https://apps.apple.com/us/app/id6504344271 | 앱스토어 버전 1.95.0 (2026-10-08T13:18Z 배포) Fixed the "Back this project" button sometimes unexpectedly opening a browser. | 수요 | 관찰
+GF-20261012-01 | 2026-10-12 | https://help.gamefound.com/article/738-gift-cards-for-backers | 'Gift Cards for Backers' 문서 수정됨 (Last updated on October 12, 2026). 변경 내용 본문에 명시 없음 | 수요 | 관찰
