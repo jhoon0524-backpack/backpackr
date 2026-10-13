@@ -21,6 +21,8 @@
 | 경쟁사 | 소스 | 읽는 방법 |
 |---|---|---|
 | 와디즈 | 공식 블로그 전 카테고리(와디즈 뉴스·와디즈 소식·서비스 이야기·기획노트·기술 이야기·일하는 법) | `blog.wadiz.io/wp-json/wp/v2/posts` (헤드리스 브라우저) |
+| 와디즈 | 메이커센터 공지사항·기획전·혜택 | `wadiz.io/web/maker/makercenter/menu/17`, `menu/20` (fetch.js 헤드리스) |
+| 와디즈 | 메인 페이지(배너·GNB) | `xvfb-run -a node competitors/tools/fetch.js https://www.wadiz.io/ <파일> --headed` (헤드리스는 본문이 비어 나옴. 해외 접속이라 영문 글로벌 페이지) |
 | 와디즈 | 도움말센터 최근 수정 문서 | `helpcenter.wadiz.io/api/v2/help_center/ko/articles.json?sort_by=updated_at&sort_order=desc` |
 | 킥스타터 | **블로그 News·Product Updates 태그 (전략·기능 우선)** | `updates.kickstarter.com/tag/news/rss/`, `updates.kickstarter.com/tag/product-updates/rss/` |
 | 킥스타터 | 공식 블로그 전체 | `updates.kickstarter.com/rss/` |
@@ -40,7 +42,7 @@
 
 리뷰 기록 규칙: 리뷰 1건 = 1행, 태그 수요, 확실도 외부. 원문발췌는 `[iOS|Android ★별점 v버전] 제목 — 본문` 150자 이내.
 
-사이트 봇 차단으로 읽을 수 없는 곳: 와디즈 공지·메이커센터·메인, 킥스타터 메인·프레스, 게임파운드 메인·블로그 직접 접속.
+사이트 봇 차단으로 읽을 수 없는 곳: 와디즈 공지(Akamai 403, wadiz.kr·wadiz.io 모두), 킥스타터 메인·프레스, 게임파운드 메인·블로그 직접 접속(Cloudflare 확인 페이지). 2026-10-13 창 있는 브라우저(`--headed`)로도 같았다. 차단은 뚫지 않고 실패로 보고한다. web.archive.org는 이 실행 환경의 egress 정책으로 접속 불가.
 
 ## 매일 실행 순서
 1. `bash competitors/tools/setup.sh` (헤드리스 브라우저 인증서 등록, 구글플레이 리뷰 도구 설치)

@@ -1,9 +1,10 @@
 // 봇 차단이 있는 페이지를 헤드리스 Chromium으로 읽는다.
-// 사용: node fetch.js <url> <outfile>  → STATUS/TITLE/---TEXT---(본문)/---LINKS---(링크) 형식으로 저장
+// 사용: node fetch.js <url> <outfile> [--headed]  → STATUS/TITLE/---TEXT---(본문)/---LINKS---(링크) 형식으로 저장
+// --headed: 창 있는 브라우저로 연다(xvfb-run -a node fetch.js ... --headed). 헤드리스로 본문이 비는 페이지(와디즈 메인)에 사용
 const { chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright');
 (async () => {
-  const url = process.argv[2], out = process.argv[3];
-  const b = await chromium.launch({ headless: true });
+  const url = process.argv[2], out = process.argv[3], headed = process.argv.includes('--headed');
+  const b = await chromium.launch({ headless: !headed });
   const ctx = await b.newContext({ locale: 'ko-KR', userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36' });
   const p = await ctx.newPage();
   let status;
