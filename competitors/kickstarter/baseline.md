@@ -2,9 +2,9 @@
 
 | 소스 | 마지막 확인 ID | 마지막 확인 날짜 | 비고 |
 |---|---|---|---|
-| 블로그 News 태그 (updates.kickstarter.com/tag/news/rss/) — 전략 우선 소스 | more-than-1-million-jobs-created-kickstarters-growing-impact-on-the-global-economy | 2026-05-26 | |
+| 블로그 News 태그 (updates.kickstarter.com/tag/news/rss/) — 전략 우선 소스 | introducing-the-kickstarter-fashion-advisory-board | 2026-10-14 | |
 | 블로그 Product Updates 태그 (updates.kickstarter.com/tag/product-updates/rss/) — 전략 우선 소스 | whats-new-on-kickstarter-this-summer-better-discovery-and-fulfillment-flexibility | 2026-06-30 | |
-| 블로그 (updates.kickstarter.com/rss) | from-side-project-to-award-winning-studio-how-mighty-boards-built-a-business-o | 2026-10-08 | 2026-10-08 확인 |
+| 블로그 (updates.kickstarter.com/rss) | introducing-the-kickstarter-fashion-advisory-board | 2026-10-14 | 2026-10-14 확인 |
 | 메인 페이지·프레스 (kickstarter.com) | 미확인 | - | 2026-10-02 사이트 봇 차단(Cloudflare 403) |
 | 도움말센터 (help.kickstarter.com, Intercom) | 미확인 | - | 최근 수정 목록/sitemap 없음 |
 | 채용 (Greenhouse kickstarter) | 5238069007 (Director, Tax) | 2026-09-14 | 공고 총 1건 |
@@ -14,4 +14,4 @@
 | 기능 소개 (features.kickstarter.com) | 출시: Late Pledges, Backer Survey, Pre-Launch Editor, Rewards Tab/Images on Rewards / Coming Soon: Backings Dashboard, Pledge Redemption / 베타: Kickstarter Performance | 2026-10-02 | 페이지 하단 © 2024 |
 | 유튜브 (UCPV33YGEVLwtOotz9ZG0XQw) | How The Charismatic Voice Used Kickstarter to Fund Vocal Research | 2026-10-07 |  |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, us) | 14658993100 | 2026-10-12 | |
-| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | 143b0a28-cce7-4e56-b696-b0415c55325d | 2026-10-12 | |
+| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | b60c4896-e78c-4594-b3d0-dfa405255c85 | 2026-10-13 | |

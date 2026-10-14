@@ -43,3 +43,5 @@
 | KS-20261012-03 | 2026-10-12 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 발명가들의 꿈을 후원할 수 있다는 점이 좋다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1a1b6204-68fa-4cca-9fa2-a1327fddc9e9) |
 | KS-20261012-04 | 2026-10-12 | 수요 | 외부 | [안드로이드 ★1] 이건 사기이고 모든 제품이 사기다. 돈을 훔치려는 것뿐이다. 어떤 프로젝트도 믿지 마라. 사기꾼들. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ffba12dd-e671-4c75-82fd-740faa208928) |
 | KS-20261012-05 | 2026-10-12 | 수요 | 외부 | [안드로이드 ★1] 로그인하기 전에는 리워드 탭이 완전히 숨겨져 있는 것 같다. 어떤 게 있는지 보려고만 해도 먼저 계정을 만들어야 한다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=46f09941-9eb4-44a0-bc56-4986d5776be9) |
+| KS-20261014-01 | 2026-10-14 | 공급 | 공식 | 패션 분야에서 영향력 있는 인물 5명이 킥스타터와 함께 차세대 독립 디자이너를 응원한다. | [링크](https://updates.kickstarter.com/introducing-the-kickstarter-fashion-advisory-board/) |
+| KS-20261013-01 | 2026-10-13 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 잘 될 때는 정말 좋고 사용하기도 아주 쉽다. 믿을 수 있는 판매자만 믿어라. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=b60c4896-e78c-4594-b3d0-dfa405255c85) |

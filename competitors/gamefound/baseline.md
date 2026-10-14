@@ -4,7 +4,7 @@
 |---|---|---|---|
 | 블로그·What's New (gamefound.com/en/blog) | 미확인 | - | 2026-10-02 사이트 봇 차단(Cloudflare 403) |
 | 메인 페이지 (gamefound.com) | 미확인 | - | 2026-10-02 사이트 봇 차단(Cloudflare 403) |
-| 도움말센터 (help.gamefound.com/sitemap.xml lastmod) | article/767-reserved-funds-understand-and-manage-your-payout-reserve | 2026-10-13T12:50:13Z | 2026-10-13 확인
+| 도움말센터 (help.gamefound.com/sitemap.xml lastmod) | article/767-reserved-funds-understand-and-manage-your-payout-reserve | 2026-10-14T05:59:33Z | 2026-10-14 확인
 | 채용 | 미확인 | - | 채용 페이지 위치 미확인(gamefound.com 차단) |
 | 앱스토어 릴리즈노트 (id6504344271) | 1.95.0 | 2026-10-08 | |
 | 구글플레이 릴리즈노트 (com.gamefound.app) | 1.93.1 | 2026-09-15 | |

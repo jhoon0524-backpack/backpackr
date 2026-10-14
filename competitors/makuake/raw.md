@@ -15,3 +15,5 @@ MK-20261005-02 | 2026-10-05 | https://apps.apple.com/jp/app/id1274816320 | [iOS 
 MK-20261008-01 | 2026-10-08 | https://mkhelp.makuake.com/hc/ja/articles/13793556203929 | 集まった応援購入額の振込先口座情報はどこから入力しますか？ (도움말 문서 수정 2026-10-08T10:50Z) | 공급 | 관찰
 MK-20261008-02 | 2026-10-08 | https://hrmos.co/pages/makuake/jobs/0000140 | Makuakeのサービス広報担当を募集します！ (신규 채용공고, 게시일 미표기, 정규직·広報・マーケティング) | 조직 | 관찰
 MK-20261008-03 | 2026-10-08 | https://hrmos.co/pages/makuake/jobs | 공고 0000078이 채용 목록(전체 5건)에서 사라짐. 2026-10-02 목록: 0000047, 0000062, 0000078, 0000089, 0000095 | 조직 | 관찰
+MK-20261009-01 | 2026-10-09 | https://www.makuake.co.jp/files/uploads/GH1ZS51quE07Gb2aaS07Gp07K707G616_V07K507Gr.pdf | Notice of Changes in Positions of Representative Directors（131KB） (Timely disclosure, October 9, 2026) | 조직 | 공식
+MK-20261014-01 | 2026-10-14 | https://mkhelp.makuake.com/hc/ja/articles/13793556203929 | 集まった応援購入額の振込先口座情報はどこから入力しますか？ (도움말 문서 수정 2026-10-14T00:42Z) | 공급 | 관찰
