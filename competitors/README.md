@@ -1,6 +1,6 @@
 # 경쟁사 변화 수집
 
-와디즈·게임파운드·킥스타터·마쿠아케·캠프파이어의 공개 정보를 '변화 1건 = 1행'으로 기록한다. 해석·요약·시사점은 쓰지 않는다.
+와디즈·게임파운드·킥스타터·마쿠아케·캠프파이어·팬딩·포스타입의 공개 정보를 '변화 1건 = 1행'으로 기록한다. 해석·요약·시사점은 쓰지 않는다.
 분석은 이 기록(raw.md)을 재료로 별도로 한다. 분석 시 우선 관심사: **전략**, **프로덕트 기능**.
 
 ## 폴더
@@ -11,7 +11,7 @@
 
 ## 행 형식
 `ID | 날짜 | 출처URL | 원문발췌 | 태그 | 확실도`
-- ID: WZ-/GF-/KS-/MK-/CF- + YYYYMMDD-NN
+- ID: WZ-/GF-/KS-/MK-/CF-/FD-/PT- + YYYYMMDD-NN
 - 날짜: 사실이 공개·발생한 날짜(수집일 아님)
 - 원문발췌: 요약 금지, 원문 그대로 150자 이내, 숫자 포함. 영어는 번역하지 않음
 - 태그: 공급 / 수요 / 수익 / 조직 / 정책 중 하나
@@ -34,8 +34,11 @@
 | 마쿠아케 | 도움말센터 | `mkhelp.makuake.com/api/v2/help_center/ja/articles.json?sort_by=edited_at&sort_order=desc` |
 | 캠프파이어 | 회사 뉴스·PR TIMES·서비스 뉴스 | `campfire.co.jp/press/`, `prtimes.jp/companyrdf.php?company_id=19299`, `camp-fire.jp/news/feed.xml` |
 | 캠프파이어 | 도움말센터 | `help.camp-fire.jp/sitemap.xml` lastmod |
-| 공통 | 앱스토어 리뷰 (최신순 50건) | `itunes.apple.com/{kr|us}/rss/customerreviews/page=1/id={앱ID}/sortby=mostrecent/json` — 와디즈 1107828621, 킥스타터 596961532, 게임파운드 6504344271, 마쿠아케 1274816320(jp), 캠프파이어 1496301418(jp) |
-| 공통 | 구글플레이 리뷰 (최신순) | `pip install google-play-scraper` → `reviews(앱, sort=Sort.NEWEST)` — com.markmount.wadiz, com.kickstarter.kickstarter, com.gamefound.app, com.ca_crowdfunding.makuake_android |
+| 팬딩 | 공지사항·업데이트 노트 | `docs.channel.io/user_guide/ko/categories/7d916951-공지사항`, `…/categories/2026년-업데이트-소식-e5a1c6e8` (curl로 HTML 읽힘. 헤드리스는 본문이 비어 나옴) |
+| 포스타입 | 공식 블로그·공지(기능 출시·이벤트·운영 안내) | `postype.com/@blog/rss` |
+| 포스타입 | 도움말센터 | `help.postype.com/api/v2/help_center/ko/articles.json?sort_by=edited_at&sort_order=desc` |
+| 공통 | 앱스토어 리뷰 (최신순 50건) | `itunes.apple.com/{kr|us}/rss/customerreviews/page=1/id={앱ID}/sortby=mostrecent/json` — 와디즈 1107828621, 킥스타터 596961532, 게임파운드 6504344271, 마쿠아케 1274816320(jp), 캠프파이어 1496301418(jp), 팬딩 1448461765(kr), 포스타입 1502367642(kr) |
+| 공통 | 구글플레이 리뷰 (최신순) | `pip install google-play-scraper` → `reviews(앱, sort=Sort.NEWEST)` — com.markmount.wadiz, com.kickstarter.kickstarter, com.gamefound.app, com.ca_crowdfunding.makuake_android, com.fanding.app, com.postype.play |
 | 공통 | 앱 릴리즈노트, 채용, 외부 뉴스(최근 2일) | 각 baseline.md 참고 |
 
 앱스토어 RSS가 0건을 돌려주는 날이 있다(애플 쪽 일시 현상, 2026-10-03 확인). 그날은 baseline을 그대로 두고 실패로 보고한다. RSS는 최신 50건을 주므로 다음 날 정상화되면 밀린 리뷰를 함께 잡는다. 앱스토어 웹 페이지는 최신순이 아니라 대체 소스로 쓰지 않는다.
