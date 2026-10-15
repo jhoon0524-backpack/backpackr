@@ -18,3 +18,5 @@
 | MK-20261008-03 | 2026-10-08 | 조직 | 관찰 | 채용 목록(전체 5건)에서 공고 0000078이 사라짐. 2026-10-02 목록: 0000047, 0000062, 0000078, 0000089, 0000095 | [링크](https://hrmos.co/pages/makuake/jobs) |
 | MK-20261009-01 | 2026-10-09 | 조직 | 공식 | 적시공시: 대표이사 직위 변경에 관한 공지 (131KB) (2026년 10월 9일) | [링크](https://www.makuake.co.jp/files/uploads/GH1ZS51quE07Gb2aaS07Gp07K707G616_V07K507Gr.pdf) |
 | MK-20261014-01 | 2026-10-14 | 공급 | 관찰 | 모인 응원구매 금액의 입금 계좌 정보는 어디에서 입력하나요? (도움말 문서 수정 2026-10-14T00:42Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13793556203929) |
+| MK-20261001-04 | 2026-10-01 | 수요 | 관찰 | 구글플레이 com.ca_crowdfunding.makuake_android 버전 4.8.0, 스토어 표기 업데이트일 2026/10/01 (기존 확인 4.7.0). 릴리즈노트 미표기 | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android) |
+| MK-20261015-01 | 2026-10-15 | 공급 | 관찰 | 편의점에서 결제하는 방법 (도움말 문서 수정 2026-10-15T07:25Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13957211811993) |

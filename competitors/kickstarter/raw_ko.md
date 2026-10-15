@@ -45,3 +45,5 @@
 | KS-20261012-05 | 2026-10-12 | 수요 | 외부 | [안드로이드 ★1] 로그인하기 전에는 리워드 탭이 완전히 숨겨져 있는 것 같다. 어떤 게 있는지 보려고만 해도 먼저 계정을 만들어야 한다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=46f09941-9eb4-44a0-bc56-4986d5776be9) |
 | KS-20261014-01 | 2026-10-14 | 공급 | 공식 | 패션 분야에서 영향력 있는 인물 5명이 킥스타터와 함께 차세대 독립 디자이너를 응원한다. | [링크](https://updates.kickstarter.com/introducing-the-kickstarter-fashion-advisory-board/) |
 | KS-20261013-01 | 2026-10-13 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 잘 될 때는 정말 좋고 사용하기도 아주 쉽다. 믿을 수 있는 판매자만 믿어라. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=b60c4896-e78c-4594-b3d0-dfa405255c85) |
+| KS-20261008-06 | 2026-10-08 | 수요 | 관찰 | 구글플레이 버전 3.43.0 (업데이트 Oct 8, 2026). 기존 확인 3.42.0. 릴리즈노트 문구 없음 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter) |
+| KS-20261014-02 | 2026-10-14 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 좋은 아이디어 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=eb22bfd5-6005-4be1-a92c-61b6656d3a69) |
