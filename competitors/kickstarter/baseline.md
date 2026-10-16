@@ -13,5 +13,5 @@
 | 외부 뉴스 검색 "Kickstarter" | - | 2026-10-12 | 개별 프로젝트 기사는 기록 대상 아님 |
 | 기능 소개 (features.kickstarter.com) | 출시: Late Pledges, Backer Survey, Pre-Launch Editor, Rewards Tab/Images on Rewards / Coming Soon: Backings Dashboard, Pledge Redemption / 베타: Kickstarter Performance | 2026-10-02 | 페이지 하단 © 2024 |
 | 유튜브 (UCPV33YGEVLwtOotz9ZG0XQw) | How The Charismatic Voice Used Kickstarter to Fund Vocal Research | 2026-10-07 |  |
-| 앱스토어 리뷰 (iTunes RSS mostrecent, us) | 14658993100 | 2026-10-12 | |
-| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | eb22bfd5-6005-4be1-a92c-61b6656d3a69 | 2026-10-14 | |
+| 앱스토어 리뷰 (iTunes RSS mostrecent, us) | 14669796840 | 2026-10-15 | |
+| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | fef44bf4-a19e-4fb4-bc38-c057054d89fc | 2026-10-15 | |

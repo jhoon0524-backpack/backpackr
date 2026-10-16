@@ -16,3 +16,6 @@
 | GF-20261012-01 | 2026-10-12 | 수요 | 관찰 | '후원자용 기프트 카드(Gift Cards for Backers)' 문서 수정됨 (최종 수정 2026년 10월 12일). 변경 내용은 본문에 명시되어 있지 않음 | [링크](https://help.gamefound.com/article/738-gift-cards-for-backers) |
 | GF-20261013-01 | 2026-10-13 | 수익 | 관찰 | '준비금: 정산금 유보분 이해하고 관리하기' 문서 수정됨 (사이트맵 수정일 2026-10-13T12:50:13Z). 정산금 유보분은 정산 사이에 환불과 지급 취소에 대비해 프로젝트 확정 잔액의 일부를 남겨 둔다. | [링크](https://help.gamefound.com/article/767-reserved-funds-understand-and-manage-your-payout-reserve) |
 | GF-20261014-01 | 2026-10-14 | 수익 | 관찰 | '준비금: 정산금 유보분 이해하고 관리하기' 문서 수정됨 (사이트맵 수정일 2026-10-14T05:59:33Z, 최종 수정 2026년 10월 14일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/767-reserved-funds-understand-and-manage-your-payout-reserve) |
+| GF-20261015-01 | 2026-10-15 | 수요 | 외부 | [iOS ★1 v1.95.0] 사기로 가득한 플랫폼 — 구매자 주의!!! 이 플랫폼을 믿지 말 것. 그들에게는 권한이 없다. 사람들이 올라와 약속한다고 주장할 수 있다… | [링크](https://apps.apple.com/us/app/gamefound/id6504344271) |
+| GF-20261015-02 | 2026-10-15 | 수요 | 외부 | [안드로이드 ★5 v1.93.1] 기간 끝내주게 좋음 | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=bdb2a62b-937d-46df-bcf7-e30b2a259e6d) |
+| GF-20261016-01 | 2026-10-16 | 수요 | 관찰 | '약정 및 결제 상태: 무엇을 뜻하나요?' 문서 수정됨 (사이트맵 수정일 2026-10-16T11:41:21Z, 최종 수정 2026년 10월 16일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/260-pledge-and-payment-statuses-what-do-they-mean) |
