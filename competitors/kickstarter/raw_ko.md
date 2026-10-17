@@ -55,3 +55,5 @@
 | KS-20261015-06 | 2026-10-15 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 신생 사업체에 좋은 플랫폼 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=625a4c24-7624-45d2-823f-89efba255ad7) |
 | KS-20261015-07 | 2026-10-15 | 수요 | 외부 | [안드로이드 ★1 v3.42.0] 사기. 후원자를 지원하지 않는다. 5~10년 전에는 좋은 아이디어를 가진 창작자를 후원했고 좋았다. 지금은 달라졌다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=f5cb5630-c4b5-4812-9da1-28f2fc38657b) |
 | KS-20261015-08 | 2026-10-15 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 킥스타터는 창작자의 꿈을 이루는 데 쓸 최고의 플랫폼! 쓰기 쉬운 도구, 훌륭한 고객 지원, 매끄러운 결제. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=33a3036d-00df-4829-bc06-4c4e2beda7ea) |
+| KS-20261016-01 | 2026-10-16 | 수요 | 외부 | [iOS ★1 v5.38.0] 클라우드플레어 때문에 사용 불가 — 프로젝트 업데이트를 볼 수 없다. 이게 고쳐질 때까지 더 이상 프로젝트를 후원하지 않겠다. | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261016-02 | 2026-10-16 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 좋다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1f4f596d-5f36-4df3-8ad6-6111752c2b9a) |
