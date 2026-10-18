@@ -10,6 +10,6 @@
 | 앱스토어 릴리즈노트 (id1274816320) | 4.8.0 | 2026-10-05 | |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, jp) | 14633079742 | 2026-10-05 | |
 | 구글플레이 릴리즈노트 (com.ca_crowdfunding.makuake_android) | 4.8.0 | 2026-10-01 | |
-| 구글플레이 리뷰 (google-play-scraper NEWEST, ja/jp) | b830f50c-ffa1-407b-b433-20acea904770 | 2026-09-24 | |
+| 구글플레이 리뷰 (google-play-scraper NEWEST, ja/jp) | 657d87af-1580-4578-85bb-5a0afc7e269a | 2026-10-17 | |
 | 매거진 (magazine.makuake.com) | 미확인 | - | 피드/API 403·404 |
 | 외부 뉴스 검색 "マクアケ" | - | 2026-10-12 | |

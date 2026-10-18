@@ -19,3 +19,5 @@ MK-20261009-01 | 2026-10-09 | https://www.makuake.co.jp/files/uploads/GH1ZS51quE
 MK-20261014-01 | 2026-10-14 | https://mkhelp.makuake.com/hc/ja/articles/13793556203929 | 集まった応援購入額の振込先口座情報はどこから入力しますか？ (도움말 문서 수정 2026-10-14T00:42Z) | 공급 | 관찰
 MK-20261001-04 | 2026-10-01 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android | 구글플레이 com.ca_crowdfunding.makuake_android 버전 4.8.0, 스토어 표기 업데이트일 2026/10/01 (기존 확인 4.7.0). 릴리즈노트 미표기 | 수요 | 관찰
 MK-20261015-01 | 2026-10-15 | https://mkhelp.makuake.com/hc/ja/articles/13957211811993 | コンビニでのお支払い方法 (도움말 문서 수정 2026-10-15T07:25Z) | 공급 | 관찰
+MK-20261017-01 | 2026-10-17 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=8c59d6fa-6aca-4db4-8d21-2c024fe3e87b | [Android ★4 v4.8.0] 自分を取り戻せ る待望 のスープができましたね。楽しみに待ってます。あなたの活躍を応援します！ | 수요 | 외부
+MK-20261017-02 | 2026-10-17 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=657d87af-1580-4578-85bb-5a0afc7e269a | [Android ★5 v4.8.0] ガジェット好きだとつい欲しくなるような商品がよくあります。ネットで探すと同様の物もあったりしますが中には唯一性のものもありますので掘り出し物を探し当てて下さい。 | 수요 | 외부

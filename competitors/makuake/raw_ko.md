@@ -20,3 +20,5 @@
 | MK-20261014-01 | 2026-10-14 | 공급 | 관찰 | 모인 응원구매 금액의 입금 계좌 정보는 어디에서 입력하나요? (도움말 문서 수정 2026-10-14T00:42Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13793556203929) |
 | MK-20261001-04 | 2026-10-01 | 수요 | 관찰 | 구글플레이 com.ca_crowdfunding.makuake_android 버전 4.8.0, 스토어 표기 업데이트일 2026/10/01 (기존 확인 4.7.0). 릴리즈노트 미표기 | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android) |
 | MK-20261015-01 | 2026-10-15 | 공급 | 관찰 | 편의점에서 결제하는 방법 (도움말 문서 수정 2026-10-15T07:25Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13957211811993) |
+| MK-20261017-01 | 2026-10-17 | 수요 | 외부 | [안드로이드 ★4 v4.8.0] 나를 되찾게 해 줄 기다리던 수프가 나왔네요. 기대하며 기다리고 있습니다. 당신의 활약을 응원합니다! | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=8c59d6fa-6aca-4db4-8d21-2c024fe3e87b) |
+| MK-20261017-02 | 2026-10-17 | 수요 | 외부 | [안드로이드 ★5 v4.8.0] 가젯을 좋아하면 저절로 갖고 싶어지는 상품이 많습니다. 인터넷에서 찾으면 비슷한 것도 있지만 그중에는 유일한 것도 있으니 숨은 보물을 찾아보세요. | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=657d87af-1580-4578-85bb-5a0afc7e269a) |
