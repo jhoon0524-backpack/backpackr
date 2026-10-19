@@ -59,3 +59,5 @@
 | KS-20261016-02 | 2026-10-16 | 수요 | 외부 | [안드로이드 ★5 v3.42.0] 좋다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1f4f596d-5f36-4df3-8ad6-6111752c2b9a) |
 | KS-20261017-01 | 2026-10-17 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 이 플랫폼은 사기꾼들의 소굴이 되었다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=c63c1530-f50c-4cf3-bae9-6079ebee68b1) |
 | KS-20261017-02 | 2026-10-17 | 수요 | 외부 | [안드로이드 ★2] 앱이 지금 고장 나서 사진이 하나도 안 보인다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=0bee43a5-1fb3-46ee-acb9-3b857b7c776c) |
+| KS-20261018-01 | 2026-10-18 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 2026년에 이런 버그투성이 앱이라니? 느리고, 뒤로 가기를 누르면 앱이 종료된다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=8c7e2704-a30b-43d1-8d1e-e11a8fa769f4) |
+| KS-20261019-01 | 2026-10-19 | 공급 | 공식 | 블로그 글 "스크롤을 위한 디자인: 킥스타터 페이지를 이해하기 쉽게 만드는 방법" (2026년 10월 19일, 읽는 시간 5분) | [링크](https://updates.kickstarter.com/design-for-the-scroll-how-to-make-your-kickstarter-page-easy-to-understand/) |
