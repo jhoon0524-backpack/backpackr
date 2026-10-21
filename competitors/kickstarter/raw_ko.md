@@ -65,3 +65,4 @@
 | KS-20261019-03 | 2026-10-19 | 수요 | 외부 | [안드로이드 ★3 v3.42.0] 유일한 가치는 모든 사람의 메시지를 받지 않는 창작자, 그리고 아직 후원하지 않은 창작자에게 개인 메시지를 보낼 수 있다는 점이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=4f214b41-8c0a-4505-aa6b-efce322d4700) |
 | KS-20261019-04 | 2026-10-19 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 훌륭하다, 웹페이지보다 훨씬 낫다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=e01f6447-61a3-4049-8831-94de19f221e3) |
 | KS-20261019-05 | 2026-10-19 | 수요 | 외부 | [안드로이드 ★1] 앱에 대해 의견을 남기고 싶지만 안타깝게도 로그인할 수 없다. 계속 로딩만 도는 상태다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=68cf81f1-d311-4952-aae2-d01356bf9324) |
+| KS-20261020-01 | 2026-10-20 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 훌륭하다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=e31c63fc-f04b-4b89-a5d7-9277d44bcefe) |

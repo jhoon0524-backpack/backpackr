@@ -21,3 +21,4 @@
 | GF-20261016-01 | 2026-10-16 | 수요 | 관찰 | '약정 및 결제 상태: 무엇을 뜻하나요?' 문서 수정됨 (사이트맵 수정일 2026-10-16T11:41:21Z, 최종 수정 2026년 10월 16일). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/260-pledge-and-payment-statuses-what-do-they-mean) |
 | GF-20261019-01 | 2026-10-19 | 공급 | 관찰 | 'GPSR' 문서 수정됨 (사이트맵 수정일 2026-10-19T09:26:11Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/703-gpsr) |
 | GF-20261019-02 | 2026-10-19 | 공급 | 관찰 | 'EU 제품 안전 규정: GPSR이 프로젝트에 의미하는 것' 문서 수정됨 (사이트맵 수정일 2026-10-19T09:24:37Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/768-eu-product-safety-rules-what-gpsr-means-for-your-projects) |
+| GF-20261021-01 | 2026-10-21 | 공급 | 관찰 | '프로젝트 이미지 설명' 문서 수정됨 (사이트맵 수정일 2026-10-21T08:53:33Z, 문서 표기 2026년 10월 21일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/304-required-project-images) |
