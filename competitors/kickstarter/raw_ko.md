@@ -66,3 +66,8 @@
 | KS-20261019-04 | 2026-10-19 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 훌륭하다, 웹페이지보다 훨씬 낫다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=e01f6447-61a3-4049-8831-94de19f221e3) |
 | KS-20261019-05 | 2026-10-19 | 수요 | 외부 | [안드로이드 ★1] 앱에 대해 의견을 남기고 싶지만 안타깝게도 로그인할 수 없다. 계속 로딩만 도는 상태다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=68cf81f1-d311-4952-aae2-d01356bf9324) |
 | KS-20261020-01 | 2026-10-20 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 훌륭하다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=e31c63fc-f04b-4b89-a5d7-9277d44bcefe) |
+| KS-20261020-02 | 2026-10-20 | 수요 | 외부 | [iOS ★1 v5.38.0] 아무것도 불러오지 않는다 — 앱이 프로젝트 업데이트나 댓글을 하나도 불러오지 못하고 후원 관리도 할 수 없다 | [링크](https://apps.apple.com/us/app/kickstarter/id596961532) |
+| KS-20261021-01 | 2026-10-21 | 수요 | 외부 | [안드로이드 ★2 v3.43.0] 처음엔 괜찮았는데 Yumi 3d 같은 사기꾼들을 들여놓고 그들이 사기를 쳐도 아무 조치를 하지 않는다. 나는 이미 몇 번 사기를 당했다. Kickstarter는… | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=7065d51f-2283-436b-bc47-49c5a0906728) |
+| KS-20261021-02 | 2026-10-21 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 이 프로젝트가 잘 되길 정말 바란다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a332546f-ccfe-412b-b53d-947878f02f89) |
+| KS-20261021-03 | 2026-10-21 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 아주 잘 작동한다! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=89e094ca-948f-4478-826f-a0d7e71389cc) |
+| KS-20261021-04 | 2026-10-21 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 멋진 작품이다!! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=8100a1be-42bb-4068-b16a-b97c62e5acec) |

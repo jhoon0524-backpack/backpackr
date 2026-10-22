@@ -46,3 +46,8 @@ WZ-20261020-01 | 2026-10-20 | https://blog.wadiz.io/%ec%b2%ab-%ea%b3%a0%ea%b0%9d
 WZ-20261020-02 | 2026-10-20 | https://blog.wadiz.io/%ec%9e%91%ea%b0%80%ea%b0%80-%eb%a8%bc%ec%a0%80-%ec%b0%be%eb%8a%94-%ea%b3%b3-%ec%99%80%eb%94%94%ec%a6%88-%ec%82%bc%eb%ac%b4%ec%84%9c%ec%a0%90%eb%b6%81/ | 와디즈(대표 신혜성, www.wadiz.io)가 오는 10월 19일부터 11월 15일까지 출판·창작 기획전 ‘삼무서점’을 열고 주요 프로젝트를 공개했다. | 공급 | 공식
 WZ-20261020-03 | 2026-10-20 | https://job.wadiz.io/ko/o/240966 | 영업PD 와디즈 PD 도서/IP 외 경력 2년 이상 2026. 11. 02, 14:59까지 (채용 목록 전체 14건에 신규 등장) | 조직 | 관찰
 WZ-20261020-04 | 2026-10-20 | https://www.wadiz.io/ | 메인 페이지 배너: Books worth keeping 3 Zero Bookstore is now open | 공급 | 관찰
+WZ-20261021-01 | 2026-10-21 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | 구글플레이 앱 업데이트 2026-10-21 (버전 26.40.0) | 공급 | 관찰
+WZ-20261021-02 | 2026-10-21 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=519f8df1-898a-4913-ae36-9d68810e9e55 | [Android ★5 v26.40.0] 제품들이 신선함...굿 | 수요 | 외부
+WZ-20261022-01 | 2026-10-22 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.43.0] 사용성 개선 및 안정화를 위해 업데이트 했습니다. | 공급 | 공식
+WZ-20261022-02 | 2026-10-22 | https://helpcenter.wadiz.io/hc/ko/articles/25500639919641 | 결제 기간에 서포터 정보를 확인할 수 있나요? (도움말 문서 수정 2026-10-22T05:45Z) | 공급 | 관찰
+WZ-20261022-03 | 2026-10-22 | https://www.wadiz.io/web/maker/makercenter/board/event/386 | [기획전] 와디즈 어워즈 2026 기획전 참여 메이커 모집 (~11/30) 올해의 성과로 초대받은 무대에서 한 해를 가장 빛나게 마무리하세요. 2026.10.22 ~ 2026.11.30 | 수요 | 공식
