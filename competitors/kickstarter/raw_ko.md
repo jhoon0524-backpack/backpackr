@@ -71,3 +71,6 @@
 | KS-20261021-02 | 2026-10-21 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 이 프로젝트가 잘 되길 정말 바란다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a332546f-ccfe-412b-b53d-947878f02f89) |
 | KS-20261021-03 | 2026-10-21 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 아주 잘 작동한다! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=89e094ca-948f-4478-826f-a0d7e71389cc) |
 | KS-20261021-04 | 2026-10-21 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 멋진 작품이다!! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=8100a1be-42bb-4068-b16a-b97c62e5acec) |
+| KS-20261022-01 | 2026-10-22 | 수요 | 외부 | [iOS ★1 v5.38.0] 모든 AI 프로젝트와 지난 모금 숨기기 — 생성형 AI를 사용한 모든 프로젝트를 영구히 숨기는 토글을 원한다. 그런 쓰레기를 후원하거나 보고 싶지 않다. | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261022-02 | 2026-10-22 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 1-48TACTIC은 훌륭한 2차 세계대전 소규모 전투 게임이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=31a519cc-030a-4729-8c25-bcbd3bc8bcf6) |
+| KS-20261022-03 | 2026-10-22 | 수요 | 외부 | [안드로이드 ★2] 여기에 AI 쓰레기가 너무 많이 팔린다. AI 쓰레기가 포함된 경우 표시하는 라벨이 썸네일에 붙었으면 한다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=d8a985a5-4b74-4242-bd54-fb994126bed3) |

@@ -51,3 +51,8 @@ WZ-20261021-02 | 2026-10-21 | https://play.google.com/store/apps/details?id=com.
 WZ-20261022-01 | 2026-10-22 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.43.0] 사용성 개선 및 안정화를 위해 업데이트 했습니다. | 공급 | 공식
 WZ-20261022-02 | 2026-10-22 | https://helpcenter.wadiz.io/hc/ko/articles/25500639919641 | 결제 기간에 서포터 정보를 확인할 수 있나요? (도움말 문서 수정 2026-10-22T05:45Z) | 공급 | 관찰
 WZ-20261022-03 | 2026-10-22 | https://www.wadiz.io/web/maker/makercenter/board/event/386 | [기획전] 와디즈 어워즈 2026 기획전 참여 메이커 모집 (~11/30) 올해의 성과로 초대받은 무대에서 한 해를 가장 빛나게 마무리하세요. 2026.10.22 ~ 2026.11.30 | 수요 | 공식
+WZ-20261022-04 | 2026-10-22 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=d139fe59-a9c3-4a01-9f74-e2dee88f5dc7 | [Android ★1 v26.40.0] 왜 구글 로그인은 안되죠 다른로그인은 되는데 구글로그인쪽만 터치가 안되요 이메일 로그인도 SNS계정있다고 안되고 지웠다 깔아도 안되고 | 수요 | 외부
+WZ-20261022-05 | 2026-10-22 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=6d13c51b-351f-4f43-a2dc-61fbe0e901e3 | [Android ★1 v26.40.0] 앱 안열림... | 수요 | 외부
+WZ-20261023-01 | 2026-10-23 | https://blog.wadiz.io/1%eb%85%84-%eb%a7%8c%ec%97%90-10%ec%96%b5-%ec%9d%b4%eb%b2%88%ec%97%94-%ea%b8%80%eb%a1%9c%eb%b2%8c%eb%a1%9c%ec%99%80%eb%94%94%ec%a6%88-%ec%86%90%ea%b8%80%ec%94%a8/ | “1년 만에 10억, 이번엔 글로벌로”…와디즈, 손글씨 ‘미꽃체’ 세 번째 펀딩 오픈 | 공급 | 공식
+WZ-20261023-02 | 2026-10-23 | https://job.wadiz.io/ko/o/241772 | 공고 241772(마케팅 PD (MD 성장형 포지션))이 채용 목록(전체 16건)에 나타남. 마감 2026. 11. 09, 14:59까지 | 조직 | 관찰
+WZ-20261023-03 | 2026-10-23 | https://job.wadiz.io/ko/o/234747 | 공고 234747(펀딩 프로모션 마케팅 운영 담당자 (인턴))이 채용 목록(전체 16건)에 나타남. 마감 2026. 11. 09, 14:59까지 | 조직 | 관찰

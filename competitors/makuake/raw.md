@@ -21,3 +21,5 @@ MK-20261001-04 | 2026-10-01 | https://play.google.com/store/apps/details?id=com.
 MK-20261015-01 | 2026-10-15 | https://mkhelp.makuake.com/hc/ja/articles/13957211811993 | コンビニでのお支払い方法 (도움말 문서 수정 2026-10-15T07:25Z) | 공급 | 관찰
 MK-20261017-01 | 2026-10-17 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=8c59d6fa-6aca-4db4-8d21-2c024fe3e87b | [Android ★4 v4.8.0] 自分を取り戻せ る待望 のスープができましたね。楽しみに待ってます。あなたの活躍を応援します！ | 수요 | 외부
 MK-20261017-02 | 2026-10-17 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=657d87af-1580-4578-85bb-5a0afc7e269a | [Android ★5 v4.8.0] ガジェット好きだとつい欲しくなるような商品がよくあります。ネットで探すと同様の物もあったりしますが中には唯一性のものもありますので掘り出し物を探し当てて下さい。 | 수요 | 외부
+MK-20261023-01 | 2026-10-23 | https://mkhelp.makuake.com/hc/ja/articles/34328422593945 | 返金制度とは (도움말 문서 수정 2026-10-23T05:21Z) | 공급 | 관찰
+MK-20261023-02 | 2026-10-23 | https://mkhelp.makuake.com/hc/ja/articles/63502529007513 | 審査書類の削除はできますか？ (도움말 문서 수정 2026-10-23T05:41Z) | 공급 | 관찰

@@ -22,3 +22,4 @@
 | GF-20261019-01 | 2026-10-19 | 공급 | 관찰 | 'GPSR' 문서 수정됨 (사이트맵 수정일 2026-10-19T09:26:11Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/703-gpsr) |
 | GF-20261019-02 | 2026-10-19 | 공급 | 관찰 | 'EU 제품 안전 규정: GPSR이 프로젝트에 의미하는 것' 문서 수정됨 (사이트맵 수정일 2026-10-19T09:24:37Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/768-eu-product-safety-rules-what-gpsr-means-for-your-projects) |
 | GF-20261021-01 | 2026-10-21 | 공급 | 관찰 | '프로젝트 이미지 설명' 문서 수정됨 (사이트맵 수정일 2026-10-21T08:53:33Z, 문서 표기 2026년 10월 21일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/304-required-project-images) |
+| GF-20261022-01 | 2026-10-22 | 수요 | 외부 | [안드로이드 ★5 v1.93.1] 비교할 만한 게 없다! | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=e724fd68-53b1-4ead-83cf-609057235b4a) |
