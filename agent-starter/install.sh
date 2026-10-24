@@ -19,7 +19,7 @@ SRC=$(dirname "$0")
 copied=0
 skipped=0
 
-for f in CLAUDE.md SPEC.md ADR.md TASKS.md PROGRESS.md PROMPTS.md run.sh          .claude/agents/deep-reasoner.md .claude/agents/runner.md; do
+for f in CLAUDE.md SPEC.md ADR.md TASKS.md PROGRESS.md PROMPTS.md run.sh          .claude/agents/deep-reasoner.md .claude/agents/runner.md .claude/agents/reviewer.md; do
   if [ -e "$TARGET/$f" ]; then
     echo "  건너뜀  $f (이미 있음)"
     skipped=$((skipped + 1))
