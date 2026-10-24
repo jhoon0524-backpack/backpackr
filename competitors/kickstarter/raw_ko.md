@@ -74,3 +74,6 @@
 | KS-20261022-01 | 2026-10-22 | 수요 | 외부 | [iOS ★1 v5.38.0] 모든 AI 프로젝트와 지난 모금 숨기기 — 생성형 AI를 사용한 모든 프로젝트를 영구히 숨기는 토글을 원한다. 그런 쓰레기를 후원하거나 보고 싶지 않다. | [링크](https://apps.apple.com/us/app/id596961532) |
 | KS-20261022-02 | 2026-10-22 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 1-48TACTIC은 훌륭한 2차 세계대전 소규모 전투 게임이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=31a519cc-030a-4729-8c25-bcbd3bc8bcf6) |
 | KS-20261022-03 | 2026-10-22 | 수요 | 외부 | [안드로이드 ★2] 여기에 AI 쓰레기가 너무 많이 팔린다. AI 쓰레기가 포함된 경우 표시하는 라벨이 썸네일에 붙었으면 한다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=d8a985a5-4b74-4242-bd54-fb994126bed3) |
+| KS-20261022-04 | 2026-10-22 | 수요 | 외부 | [iOS ★1 v5.38.0] 한 번으로 끝 — 내가 후원한 유일한 킥스타터 프로젝트. 창작자는 목표 금액을 크게 넘겼는데도 제품을 발송하지 않았다. | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261023-01 | 2026-10-23 | 수요 | 외부 | [안드로이드 ★2 v3.43.0] 킥스타터는 사기 캠페인이 돈을 가져가도 "보장되지 않는다고 말했다"고 할 뿐이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=d336b1ed-47d1-4bf7-b20a-3db129da81ff) |
+| KS-20261023-02 | 2026-10-23 | 수요 | 외부 | [안드로이드 ★3 v3.43.0] 작가들이 독자를 속이는 것을 내버려 뒀다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1077a06f-0acf-4ec8-b362-d59c5049e888) |
