@@ -42,4 +42,5 @@ if [ "$copied" -gt 0 ]; then
   echo "  1. CLAUDE.md 의 << >> 를 채운다. 특히 3장 검증 명령"
   echo "  2. SPEC.md 를 채운다"
   echo "  3. PROMPTS.md 의 1번 프롬프트를 던져 TASKS.md 를 만든다"
+  echo "  4. run.sh 를 쓰려면 그 폴더에서 claude 를 한 번 직접 열어 신뢰 질문에 승인한다"
 fi
