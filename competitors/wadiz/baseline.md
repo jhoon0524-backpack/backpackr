@@ -14,7 +14,7 @@
 | IR (wadizcorp.com 주요 뉴스) | newsBoardDetail/8932 | 2026-06-05 | 2026-10-02 확인 |
 | 앱스토어 릴리즈노트 | 26.43.0 | 2026-10-22 | |
 | 구글플레이 릴리즈노트 | 26.40.0 업데이트 2026-10-21 | 2026-10-21 | |
-| 외부 뉴스 검색 "와디즈" | - | 2026-10-23 | |
+| 외부 뉴스 검색 "와디즈" | - | 2026-10-24 | |
 | 메인 페이지 (배너·기획전·GNB) | - | 2026-10-20 | 2026-10-20 배너에 "Books worth keeping 3 Zero Bookstore is now open" 확인. 2026-10-13 첫 읽기. `fetch.js --headed`(xvfb-run)로만 본문이 읽힘, 헤드리스는 본문 0자. 해외 접속이라 영문 글로벌 페이지가 나옴. 배너: Early Winter, BOOKMARKS, Fine Sense, Wine Bag, Hangul Blade, Korean Scarf / 메뉴: Wadiz Story, Benefits, Coupon, EndingSoon, MakerGuide / 카테고리 20개 |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, kr) | 14507448070 | 2026-09-03 | 2026-10-08 신규 없음 |
 | 구글플레이 리뷰 (google-play-scraper NEWEST, ko/kr) | 6d13c51b-351f-4f43-a2dc-61fbe0e901e3 | 2026-10-22 | |
