@@ -77,3 +77,8 @@
 | KS-20261022-04 | 2026-10-22 | 수요 | 외부 | [iOS ★1 v5.38.0] 한 번으로 끝 — 내가 후원한 유일한 킥스타터 프로젝트. 창작자는 목표 금액을 크게 넘겼는데도 제품을 발송하지 않았다. | [링크](https://apps.apple.com/us/app/id596961532) |
 | KS-20261023-01 | 2026-10-23 | 수요 | 외부 | [안드로이드 ★2 v3.43.0] 킥스타터는 사기 캠페인이 돈을 가져가도 "보장되지 않는다고 말했다"고 할 뿐이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=d336b1ed-47d1-4bf7-b20a-3db129da81ff) |
 | KS-20261023-02 | 2026-10-23 | 수요 | 외부 | [안드로이드 ★3 v3.43.0] 작가들이 독자를 속이는 것을 내버려 뒀다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1077a06f-0acf-4ec8-b362-d59c5049e888) |
+| KS-20261023-03 | 2026-10-23 | 수요 | 외부 | [iOS ★2 v5.38.0] 이메일을 주면 받은편지함을 다시는 비울 수 없다 — 계속 수신 거부를 하는데도 이메일을 엄청나게 많이 보낸다 | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261024-01 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★5 v3.36.2] 훌륭하다! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=496acf07-250b-4c6d-8c06-40ba5f080aa6) |
+| KS-20261024-02 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 킥스타터는 훌륭하다! 새로운 혁신적인 장난감을 사는 것이 정말 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=f7ad69f1-1522-41cc-8b05-a73f20a93079) |
+| KS-20261024-03 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=34d2ec83-2c18-47b8-90a4-7e8daf39b117) |
+| KS-20261024-04 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 로그인이 안 된다. 이메일을 입력하는 페이지로 보내 놓고 계속 버튼 위에 로딩 원만 표시된다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=49fd6dcb-d51c-404b-b4a4-63482e323eac) |
