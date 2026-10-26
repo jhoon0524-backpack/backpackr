@@ -14,4 +14,5 @@
 - `booking/` — 예약 서비스 실험
 - `dropbid/`, `dropbid-mobile/` — 입찰 서비스 실험 (웹 + 네이티브)
 - `agent-starter/` — 에이전트 스타터 실험
+- `beltscroll/` — 벨트스크롤 액션 게임 실험 (HTML 파일 하나, 설치 없음)
 - `docs/prd/` — 기획 문서
