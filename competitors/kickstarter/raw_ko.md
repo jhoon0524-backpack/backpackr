@@ -82,3 +82,4 @@
 | KS-20261024-02 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 킥스타터는 훌륭하다! 새로운 혁신적인 장난감을 사는 것이 정말 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=f7ad69f1-1522-41cc-8b05-a73f20a93079) |
 | KS-20261024-03 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=34d2ec83-2c18-47b8-90a4-7e8daf39b117) |
 | KS-20261024-04 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 로그인이 안 된다. 이메일을 입력하는 페이지로 보내 놓고 계속 버튼 위에 로딩 원만 표시된다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=49fd6dcb-d51c-404b-b4a4-63482e323eac) |
+| KS-20261025-01 | 2026-10-25 | 수요 | 외부 | [iOS ★1 v5.38.0] 사기꾼들 — 심사한다고 하면서 사기꾼이 아무거나 올리게 두고, 미리 신고를 받았는데도 결제를 한다. 사기에 가담한 것이다 | [링크](https://apps.apple.com/us/app/id596961532) |
