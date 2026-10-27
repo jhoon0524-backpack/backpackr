@@ -88,9 +88,9 @@ const ART = (() => {
            pants: '#c9c5b9', pantsD: '#99958a', boots: '#87949b', bootsD: '#6a767d', accent: '#8fe6ff',
            belt: '#8c877b', eye: '#0a0a0e', fist: '#6a767d', fistD: '#4f5a60' },
     },
-    dokkaebi: {  // 도깨비 (brute 복제): 붉은 몸, 뿔, 헝클어진 머리, 새끼줄 띠와 방울
+    dokkaebi: {  // 도깨비 (brute 복제): 붉은 몸, 큰 뿔, 헝클어진 머리, 새끼줄 띠와 방울. 윤무겸보다 위압적으로 — 어깨·몸통·팔을 넓고 두껍게 (오너 결정)
       name: '도깨비', style: 'dokkaebi',
-      head: [8, 7], torso: [13, 11], legLen: 10, legW: 4, armW: 4, upper: 5, fore: 5,
+      head: [9, 8], torso: [16, 13], legLen: 11, legW: 5, armW: 5, upper: 6, fore: 6,
       c: { skin: '#b5463b', skinD: '#842e27', shine: '#d66a5c', hair: '#1a1414', top: '#8c7a52', topD: '#6a5a3a',
            pants: '#3b3226', pantsD: '#2a231b', boots: '#c9b994', bootsD: '#9c8e6c', accent: '#d8b04a',
            belt: '#a08a5a', eye: '#f2d14a', fist: '#b5463b', fistD: '#842e27', horn: '#e6dcc2' },
@@ -212,10 +212,11 @@ const ART = (() => {
         R(tx - 13, hipY + bob + 6, 1, 2, k.gold); R(tx - 7, hipY + bob + 2, 1, 2, k.gold);
         if (!armed) { R(tx + tw - 1, hipY + bob - 3, 4, 1, k.sheath); R(tx + tw - 1, hipY + bob - 4, 1, 3, k.gold); }
       }
-      if (def.style === 'dokkaebi') {   // 맨몸 + 어깨에 걸친 새끼줄 천
+      if (def.style === 'dokkaebi') {   // 맨몸 + 솟은 어깨 근육 + 어깨에 걸친 새끼줄 천
         R(tx, tTop, tw, th, k.skin);
-        R(tx, tTop, 1, th, k.skinD);
-        R(tx + 3, tTop + 2, 2, 2, k.shine);
+        R(tx - 1, tTop + 1, tw + 2, 4, k.skin); R(tx + 1, tTop - 1, tw - 2, 1, k.skin);   // 어깨를 넓고 둥글게
+        R(tx, tTop, 1, th, k.skinD); R(tx - 1, tTop + 1, 1, 4, k.skinD);
+        R(tx + 3, tTop + 2, 3, 2, k.shine); R(tx + tw - 5, tTop + 5, 3, 1, k.skinD); R(tx + tw - 6, tTop + 8, 4, 1, k.skinD);   // 가슴·배 근육 그림자
         for (let i = 0; i < th - 1; i++) R(tx + 2 + Math.round(i * (tw - 5) / th), tTop + i, 3, 1, i % 3 ? k.top : k.topD);
       } else if (def.style === 'brute') {   // 민소매: 어깨가 드러남
         R(tx, tTop, tw, th, k.skin);
@@ -278,9 +279,9 @@ const ART = (() => {
         R(hx + 3, hy + 1, 2, hh - 1, k.hair);
         R(hx + hw - 1, hy + 1, 1, 2, k.hair);
         if (!hurt) R(hx + hw - 2, hy + 3, 1, 1, k.accent);
-      } else if (def.style === 'dokkaebi') {  // 뿔 2개 + 헝클어진 머리 + 수염 + 송곳니
-        R(hx + 1, hy - 3, 1, 3, k.horn); R(hx + 2, hy - 4, 1, 1, k.horn);
-        R(hx + hw - 3, hy - 3, 1, 3, k.horn); R(hx + hw - 2, hy - 4, 1, 1, k.horn);
+      } else if (def.style === 'dokkaebi') {  // 굵게 휜 큰 뿔 2개 + 헝클어진 머리 + 수염 + 송곳니
+        R(hx, hy - 3, 2, 3, k.horn); R(hx - 1, hy - 5, 2, 2, k.horn); R(hx - 1, hy - 6, 1, 1, k.horn);
+        R(hx + hw - 3, hy - 3, 2, 3, k.horn); R(hx + hw - 2, hy - 5, 2, 2, k.horn); R(hx + hw - 1, hy - 6, 1, 1, k.horn);
         R(hx - 1, hy - 1, hw + 1, 2, k.hair); R(hx - 1, hy, 3, 6, k.hair);
         R(hx + hw - 4, hy + hh - 3, 5, 3, k.hair);
         if (!hurt) R(hx + hw - 2, hy + 3, 1, 1, k.eye);
@@ -365,7 +366,10 @@ const ART = (() => {
     const { hw, hh, hx, hy } = geometry(def);
     const [face, fg] = canvas(hw + 8, hh + 7);
     fg.drawImage(bust, hx - 4, hy - 4, hw + 8, hh + 7, 0, 0, hw + 8, hh + 7);
-    return { frames, flash, face, sheet: {} };
+    // 그림 키(칸, 외곽선 포함): 서 있는 그림에서 맨 위 불투명 줄 ~ 발바닥. 맞을 때 불꽃·체력바 높이에 쓴다 (판정과 무관)
+    const d = frames.idle0.getContext('2d').getImageData(0, 0, FW, FH).data;
+    let top = 0; while (top < FH && ![...Array(FW).keys()].some(x => d[(top * FW + x) * 4 + 3])) top++;
+    return { frames, flash, face, sheet: {}, height: FOOT + 1 - top };
   }
 
   // ----- 타격 이펙트 (3장) -----
@@ -717,16 +721,12 @@ const ART = (() => {
     jGlow(g, R, lamps);
     return c;
   }
-  // 그림 질감(assets/joseon/floor_dirt.png, 원본 assets/reference/06 에서 잘라 1/3 로 줄인 것)으로 바닥을 깐다. 좌우를 번갈아 뒤집어 잇는다 (이음매가 좌우 대칭 무늬로 보임 — 오너 판단 대기, docs/joseon-p0.md)
+  // 그림 질감(assets/joseon/floor_dirt.png)으로 바닥을 깐다. 질감은 원본 assets/reference/06 의 흙길 띠 3개(높이 330·560·760px)를
+  // 150px 씩 겹쳐 서서히 섞고 끝을 처음과 이어 붙인 고리라, 뒤집지 않고 그대로 반복해도 이음매가 없다 (가로 801칸)
   function texturedFloor(img, wu, hu, lamps) {
     const [c, g] = canvas(wu, hu); const R = painter(g);
     R(0, 0, wu, hu, '#3f3428');
-    for (let x = 0, k = 0; x < wu; x += img.width, k++) {
-      g.save();
-      if (k % 2) { g.translate(x + img.width, 0); g.scale(-1, 1); g.drawImage(img, 0, 0, img.width, hu); }
-      else g.drawImage(img, x, 0, img.width, hu);
-      g.restore();
-    }
+    for (let x = 0; x < wu; x += img.width) g.drawImage(img, x, 0, img.width, hu);
     jFloorEdge(R, wu);
     jGlow(g, R, lamps);
     return c;
@@ -777,6 +777,7 @@ const ART = (() => {
       set.sheet[name] = { img: c, flash: silhouette(c, '#ffffff') };
     }
     set.spec = spec;
+    if (spec.height) set.sheetHeight = spec.height;
     if (spec.face && set.sheet.idle0) {
       const [x, y, w, h] = spec.face, [c, g] = canvas(w, h);
       g.drawImage(set.sheet.idle0.img, x, y, w, h, 0, 0, w, h);
@@ -789,10 +790,14 @@ const ART = (() => {
     if (sh) return { img: flash ? sh.flash : sh.img, scale: set.spec.scale, ax: set.spec.footX, ay: set.spec.footY };
     return { img: (flash ? set.flash : set.frames)[name], scale: S, ax: CX, ay: FOOT };
   }
+  function heightOf(id) {   // 화면 키 px (시트에 height 가 있으면 그 값)
+    const set = characters[id];
+    return set.sheetHeight || set.height * S;
+  }
   function faceOf(id) {   // HUD 얼굴: 시트 얼굴은 높이 42px 로 맞춘다
     const set = characters[id];
     return set.sheetFace ? { img: set.sheetFace, scale: 42 / set.sheetFace.height } : { img: set.face, scale: S };
   }
 
-  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, texturedFloor, useSpriteSheet, frameOf, faceOf, BARE, text };
+  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, texturedFloor, useSpriteSheet, frameOf, faceOf, heightOf, BARE, text };
 })();
