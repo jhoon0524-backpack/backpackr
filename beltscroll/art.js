@@ -90,7 +90,7 @@ const ART = (() => {
     },
     dokkaebi: {  // 도깨비 (brute 복제): 붉은 몸, 큰 뿔, 헝클어진 머리, 새끼줄 띠와 방울. 윤무겸보다 위압적으로 — 어깨·몸통·팔을 넓고 두껍게 (오너 결정)
       name: '도깨비', style: 'dokkaebi',
-      head: [9, 8], torso: [16, 13], legLen: 11, legW: 5, armW: 5, upper: 6, fore: 6,
+      head: [9, 8], torso: [16, 13], legLen: 11, legW: 5, armW: 5, upper: 5, fore: 5,   // 팔 길이는 덩치와 같게: 주먹 끝 48px ≤ 공격 사거리 52px
       c: { skin: '#b5463b', skinD: '#842e27', shine: '#d66a5c', hair: '#1a1414', top: '#8c7a52', topD: '#6a5a3a',
            pants: '#3b3226', pantsD: '#2a231b', boots: '#c9b994', bootsD: '#9c8e6c', accent: '#d8b04a',
            belt: '#a08a5a', eye: '#f2d14a', fist: '#b5463b', fistD: '#842e27', horn: '#e6dcc2' },
@@ -338,7 +338,7 @@ const ART = (() => {
     if (def.style === 'mugyeom') { R(x - 1, y - hw, 3, hw, k.hair); R(x - 3, y - hw + 2, 2, 3, k.hair); R(x - 3, y - hw + 3, 2, 1, k.gold); R(x - 4, y - hw + 1, 1, 1, k.accent); }
     const coat = def.skirt ? Math.min(def.skirt, def.legLen - 2) : 0;   // 도포 자락이 다리를 덮음
     if (def.style === 'wongwi') { R(x - 5, y - hw + 1, 6, hw - 1, k.hair); R(x + 1, y - hw, 2, hw - 2, k.hair); }
-    if (def.style === 'dokkaebi') { R(x - 1, y - hw, 3, hw, k.hair); R(x - 3, y - hw + 1, 2, 1, k.horn); R(x - 3, y - 3, 2, 1, k.horn); R(x + hh - 3, y - hw, 3, hw - 1, k.hair); }
+    if (def.style === 'dokkaebi') { R(x - 1, y - hw, 3, hw, k.hair); R(x - 2, y - hw + 1, 2, 1, k.horn); R(x - 2, y - 3, 2, 1, k.horn); R(x + hh - 3, y - hw, 3, hw - 1, k.hair); }
     x += hh;
     R(x, y - thick, th, thick, k.top);
     R(x, y - 1, th, 1, k.topD);
@@ -366,10 +366,10 @@ const ART = (() => {
     const { hw, hh, hx, hy } = geometry(def);
     const [face, fg] = canvas(hw + 8, hh + 7);
     fg.drawImage(bust, hx - 4, hy - 4, hw + 8, hh + 7, 0, 0, hw + 8, hh + 7);
-    // 그림 키(칸, 외곽선 포함): 서 있는 그림에서 맨 위 불투명 줄 ~ 발바닥. 맞을 때 불꽃·체력바 높이에 쓴다 (판정과 무관)
-    const d = frames.idle0.getContext('2d').getImageData(0, 0, FW, FH).data;
-    let top = 0; while (top < FH && ![...Array(FW).keys()].some(x => d[(top * FW + x) * 4 + 3])) top++;
-    return { frames, flash, face, sheet: {}, height: FOOT + 1 - top };
+    // 그림 키(칸, 외곽선 포함): 맨 위 불투명 줄 ~ 발바닥. 맞을 때 불꽃·체력바 높이에 쓴다 (판정과 무관). 서 있을 때·누웠을 때
+    const tall = c => { const d = c.getContext('2d').getImageData(0, 0, FW, FH).data; let top = 0;
+      while (top < FH && ![...Array(FW).keys()].some(x => d[(top * FW + x) * 4 + 3])) top++; return FOOT + 1 - top; };
+    return { frames, flash, face, sheet: {}, height: tall(frames.idle0), downHeight: tall(frames.down) };
   }
 
   // ----- 타격 이펙트 (3장) -----
@@ -778,6 +778,7 @@ const ART = (() => {
     }
     set.spec = spec;
     if (spec.height) set.sheetHeight = spec.height;
+    if (spec.downHeight) set.sheetDownHeight = spec.downHeight;
     if (spec.face && set.sheet.idle0) {
       const [x, y, w, h] = spec.face, [c, g] = canvas(w, h);
       g.drawImage(set.sheet.idle0.img, x, y, w, h, 0, 0, w, h);
@@ -790,9 +791,9 @@ const ART = (() => {
     if (sh) return { img: flash ? sh.flash : sh.img, scale: set.spec.scale, ax: set.spec.footX, ay: set.spec.footY };
     return { img: (flash ? set.flash : set.frames)[name], scale: S, ax: CX, ay: FOOT };
   }
-  function heightOf(id) {   // 화면 키 px (시트에 height 가 있으면 그 값)
+  function heightOf(id, lying) {   // 화면 키 px (누워 있으면 누운 그림 높이. 시트에 height·downHeight 가 있으면 그 값)
     const set = characters[id];
-    return set.sheetHeight || set.height * S;
+    return lying ? set.sheetDownHeight || set.downHeight * S : set.sheetHeight || set.height * S;
   }
   function faceOf(id) {   // HUD 얼굴: 시트 얼굴은 높이 42px 로 맞춘다
     const set = characters[id];

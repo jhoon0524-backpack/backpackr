@@ -55,7 +55,7 @@ BB_DATA.sprites = {
 };
 ```
 - 이름(`mugyeom`)은 art.js 의 캐릭터 이름 (주인공 `mugyeom`, 적은 `data/enemies.js` 의 art: `wongwi`·`dokkaebi`).
-- `height`: 화면 키 px (맞을 때 불꽃·적 체력바 높이에 씀, 판정과 무관). 없으면 코드 그림 키.
+- `height`: 화면 키 px (맞을 때 불꽃·적 체력바 높이에 씀, 판정과 무관). 없으면 코드 그림 키. `downHeight`: 누운 그림 높이 px (누운 적 추가타 불꽃 높이), 없으면 코드 그림 값.
 - `face`: HUD 얼굴 사진으로 쓸 영역 [x, y, 너비, 높이] (idle0 칸 기준). 없으면 코드 그림 얼굴.
 - 그림 파일을 못 불러오면 코드 그림 그대로 (게임은 멈추지 않음).
 - 확인: `node tests/sprites.js` (가짜 시트로 교체·빠진 칸·파일 없음 경우를 잰다).

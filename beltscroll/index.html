@@ -110,7 +110,7 @@ for (const [id, spec] of Object.entries(BB_DATA.sprites || {})) {
 }
 const FONT = '"Press Start 2P", monospace';
 // 맞을 때 불꽃·파티클·적 체력바 높이 (시각 전용, 판정과 무관). 조선 그림은 그림 키에 맞추고, 원래 그림은 예전처럼 h
-const fxH = f => THEME === 'joseon' ? ART.heightOf(f === player ? PLAYER_ART : f.art) : f.h;
+const fxH = f => THEME === 'joseon' ? ART.heightOf(f === player ? PLAYER_ART : f.art, f.down > 0 && f.z <= 2) : f.h;   // 누운 그림이면 누운 높이 (추가타 불꽃이 공중에 뜨지 않게)
 const KFONT = '"Song Myung", "Apple SD Gothic Neo", "Noto Sans KR", serif';   // 한글 제목·이름
 document.fonts && document.fonts.load('16px "Press Start 2P"').catch(() => {});
 
