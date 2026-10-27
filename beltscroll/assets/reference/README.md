@@ -8,6 +8,7 @@
 | **경량 WebP** | `01_game_art.webp` ~ `07_legacy_atlas.webp` | 손실 압축 WebP, 투명도 없음(RGB) | 처음 받은 `joseon_assets_light.zip`. 한 장 약 0.3~0.4MB. 원본과 픽셀 평균 차이 약 2~3 (0~255 중) |
 | **PNG 원본** | `png-originals/` | 무손실 PNG | 오너가 올린 `joseon_recovered_art_review.zip` (안내문 `README_에셋_복구_안내.md` 포함). 한 장 약 3MB |
 
+- 경량 판의 `README.txt`(받은 그대로 보관)에 "Original full-resolution PNG is in the separate full ZIP archive" 라고 적힌 그 원본이 `png-originals/` 다 (2026-10-27 수령·보관). 원본을 아직 못 받았다는 뜻으로 읽지 말 것.
 - 해상도는 두 판본이 같다 (1536×1024, 06 만 1254×1254). "고해상도"라기보다 **무손실·투명도 보존** 원본이다.
 - **07 아틀라스 PNG 원본만 진짜 투명 배경**이다(픽셀 46% 가 완전 투명). 인물 5종·도깨비·백호·멧돼지·용·초가가 배경 없이 오려져 있다. 경량 WebP 07 은 이 투명도가 사라져 어두운 배경이 붙어 있다. 단, 한 장씩의 정지 컷이라 걷기·공격·맞음 같은 동작 프레임은 아니다.
 - 나머지 PNG(01·02·04·05)는 RGBA 이지만 화면 전체가 반쯤 불투명한 값(알파 1~252)이라 오려진 컷이 아니다. 03·06 은 RGB.

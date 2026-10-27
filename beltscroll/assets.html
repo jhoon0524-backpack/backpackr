@@ -52,7 +52,7 @@ const g = comp.getContext('2d'); g.imageSmoothingEnabled = false;
 g.drawImage(bg.sky, 0, 0);
 for (const l of bg.layers) g.drawImage(l.img, 0, 0);
 g.drawImage(bg.floor, 0, Math.ceil(310 / 3));
-tile(sec, scaled(comp, 2), '하늘 + 먼 빌딩 + 가까운 빌딩 + 가게 거리 + 바닥');
+tile(sec, scaled(comp, 2), '조선 마을 밤: 하늘 + 먼 산 + 뒷마을 지붕 + 마을 길 + 바닥(코드 흙길, 게임에선 06 질감)');
 </script>
 </body>
 </html>
