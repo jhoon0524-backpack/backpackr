@@ -197,6 +197,9 @@ const hit = (...codes) => codes.some(c => pressed[c]);
 // ===== 웨이브·적 종류 (data/waves.js, data/enemies.js) =====
 const WAVES = BB_DATA.waves;
 const ENEMY_TYPES = BB_DATA.enemies;
+// 데이터 이름 오타 점검: 틀린 이름이 있으면 게임이 말없이 굳기 전에 어디가 틀렸는지 알린다
+for (const [i, w] of WAVES.entries()) for (const e of w.enemies) if (!ENEMY_TYPES[e.type]) alert(`data/waves.js: 웨이브 ${i + 1} 의 적 이름 "${e.type}" 이 data/enemies.js 에 없습니다`);
+for (const [id, t] of Object.entries(ENEMY_TYPES)) if (!ART.characters[t.art]) alert(`data/enemies.js: ${id} 의 그림 이름 "${t.art}" 이 art.js 에 없습니다 (thug·brute 중 하나)`);
 
 // ===== 무작위 (6단계): 시드 고정 난수 하나. reset() 때 같은 시드로 다시 시작 → 같은 입력이면 같은 판 =====
 // 적 등장 위치·적 공격 간격·파티클에 쓴다. 소리 잡음은 판에 영향이 없어 Math.random 그대로 (소리를 켜고 끄는 것으로 판이 바뀌지 않게)
@@ -260,7 +263,7 @@ const GRAB = {
 
 // ===== 타격감 (3단계, 값과 설명은 data/feel.js) =====
 const FEEL = BB_DATA.feel;
-const KILL_FLASH_MULT = 2;   // 적을 죽이는 타격은 흰 번쩍임 2배
+const KILL_FLASH_MULT = FEEL.killFlashMult;   // 적을 죽이는 타격은 흰 번쩍임 2배
 
 // ===== 디버그 =====
 // H: 판정 범위 표시 / F: 타격감 강제 (auto → normal → heavy) / G: 0.25배속 / M: 타격음 켜기·끄기
