@@ -1,0 +1,7 @@
+{
+  "name": "belt-brawl-tests",
+  "private": true,
+  "description": "Belt Brawl 측정 스크립트 (게임 실행에는 필요 없음)",
+  "scripts": { "test": "node run-all.js" },
+  "devDependencies": { "playwright": "1.63.0" }
+}

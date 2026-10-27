@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Belt Brawl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #111318; color: #e8e8ef; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+  /* 화면 크기: 창 높이에 맞춰 16:9 로 최대한 크게. --reserve 는 위아래 여백 + 아래 조작 안내 높이 */
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; box-sizing: border-box; overscroll-behavior: none; --reserve: 80px; }
+  #stage { position: relative; width: min(100%, calc((100vh - var(--reserve)) * 16 / 9)); width: min(100%, calc((100dvh - var(--reserve)) * 16 / 9)); touch-action: none; user-select: none; -webkit-user-select: none; }
+  /* 휴대폰: 여백 없이 화면을 꽉 채운다 */
+  body.has-touch { padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); gap: 0; background: #000; --reserve: 0px; }
+  body.has-touch canvas { border-radius: 0; box-shadow: none; }
+  /* 전체화면 */
+  /* #frame = 게임 화면 + 터치 조작. 전체화면에서도 조작 버튼이 게임 화면 안에 붙어 있게 한 덩어리로 묶는다 */
+  #frame { position: relative; width: 100%; }
+  #stage:fullscreen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
+  #stage:fullscreen #frame { width: min(100vw, 100vh * 16 / 9); }
+  #stage:fullscreen canvas { border-radius: 0; box-shadow: none; }
+  #stage:-webkit-full-screen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
+  #stage:-webkit-full-screen #frame { width: min(100vw, 100vh * 16 / 9); }
+  #stage:-webkit-full-screen canvas { border-radius: 0; box-shadow: none; }
+  #btnVibe { position: absolute; top: calc(9% + 8px); right: 104px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 18px; line-height: 1; padding: 0; cursor: pointer; opacity: .55; }
+  #btnVibe.on { opacity: 1; }
+  #btnVibe { display: none; }   /* 진동은 손가락 터치가 기본인 기기(휴대폰·태블릿)에서만. PC·터치 노트북은 API 가 있어도 진동 장치가 없다 */
+  @media (hover: none) and (pointer: coarse) { #btnVibe { display: block; } }
+  #btnSound { position: absolute; top: calc(9% + 8px); right: 56px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 18px; line-height: 1; padding: 0; cursor: pointer; }
+  #btnFull { position: absolute; top: calc(9% + 8px); right: 8px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 20px; line-height: 1; padding: 0; cursor: pointer; }
+  /* 휴대폰(폭 600px 이하 터치 전용 기기)을 세로로 들면 가로로 돌리라는 안내 (게임은 잠시 멈춤).
+     전체화면 중에도 보이도록 #stage 안에 둔다. 터치 노트북·태블릿은 막지 않는다 */
+  #rotate { display: none; position: fixed; inset: 0; z-index: 10; background: #0e0b16; color: #fff; flex-direction: column; align-items: center; justify-content: center; gap: 16px; font-size: 18px; text-align: center; padding: 24px; }
+  #rotate .phone { width: 44px; height: 76px; border: 3px solid #ffd34d; border-radius: 8px; animation: turn 1.6s ease-in-out infinite; }
+  @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) and (hover: none) and (pointer: coarse) and (max-width: 600px) { #rotate { display: flex; } }
+  canvas { display: block; background: #000; width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+  .help { font-size: 13px; color: #9aa0ad; text-align: center; line-height: 1.6; }
+  .help b { color: #e8e8ef; }
+  /* 터치 조작: 터치 기기에서만 보인다 */
+  .touch { display: none; }
+  body.has-touch .touch { display: block; }
+  body.has-touch .btn { display: flex; }
+  body.has-touch .help { display: none; }
+  #stick { position: absolute; left: 0; top: 0; width: 55%; height: 100%; }
+  #stick .base, #stick .knob { position: absolute; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .15s; }
+  #stick .base { width: 110px; height: 110px; margin: -55px 0 0 -55px; border: 2px solid rgba(255,255,255,.45); background: rgba(255,255,255,.08); }
+  #stick .knob { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: rgba(255,255,255,.6); }
+  #stick.active .base, #stick.active .knob { opacity: 1; }
+  .btn { position: absolute; width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(255,255,255,.5); background: rgba(255,255,255,.12); color: #fff; font: bold 15px system-ui, sans-serif; align-items: center; justify-content: center; }
+  .btn:active, .btn.down { background: rgba(255,255,255,.4); }
+  #btnAttack { right: 6%; bottom: 10%; }
+  #btnJump { right: 18%; bottom: 32%; }
+  @media (max-height: 420px) { .btn { width: 60px; height: 60px; } }
+</style>
+</head>
+<body>
+<div id="stage">
+ <div id="frame">
+  <canvas id="game" width="960" height="540"></canvas>
+  <div id="stick" class="touch"><div class="base"></div><div class="knob"></div></div>
+  <div id="btnJump" class="btn touch">점프</div>
+  <div id="btnAttack" class="btn touch">공격</div>
+  <button id="btnVibe" type="button" aria-label="진동 켜기" title="진동 켜기/끄기">📳</button>
+  <button id="btnSound" type="button" aria-label="타격음 끄기" title="타격음 켜기/끄기 (M)">🔊</button>
+  <button id="btnFull" type="button" aria-label="전체화면" title="전체화면">⛶</button>
+ </div>
+ <div id="rotate"><div class="phone"></div><div>휴대폰을 가로로 돌리면<br>크게 할 수 있어요</div></div>
+</div>
+<div class="help">
+  <b>이동</b> 방향키 / WASD &nbsp;·&nbsp; <b>공격</b> Z 또는 J &nbsp;·&nbsp; <b>점프</b> X 또는 K &nbsp;·&nbsp; <b>시작/재시작</b> Enter
+</div>
+<script src="art.js"></script>
+<script src="data/enemies.js"></script>
+<script src="data/waves.js"></script>
+<script src="data/feel.js"></script>
+<script>
+'use strict';
+
+// ===== 기본 설정 =====
+const W = 960, H = 540;
+const GROUND_TOP = 310, GROUND_BOTTOM = 520;   // 걸을 수 있는 깊이 범위 (y)
+const STAGE_LENGTH = 3600;                     // 스테이지 전체 길이 (x)
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// ===== 그림 (art.js 에서 만든다) =====
+const S = ART.S;
+const BG = ART.buildStage({ W, H, groundTop: GROUND_TOP, stageLength: STAGE_LENGTH });
+const FONT = '"Press Start 2P", monospace';
+document.fonts && document.fonts.load('16px "Press Start 2P"').catch(() => {});
+
+const keys = {};
+addEventListener('keydown', e => {
+  if (e.code !== 'KeyM' && debug.sound) ensureAudio();   // 소리 기본 켜짐: 첫 키에서 오디오 장치
+  if (e.code === 'KeyM' && !e.repeat) toggleSound();   // 소리는 키 누름 안에서 켜야 브라우저가 허락한다
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  if (!e.repeat) pressed[e.code] = true;
+  keys[e.code] = true;
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+for (const ev of ['pointerdown', 'pointerup', 'click']) addEventListener(ev, () => { if (debug.sound) ensureAudio(); }, true);   // 첫 탭에서 오디오 장치 (휴대폰은 손가락을 뗄 때 소리를 허락한다)
+let pressed = {};   // 이번 프레임에 새로 눌린 키
+
+const down = (...codes) => codes.some(c => keys[c]);
+
+// ===== 터치 조작 (키보드와 같은 keys/pressed 에 넣는다) =====
+const stage = document.getElementById('stage');
+const frameEl = document.getElementById('frame');
+const stick = document.getElementById('stick');
+const knob = stick.querySelector('.knob'), base = stick.querySelector('.base');
+let stickId = null, stickOrigin = null;
+const STICK_RADIUS = 45, DEAD = 12;
+
+function setStickKeys(dx, dy) {
+  keys.ArrowLeft = dx < -DEAD; keys.ArrowRight = dx > DEAD;
+  keys.ArrowUp = dy < -DEAD;   keys.ArrowDown = dy > DEAD;
+}
+stick.addEventListener('pointerdown', e => {
+  if (stickId !== null) return;
+  document.body.classList.add('has-touch');
+  stickId = e.pointerId; stickOrigin = { x: e.clientX, y: e.clientY };
+  const r = frameEl.getBoundingClientRect();
+  base.style.left = knob.style.left = (e.clientX - r.left) + 'px';
+  base.style.top = knob.style.top = (e.clientY - r.top) + 'px';
+  stick.classList.add('active');
+  stick.setPointerCapture(e.pointerId);
+  tapToStart();
+});
+stick.addEventListener('pointermove', e => {
+  if (e.pointerId !== stickId) return;
+  let dx = e.clientX - stickOrigin.x, dy = e.clientY - stickOrigin.y;
+  const len = Math.hypot(dx, dy);
+  if (len > STICK_RADIUS) { dx *= STICK_RADIUS / len; dy *= STICK_RADIUS / len; }
+  const r = frameEl.getBoundingClientRect();
+  knob.style.left = (stickOrigin.x + dx - r.left) + 'px';
+  knob.style.top = (stickOrigin.y + dy - r.top) + 'px';
+  setStickKeys(dx, dy);
+});
+const stickEnd = e => {
+  if (e.pointerId !== stickId) return;
+  stickId = null; stick.classList.remove('active'); setStickKeys(0, 0);
+};
+stick.addEventListener('pointerup', stickEnd);
+stick.addEventListener('pointercancel', stickEnd);
+
+function bindButton(id, code) {
+  const el = document.getElementById(id);
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); el.classList.add('down');
+    pressed[code] = true; keys[code] = true;
+    tapToStart();
+  });
+  const up = () => { el.classList.remove('down'); keys[code] = false; };
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+  el.addEventListener('pointerleave', up);
+}
+bindButton('btnAttack', 'KeyZ');
+bindButton('btnJump', 'KeyX');
+
+// ===== 화면 크게: 전체화면 + 가로 고정 (지원하는 기기만. 아이폰 사파리는 전체화면을 지원하지 않아 버튼을 숨긴다) =====
+const btnFull = document.getElementById('btnFull');
+const btnSound = document.getElementById('btnSound');
+if (!(window.AudioContext || window.webkitAudioContext)) btnSound.style.display = 'none';   // 소리를 낼 수 없는 브라우저
+btnSound.addEventListener('click', () => { btnSound.blur(); toggleSound(); });   // 포커스가 남으면 Enter 가 버튼을 누른다
+const btnVibe = document.getElementById('btnVibe');
+if (typeof navigator.vibrate !== 'function') btnVibe.style.display = 'none';   // 진동을 못 쓰는 브라우저 (아이폰 사파리 등)
+btnVibe.addEventListener('click', () => { btnVibe.blur(); toggleVibe(); });
+if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) { btnFull.style.display = 'none'; btnSound.style.right = '8px'; btnVibe.style.right = '56px'; }   // 전체화면이 없으면 한 칸씩 끝으로
+btnFull.addEventListener('click', () => {
+  btnFull.blur();   // 버튼에 포커스가 남으면 Enter(시작 키)가 버튼을 다시 눌러버린다
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    return;
+  }
+  const req = stage.requestFullscreen || stage.webkitRequestFullscreen;
+  Promise.resolve(req.call(stage))
+    .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))
+    .catch(() => {});
+});
+// 휴대폰을 세로로 들고 있으면 게임을 멈춘다 (가로로 돌리라는 안내가 덮고 있음)
+const phonePortrait = matchMedia('(orientation: portrait) and (hover: none) and (pointer: coarse) and (max-width: 600px)');   // CSS 의 #rotate 조건과 같다
+const rotateBlocked = () => phonePortrait.matches;
+
+// 시작/게임오버/클리어 화면에서는 아무 데나 탭하면 Enter 와 같다
+function tapToStart() { if (state !== 'play') pressed.Enter = true; }
+canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') document.body.classList.add('has-touch'); tapToStart(); });
+if (matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window) document.body.classList.add('has-touch');
+const hit = (...codes) => codes.some(c => pressed[c]);
+
+// ===== 웨이브·적 종류 (data/waves.js, data/enemies.js) =====
+const WAVES = BB_DATA.waves;
+const ENEMY_TYPES = BB_DATA.enemies;
+// 데이터 이름 오타 점검: 틀린 이름이 있으면 게임이 말없이 굳기 전에 어디가 틀렸는지 알린다
+for (const [i, w] of WAVES.entries()) for (const e of w.enemies) if (!ENEMY_TYPES[e.type]) alert(`data/waves.js: 웨이브 ${i + 1} 의 적 이름 "${e.type}" 이 data/enemies.js 에 없습니다`);
+for (const [id, t] of Object.entries(ENEMY_TYPES)) if (!ART.characters[t.art]) alert(`data/enemies.js: ${id} 의 그림 이름 "${t.art}" 이 art.js 에 없습니다 (thug·brute 중 하나)`);
+
+// ===== 무작위 (6단계): 시드 고정 난수 하나. reset() 때 같은 시드로 다시 시작 → 같은 입력이면 같은 판 =====
+// 적 등장 위치·적 공격 간격·파티클에 쓴다. 소리 잡음은 판에 영향이 없어 Math.random 그대로 (소리를 켜고 끄는 것으로 판이 바뀌지 않게)
+const RNG_SEED = 20261027;
+let rngState;
+function rng() {   // mulberry32: 0 이상 1 미만
+  rngState = (rngState + 0x6D2B79F5) | 0;
+  let t = rngState;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+// ===== 공격 리듬 (프레임 단위, 60프레임 = 1초) =====
+// prep 준비(windup 포즈) → active 타격(첫 프레임에 판정) → recover 회수
+const ATTACKS = [
+  { pose: 'punch',  prep: 5,  active: 4, recover: 9,  reach: 48, dmg: 10, step: 5, heavy: false },  // 1타
+  { pose: 'punch2', prep: 5,  active: 4, recover: 9,  reach: 48, dmg: 10, step: 5, heavy: false },  // 2타
+  { pose: 'kick',   prep: 10, active: 4, recover: 12, reach: 58, dmg: 18, step: 0, heavy: true },   // 3타 (넘어뜨림)
+];
+const attackTotal = a => a.prep + a.active + a.recover;
+const COMBO_WINDOW = 22;   // 앞 타가 맞고 끝난 뒤 이 프레임 안에 눌러야 다음 타로 이어진다
+const POSE_HOLD = 4;       // 회수 구간 초반에 공격 포즈를 유지하는 프레임
+const ENEMY_STOP = 35;     // 적이 플레이어 앞에서 멈추려는 거리. ±STOP_TOL 안에서 멈춘다 (약공격 사거리와 9px 이상 여유)
+const STOP_TOL = 4;        // 목표 위치에서 이만큼 안이면 도착으로 본다
+
+// ===== 적 공정성·다운·점프 (4단계). 프레임 단위, px =====
+const ENEMY_AI = {
+  attackStart: 56,      // 이 거리 안이면 공격 준비 시작 (주인공 약공격 사거리 48 밖에서 예고한다)
+  reach: 52,            // 돌진 후 주먹이 닿는 거리 (적이 보는 방향 앞쪽만)
+  lungeFrames: 4,       // 판정 직전 몇 프레임 동안 달려드는지
+  lungeSpeed: 6,        // 돌진 프레임당 px (최대 24px)
+  lungeMinGap: 20,      // 주인공과 이만큼 가까우면 더 달려들지 않는다 (뚫고 지나가지 않게)
+  maxAttackers: 1,      // 동시에 공격 준비할 수 있는 적 수
+  maxAttackersCrowd: 2, // 살아 있는 적이 crowdSize 명 이상일 때
+  crowdSize: 4,
+  punishWindow: 10,     // 주인공 공격의 마지막 이 프레임 동안 (회수 구간)
+  punishSpeed: 1.5,     // 적 걷기 속도 배율
+};
+const DOWN_FRAMES = 50;    // 쓰러져 있는 프레임 (넘어뜨림·사망·던지기 착지)
+const GETUP_INVULN = 20;   // 일어난 뒤 무적 프레임 (적·주인공)
+const LANDING_LAG = 6;     // 점프 착지 후 아무것도 못 하는 프레임 (점프가 공짜 회피가 되지 않게)
+// 쓰러진 적 추가타: 아래 + Z. 다운당 1회, 다운 시간을 늘리지 않는다
+const STOMP = { pose: 'stomp', prep: 6, active: 4, recover: 10, reach: 48, dmg: 10, step: 0, heavy: false, otg: true };
+// 점프 공격: 공중에서 Z. 점프당 1회. 준비 뒤 착지할 때까지 발을 뻗고 있고 처음 맞는 순간 1번 판정 (heavy, 넘어뜨림)
+const JUMP_KICK = { prep: 3, reach: 50, zReach: 75, dmg: 14 };
+
+// ===== 잡아 던지기. 프레임 단위, px (설계: docs/stage-grab.md) =====
+const GRAB = {
+  range: 34,          // 이 거리 안의 서 있는 적 쪽으로 밀면
+  pushFrames: 8,      // 이만큼 계속 밀면 잡는다
+  holdDist: 24,       // 잡은 적은 주인공 앞 이 거리에 붙들림 (미는 동안도 이보다 가까워지지 않음)
+  maxFrames: 100,     // 이만큼 지나면 적이 빠져나감
+  knee: { prep: 4, active: 3, recover: 8 },   // 무릎치기 (Z)
+  kneeDmg: 8, lastKneeDmg: 12, maxKnees: 3,   // 3번째 무릎은 heavy, 넘어뜨리며 놓음
+  throwPrep: 6, throwRecover: 10,             // 던지기 (점프 버튼): 준비 뒤 놓고, 회수 동안 행동 불가
+  throwSpeed: 9, throwFriction: 0.92, throwVz: 7,
+  throwDmg: 20,       // 던져진 적이 착지할 때 (heavy)
+  bodyDmg: 10, bodyReach: 28,   // 날아가는 적에 부딪힌 다른 적 (heavy, 넘어짐, 적마다 1번)
+};
+
+// ===== 타격감 (3단계, 값과 설명은 data/feel.js) =====
+const FEEL = BB_DATA.feel;
+const KILL_FLASH_MULT = FEEL.killFlashMult;   // 적을 죽이는 타격은 흰 번쩍임 2배
+
+// ===== 디버그 =====
+// H: 판정 범위 표시 / F: 타격감 강제 (auto → normal → heavy) / G: 0.25배속 / M: 타격음 켜기·끄기
+const debug = { hitbox: false, feel: 'auto', slow: false, sound: true, vibe: false };   // 소리 기본 켜짐 (5단계 판정 뒤 오너 결정)
+
+// ===== 소리 (5단계 + 후속). 코드로 합성, 파일 없음 (설계: docs/stage5-sound.md) =====
+// freq: "퍽" 사인파 시작 음높이(Hz, 끝은 freq×drop) / dur: 길이(초) / noise: "탁" 잡음 비율, band: 잡음 대역(Hz, bandTo 가 있으면 그쪽으로 미끄러짐) / vol: 최대 음량
+// 타격음 normal·heavy 는 음높이·길이만 다르다
+const SOUND = {
+  normal: { freq: 220, dur: 0.09, noise: 0.35, band: 1760 },   // 약타격
+  heavy:  { freq: 110, dur: 0.20, noise: 0.35, band: 880 },    // 강타격
+  grab:   { freq: 330, dur: 0.05, noise: 0.2, band: 2640, vol: 0.35 },   // 잡기 "턱"
+  thud:   { freq: 70,  dur: 0.32, noise: 0.5, band: 300,  vol: 0.6 },    // 던진 적 착지 "쿵"
+  whoosh: { dur: 0.08, noise: 1, band: 2400, bandTo: 600, vol: 0.18 },   // 헛스윙 "휙" (잡음만)
+  ko:     { freq: 440, drop: 0.25, dur: 0.35, wave: 'triangle', vol: 0.18 },   // 적 쓰러짐 (내려가는 음)
+  volume: 0.5,      // vol 이 없을 때 최대 음량
+  drop: 0.4,        // drop 이 없을 때 끝 음높이 비율
+};
+// 한 프레임에 소리 1개. 겹치면 높은 쪽: 쿵 > 강타격 > 쓰러짐 > 잡기 > 약타격 > 휙
+const SOUND_RANK = { whoosh: 1, normal: 2, grab: 3, ko: 4, heavy: 5, thud: 6 };
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audio = null, pendingSound = null;   // 이번 프레임에 낼 소리 (프레임 끝에 1번)
+// 브라우저는 사용자 입력 전에는 소리를 못 내게 하므로 첫 키·첫 탭에서 오디오 장치를 만든다
+function ensureAudio() {
+  if (!AudioCtx) return;
+  if (!audio) audio = new AudioCtx();
+  if (audio.state === 'suspended' && audio.resume) audio.resume();
+}
+function toggleSound() {
+  if (!AudioCtx) return;
+  debug.sound = !debug.sound;
+  if (debug.sound) { ensureAudio(); synth('normal'); }   // 켰다는 확인 (바로)
+  const b = document.getElementById('btnSound');
+  b.textContent = debug.sound ? '🔊' : '🔇';
+  b.setAttribute('aria-label', debug.sound ? '타격음 끄기' : '타격음 켜기');
+}
+function queueSound(kind) {
+  if (debug.sound && audio && (!pendingSound || SOUND_RANK[kind] > SOUND_RANK[pendingSound])) pendingSound = kind;
+}
+// 타격 순간에는 모아 두기만 한다 (소리·진동). 프레임 끝(flushSound)에 1번씩
+function playHit(kind, playerHurt) {
+  queueSound(kind);
+  if (debug.vibe) pendingVibe = Math.max(pendingVibe || 0, HAPTIC[playerHurt ? 'hurt' : kind]);   // 이번 프레임 가장 긴 진동 1번
+}
+function flushSound() {
+  if (pendingSound) synth(pendingSound);
+  if (pendingVibe && canVibrate) navigator.vibrate(pendingVibe);
+  pendingSound = null; pendingVibe = null;
+}
+
+// ===== 진동 (오너 요청). 길이(ms)만 다르다. 안드로이드만 (아이폰 사파리는 웹 진동 미지원) =====
+const HAPTIC = { normal: 12, heavy: 35, hurt: 35 };   // hurt: 주인공이 맞을 때 (때릴 때와 구분, 오너 결정)
+const canVibrate = typeof navigator.vibrate === 'function';
+let pendingVibe = null;   // 이번 프레임에 낼 진동 길이(ms)
+function vibrate(kind) { if (canVibrate) navigator.vibrate(HAPTIC[kind]); }
+function toggleVibe() {
+  if (!canVibrate) return;
+  debug.vibe = !debug.vibe;
+  if (debug.vibe) vibrate('heavy');   // 켰다는 확인
+  const b = document.getElementById('btnVibe');
+  b.classList.toggle('on', debug.vibe);
+  b.setAttribute('aria-label', debug.vibe ? '진동 끄기' : '진동 켜기');
+}
+function synth(kind) {
+  if (!debug.sound || !audio) return;
+  const sd = SOUND[kind], t0 = audio.currentTime;
+  const out = audio.createGain();
+  out.gain.setValueAtTime(0.0001, t0);
+  out.gain.exponentialRampToValueAtTime(sd.vol || SOUND.volume, t0 + 0.002);
+  out.gain.exponentialRampToValueAtTime(0.0001, t0 + sd.dur);
+  out.connect(audio.destination);
+  if (sd.freq) {   // "퍽": 음높이가 빠르게 떨어지는 소리
+    const osc = audio.createOscillator();
+    osc.type = sd.wave || 'sine';
+    osc.frequency.setValueAtTime(sd.freq, t0);
+    osc.frequency.exponentialRampToValueAtTime(sd.freq * (sd.drop || SOUND.drop), t0 + sd.dur);
+    osc.connect(out); osc.start(t0); osc.stop(t0 + sd.dur + 0.02);
+  }
+  if (sd.noise) {  // "탁"·"휙": 대역을 거른 짧은 잡음
+    const len = Math.ceil(audio.sampleRate * sd.dur), buf = audio.createBuffer(1, len, audio.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = audio.createBufferSource(); src.buffer = buf;
+    const bp = audio.createBiquadFilter(); bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(sd.band, t0);
+    if (sd.bandTo) bp.frequency.exponentialRampToValueAtTime(sd.bandTo, t0 + sd.dur);
+    const ng = audio.createGain(); ng.gain.value = sd.noise;
+    src.connect(bp); bp.connect(ng); ng.connect(out); src.start(t0);
+  }
+}
+const feelFor = kind => FEEL[debug.feel === 'auto' ? kind : debug.feel];
+
+// ===== 상태 =====
+let state, player, enemies, particles, sparks, cam, waveIndex, waveState, score, camKick, time;
+
+function reset() {
+  state = 'title';
+  player = {
+    x: 120, y: 420, z: 0, vz: 0, dir: 1, w: 36, h: 76,
+    hp: 100, maxHp: 100, speed: 3.2,
+    attack: 0, combo: 0, comboTimer: 0, hitstun: 0, invuln: 0, down: 0,
+    lastHit: false, buffered: false, lunge: 0, swing: null,
+    frozenUntil: 0, vx: 0, kbFriction: 0, flash: 0,
+    move: null, jumpKick: null, jumpKickUsed: false, landLag: 0, jumped: false,
+    grab: null, grabPush: 0, grabTarget: null, afterGrab: null,
+  };
+  debug.hits = 0; debug.misses = 0;
+  enemies = [];
+  particles = [];
+  sparks = [];
+  cam = 0;
+  waveIndex = 0;
+  waveState = 'walk';   // walk → fight → clear
+  score = 0;
+  camKick = null;
+  pendingSound = null; pendingVibe = null;
+  time = 0;
+  rngState = RNG_SEED;
+}
+reset();
+
+function spawnWave(i) {
+  const wave = WAVES[i];
+  wave.enemies.forEach((e, k) => {
+    const t = ENEMY_TYPES[e.type];
+    const fromRight = k % 3 !== 2;    // 대부분 오른쪽, 가끔 왼쪽에서
+    enemies.push({
+      type: e.type, ...t, maxHp: t.hp,
+      x: cam + (fromRight ? W + 40 + k * 60 : -60 - k * 40),
+      y: GROUND_TOP + 30 + rng() * (GROUND_BOTTOM - GROUND_TOP - 60),
+      z: 0, vz: 0, dir: fromRight ? -1 : 1,
+      hitstun: 0, down: 0, attack: 0, cooldown: 60 + k * 30, dead: 0, flash: 0, entered: false, frozenUntil: 0, vx: 0, kbFriction: 0, invuln: 0, stomped: false, grabbed: false, thrown: null,
+    });
+  });
+}
+
+// ===== 유틸 =====
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const overlapDepth = (a, b) => Math.abs(a.y - b.y) < 22;
+
+function burst(x, y, color, n = 8) {
+  for (let i = 0; i < n; i++) {
+    particles.push({ x, y, vx: (rng() - .5) * 6, vy: -rng() * 5 - 1, life: 30 + rng() * 15, color });
+  }
+}
+
+// 히트스톱: 공격자와 맞은 쪽만 멈춘다 (맞은 다음 프레임부터 hitstop 프레임 동안, 양쪽이 같은 프레임에 풀린다)
+// 카메라 킥: 타격 방향으로 밀렸다 돌아온다 (더 센 킥이 덮어쓴다)
+const frozen = f => time <= f.frozenUntil;
+function impact(feel, victim, attacker, dir) {
+  playHit(feel === FEEL.heavy ? 'heavy' : 'normal', victim === player);   // 소리도 타격감을 따른다 (F 강제 포함). 주인공이 맞으면 진동은 따로
+  victim.frozenUntil = Math.max(victim.frozenUntil, time + feel.hitstop);
+  if (attacker) attacker.frozenUntil = Math.max(attacker.frozenUntil, time + feel.hitstop);
+  const left = camKick ? camKick.amp * (1 - camKick.t / camKick.dur) : 0;
+  if (feel.kick >= left) camKick = { dir, amp: feel.kick, dur: feel.kickFrames, t: 0 };
+}
+
+// 넉백: 순간이동 대신 첫 속도에서 매 프레임 줄어들며 미끄러진다 (멈춤이 끝난 뒤부터)
+function knockback(f, dir, feel) { f.vx = dir * feel.kbSpeed; f.kbFriction = feel.kbFriction; }
+// 한 번 화면에 들어온 적은 걷기·경직·다운·넉백·겹침 밀기 중 언제든 화면 밖으로 나가지 못한다 (벽에 닿으면 미끄러짐도 멈춤)
+function keepOnScreen(e) {
+  if (!e.entered) return;
+  const cx = clamp(e.x, cam + 20, cam + W - 20);
+  if (cx !== e.x) { e.x = cx; e.vx = 0; }
+}
+
+function slide(f) {
+  if (f.vx === 0) return;
+  f.x += f.vx;
+  f.vx *= f.kbFriction;
+  if (Math.abs(f.vx) < 0.05) f.vx = 0;
+}
+
+function damageEnemy(e, dmg, knockdown, dir, attacker) {
+  const otg = e.down > 0;   // 쓰러진 적 추가타: 다운 시간·위치는 그대로
+  const lethal = e.hp - dmg <= 0;
+  const feel = feelFor(knockdown || lethal ? 'heavy' : 'normal');
+  e.hp -= dmg;
+  e.flash = feel.flash * (lethal ? KILL_FLASH_MULT : 1);
+  e.attack = 0;
+  burst(e.x, e.y - e.h / 2 - e.z, '#ffd36b');
+  sparks.push({ x: e.x - dir * 10, y: e.y, h: e.z + e.h * 0.65, t: 0 });
+  impact(feel, e, attacker, dir);
+  if (otg) {
+    // 다운 시간을 늘리지 않는다. 체력이 0이 되면 다운이 끝날 때 사라진다
+  } else if (lethal || knockdown) {
+    knockback(e, dir, feel);
+    e.down = DOWN_FRAMES;
+    e.vz = 6;
+    e.z = Math.max(e.z, 1);
+    e.hitstun = 0;
+    e.stomped = false;
+  } else {
+    knockback(e, dir, feel);
+    e.hitstun = 16;
+  }
+  if (lethal) { score += e.score; }
+}
+
+function damagePlayer(dmg, dir, knockdown, attacker) {
+  if (player.invuln > 0 || player.down > 0) return;
+  player.hp = Math.max(0, player.hp - dmg);
+  player.attack = 0; player.combo = 0; player.buffered = false; player.lunge = 0;
+  player.jumpKick = null; player.landLag = 0; player.jumped = false; player.afterGrab = null;
+  if (player.grab) releaseGrab(player);   // 맞으면 잡은 적을 놓친다
+  player.grabPush = 0; player.grabTarget = null;
+  burst(player.x, player.y - player.h / 2 - player.z, '#ff6b6b');
+  sparks.push({ x: player.x - dir * 10, y: player.y, h: player.z + player.h * 0.65, t: 0 });
+  const feel = feelFor('normal');
+  player.flash = feel.flash;
+  impact(feel, player, attacker, dir);
+  if (knockdown || player.hp <= 0) {
+    player.down = DOWN_FRAMES; player.vz = 6; player.z = Math.max(player.z, 1);
+    knockback(player, dir, feelFor('heavy'));   // 넘어질 때는 날아가는 거리 (역할 기준)
+  } else {
+    player.hitstun = 14;
+    knockback(player, dir, feel);
+  }
+  player.invuln = 40;   // 체력 0이면 넘어지는 모션(다운)이 끝난 뒤 게임오버
+}
+
+// 맞혔을 때만 다음 타로 이어진다. 헛스윙하면 1타부터
+function startAttack(p) {
+  if (down('ArrowDown', 'KeyS') && enemies.some(e => canStomp(p, e))) {   // 아래 + Z: 쓰러진 적 추가타
+    p.combo = 0;
+    p.move = STOMP;
+  } else {
+    const chain = p.lastHit && p.comboTimer > 0 && p.combo < 3;
+    p.combo = chain ? p.combo + 1 : 1;
+    p.move = ATTACKS[p.combo - 1];
+  }
+  p.comboTimer = 0;   // 이어치기 유효 시간은 공격이 끝날 때 다시 잰다
+  p.attack = attackTotal(p.move);
+  p.buffered = false;
+  p.lastHit = false;
+}
+
+const inFront = (p, e, reach) => { const dx = (e.x - p.x) * p.dir; return dx > -10 && dx < reach && overlapDepth(p, e); };
+const canStomp = (p, e) => !e.dead && e.down > 0 && e.z === 0 && !e.stomped && e.hp > 0 && inFront(p, e, STOMP.reach);
+
+function resolveAttack(p, a) {
+  let any = false;
+  for (const e of enemies) {
+    if (e.dead || e.invuln > 0) continue;
+    if (a.otg ? !canStomp(p, e) : (e.down > 0 || !inFront(p, e, a.reach) || Math.abs(e.z - p.z) >= 40)) continue;
+    damageEnemy(e, a.dmg, a.heavy, p.dir, p);
+    if (a.otg) e.stomped = true;
+    any = true;
+  }
+  p.lastHit = any;
+  if (any) { p.lunge = a.step; debug.hits++; } else { debug.misses++; queueSound('whoosh'); }   // 헛스윙 "휙"
+  p.swing = { x: p.x, y: p.y, dir: p.dir, reach: a.reach, hit: any, t: time };
+}
+
+// 점프 공격: 발을 뻗은 동안 처음 닿는 적들에게 1번 (heavy, 넘어뜨림)
+function resolveJumpKick(p) {
+  let any = false;
+  for (const e of enemies) {
+    if (e.dead || e.invuln > 0 || e.down > 0) continue;
+    if (!inFront(p, e, JUMP_KICK.reach) || p.z >= JUMP_KICK.zReach) continue;
+    damageEnemy(e, JUMP_KICK.dmg, true, p.dir, p);
+    any = true;
+  }
+  if (any) p.jumpKick.hit = true;
+}
+
+// ----- 잡아 던지기 -----
+const canGrab = (p, e) => !e.dead && !e.grabbed && e.entered && e.down === 0 && e.z === 0 && e.invuln === 0 && e.attack === 0 && !frozen(e)
+  && (e.x - p.x) * p.dir > 0 && (e.x - p.x) * p.dir <= GRAB.range && Math.abs(e.y - p.y) < 14;
+
+function startGrab(p, e) {
+  queueSound('grab');   // "턱"
+  p.grab = { e, t: 0, knees: 0, kneeT: 0, throwT: 0, throwDir: p.dir, queue: null };
+  e.grabbed = true; e.attack = 0; e.hitstun = 0; e.vx = 0;
+  p.grabPush = 0; p.grabTarget = null; p.buffered = false; p.combo = 0; p.lastHit = false;
+}
+function releaseGrab(p) {
+  const e = p.grab.e;
+  e.grabbed = false; e.hitstun = 0;
+  p.grab = null;
+}
+// 잡기를 끝낸 뒤 회수: 그 포즈를 poseFrames 동안 보이고, 전체 frames 동안 행동 불가 (Z 는 선입력)
+function setAfterGrab(p, frames, pose, poseFrames) { p.afterGrab = { left: frames, total: frames, pose, poseFrames }; }
+function kneeHit(p) {
+  const g = p.grab, e = g.e;
+  g.knees++;
+  const last = g.knees >= GRAB.maxKnees;
+  const dmg = last ? GRAB.lastKneeDmg : GRAB.kneeDmg;
+  if (last || e.hp - dmg <= 0) {           // 3번째(또는 처치) 무릎: 놓으면서 넘어뜨림 (heavy). 무릎 포즈와 회수는 끝까지
+    releaseGrab(p);
+    const k = GRAB.knee;
+    setAfterGrab(p, k.active + k.recover - 1, 'stomp', k.active + POSE_HOLD);   // 다른 무릎과 같은 포즈 길이
+    damageEnemy(e, dmg, true, p.dir, p);
+  } else {
+    damageEnemy(e, dmg, false, p.dir, p);
+    e.vx = 0; e.hitstun = 0;               // 붙들린 채라 밀리지 않는다
+  }
+}
+function releaseThrow(p) {
+  const g = p.grab, e = g.e, dir = g.throwDir;
+  releaseGrab(p);
+  e.x = p.x + dir * GRAB.holdDist;
+  e.vx = dir * GRAB.throwSpeed; e.kbFriction = GRAB.throwFriction;
+  e.vz = GRAB.throwVz; e.z = 1;
+  e.down = DOWN_FRAMES; e.attack = 0; e.stomped = false;
+  e.thrown = { dir, hits: [] };
+  p.dir = dir;
+  setAfterGrab(p, GRAB.throwRecover, 'punch2', GRAB.throwRecover);
+}
+function escapeGrab(p) {                     // 시간이 다 되면 빠져나감: 서로 조금 밀려남
+  const e = p.grab.e, dir = p.dir;
+  releaseGrab(p);
+  knockback(e, dir, feelFor('normal'));
+  knockback(p, -dir, feelFor('normal'));
+}
+function updateGrab(p) {
+  const g = p.grab, k = GRAB.knee;
+  const zPress = hit('KeyZ', 'KeyJ'), xPress = hit('KeyX', 'KeyK');
+  g.t++;
+  if (g.throwT > 0) {                        // 던지는 중
+    if (++g.throwT > GRAB.throwPrep) releaseThrow(p);
+    return;
+  }
+  if (g.kneeT > 0) {                         // 무릎 동작 중
+    g.kneeT++;
+    if (g.kneeT === k.prep + 1) { kneeHit(p); if (!p.grab) return; }
+    if (g.kneeT > k.prep && !g.queue) g.queue = zPress ? 'knee' : xPress ? 'throw' : null;   // 타격 뒤 누른 입력은 1칸 대기
+    if (g.kneeT < k.prep + k.active + k.recover) return;
+    g.kneeT = 0;
+  }
+  const act = g.queue || (zPress ? 'knee' : xPress ? 'throw' : null);
+  g.queue = null;
+  if (act === 'knee') { g.kneeT = 1; return; }
+  if (act === 'throw') {                     // 방향키를 누르고 있으면 그쪽으로 (뒤로 던지기)
+    let mx = 0;
+    if (down('ArrowLeft', 'KeyA')) mx -= 1;
+    if (down('ArrowRight', 'KeyD')) mx += 1;
+    g.throwDir = mx || p.dir; g.throwT = 1;
+    return;
+  }
+  if (g.t >= GRAB.maxFrames) escapeGrab(p);
+}
+// 던져진 적: 날아가며 부딪힌 적을 넘어뜨리고, 착지할 때 "쿵"
+function updateThrown(e) {
+  const t = e.thrown;
+  if (e.z > 0) {
+    for (const o of enemies) {
+      if (o === e || o.dead || o.down > 0 || o.invuln > 0 || o.grabbed || t.hits.includes(o)) continue;
+      if (Math.abs(o.x - e.x) < GRAB.bodyReach && overlapDepth(o, e)) { t.hits.push(o); damageEnemy(o, GRAB.bodyDmg, true, t.dir, null); }
+    }
+    return;
+  }
+  e.thrown = null;
+  e.down = DOWN_FRAMES;   // 쓰러진 시간은 착지 순간부터 (달려가 추가타 가능, 오너 결정)
+  const lethal = e.hp - GRAB.throwDmg <= 0, feel = feelFor('heavy');
+  e.hp -= GRAB.throwDmg;
+  e.flash = feel.flash * (lethal ? KILL_FLASH_MULT : 1);
+  burst(e.x, e.y - 10, '#ffd36b', 12);
+  sparks.push({ x: e.x, y: e.y, h: 8, t: 0 });
+  impact(feel, e, null, t.dir);
+  queueSound('thud');   // 착지 "쿵" (같은 프레임 강타격음보다 우선)
+  if (lethal) score += e.score;
+}
+
+// ===== 업데이트 =====
+function update() {
+  time++;
+  // 카메라 킥은 상태(게임오버 등)와 상관없이 매 프레임 복귀한다. 맞은 프레임에는 최대치로 그려진다
+  if (camKick && ++camKick.t >= camKick.dur) camKick = null;
+  if (hit('KeyH')) debug.hitbox = !debug.hitbox;
+  if (hit('KeyF')) debug.feel = { auto: 'normal', normal: 'heavy', heavy: 'auto' }[debug.feel];
+  if (hit('KeyG')) debug.slow = !debug.slow;
+  if (state === 'title' || state === 'gameover' || state === 'clear') {
+    // 시작하는 프레임에 같이 눌린 입력(터치 공격 버튼 등)은 버린다
+    if (hit('Enter')) { reset(); state = 'play'; pressed = {}; }
+    return;
+  }
+
+  // 걷는 애니메이션용: 이번 프레임 시작 위치 기억
+  for (const f of [player, ...enemies]) { f.ox = f.x; f.oy = f.y; }
+
+  // --- 플레이어 ---
+  const p = player;
+  if (p.flash > 0) p.flash--;
+  if (!frozen(p)) {
+    if (p.invuln > 0) p.invuln--;
+    if (p.comboTimer > 0 && --p.comboTimer === 0) p.combo = 0;
+
+    // 공중 물리. 점프 착지 때는 착지 경직, 점프 공격은 끝
+    if (p.z > 0 || p.vz !== 0) {
+      p.z += p.vz; p.vz -= 0.45;
+      if (p.z <= 0) {
+        p.z = 0; p.vz = 0;
+        if (p.jumped) p.landLag = LANDING_LAG;   // 스스로 뛴 점프만. 공중에서 맞았거나 넘어진 착지는 제외
+        p.jumped = false; p.jumpKick = null; p.jumpKickUsed = false;
+      }
+    }
+
+    if (p.down > 0) {
+      p.down--;
+      if (p.down === 0) {
+        if (p.hp <= 0) state = 'gameover';                         // 넘어지는 모션이 끝난 뒤 게임오버
+        else p.invuln = Math.max(p.invuln, GETUP_INVULN);          // 기상 무적
+      }
+    } else if (p.hitstun > 0) {
+      p.hitstun--;
+    } else if (p.landLag > 0) {
+      if (hit('KeyZ', 'KeyJ')) p.buffered = true;   // 착지 경직 중 누른 공격은 기억했다가 경직이 끝나면 바로 낸다 (줄이기 전에 확인)
+      p.landLag--;
+    } else if (p.grab) {
+      updateGrab(p);
+    } else if (p.afterGrab) {
+      if (hit('KeyZ', 'KeyJ')) p.buffered = true;   // 잡기를 끝낸 뒤 회수 중 누른 공격도 기억
+      if (--p.afterGrab.left <= 0) p.afterGrab = null;
+    } else {
+      if (p.attack > 0) {
+        p.attack--;
+        if (p.attack > 0) {
+          const a = p.move;
+          if (attackTotal(a) - p.attack + 1 === a.prep + 1) resolveAttack(p, a);   // 타격 첫 프레임에 판정
+        } else {
+          p.comboTimer = COMBO_WINDOW;
+          if (p.z > 0) p.buffered = false;   // 공중에서 끝난 공격의 선입력은 버린다 (착지 때 멋대로 나가지 않게)
+        }
+      }
+      if (p.attack === 0) {
+        let mx = 0, my = 0;
+        if (down('ArrowLeft', 'KeyA')) mx -= 1;
+        if (down('ArrowRight', 'KeyD')) mx += 1;
+        if (down('ArrowUp', 'KeyW')) my -= 1;
+        if (down('ArrowDown', 'KeyS')) my += 1;
+        if (mx !== 0 && p.z === 0) p.dir = mx;
+        const len = Math.hypot(mx, my) || 1;
+        p.x += (mx / len) * p.speed;
+        p.y += (my / len) * p.speed * 0.6;
+
+        // 잡기: 잡을 수 있는 적 쪽으로 계속 밀면 잡는다. 미는 동안 그 적 몸에 막힌다
+        const target = (p.z === 0 && mx !== 0 && mx === p.dir)
+          ? enemies.filter(e => canGrab(p, e)).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0] : null;   // 가장 가까운 적
+        if (target) {
+          if ((target.x - p.x) * p.dir < GRAB.holdDist) p.x = target.x - p.dir * GRAB.holdDist;
+          p.grabPush = (p.grabTarget === target ? p.grabPush : 0) + 1;
+          p.grabTarget = target;
+        } else { p.grabPush = 0; p.grabTarget = null; }
+
+        if (target && p.grabPush >= GRAB.pushFrames) { startGrab(p, target); if (hit('KeyZ', 'KeyJ')) p.grab.queue = 'knee'; }   // 잡는 프레임에 누른 Z 는 무릎으로
+        else if ((p.buffered || hit('KeyZ', 'KeyJ')) && p.z === 0) startAttack(p);      // 땅: 공격 (같은 프레임 점프는 무시)
+        else if (hit('KeyX', 'KeyK') && p.z === 0) { p.vz = 9; p.z = 1; p.jumped = true; }   // 땅: 점프
+        else if (hit('KeyZ', 'KeyJ') && p.z > 0 && !p.jumpKickUsed) {         // 공중: 점프 공격 (점프당 1회)
+          p.jumpKick = { t: 0, hit: false }; p.jumpKickUsed = true;
+        }
+        if (p.attack > 0) { p.grabPush = 0; p.grabTarget = null; }
+        if (p.jumpKick) {
+          p.jumpKick.t++;
+          if (p.jumpKick.t > JUMP_KICK.prep && !p.jumpKick.hit) resolveJumpKick(p);
+        }
+      }
+    }
+    // 1·2타가 맞으면 멈춤이 끝난 뒤 앞으로 조금 미끄러져 나간다
+    if (p.lunge > 0 && !frozen(p)) { const s = Math.min(p.lunge, 2); p.x += p.dir * s; p.lunge -= s; }
+    slide(p);
+  }
+  // 선입력: 판정 프레임부터 공격이 끝날 때까지 누른 공격을 기억했다가 끝나는 즉시 다음 타로 (히트스톱 중에도 포착)
+  if (hit('KeyZ', 'KeyJ') && p.z > 0 && p.jumpKick && p.jumpKick.hit) p.buffered = true;   // 점프 공격이 맞은 뒤 공중에서 누른 Z → 착지 경직 끝에 1타
+  if (hit('KeyZ', 'KeyJ') && p.attack > 0) {
+    const a = p.move;
+    if (p.attack <= attackTotal(a) - a.prep) p.buffered = true;
+  }
+
+  // 이동 범위 제한
+  p.y = clamp(p.y, GROUND_TOP, GROUND_BOTTOM);
+  const leftWall = cam + 20;
+  const rightWall = waveState === 'fight' ? cam + W - 20 : Math.min(STAGE_LENGTH - 20, cam + W + 200);
+  p.x = clamp(p.x, leftWall, rightWall);
+  // 잡힌 적은 주인공 앞에 붙들림. 화면 밖이면 주인공을 밀어 맞춘다
+  if (p.grab) {
+    const g = p.grab, e = g.e;
+    // 뒤로 던지기 준비 중엔 앞(+24)에서 뒤(-24)로 미끄러져 넘어간다 (순간이동 없음)
+    const swing = g.throwT > 0 && g.throwDir !== p.dir ? 1 - 2 * Math.min(1, g.throwT / GRAB.throwPrep) : 1;
+    e.x = p.x + p.dir * GRAB.holdDist * swing; e.y = p.y; e.z = 0; e.vz = 0; e.dir = -p.dir;
+    const cx = clamp(e.x, cam + 20, cam + W - 20);
+    if (cx !== e.x) { e.x = cx; p.x = e.x - p.dir * GRAB.holdDist * swing; }   // 위 공식의 역 (뒤로 던지기 중이면 swing 반영)
+  }
+
+  // --- 카메라 / 웨이브 ---
+  if (waveState !== 'fight') {
+    const target = clamp(p.x - W * 0.4, 0, STAGE_LENGTH - W);
+    if (target > cam) cam += Math.min(target - cam, 6);
+  }
+  if (waveState === 'walk' && waveIndex < WAVES.length && p.x >= WAVES[waveIndex].lockX) {
+    waveState = 'fight';
+    spawnWave(waveIndex);
+  }
+  if (waveState === 'fight' && enemies.every(e => e.dead)) {
+    enemies = [];
+    waveIndex++;
+    waveState = waveIndex >= WAVES.length ? 'done' : 'walk';
+    if (waveState === 'done') { state = 'clear'; score += 1000; }
+  }
+
+  // --- 적 ---
+  for (const e of enemies) {
+    if (e.dead) continue;
+    if (e.flash > 0) e.flash--;
+    if (frozen(e)) continue;
+    if (e.grabbed) continue;   // 잡힌 적은 아무것도 못 한다 (위치는 주인공 쪽에서 고정)
+    if (e.invuln > 0) e.invuln--;
+    slide(e);
+    keepOnScreen(e);
+    if (e.z > 0 || e.vz !== 0) {
+      e.z += e.vz; e.vz -= 0.45;
+      if (e.z <= 0) { e.z = 0; e.vz = 0; if (e.down > 0 && e.hp <= 0) queueSound('ko'); }   // 처치된 적이 바닥에 닿는 순간 "쓰러짐"
+    }
+    if (e.thrown) updateThrown(e);
+
+    if (e.down > 0) {
+      e.down--;
+      if (e.down === 0) {
+        if (e.hp <= 0) { e.dead = 1; burst(e.x, e.y - 30, '#ffffff', 14); }
+        else e.invuln = GETUP_INVULN;   // 기상 무적
+      }
+      continue;
+    }
+    if (e.hitstun > 0) { e.hitstun--; continue; }
+    if (e.cooldown > 0) e.cooldown--;
+
+    const dx = p.x - e.x, dy = p.y - e.y;
+
+    if (e.attack > 0) {   // 공격 중에는 방향 고정
+      e.attack--;
+      const front = (p.x - e.x) * e.dir;
+      if (e.attack > 8 && e.attack <= 8 + ENEMY_AI.lungeFrames && front > ENEMY_AI.lungeMinGap) {
+        e.x += e.dir * Math.min(ENEMY_AI.lungeSpeed, front - ENEMY_AI.lungeMinGap);   // 판정 직전 돌진
+        keepOnScreen(e);
+      }
+      if (e.attack === 8) {   // 준비 동작 끝에 타격. 보는 방향 앞쪽만 맞는다
+        const f2 = (p.x - e.x) * e.dir;
+        if (f2 > -10 && f2 < ENEMY_AI.reach && overlapDepth(e, p) && p.z < 30) damagePlayer(e.dmg, e.dir, e.knockdown, e);
+      }
+      continue;
+    }
+    e.dir = dx > 0 ? 1 : -1;
+
+    // 플레이어 옆 자리(좌 또는 우)로 접근
+    // 주인공 옆자리로 접근. 그 자리가 화면 밖이면 반대쪽 옆자리로 (화면 밖에서 서성이거나 주인공과 겹쳐 서지 않게)
+    let wantX = p.x - e.dir * ENEMY_STOP;
+    // 기준을 STOP_TOL 만큼 안쪽으로: 목표 ±STOP_TOL 어디에 서도 화면 안(entered)이 되게
+    if (wantX < cam + 20 + STOP_TOL || wantX > cam + W - 20 - STOP_TOL) wantX = p.x + e.dir * ENEMY_STOP;
+    const ddx = wantX - e.x;
+    // 주인공 공격의 회수 구간·착지 경직에만 빨라진다 (헛손질을 노린다)
+    const recovering = (p.attack > 0 && p.attack <= ENEMY_AI.punishWindow) || p.landLag > 0;   // 착지 경직도 회수 구간
+    const spd = e.speed * (recovering ? ENEMY_AI.punishSpeed : 1);
+    if (Math.abs(ddx) > STOP_TOL) e.x += Math.sign(ddx) * spd;
+    if (Math.abs(dy) > 4) e.y += Math.sign(dy) * spd * 0.7;
+    e.y = clamp(e.y, GROUND_TOP, GROUND_BOTTOM);
+    // 한 번 화면에 들어온 적은 화면 밖으로 숨지 못한다
+    if (e.x >= cam + 20 && e.x <= cam + W - 20) e.entered = true;   // 화면 제한(keepOnScreen)과 같은 범위, 양 끝 포함
+    keepOnScreen(e);   // 걸음 뒤에도 (벽에 붙은 플레이어 옆 자리가 화면 밖일 수 있다)
+
+    const alive = enemies.filter(o => !o.dead).length;
+    const attackers = enemies.filter(o => !o.dead && o.attack > 0).length;
+    const maxA = alive >= ENEMY_AI.crowdSize ? ENEMY_AI.maxAttackersCrowd : ENEMY_AI.maxAttackers;
+    if (Math.abs(dx) <= ENEMY_AI.attackStart && Math.abs(dx) >= ENEMY_AI.lungeMinGap && Math.abs(dy) < 16 && e.cooldown <= 0 && e.invuln === 0 && e.entered && p.down === 0 && attackers < maxA) {   // 화면에 들어온 적만, 주인공과 겹쳐 있지 않을 때만, 기상 무적 중엔 안 함
+      e.dir = dx > 0 ? 1 : -1;
+      e.attack = e.windup;
+      e.cooldown = 90 + Math.floor(rng() * 60);
+    }
+  }
+
+  // 적끼리 겹침 완화
+  for (let i = 0; i < enemies.length; i++) for (let j = i + 1; j < enemies.length; j++) {
+    const a = enemies[i], b = enemies[j];
+    if (a.dead || b.dead || frozen(a) || frozen(b) || a.grabbed || b.grabbed) continue;   // 히트스톱 중·잡힌 적은 밀리지 않는다
+    if (Math.abs(a.x - b.x) < 30 && Math.abs(a.y - b.y) < 14) {
+      const s = a.x < b.x ? -1 : 1; a.x += s * 0.8; b.x -= s * 0.8;
+    }
+  }
+  for (const e of enemies) if (!e.dead) keepOnScreen(e);   // 겹침 밀기 뒤에도 화면 제한 (위치를 바꾸는 마지막 줄)
+
+  for (const f of [player, ...enemies]) {
+    const d = Math.hypot(f.x - f.ox, f.y - f.oy);
+    f.moving = d > 0.3;
+    f.walk = (f.walk || 0) + d;
+  }
+
+  // --- 파티클 ---
+  for (const s of sparks) s.t++;
+  sparks = sparks.filter(s => s.t < 9);
+  for (const q of particles) { q.x += q.vx; q.y += q.vy; q.vy += 0.3; q.life--; }
+  particles = particles.filter(q => q.life > 0);
+  flushSound();   // 이번 프레임 타격음 (가장 센 것 1번)
+}
+
+// ===== 그리기 =====
+function drawBackground() {
+  ctx.drawImage(BG.sky, 0, 0, BG.sky.width * S, BG.sky.height * S);
+  const cols = Math.ceil(W / S) + 1;
+  for (const layer of BG.layers) {   // 멀리 있는 층일수록 천천히 움직인다
+    const off = cam * layer.f, u = Math.floor(off / S);
+    ctx.drawImage(layer.img, u, 0, cols, layer.img.height, Math.round(u * S - off), 0, cols * S, layer.img.height * S);
+  }
+  const u = Math.floor(cam / S);
+  ctx.drawImage(BG.floor, u, 0, cols, BG.floor.height, Math.round(u * S - cam), GROUND_TOP, cols * S, BG.floor.height * S);
+}
+
+// 지금 상태에 맞는 그림 이름
+function frameName(f, isPlayer) {
+  // 히트스톱 동안은 맞은 순간의 포즈로 멈춘다. 바닥에 누워 있다가 추가타를 맞은 적은 누운 그림 그대로
+  if (frozen(f) && (f.hitstun > 0 || (f.down > 0 && f.z > 0))) return 'hurt';
+  if (!isPlayer && f.grabbed) return 'hurt';
+  if (f.down > 0) return f.z > 2 ? 'hurt' : 'down';
+  if (f.hitstun > 0) return 'hurt';
+  if (isPlayer) {
+    if (f.grab) {   // 잡기: 붙든 팔(punch) / 무릎(stomp) / 던지기 준비(windup)
+      const g = f.grab, k = GRAB.knee;
+      if (g.throwT > 0) return 'windup';
+      if (g.kneeT > k.prep && g.kneeT <= k.prep + k.active + POSE_HOLD) return 'stomp';
+      return 'punch';
+    }
+    if (f.afterGrab) { const a = f.afterGrab; return a.total - a.left < a.poseFrames ? a.pose : 'idle0'; }   // 던진 팔 / 마지막 무릎
+    if (f.jumpKick) return f.jumpKick.t <= JUMP_KICK.prep ? 'jump' : 'kick';
+    if (f.attack > 0) {
+      const a = f.move, t = attackTotal(a) - f.attack + 1;
+      if (t <= a.prep) return 'windup';                       // 준비
+      if (t <= a.prep + a.active + POSE_HOLD) return a.pose;   // 타격 (판정 프레임에 시작)
+      return 'idle0';                                          // 회수
+    }
+    if (f.z > 0) return 'jump';
+  } else if (f.attack > 0) {
+    return f.attack > 8 ? 'windup' : 'punch';
+  }
+  if (f.moving) return 'walk' + (Math.floor(f.walk / 12) % 4);
+  return 'idle' + (Math.floor(time / 30) % 2);
+}
+
+function drawFighter(f, isPlayer) {
+  const sx = Math.round(f.x - cam);
+  const baseY = Math.round(f.y);
+  // 그림자
+  ctx.fillStyle = 'rgba(0,0,0,.45)';
+  ctx.beginPath(); ctx.ellipse(sx, baseY, f.w * 0.7, 8, 0, 0, Math.PI * 2); ctx.fill();
+
+  const set = ART.characters[isPlayer ? 'player' : f.art];
+  const img = (f.flash > 0 ? set.flash : set.frames)[frameName(f, isPlayer)];
+  ctx.save();
+  if (isPlayer && f.invuln > 0 && Math.floor(time / 3) % 2) ctx.globalAlpha = 0.45;
+  if (!isPlayer && f.hp <= 0 && f.down < 24 && Math.floor(time / 3) % 2) ctx.globalAlpha = 0.3;   // 사라지기 전 깜빡임
+  if (!isPlayer && f.invuln > 0 && Math.floor(time / 3) % 2) ctx.globalAlpha = 0.5;               // 기상 무적
+  ctx.translate(sx, baseY - Math.round(f.z));
+  if (f.dir < 0) ctx.scale(-1, 1);
+  ctx.drawImage(img, -ART.CX * S, -ART.FOOT * S, img.width * S, img.height * S);
+  ctx.restore();
+
+  // 적 체력바
+  const top = baseY - f.h - f.z;
+  if (!isPlayer && f.hp < f.maxHp && f.hp > 0) {
+    ctx.fillStyle = '#0e0b16'; ctx.fillRect(sx - 21, top - 16, 42, 7);
+    ctx.fillStyle = '#ff5c5c'; ctx.fillRect(sx - 20, top - 15, 40 * f.hp / f.maxHp, 5);
+  }
+}
+
+// H 키: 판정 범위 표시. 바닥의 띠 = 공격이 닿는 앞뒤·깊이 범위, 십자 = 적의 위치(판정 기준점)
+function drawHitboxes() {
+  const p = player, band = 22;
+  const box = (x, y, dir, from, to, stroke, fill) => {
+    const x0 = x - cam + dir * from, x1 = x - cam + dir * to;
+    ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = 2;
+    ctx.fillRect(Math.min(x0, x1), y - band, Math.abs(x1 - x0), band * 2);
+    ctx.strokeRect(Math.min(x0, x1), y - band, Math.abs(x1 - x0), band * 2);
+  };
+  // 다음에 나갈 공격의 사거리
+  const next = p.attack > 0 ? p.move : ATTACKS[(p.lastHit && p.comboTimer > 0 && p.combo < 3) ? p.combo : 0];
+  box(p.x, p.y, p.dir, -10, next.reach, 'rgba(255,211,77,.9)', 'rgba(255,211,77,.08)');
+  // 방금 판정한 공격: 초록 = 맞음, 빨강 = 헛스윙
+  if (p.swing && time - p.swing.t < 12) {
+    const c = p.swing.hit ? '76,217,100' : '255,92,92';
+    box(p.swing.x, p.swing.y, p.swing.dir, -10, p.swing.reach, `rgb(${c})`, `rgba(${c},.35)`);
+  }
+  for (const e of enemies) {
+    if (e.dead) continue;
+    const ex = e.x - cam;
+    ctx.strokeStyle = e.down > 0 ? '#888' : '#ff5c5c'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(ex - 6, e.y); ctx.lineTo(ex + 6, e.y); ctx.moveTo(ex, e.y - 6); ctx.lineTo(ex, e.y + 6); ctx.stroke();
+    if (e.attack > 0) box(e.x, e.y, e.dir, -10, ENEMY_AI.reach, 'rgba(255,92,92,.8)', 'rgba(255,92,92,.1)');   // 적 공격 범위 (준비 중, 돌진하면 같이 움직임)
+  }
+  ctx.font = `10px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+  ctx.fillText(`HITBOX  HIT ${debug.hits}  MISS ${debug.misses}  COMBO ${p.combo}`, 12, H - 12);
+}
+
+function drawHUD() {
+  ctx.fillStyle = 'rgba(14,11,22,.8)'; ctx.fillRect(0, 0, W, 48);
+  // 얼굴 + 체력
+  const face = ART.characters.player.face;
+  ctx.fillStyle = '#2a2438'; ctx.fillRect(10, 4, face.width * S + 4, 40);
+  ctx.drawImage(face, 12, 6, face.width * S, face.height * S);
+  const bx = 12 + face.width * S + 12;
+  ctx.font = `10px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+  ctx.fillText('PLAYER', bx, 18);
+  ctx.fillStyle = '#0e0b16'; ctx.fillRect(bx - 2, 24, 224, 16);
+  ctx.fillStyle = '#3a3346'; ctx.fillRect(bx, 26, 220, 12);
+  ctx.fillStyle = player.hp > 30 ? '#4cd964' : '#ff5c5c'; ctx.fillRect(bx, 26, 220 * player.hp / player.maxHp, 12);
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(bx, 26, 220 * player.hp / player.maxHp, 3);
+
+  ctx.font = `12px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+  ctx.fillText(`WAVE ${Math.min(waveIndex + 1, WAVES.length)}/${WAVES.length}`, W / 2, 30);
+  ctx.textAlign = 'right';
+  ctx.fillText(`SCORE ${String(score).padStart(6, '0')}`, W - 16, 30);
+
+  if (state === 'play' && waveState === 'walk' && Math.floor(time / 20) % 2) {
+    ctx.font = `28px ${FONT}`; ctx.textAlign = 'right';
+    ctx.fillStyle = '#0e0b16'; ctx.fillText('GO', W - 74, H / 2 + 3);
+    ctx.fillStyle = '#ffd34d'; ctx.fillText('GO', W - 77, H / 2);
+    ctx.beginPath(); ctx.moveTo(W - 64, H / 2 - 28); ctx.lineTo(W - 30, H / 2 - 14); ctx.lineTo(W - 64, H / 2); ctx.closePath(); ctx.fill();
+  }
+}
+
+function drawDebugModes() {   // F·G·M 상태를 오른쪽 아래 구석에 표시
+  const tags = [];
+  if (debug.feel !== 'auto') tags.push(`FEEL ${debug.feel.toUpperCase()}`);
+  if (debug.slow) tags.push('x0.25');
+  if (debug.sound) tags.push('SOUND');
+  if (debug.vibe) tags.push('VIBE');
+  if (!tags.length) return;
+  ctx.font = `10px ${FONT}`; ctx.textAlign = 'right'; ctx.fillStyle = '#ffd34d';
+  ctx.fillText(tags.join('  '), W - 12, H - 12);
+}
+
+function drawOverlay(title, sub) {
+  ctx.fillStyle = 'rgba(14,11,22,.7)'; ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+  ctx.font = `44px ${FONT}`;
+  ctx.fillStyle = '#0e0b16'; ctx.fillText(title, W / 2 + 4, H / 2 - 16);
+  ctx.fillStyle = '#ffd34d'; ctx.fillText(title, W / 2, H / 2 - 20);
+  ctx.font = '20px system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif'; ctx.fillStyle = '#e8e8ef';
+  ctx.fillText(sub, W / 2, H / 2 + 36);
+  if (state === 'title') {   // 등장인물 소개
+    const cast = [['player', 1, W / 2 - 200], ['thug', -1, W / 2 + 130], ['brute', -1, W / 2 + 230]];
+    for (const [id, dir, x] of cast) {
+      const img = ART.characters[id].frames.idle0;
+      ctx.save(); ctx.translate(x, H - 30); ctx.scale(dir, 1);
+      ctx.drawImage(img, -ART.CX * S, -ART.FOOT * S, img.width * S, img.height * S);
+      ctx.restore();
+    }
+  }
+}
+
+function draw() {
+  ctx.save();
+  if (camKick) ctx.translate(Math.round(camKick.dir * camKick.amp * (1 - camKick.t / camKick.dur)), 0);
+  drawBackground();
+
+  // 깊이(y) 순으로 정렬해서 뒤에 있는 캐릭터부터 그린다
+  const depth = f => f.y + (f === player && f.grab ? 0.5 : 0);   // 잡고 있을 땐 주인공을 앞에 (무릎이 보이게)
+  const all = [player, ...enemies.filter(e => !e.dead)].sort((a, b) => depth(a) - depth(b));
+  for (const f of all) drawFighter(f, f === player);
+
+  for (const q of particles) {
+    ctx.globalAlpha = Math.min(1, q.life / 15);
+    ctx.fillStyle = q.color; ctx.fillRect(q.x - cam - 2, q.y - 2, 4, 4);
+  }
+  ctx.globalAlpha = 1;
+  if (debug.hitbox) drawHitboxes();
+  for (const sp of sparks) {
+    const img = ART.sparks[Math.min(2, Math.floor(sp.t / 3))];
+    ctx.drawImage(img, Math.round(sp.x - cam - img.width * S / 2), Math.round(sp.y - sp.h - img.height * S / 2), img.width * S, img.height * S);
+  }
+  ctx.restore();
+
+  drawHUD();
+  drawDebugModes();
+  if (state === 'title') drawOverlay('BELT BRAWL', '화면을 탭하거나 Enter 키를 눌러 시작');
+  if (state === 'gameover') drawOverlay('GAME OVER', `점수 ${score}  ·  탭 또는 Enter 키로 재시작`);
+  if (state === 'clear') drawOverlay('STAGE CLEAR!', `점수 ${score}  ·  탭 또는 Enter 키로 다시 하기`);
+}
+
+// ===== 메인 루프 (60fps 고정 스텝) =====
+let last = performance.now(), acc = 0;
+const STEP = 1000 / 60;
+function frame(now) {
+  acc += Math.min(now - last, 100) * (debug.slow ? 0.25 : 1); last = now;
+  if (rotateBlocked()) { acc = 0; pressed = {}; }
+  while (acc >= STEP) { update(); pressed = {}; acc -= STEP; }
+  draw();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
