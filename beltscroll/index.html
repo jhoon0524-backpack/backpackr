@@ -972,7 +972,8 @@ function drawHitboxes() {
     const ex = e.x - cam;
     ctx.strokeStyle = e.down > 0 ? '#888' : '#ff5c5c'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(ex - 6, e.y); ctx.lineTo(ex + 6, e.y); ctx.moveTo(ex, e.y - 6); ctx.lineTo(ex, e.y + 6); ctx.stroke();
-    ctx.fillStyle = e.down > 0 ? 'rgba(136,136,136,.6)' : 'rgba(255,92,92,.7)'; ctx.fillRect(ex - e.w / 2, e.y + 8, e.w, 3);   // 몸 폭 (칼 판정용)
+    // 몸 앞쪽 절반 (칼 판정용): 적 중심에서 주인공 쪽으로 w/2. 이 막대가 노란 상자에 닿으면 칼이 맞는다 (뒤쪽은 판정이 적 중심 기준이라 막대를 중심까지만 그림)
+    ctx.fillStyle = e.down > 0 ? 'rgba(136,136,136,.6)' : 'rgba(255,92,92,.7)'; ctx.fillRect(p.dir > 0 ? ex - e.w / 2 : ex, e.y + 8, e.w / 2, 3);
     if (e.attack > 0) box(e.x, e.y, e.dir, -10, ENEMY_AI.reach, 'rgba(255,92,92,.8)', 'rgba(255,92,92,.1)');   // 적 공격 범위 (준비 중, 돌진하면 같이 움직임)
   }
   ctx.font = `10px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
