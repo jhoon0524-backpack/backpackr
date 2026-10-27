@@ -17,16 +17,21 @@
   body.has-touch { padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); gap: 0; background: #000; --reserve: 0px; }
   body.has-touch canvas { border-radius: 0; box-shadow: none; }
   /* 전체화면 */
+  /* #frame = 게임 화면 + 터치 조작. 전체화면에서도 조작 버튼이 게임 화면 안에 붙어 있게 한 덩어리로 묶는다 */
+  #frame { position: relative; width: 100%; }
   #stage:fullscreen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
-  #stage:fullscreen canvas { width: min(100vw, 100vh * 16 / 9); border-radius: 0; box-shadow: none; }
+  #stage:fullscreen #frame { width: min(100vw, 100vh * 16 / 9); }
+  #stage:fullscreen canvas { border-radius: 0; box-shadow: none; }
   #stage:-webkit-full-screen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
-  #stage:-webkit-full-screen canvas { width: min(100vw, 100vh * 16 / 9); border-radius: 0; box-shadow: none; }
+  #stage:-webkit-full-screen #frame { width: min(100vw, 100vh * 16 / 9); }
+  #stage:-webkit-full-screen canvas { border-radius: 0; box-shadow: none; }
   #btnFull { position: absolute; top: calc(9% + 8px); right: 8px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 20px; line-height: 1; padding: 0; cursor: pointer; }
-  /* 휴대폰을 세로로 들면 가로로 돌리라는 안내 (게임은 잠시 멈춤) */
+  /* 휴대폰(폭 600px 이하 터치 전용 기기)을 세로로 들면 가로로 돌리라는 안내 (게임은 잠시 멈춤).
+     전체화면 중에도 보이도록 #stage 안에 둔다. 터치 노트북·태블릿은 막지 않는다 */
   #rotate { display: none; position: fixed; inset: 0; z-index: 10; background: #0e0b16; color: #fff; flex-direction: column; align-items: center; justify-content: center; gap: 16px; font-size: 18px; text-align: center; padding: 24px; }
   #rotate .phone { width: 44px; height: 76px; border: 3px solid #ffd34d; border-radius: 8px; animation: turn 1.6s ease-in-out infinite; }
   @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
-  @media (orientation: portrait) { body.has-touch #rotate { display: flex; } }
+  @media (orientation: portrait) and (hover: none) and (pointer: coarse) and (max-width: 600px) { #rotate { display: flex; } }
   canvas { display: block; background: #000; width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
   .help { font-size: 13px; color: #9aa0ad; text-align: center; line-height: 1.6; }
   .help b { color: #e8e8ef; }
@@ -49,13 +54,15 @@
 </head>
 <body>
 <div id="stage">
+ <div id="frame">
   <canvas id="game" width="960" height="540"></canvas>
   <div id="stick" class="touch"><div class="base"></div><div class="knob"></div></div>
   <div id="btnJump" class="btn touch">점프</div>
   <div id="btnAttack" class="btn touch">공격</div>
   <button id="btnFull" type="button" aria-label="전체화면" title="전체화면">⛶</button>
+ </div>
+ <div id="rotate"><div class="phone"></div><div>휴대폰을 가로로 돌리면<br>크게 할 수 있어요</div></div>
 </div>
-<div id="rotate"><div class="phone"></div><div>휴대폰을 가로로 돌리면<br>크게 할 수 있어요</div></div>
 <div class="help">
   <b>이동</b> 방향키 / WASD &nbsp;·&nbsp; <b>공격</b> Z 또는 J &nbsp;·&nbsp; <b>점프</b> X 또는 K &nbsp;·&nbsp; <b>시작/재시작</b> Enter
 </div>
@@ -91,6 +98,7 @@ const down = (...codes) => codes.some(c => keys[c]);
 
 // ===== 터치 조작 (키보드와 같은 keys/pressed 에 넣는다) =====
 const stage = document.getElementById('stage');
+const frameEl = document.getElementById('frame');
 const stick = document.getElementById('stick');
 const knob = stick.querySelector('.knob'), base = stick.querySelector('.base');
 let stickId = null, stickOrigin = null;
@@ -104,7 +112,7 @@ stick.addEventListener('pointerdown', e => {
   if (stickId !== null) return;
   document.body.classList.add('has-touch');
   stickId = e.pointerId; stickOrigin = { x: e.clientX, y: e.clientY };
-  const r = stage.getBoundingClientRect();
+  const r = frameEl.getBoundingClientRect();
   base.style.left = knob.style.left = (e.clientX - r.left) + 'px';
   base.style.top = knob.style.top = (e.clientY - r.top) + 'px';
   stick.classList.add('active');
@@ -116,7 +124,7 @@ stick.addEventListener('pointermove', e => {
   let dx = e.clientX - stickOrigin.x, dy = e.clientY - stickOrigin.y;
   const len = Math.hypot(dx, dy);
   if (len > STICK_RADIUS) { dx *= STICK_RADIUS / len; dy *= STICK_RADIUS / len; }
-  const r = stage.getBoundingClientRect();
+  const r = frameEl.getBoundingClientRect();
   knob.style.left = (stickOrigin.x + dx - r.left) + 'px';
   knob.style.top = (stickOrigin.y + dy - r.top) + 'px';
   setStickKeys(dx, dy);
@@ -157,9 +165,9 @@ btnFull.addEventListener('click', () => {
     .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))
     .catch(() => {});
 });
-// 터치 기기를 세로로 들고 있으면 게임을 멈춘다 (가로로 돌리라는 안내가 덮고 있음)
-const portrait = matchMedia('(orientation: portrait)');
-const rotateBlocked = () => document.body.classList.contains('has-touch') && portrait.matches;
+// 휴대폰을 세로로 들고 있으면 게임을 멈춘다 (가로로 돌리라는 안내가 덮고 있음)
+const phonePortrait = matchMedia('(orientation: portrait) and (hover: none) and (pointer: coarse) and (max-width: 600px)');   // CSS 의 #rotate 조건과 같다
+const rotateBlocked = () => phonePortrait.matches;
 
 // 시작/게임오버/클리어 화면에서는 아무 데나 탭하면 Enter 와 같다
 function tapToStart() { if (state !== 'play') pressed.Enter = true; }
