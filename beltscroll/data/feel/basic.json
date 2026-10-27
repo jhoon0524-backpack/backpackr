@@ -1,0 +1,1 @@
+{ "id": "basic", "hitstop": 4, "flash": 2, "shake": { "amp": 2, "frames": 6 }, "knockback": { "dist": 10, "frames": 6 } }

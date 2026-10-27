@@ -1,0 +1,23 @@
+{
+  "id": "look-c",
+  "note": "시안 C 플랫 벡터형: 파스텔 단색 면 + 굵은 외곽선 도시",
+  "floor": { "top": 240, "bottom": 340, "left": 20, "right": 620 },
+  "palette": {
+    "bg": "#cdeffd", "b1": "#a2d2ff", "b2": "#ffc8dd", "win": "#ffffff", "ol": "#1b1b2f",
+    "floor": "#fff3e0", "line": "#f2c6a0", "shadow": "#f2c6a0", "flash": "#ffffff"
+  },
+  "background": [
+    { "type": "rect", "x": 20, "y": 110, "w": 122, "h": 160, "r": 6, "color": "b1", "outline": { "color": "ol", "width": 2 } },
+    { "type": "rect", "x": 150, "y": 70, "w": 90, "h": 200, "r": 6, "color": "b2", "outline": { "color": "ol", "width": 2 } },
+    { "type": "rect", "x": 400, "y": 90, "w": 120, "h": 180, "r": 6, "color": "b2", "outline": { "color": "ol", "width": 2 } },
+    { "type": "rect", "x": 540, "y": 130, "w": 90, "h": 140, "r": 6, "color": "b1", "outline": { "color": "ol", "width": 2 } },
+    { "type": "rect", "x": 40, "y": 130, "w": 20, "h": 26, "r": 3, "color": "win", "outline": { "color": "ol", "width": 2 }, "repeat": { "dx": 36, "count": 3 } },
+    { "type": "rect", "x": 168, "y": 92, "w": 20, "h": 26, "r": 3, "color": "win", "outline": { "color": "ol", "width": 2 }, "repeat": { "dy": 44, "count": 3 } },
+    { "type": "rect", "x": 204, "y": 92, "w": 20, "h": 26, "r": 3, "color": "win", "outline": { "color": "ol", "width": 2 }, "repeat": { "dy": 44, "count": 3 } },
+    { "type": "rect", "x": 420, "y": 112, "w": 22, "h": 28, "r": 3, "color": "win", "outline": { "color": "ol", "width": 2 }, "repeat": { "dx": 34, "count": 3 } },
+    { "type": "rect", "x": 560, "y": 150, "w": 20, "h": 26, "r": 3, "color": "win", "outline": { "color": "ol", "width": 2 }, "repeat": { "dx": 34, "count": 2 } },
+    { "type": "rect", "x": -40, "y": 240, "w": 720, "h": 160, "color": "floor", "outline": { "color": "ol", "width": 2 } },
+    { "type": "rect", "x": -32, "y": 290, "w": 704, "h": 3, "color": "line" },
+    { "type": "rect", "x": 40, "y": 250, "w": 3, "h": 90, "color": "line", "repeat": { "dx": 120, "count": 6 } }
+  ]
+}

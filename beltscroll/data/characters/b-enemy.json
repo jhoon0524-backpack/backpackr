@@ -1,0 +1,35 @@
+{
+  "id": "b-enemy",
+  "note": "시안 B 적: 배 나온 고블린. 옆으로 뻗은 큰 귀 + 긴 팔 + 짧은 다리. 팔레트만 바꿔 바리에이션",
+  "hp": 3,
+  "scale": 1.3,
+  "outline": { "color": "line", "width": 2 },
+  "palette": { "line": "#000000", "skin": "#00e436", "skinD": "#008751", "belly": "#ffccaa", "cloth": "#ab5236", "eye": "#ff004d", "tooth": "#fff1e8" },
+  "shadow": { "rx": 24, "ry": 6 },
+  "body": { "w": 36, "h": 84 },
+  "hurtFrames": 24,
+  "parts": [
+    { "id": "armB", "parent": "torso", "at": [-10, -28], "color": "skinD", "shape": { "type": "capsule", "from": [0,0], "to": [0,26], "w": 8 } },
+    { "id": "clawB", "parent": "armB", "at": [0, 27], "color": "skinD", "shape": { "type": "poly", "pts": [[-6,-3],[6,-3],[7,6],[2,3],[0,8],[-3,3],[-7,6]] } },
+    { "id": "legB", "at": [-7, -22], "color": "skinD", "shape": { "type": "poly", "pts": [[-6,0],[6,0],[5,20],[10,22],[-6,22]] } },
+    { "id": "torso", "at": [0, -20], "color": "skin", "shape": { "type": "ellipse", "x": 0, "y": -16, "rx": 18, "ry": 19 } },
+    { "id": "bellyPatch", "parent": "torso", "at": [5, -10], "color": "belly", "shape": { "type": "ellipse", "rx": 10, "ry": 10 } },
+    { "id": "cloth", "parent": "torso", "at": [0, -4], "color": "cloth", "shape": { "type": "poly", "pts": [[-17,-2],[17,-2],[12,8],[4,4],[-2,10],[-8,4],[-15,6]] } },
+    { "id": "legF", "at": [7, -22], "color": "skin", "shape": { "type": "poly", "pts": [[-6,0],[6,0],[5,20],[11,22],[-6,22]] } },
+    { "id": "head", "parent": "torso", "at": [6, -32], "color": "skin", "shape": { "type": "ellipse", "x": 0, "y": -10, "rx": 13, "ry": 12 } },
+    { "id": "ears", "parent": "head", "at": [0, -12], "color": "skin", "shape": { "type": "poly", "pts": [[-10,-4],[-30,-14],[-12,4],[10,4],[28,-12],[10,-4]] } },
+    { "id": "eye", "parent": "head", "at": [0, 0], "color": "eye", "shape": { "type": "rect", "x": 4, "y": -14, "w": 6, "h": 5 } },
+    { "id": "teeth", "parent": "head", "at": [0, 0], "color": "tooth", "shape": { "type": "poly", "pts": [[2,-4],[12,-4],[10,0],[8,-2],[6,0],[4,-2]] } },
+    { "id": "armF", "parent": "torso", "at": [12, -28], "color": "skin", "shape": { "type": "capsule", "from": [0,0], "to": [0,26], "w": 8 } },
+    { "id": "clawF", "parent": "armF", "at": [0, 27], "color": "skin", "shape": { "type": "poly", "pts": [[-6,-3],[6,-3],[7,6],[2,3],[0,8],[-3,3],[-7,6]] } }
+  ],
+  "poses": {
+    "idle": { "loop": true, "keys": [
+      { "dur": 24, "parts": { "armF": { "rot": -20 }, "armB": { "rot": 10 }, "legF": { "rot": -10 }, "legB": { "rot": 10 }, "torso": { "rot": 8 }, "ears": { "rot": 0 } } },
+      { "dur": 24, "root": { "y": 1 }, "parts": { "armF": { "rot": -26 }, "armB": { "rot": 14 }, "legF": { "rot": -10 }, "legB": { "rot": 10 }, "torso": { "rot": 10, "sy": 0.96 }, "ears": { "rot": 6 } } }
+    ] },
+    "hurt": { "keys": [
+      { "dur": 2, "hold": 30, "root": { "x": -4 }, "parts": { "torso": { "rot": -22, "sx": 0.9, "sy": 1.08 }, "head": { "rot": -26 }, "ears": { "rot": -14 }, "armF": { "rot": 80 }, "armB": { "rot": -60 }, "legF": { "rot": -20 }, "legB": { "rot": 14 } } }
+    ] }
+  }
+}

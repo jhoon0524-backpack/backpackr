@@ -1,0 +1,10 @@
+{
+  "id": "hit-b",
+  "note": "시안 B: 픽셀 십자 별 + 네모 파편",
+  "layers": [
+    { "type": "ring", "color": "#ffec27", "r": [8, 54], "w": 6, "frames": 10 },
+    { "type": "flash", "shape": "star", "points": 4, "inner": 0.28, "rot": 45, "color": "#ffa300", "r": [10, 40], "frames": 10, "grow": 0.25 },
+    { "type": "flash", "shape": "star", "points": 4, "inner": 0.25, "rot": 0, "color": "#fff1e8", "r": [14, 54], "frames": 8, "grow": 0.25 },
+    { "type": "sparks", "count": 12, "life": [10, 18], "speed": [4, 9], "angle": -10, "spread": 160, "w": 8, "drag": 0.85, "gravity": 0.35, "square": true, "colors": ["#ffec27", "#ffa300", "#ff004d", "#fff1e8"] }
+  ]
+}

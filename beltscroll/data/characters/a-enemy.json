@@ -1,0 +1,31 @@
+{
+  "id": "a-enemy",
+  "note": "시안 A 적: 덩치 큰 뿔 달린 깡패. 넓은 어깨·작은 머리·굵은 팔다리. 눈만 포인트 색",
+  "hp": 3,
+  "scale": 1.3,
+  "palette": { "ink": "#15111c", "accent": "#7dfcff" },
+  "shadow": { "rx": 28, "ry": 6 },
+  "body": { "w": 40, "h": 92 },
+  "hurtFrames": 24,
+  "parts": [
+    { "id": "armB", "parent": "torso", "at": [-14, -36], "color": "ink", "shape": { "type": "capsule", "from": [0,0], "to": [0,30], "w": 13 } },
+    { "id": "fistB", "parent": "armB", "at": [0, 31], "color": "ink", "shape": { "type": "ellipse", "rx": 9, "ry": 8 } },
+    { "id": "legB", "at": [-8, -28], "color": "ink", "shape": { "type": "poly", "pts": [[-7,0],[7,0],[6,26],[10,28],[-7,28]] } },
+    { "id": "torso", "at": [0, -26], "color": "ink", "shape": { "type": "poly", "pts": [[-14,2],[14,2],[24,-34],[16,-42],[-18,-40],[-22,-30]] } },
+    { "id": "legF", "at": [8, -28], "color": "ink", "shape": { "type": "poly", "pts": [[-7,0],[7,0],[6,26],[11,28],[-7,28]] } },
+    { "id": "head", "parent": "torso", "at": [6, -40], "color": "ink", "shape": { "type": "ellipse", "x": 2, "y": -6, "rx": 10, "ry": 9 } },
+    { "id": "horns", "parent": "head", "at": [0, 0], "color": "ink", "shape": { "type": "poly", "pts": [[-6,-12],[-14,-24],[-2,-14],[6,-14],[12,-26],[10,-12]] } },
+    { "id": "eye", "parent": "head", "at": [0, 0], "color": "accent", "shape": { "type": "poly", "pts": [[4,-8],[11,-9],[10,-5],[4,-5]] } },
+    { "id": "armF", "parent": "torso", "at": [16, -36], "color": "ink", "shape": { "type": "capsule", "from": [0,0], "to": [0,30], "w": 13 } },
+    { "id": "fistF", "parent": "armF", "at": [0, 31], "color": "ink", "shape": { "type": "ellipse", "rx": 9, "ry": 8 } }
+  ],
+  "poses": {
+    "idle": { "loop": true, "keys": [
+      { "dur": 34, "parts": { "armF": { "rot": -12 }, "armB": { "rot": 8 }, "legF": { "rot": -8 }, "legB": { "rot": 8 }, "torso": { "rot": 6 } } },
+      { "dur": 34, "root": { "y": 1 }, "parts": { "armF": { "rot": -16 }, "armB": { "rot": 12 }, "legF": { "rot": -8 }, "legB": { "rot": 8 }, "torso": { "rot": 8, "sy": 0.97 } } }
+    ] },
+    "hurt": { "keys": [
+      { "dur": 2, "hold": 30, "root": { "x": -4 }, "parts": { "torso": { "rot": -24, "sx": 0.92, "sy": 1.06 }, "head": { "rot": -28 }, "armF": { "rot": 70 }, "armB": { "rot": -50 }, "legF": { "rot": -18 }, "legB": { "rot": 14 } } }
+    ] }
+  }
+}

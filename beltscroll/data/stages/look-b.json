@@ -1,0 +1,32 @@
+{
+  "id": "look-b",
+  "note": "시안 B 저해상도 픽셀형: 320x180에 그린 뒤 2배 확대, 16색 팔레트로 색 맞춤. 밤 골목",
+  "render": { "style": "pixel", "downscale": 2 },
+  "floor": { "top": 240, "bottom": 340, "left": 20, "right": 620 },
+  "palette": {
+    "bg": "#1d2b53", "wall": "#83769c", "mortar": "#5f574f", "window": "#ffec27", "frame": "#000000",
+    "floor": "#c2c3c7", "tile": "#83769c", "curb": "#fff1e8", "shadow": "#5f574f", "flash": "#fff1e8"
+  },
+  "background": [
+    { "type": "rect", "x": -32, "y": 60, "w": 704, "h": 180, "color": "wall" },
+    { "type": "rect", "x": -32, "y": 76, "w": 704, "h": 2, "color": "mortar", "repeat": { "dy": 16, "count": 11 } },
+    { "type": "rect", "x": -20, "y": 60, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -4, "y": 78, "w": 2, "h": 14, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -20, "y": 92, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -4, "y": 108, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -20, "y": 124, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -4, "y": 140, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -20, "y": 156, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -4, "y": 172, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -20, "y": 188, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -4, "y": 204, "w": 2, "h": 16, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": -20, "y": 220, "w": 2, "h": 18, "color": "mortar", "repeat": { "dx": 32, "count": 23 } },
+    { "type": "rect", "x": 60, "y": 96, "w": 44, "h": 56, "color": "frame", "repeat": { "dx": 200, "count": 3 } },
+    { "type": "rect", "x": 64, "y": 100, "w": 36, "h": 48, "color": "window", "repeat": { "dx": 200, "count": 3 } },
+    { "type": "rect", "x": 80, "y": 100, "w": 4, "h": 48, "color": "frame", "repeat": { "dx": 200, "count": 3 } },
+    { "type": "rect", "x": -32, "y": 236, "w": 704, "h": 6, "color": "curb" },
+    { "type": "rect", "x": -32, "y": 242, "w": 704, "h": 150, "color": "floor" },
+    { "type": "rect", "x": -32, "y": 274, "w": 704, "h": 2, "color": "tile", "repeat": { "dy": 34, "count": 3 } },
+    { "type": "rect", "x": 0, "y": 242, "w": 2, "h": 120, "color": "tile", "repeat": { "dx": 64, "count": 11 } }
+  ]
+}

@@ -1,0 +1,1 @@
+{ "id": "strong", "hitstop": 10, "flash": 3, "shake": { "amp": 6, "frames": 14 }, "knockback": { "dist": 34, "frames": 12 } }

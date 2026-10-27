@@ -1,0 +1,34 @@
+{
+  "id": "c-enemy",
+  "note": "시안 C 적: 네모난 로봇 깡패. 사각 몸통·사각 머리·외눈 바이저·안테나. 팔레트만 바꿔 바리에이션",
+  "hp": 3,
+  "scale": 1.3,
+  "outline": { "color": "ol", "width": 2 },
+  "palette": { "ol": "#1b1b2f", "body": "#7b2cbf", "bodyD": "#5a189a", "metal": "#c9cad9", "visor": "#ff5d8f", "bolt": "#ffd60a" },
+  "shadow": { "rx": 24, "ry": 6 },
+  "body": { "w": 38, "h": 88 },
+  "hurtFrames": 24,
+  "parts": [
+    { "id": "armB", "parent": "torso", "at": [-14, -32], "color": "bodyD", "shape": { "type": "rect", "x": -5, "y": 0, "w": 10, "h": 26, "r": 2 } },
+    { "id": "fistB", "parent": "armB", "at": [0, 28], "color": "metal", "shape": { "type": "rect", "x": -7, "y": -4, "w": 14, "h": 12, "r": 2 } },
+    { "id": "legB", "at": [-8, -26], "color": "bodyD", "shape": { "type": "rect", "x": -6, "y": 0, "w": 12, "h": 26, "r": 2 } },
+    { "id": "torso", "at": [0, -26], "color": "body", "shape": { "type": "rect", "x": -18, "y": -36, "w": 36, "h": 38, "r": 5 } },
+    { "id": "plate", "parent": "torso", "at": [0, -24], "color": "metal", "shape": { "type": "rect", "x": -9, "y": -6, "w": 18, "h": 12, "r": 2 } },
+    { "id": "bolt", "parent": "plate", "at": [0, 0], "color": "bolt", "shape": { "type": "ellipse", "rx": 3, "ry": 3 } },
+    { "id": "legF", "at": [8, -26], "color": "body", "shape": { "type": "rect", "x": -6, "y": 0, "w": 12, "h": 26, "r": 2 } },
+    { "id": "head", "parent": "torso", "at": [2, -36], "color": "metal", "shape": { "type": "rect", "x": -11, "y": -20, "w": 22, "h": 20, "r": 3 } },
+    { "id": "antenna", "parent": "head", "at": [-4, -20], "color": "bolt", "shape": { "type": "poly", "pts": [[-1,0],[1,0],[1,-8],[4,-10],[0,-14],[-4,-10],[-1,-8]] } },
+    { "id": "visor", "parent": "head", "at": [0, 0], "color": "visor", "shape": { "type": "rect", "x": -2, "y": -14, "w": 14, "h": 6, "r": 2 } },
+    { "id": "armF", "parent": "torso", "at": [16, -32], "color": "body", "shape": { "type": "rect", "x": -5, "y": 0, "w": 10, "h": 26, "r": 2 } },
+    { "id": "fistF", "parent": "armF", "at": [0, 28], "color": "metal", "shape": { "type": "rect", "x": -7, "y": -4, "w": 14, "h": 12, "r": 2 } }
+  ],
+  "poses": {
+    "idle": { "loop": true, "keys": [
+      { "dur": 28, "parts": { "armF": { "rot": -14 }, "armB": { "rot": 8 }, "torso": { "rot": 4 } } },
+      { "dur": 28, "root": { "y": 1 }, "parts": { "armF": { "rot": -18 }, "armB": { "rot": 12 }, "torso": { "rot": 5, "sy": 0.97 } } }
+    ] },
+    "hurt": { "keys": [
+      { "dur": 2, "hold": 30, "root": { "x": -4 }, "parts": { "torso": { "rot": -20, "sx": 0.9, "sy": 1.08 }, "head": { "rot": -24 }, "armF": { "rot": 80 }, "armB": { "rot": -60 }, "legF": { "rot": -18 }, "legB": { "rot": 14 } } }
+    ] }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "look-a",
+  "note": "2단계 시안 A: 플레이어가 서 있는 적에게 3타(강)를 한 번 넣는다",
+  "stage": "look-a",
+  "player": { "char": "a-player", "x": 250, "y": 300, "facing": 1 },
+  "enemies": [{ "char": "a-enemy", "x": 340, "y": 300, "facing": -1 }],
+  "input": [{ "at": 10, "for": 1, "hold": ["attack"] }]
+}

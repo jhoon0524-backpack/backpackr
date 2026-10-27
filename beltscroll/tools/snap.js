@@ -55,7 +55,8 @@ function resolveFrames(page, tokens) {
   }));
 }
 
-// 팔레트 검사: ±8 안이면 팔레트 색, 두 팔레트 색 사이(±8)면 안티에일리어싱 중간색, 그 외는 팔레트 밖.
+// 팔레트 검사: ±8 안이면 팔레트 색, 팔레트 색 2~3개가 섞인 색(±8)이면 안티에일리어싱 중간색
+// (도형 가장자리, 세 색이 만나는 모서리), 그 외는 팔레트 밖.
 function paletteCheck(file, palette, height) {
   const png = PNG.sync.read(readFileSync(file));
   const pal = palette.map((h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)));
@@ -67,6 +68,17 @@ function paletteCheck(file, palette, height) {
     const t = Math.max(0, Math.min(1, ((c[0] - a[0]) * d[0] + (c[1] - a[1]) * d[1] + (c[2] - a[2]) * d[2]) / len));
     return near(c, [a[0] + d[0] * t, a[1] + d[1] * t, a[2] + d[2] * t]);
   };
+  const MIX_STEPS = 20;
+  const inTriangle = (c, a, b, d) => {
+    for (let i = 0; i <= MIX_STEPS; i++) {
+      for (let j = 0; i + j <= MIX_STEPS; j++) {
+        const u = i / MIX_STEPS, v = j / MIX_STEPS, w = 1 - u - v;
+        if (near(c, [0, 1, 2].map((k) => a[k] * u + b[k] * v + d[k] * w))) return true;
+      }
+    }
+    return false;
+  };
+  const mixOf3 = (c) => pal.some((a, i) => pal.some((b, j) => j > i && pal.some((d, k) => k > j && inTriangle(c, a, b, d))));
   const counts = new Map();
   for (let y = 0; y < Math.min(height, png.height); y++) {
     for (let x = 0; x < png.width; x++) {
@@ -80,7 +92,7 @@ function paletteCheck(file, palette, height) {
   for (const [key, n] of counts) {
     const c = [(key >> 16) & 255, (key >> 8) & 255, key & 255];
     if (pal.some((p) => near(c, p))) inPal++;
-    else if (pal.some((a, i) => pal.some((b, j) => j > i && onSegment(c, a, b)))) aa++;
+    else if (pal.some((a, i) => pal.some((b, j) => j > i && onSegment(c, a, b))) || mixOf3(c)) aa++;
     else outside.push({ hex: '#' + key.toString(16).padStart(6, '0'), pixels: n });
   }
   outside.sort((a, b) => b.pixels - a.pixels);
