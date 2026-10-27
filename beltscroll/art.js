@@ -85,6 +85,7 @@ const ART = (() => {
     punch2: { near: [3, 0],  far: [-3, 0], arm: 'guard',  farArm: 'punch', lean: 1 },
     kick:   { near: 'kick',  far: [-2, 0], arm: 'back',   farArm: 'guard', lean: -1 },
     jump:   { near: [2, 3],  far: [-2, 4], arm: 'up',     farArm: 'guard' },
+    stomp:  { near: [6, 3],  far: [-3, 0], arm: 'back',   farArm: 'guard', lean: -1 },   // 쓰러진 적 내려찍기 (4단계 추가)
     hurt:   { near: [-1, 0], far: [-4, 0], arm: 'back',   farArm: 'back',  lean: -2, bob: 1, face: 'hurt' },
   };
 

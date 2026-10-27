@@ -216,7 +216,7 @@ const ENEMY_AI = {
 const GETUP_INVULN = 20;   // 일어난 뒤 무적 프레임 (적·주인공)
 const LANDING_LAG = 6;     // 점프 착지 후 아무것도 못 하는 프레임 (점프가 공짜 회피가 되지 않게)
 // 쓰러진 적 추가타: 아래 + Z. 다운당 1회, 다운 시간을 늘리지 않는다
-const STOMP = { pose: 'kick', prep: 6, active: 4, recover: 10, reach: 48, dmg: 10, step: 0, heavy: false, otg: true };
+const STOMP = { pose: 'stomp', prep: 6, active: 4, recover: 10, reach: 48, dmg: 10, step: 0, heavy: false, otg: true };
 // 점프 공격: 공중에서 Z. 점프당 1회. 준비 뒤 착지할 때까지 발을 뻗고 있고 처음 맞는 순간 1번 판정 (heavy, 넘어뜨림)
 const JUMP_KICK = { prep: 3, reach: 50, zReach: 75, dmg: 14 };
 
@@ -485,6 +485,7 @@ function update() {
     slide(p);
   }
   // 선입력: 판정 프레임부터 공격이 끝날 때까지 누른 공격을 기억했다가 끝나는 즉시 다음 타로 (히트스톱 중에도 포착)
+  if (hit('KeyZ', 'KeyJ') && p.z > 0 && p.jumpKick && p.jumpKick.hit) p.buffered = true;   // 점프 공격이 맞은 뒤 공중에서 누른 Z → 착지 경직 끝에 1타
   if (hit('KeyZ', 'KeyJ') && p.attack > 0) {
     const a = p.move;
     if (p.attack <= attackTotal(a) - a.prep) p.buffered = true;
@@ -551,7 +552,9 @@ function update() {
     e.dir = dx > 0 ? 1 : -1;
 
     // 플레이어 옆 자리(좌 또는 우)로 접근
-    const wantX = p.x - e.dir * ENEMY_STOP;
+    // 주인공 옆자리로 접근. 그 자리가 화면 밖이면 반대쪽 옆자리로 (화면 밖에서 서성이거나 주인공과 겹쳐 서지 않게)
+    let wantX = p.x - e.dir * ENEMY_STOP;
+    if (wantX < cam + 20 || wantX > cam + W - 20) wantX = p.x + e.dir * ENEMY_STOP;
     const ddx = wantX - e.x;
     // 주인공 공격의 회수 구간·착지 경직에만 빨라진다 (헛손질을 노린다)
     const recovering = (p.attack > 0 && p.attack <= ENEMY_AI.punishWindow) || p.landLag > 0;   // 착지 경직도 회수 구간
@@ -566,7 +569,7 @@ function update() {
     const alive = enemies.filter(o => !o.dead).length;
     const attackers = enemies.filter(o => !o.dead && o.attack > 0).length;
     const maxA = alive >= ENEMY_AI.crowdSize ? ENEMY_AI.maxAttackersCrowd : ENEMY_AI.maxAttackers;
-    if (Math.abs(dx) <= ENEMY_AI.attackStart && Math.abs(dy) < 16 && e.cooldown <= 0 && e.invuln === 0 && p.down === 0 && attackers < maxA) {   // 기상 무적 중엔 공격도 안 한다
+    if (Math.abs(dx) <= ENEMY_AI.attackStart && Math.abs(dx) >= ENEMY_AI.lungeMinGap && Math.abs(dy) < 16 && e.cooldown <= 0 && e.invuln === 0 && e.entered && p.down === 0 && attackers < maxA) {   // 화면에 들어온 적만, 주인공과 겹쳐 있지 않을 때만, 기상 무적 중엔 안 함
       e.dir = dx > 0 ? 1 : -1;
       e.attack = e.windup;
       e.cooldown = 90 + Math.floor(Math.random() * 60);
