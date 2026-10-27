@@ -10,8 +10,23 @@
 <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #111318; color: #e8e8ef; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
-  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; box-sizing: border-box; overscroll-behavior: none; }
-  #stage { position: relative; width: min(100%, 960px, calc((100vh - 32px) * 16 / 9)); touch-action: none; user-select: none; -webkit-user-select: none; }
+  /* 화면 크기: 창 높이에 맞춰 16:9 로 최대한 크게. --reserve 는 위아래 여백 + 아래 조작 안내 높이 */
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; box-sizing: border-box; overscroll-behavior: none; --reserve: 80px; }
+  #stage { position: relative; width: min(100%, calc((100vh - var(--reserve)) * 16 / 9)); width: min(100%, calc((100dvh - var(--reserve)) * 16 / 9)); touch-action: none; user-select: none; -webkit-user-select: none; }
+  /* 휴대폰: 여백 없이 화면을 꽉 채운다 */
+  body.has-touch { padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); gap: 0; background: #000; --reserve: 0px; }
+  body.has-touch canvas { border-radius: 0; box-shadow: none; }
+  /* 전체화면 */
+  #stage:fullscreen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
+  #stage:fullscreen canvas { width: min(100vw, 100vh * 16 / 9); border-radius: 0; box-shadow: none; }
+  #stage:-webkit-full-screen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
+  #stage:-webkit-full-screen canvas { width: min(100vw, 100vh * 16 / 9); border-radius: 0; box-shadow: none; }
+  #btnFull { position: absolute; top: calc(9% + 8px); right: 8px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 20px; line-height: 1; padding: 0; cursor: pointer; }
+  /* 휴대폰을 세로로 들면 가로로 돌리라는 안내 (게임은 잠시 멈춤) */
+  #rotate { display: none; position: fixed; inset: 0; z-index: 10; background: #0e0b16; color: #fff; flex-direction: column; align-items: center; justify-content: center; gap: 16px; font-size: 18px; text-align: center; padding: 24px; }
+  #rotate .phone { width: 44px; height: 76px; border: 3px solid #ffd34d; border-radius: 8px; animation: turn 1.6s ease-in-out infinite; }
+  @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) { body.has-touch #rotate { display: flex; } }
   canvas { display: block; background: #000; width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
   .help { font-size: 13px; color: #9aa0ad; text-align: center; line-height: 1.6; }
   .help b { color: #e8e8ef; }
@@ -29,7 +44,7 @@
   .btn:active, .btn.down { background: rgba(255,255,255,.4); }
   #btnAttack { right: 6%; bottom: 10%; }
   #btnJump { right: 18%; bottom: 32%; }
-  @media (max-height: 420px) { body { padding: 6px; } .btn { width: 60px; height: 60px; } }
+  @media (max-height: 420px) { .btn { width: 60px; height: 60px; } }
 </style>
 </head>
 <body>
@@ -38,7 +53,9 @@
   <div id="stick" class="touch"><div class="base"></div><div class="knob"></div></div>
   <div id="btnJump" class="btn touch">점프</div>
   <div id="btnAttack" class="btn touch">공격</div>
+  <button id="btnFull" type="button" aria-label="전체화면" title="전체화면">⛶</button>
 </div>
+<div id="rotate"><div class="phone"></div><div>휴대폰을 가로로 돌리면<br>크게 할 수 있어요</div></div>
 <div class="help">
   <b>이동</b> 방향키 / WASD &nbsp;·&nbsp; <b>공격</b> Z 또는 J &nbsp;·&nbsp; <b>점프</b> X 또는 K &nbsp;·&nbsp; <b>시작/재시작</b> Enter
 </div>
@@ -125,6 +142,24 @@ function bindButton(id, code) {
 }
 bindButton('btnAttack', 'KeyZ');
 bindButton('btnJump', 'KeyX');
+
+// ===== 화면 크게: 전체화면 + 가로 고정 (지원하는 기기만. 아이폰 사파리는 전체화면을 지원하지 않아 버튼을 숨긴다) =====
+const btnFull = document.getElementById('btnFull');
+if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) btnFull.style.display = 'none';
+btnFull.addEventListener('click', () => {
+  btnFull.blur();   // 버튼에 포커스가 남으면 Enter(시작 키)가 버튼을 다시 눌러버린다
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    return;
+  }
+  const req = stage.requestFullscreen || stage.webkitRequestFullscreen;
+  Promise.resolve(req.call(stage))
+    .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))
+    .catch(() => {});
+});
+// 터치 기기를 세로로 들고 있으면 게임을 멈춘다 (가로로 돌리라는 안내가 덮고 있음)
+const portrait = matchMedia('(orientation: portrait)');
+const rotateBlocked = () => document.body.classList.contains('has-touch') && portrait.matches;
 
 // 시작/게임오버/클리어 화면에서는 아무 데나 탭하면 Enter 와 같다
 function tapToStart() { if (state !== 'play') pressed.Enter = true; }
@@ -632,6 +667,7 @@ let last = performance.now(), acc = 0;
 const STEP = 1000 / 60;
 function frame(now) {
   acc += Math.min(now - last, 100) * (debug.slow ? 0.25 : 1); last = now;
+  if (rotateBlocked()) { acc = 0; pressed = {}; }
   while (acc >= STEP) { update(); pressed = {}; acc -= STEP; }
   draw();
   requestAnimationFrame(frame);
