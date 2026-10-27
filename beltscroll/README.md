@@ -13,10 +13,11 @@
 | `data/waves.js` | 웨이브 구성 (어디서 몇 명, 어떤 적) |
 | `data/feel.js` | 타격감 숫자 (멈춤·화면 밀림·밀려남·번쩍임) |
 | `tests/` | 자동 측정 스크립트 (게임 실행엔 필요 없음, 돌리는 법은 `tests/README.md`) |
+| `assets/joseon/` | 조선 퇴마전 그림: `floor_dirt.png`(바닥 질감, 게임이 읽음), `reference/`(설정화 원본 7장, 참고용) |
 
 ## 실행하는 법
 
-`index.html` 파일을 더블클릭해서 브라우저(크롬, 엣지, 사파리)로 엽니다. `art.js` 와 `data` 폴더가 같은 폴더에 있어야 합니다.
+`index.html` 파일을 더블클릭해서 브라우저(크롬, 엣지, 사파리)로 엽니다. `art.js`, `data` 폴더, `assets/joseon/floor_dirt.png` 가 같이 있어야 합니다 (바닥 그림이 없으면 코드로 그린 흙길이 나옵니다).
 
 ## 조작
 

@@ -4,7 +4,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const { pa
 const base = OUT + '/typo';
 (async () => {
   const b = await chromium.launch();
-  const cases = { '정상': s => s, '웨이브 적 이름 오타': (s, f) => f === 'waves.js' ? s.replace('"thug" }, { "type": "thug" }] }', '"thugg" }, { "type": "thug" }] }') : s, '그림 이름 오타': (s, f) => f === 'enemies.js' ? s.replace('"art": "brute"', '"art": "brut"') : s };
+  const cases = { '정상': s => s, '웨이브 적 이름 오타': (s, f) => f === 'waves.js' ? s.replace('"thug" }, { "type": "thug" }] }', '"thugg" }, { "type": "thug" }] }') : s, '그림 이름 오타': (s, f) => f === 'enemies.js' ? s.replace(/("brute":[^\n]*"art": ")(\w+)/, '$1$2x') : s };
   for (const [name, fn] of Object.entries(cases)) {
     fs.rmSync(base, { recursive: true, force: true }); fs.mkdirSync(base + '/data', { recursive: true });
     for (const f of ['index.html', 'art.js']) fs.copyFileSync(ROOT + '/' + f, base + '/' + f);

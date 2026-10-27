@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Belt Brawl</title>
+<title>조선 퇴마전 — Belt Brawl</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Song+Myung&display=swap" rel="stylesheet">
 <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #111318; color: #e8e8ef; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
@@ -91,8 +91,17 @@ ctx.imageSmoothingEnabled = false;
 
 // ===== 그림 (art.js 에서 만든다) =====
 const S = ART.S;
-const BG = ART.buildStage({ W, H, groundTop: GROUND_TOP, stageLength: STAGE_LENGTH });
+// 세계관: 'joseon'(조선 퇴마전: 윤무겸·조선 마을) | 'street'(원래 밤거리·주인공). 적 그림은 data/enemies.js 의 art
+const THEME = 'joseon';
+const PLAYER_ART = THEME === 'joseon' ? 'mugyeom' : 'player';
+const BG = ART.buildStage({ W, H, groundTop: GROUND_TOP, stageLength: STAGE_LENGTH, theme: THEME });
+if (THEME === 'joseon') {   // 바닥 그림 질감. 못 불러오면 코드로 그린 흙길 그대로 (폴백)
+  const tex = new Image();
+  tex.onload = () => { BG.floor = ART.texturedFloor(tex, BG.floor.width, BG.floor.height, BG.lamps); };
+  tex.src = 'assets/joseon/floor_dirt.png';
+}
 const FONT = '"Press Start 2P", monospace';
+const KFONT = '"Song Myung", "Apple SD Gothic Neo", "Noto Sans KR", serif';   // 한글 제목·이름
 document.fonts && document.fonts.load('16px "Press Start 2P"').catch(() => {});
 
 const keys = {};
@@ -199,7 +208,7 @@ const WAVES = BB_DATA.waves;
 const ENEMY_TYPES = BB_DATA.enemies;
 // 데이터 이름 오타 점검: 틀린 이름이 있으면 게임이 말없이 굳기 전에 어디가 틀렸는지 알린다
 for (const [i, w] of WAVES.entries()) for (const e of w.enemies) if (!ENEMY_TYPES[e.type]) alert(`data/waves.js: 웨이브 ${i + 1} 의 적 이름 "${e.type}" 이 data/enemies.js 에 없습니다`);
-for (const [id, t] of Object.entries(ENEMY_TYPES)) if (!ART.characters[t.art]) alert(`data/enemies.js: ${id} 의 그림 이름 "${t.art}" 이 art.js 에 없습니다 (thug·brute 중 하나)`);
+for (const [id, t] of Object.entries(ENEMY_TYPES)) if (!ART.characters[t.art]) alert(`data/enemies.js: ${id} 의 그림 이름 "${t.art}" 이 art.js 에 없습니다 (${Object.keys(ART.characters).join('·')} 중 하나)`);
 
 // ===== 무작위 (6단계): 시드 고정 난수 하나. reset() 때 같은 시드로 다시 시작 → 같은 입력이면 같은 판 =====
 // 적 등장 위치·적 공격 간격·파티클에 쓴다. 소리 잡음은 판에 영향이 없어 Math.random 그대로 (소리를 켜고 끄는 것으로 판이 바뀌지 않게)
@@ -905,7 +914,7 @@ function drawFighter(f, isPlayer) {
   ctx.fillStyle = 'rgba(0,0,0,.45)';
   ctx.beginPath(); ctx.ellipse(sx, baseY, f.w * 0.7, 8, 0, 0, Math.PI * 2); ctx.fill();
 
-  const set = ART.characters[isPlayer ? 'player' : f.art];
+  const set = ART.characters[isPlayer ? PLAYER_ART : f.art];
   const img = (f.flash > 0 ? set.flash : set.frames)[frameName(f, isPlayer)];
   ctx.save();
   if (isPlayer && f.invuln > 0 && Math.floor(time / 3) % 2) ctx.globalAlpha = 0.45;
@@ -955,12 +964,13 @@ function drawHitboxes() {
 function drawHUD() {
   ctx.fillStyle = 'rgba(14,11,22,.8)'; ctx.fillRect(0, 0, W, 48);
   // 얼굴 + 체력
-  const face = ART.characters.player.face;
+  const face = ART.characters[PLAYER_ART].face;
   ctx.fillStyle = '#2a2438'; ctx.fillRect(10, 4, face.width * S + 4, 40);
   ctx.drawImage(face, 12, 6, face.width * S, face.height * S);
   const bx = 12 + face.width * S + 12;
-  ctx.font = `10px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
-  ctx.fillText('PLAYER', bx, 18);
+  ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+  if (THEME === 'joseon') { ctx.font = `16px ${KFONT}`; ctx.fillText(ART.CHARACTERS[PLAYER_ART].name, bx, 20); }
+  else { ctx.font = `10px ${FONT}`; ctx.fillText('PLAYER', bx, 18); }
   ctx.fillStyle = '#0e0b16'; ctx.fillRect(bx - 2, 24, 224, 16);
   ctx.fillStyle = '#3a3346'; ctx.fillRect(bx, 26, 220, 12);
   ctx.fillStyle = player.hp > 30 ? '#4cd964' : '#ff5c5c'; ctx.fillRect(bx, 26, 220 * player.hp / player.maxHp, 12);
@@ -993,14 +1003,15 @@ function drawDebugModes() {   // F·G·M 상태를 오른쪽 아래 구석에 �
 function drawOverlay(title, sub) {
   ctx.fillStyle = 'rgba(14,11,22,.7)'; ctx.fillRect(0, 0, W, H);
   ctx.textAlign = 'center';
-  ctx.font = `44px ${FONT}`;
+  ctx.font = /[가-힣]/.test(title) ? `60px ${KFONT}` : `44px ${FONT}`;
   ctx.fillStyle = '#0e0b16'; ctx.fillText(title, W / 2 + 4, H / 2 - 16);
   ctx.fillStyle = '#ffd34d'; ctx.fillText(title, W / 2, H / 2 - 20);
   ctx.font = '20px system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif'; ctx.fillStyle = '#e8e8ef';
   ctx.fillText(sub, W / 2, H / 2 + 36);
   if (state === 'title') {   // 등장인물 소개
-    const cast = [['player', 1, W / 2 - 200], ['thug', -1, W / 2 + 130], ['brute', -1, W / 2 + 230]];
+    const cast = [[PLAYER_ART, 1, W / 2 - 200], [ENEMY_TYPES.thug.art, -1, W / 2 + 130], [ENEMY_TYPES.brute.art, -1, W / 2 + 230]];
     for (const [id, dir, x] of cast) {
+      if (!ART.characters[id]) continue;   // data 의 그림 이름 오타면 (알림창이 이미 뜸) 그 인물만 빼고 그린다
       const img = ART.characters[id].frames.idle0;
       ctx.save(); ctx.translate(x, H - 30); ctx.scale(dir, 1);
       ctx.drawImage(img, -ART.CX * S, -ART.FOOT * S, img.width * S, img.height * S);
@@ -1033,7 +1044,7 @@ function draw() {
 
   drawHUD();
   drawDebugModes();
-  if (state === 'title') drawOverlay('BELT BRAWL', '화면을 탭하거나 Enter 키를 눌러 시작');
+  if (state === 'title') drawOverlay(THEME === 'joseon' ? '조선 퇴마전' : 'BELT BRAWL', '화면을 탭하거나 Enter 키를 눌러 시작');
   if (state === 'gameover') drawOverlay('GAME OVER', `점수 ${score}  ·  탭 또는 Enter 키로 재시작`);
   if (state === 'clear') drawOverlay('STAGE CLEAR!', `점수 ${score}  ·  탭 또는 Enter 키로 다시 하기`);
 }
