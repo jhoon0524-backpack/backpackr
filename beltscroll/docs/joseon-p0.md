@@ -77,6 +77,10 @@
 - file:// 로 열면 바닥·시트 그림 때문에 화면 캔버스 픽셀을 읽을 수 없다(브라우저 보안). 지금 게임·측정은 픽셀을 읽지 않아 영향 없음. 나중에 그림 자동 비교는 스크린샷 비교로 해야 한다.
 - assets.html 의 설명 글자 일부("먼 빌딩·가게 거리")는 옛 문구.
 
+## 실행 링크
+- 조선 퇴마전 버전: https://claude.ai/artifact/XVrn1iFuMaEqmiA7AcvTkk (비공개, 오너 계정에서 열림)
+- 원래 버전(6단계): https://claude.ai/artifact/URVnfoCiiRcYdEXHWXjwwB (그대로)
+
 ## 7. 되돌리기
 - 이 작업 전체: 원래 브랜치 `ccr-05037f70-jcsww6` 를 쓰면 된다 (이 브랜치와 별개).
 - 이 브랜치 안에서 그림만 원래대로: index.html `const THEME = 'joseon'` → `'street'`, data/enemies.js 의 `"art": "wongwi"` → `"thug"`, `"art": "dokkaebi"` → `"brute"`.
