@@ -221,6 +221,20 @@ const STOMP = { pose: 'stomp', prep: 6, active: 4, recover: 10, reach: 48, dmg: 
 // 점프 공격: 공중에서 Z. 점프당 1회. 준비 뒤 착지할 때까지 발을 뻗고 있고 처음 맞는 순간 1번 판정 (heavy, 넘어뜨림)
 const JUMP_KICK = { prep: 3, reach: 50, zReach: 75, dmg: 14 };
 
+// ===== 잡아 던지기. 프레임 단위, px (설계: docs/stage-grab.md) =====
+const GRAB = {
+  range: 34,          // 이 거리 안의 서 있는 적 쪽으로 밀면
+  pushFrames: 8,      // 이만큼 계속 밀면 잡는다
+  holdDist: 24,       // 잡은 적은 주인공 앞 이 거리에 붙들림 (미는 동안도 이보다 가까워지지 않음)
+  maxFrames: 100,     // 이만큼 지나면 적이 빠져나감
+  knee: { prep: 4, active: 3, recover: 8 },   // 무릎치기 (Z)
+  kneeDmg: 8, lastKneeDmg: 12, maxKnees: 3,   // 3번째 무릎은 heavy, 넘어뜨리며 놓음
+  throwPrep: 6, throwRecover: 10,             // 던지기 (점프 버튼): 준비 뒤 놓고, 회수 동안 행동 불가
+  throwSpeed: 9, throwFriction: 0.92, throwVz: 7,
+  throwDmg: 20,       // 던져진 적이 착지할 때 (heavy)
+  bodyDmg: 10, bodyReach: 28,   // 날아가는 적에 부딪힌 다른 적 (heavy, 넘어짐, 적마다 1번)
+};
+
 // ===== 타격감 (3단계). 프레임 단위, px =====
 // hitstop: 맞는 순간 공격자·맞은 쪽만 멈추는 프레임 / kick: 카메라가 타격 방향으로 밀리는 px, kickFrames: 복귀까지 프레임
 // kbSpeed: 넉백 첫 프레임 속도, kbFriction: 매 프레임 남는 속도 비율 (총 거리 ≈ kbSpeed / (1 - kbFriction)) / flash: 흰 번쩍임 프레임
@@ -247,6 +261,7 @@ function reset() {
     lastHit: false, buffered: false, lunge: 0, swing: null,
     frozenUntil: 0, vx: 0, kbFriction: 0, flash: 0,
     move: null, jumpKick: null, jumpKickUsed: false, landLag: 0, jumped: false,
+    grab: null, grabPush: 0, grabTarget: null, throwRecover: 0,
   };
   debug.hits = 0; debug.misses = 0;
   enemies = [];
@@ -271,7 +286,7 @@ function spawnWave(i) {
       x: cam + (fromRight ? W + 40 + k * 60 : -60 - k * 40),
       y: GROUND_TOP + 30 + Math.random() * (GROUND_BOTTOM - GROUND_TOP - 60),
       z: 0, vz: 0, dir: fromRight ? -1 : 1,
-      hitstun: 0, down: 0, attack: 0, cooldown: 60 + k * 30, dead: 0, flash: 0, entered: false, frozenUntil: 0, vx: 0, kbFriction: 0, invuln: 0, stomped: false,
+      hitstun: 0, down: 0, attack: 0, cooldown: 60 + k * 30, dead: 0, flash: 0, entered: false, frozenUntil: 0, vx: 0, kbFriction: 0, invuln: 0, stomped: false, grabbed: false, thrown: null,
     });
   });
 }
@@ -342,7 +357,9 @@ function damagePlayer(dmg, dir, knockdown, attacker) {
   if (player.invuln > 0 || player.down > 0) return;
   player.hp = Math.max(0, player.hp - dmg);
   player.attack = 0; player.combo = 0; player.buffered = false; player.lunge = 0;
-  player.jumpKick = null; player.landLag = 0; player.jumped = false;
+  player.jumpKick = null; player.landLag = 0; player.jumped = false; player.throwRecover = 0;
+  if (player.grab) releaseGrab(player);   // 맞으면 잡은 적을 놓친다
+  player.grabPush = 0; player.grabTarget = null;
   burst(player.x, player.y - player.h / 2 - player.z, '#ff6b6b');
   sparks.push({ x: player.x - dir * 10, y: player.y, h: player.z + player.h * 0.65, t: 0 });
   const feel = feelFor('normal');
@@ -403,6 +420,96 @@ function resolveJumpKick(p) {
   if (any) p.jumpKick.hit = true;
 }
 
+// ----- 잡아 던지기 -----
+const canGrab = (p, e) => !e.dead && !e.grabbed && e.entered && e.down === 0 && e.z === 0 && e.invuln === 0 && e.attack === 0 && !frozen(e)
+  && (e.x - p.x) * p.dir > 0 && (e.x - p.x) * p.dir <= GRAB.range && Math.abs(e.y - p.y) < 14;
+
+function startGrab(p, e) {
+  p.grab = { e, t: 0, knees: 0, kneeT: 0, throwT: 0, throwDir: p.dir, queue: null };
+  e.grabbed = true; e.attack = 0; e.hitstun = 0; e.vx = 0;
+  p.grabPush = 0; p.grabTarget = null; p.buffered = false; p.combo = 0; p.lastHit = false;
+}
+function releaseGrab(p) {
+  const e = p.grab.e;
+  e.grabbed = false; e.hitstun = 0;
+  p.grab = null;
+}
+function kneeHit(p) {
+  const g = p.grab, e = g.e;
+  g.knees++;
+  const last = g.knees >= GRAB.maxKnees;
+  const dmg = last ? GRAB.lastKneeDmg : GRAB.kneeDmg;
+  if (last || e.hp - dmg <= 0) {           // 3번째(또는 처치) 무릎: 놓으면서 넘어뜨림 (heavy)
+    releaseGrab(p);
+    damageEnemy(e, dmg, true, p.dir, p);
+  } else {
+    damageEnemy(e, dmg, false, p.dir, p);
+    e.vx = 0; e.hitstun = 0;               // 붙들린 채라 밀리지 않는다
+  }
+}
+function releaseThrow(p) {
+  const g = p.grab, e = g.e, dir = g.throwDir;
+  releaseGrab(p);
+  e.x = p.x + dir * GRAB.holdDist;
+  e.vx = dir * GRAB.throwSpeed; e.kbFriction = GRAB.throwFriction;
+  e.vz = GRAB.throwVz; e.z = 1;
+  e.down = 50; e.attack = 0; e.stomped = false;
+  e.thrown = { dir, hits: [] };
+  p.throwRecover = GRAB.throwRecover;
+}
+function escapeGrab(p) {                     // 시간이 다 되면 빠져나감: 서로 조금 밀려남
+  const e = p.grab.e, dir = p.dir;
+  releaseGrab(p);
+  knockback(e, dir, feelFor('normal'));
+  knockback(p, -dir, feelFor('normal'));
+}
+function updateGrab(p) {
+  const g = p.grab, k = GRAB.knee;
+  const zPress = hit('KeyZ', 'KeyJ'), xPress = hit('KeyX', 'KeyK');
+  g.t++;
+  if (g.throwT > 0) {                        // 던지는 중
+    if (++g.throwT > GRAB.throwPrep) releaseThrow(p);
+    return;
+  }
+  if (g.kneeT > 0) {                         // 무릎 동작 중
+    g.kneeT++;
+    if (g.kneeT === k.prep + 1) { kneeHit(p); if (!p.grab) return; }
+    if (g.kneeT > k.prep && !g.queue) g.queue = zPress ? 'knee' : xPress ? 'throw' : null;   // 타격 뒤 누른 입력은 1칸 대기
+    if (g.kneeT < k.prep + k.active + k.recover) return;
+    g.kneeT = 0;
+  }
+  const act = g.queue || (zPress ? 'knee' : xPress ? 'throw' : null);
+  g.queue = null;
+  if (act === 'knee') { g.kneeT = 1; return; }
+  if (act === 'throw') {                     // 방향키를 누르고 있으면 그쪽으로 (뒤로 던지기)
+    let mx = 0;
+    if (down('ArrowLeft', 'KeyA')) mx -= 1;
+    if (down('ArrowRight', 'KeyD')) mx += 1;
+    g.throwDir = mx || p.dir; p.dir = g.throwDir; g.throwT = 1;
+    return;
+  }
+  if (g.t >= GRAB.maxFrames) escapeGrab(p);
+}
+// 던져진 적: 날아가며 부딪힌 적을 넘어뜨리고, 착지할 때 "쿵"
+function updateThrown(e) {
+  const t = e.thrown;
+  if (e.z > 0) {
+    for (const o of enemies) {
+      if (o === e || o.dead || o.down > 0 || o.invuln > 0 || o.grabbed || t.hits.includes(o)) continue;
+      if (Math.abs(o.x - e.x) < GRAB.bodyReach && overlapDepth(o, e)) { t.hits.push(o); damageEnemy(o, GRAB.bodyDmg, true, t.dir, null); }
+    }
+    return;
+  }
+  e.thrown = null;
+  const lethal = e.hp - GRAB.throwDmg <= 0, feel = feelFor('heavy');
+  e.hp -= GRAB.throwDmg;
+  e.flash = feel.flash * (lethal ? KILL_FLASH_MULT : 1);
+  burst(e.x, e.y - 10, '#ffd36b', 12);
+  sparks.push({ x: e.x, y: e.y, h: 8, t: 0 });
+  impact(feel, e, null, t.dir);
+  if (lethal) score += e.score;
+}
+
 // ===== 업데이트 =====
 function update() {
   time++;
@@ -448,6 +555,11 @@ function update() {
     } else if (p.landLag > 0) {
       if (hit('KeyZ', 'KeyJ')) p.buffered = true;   // 착지 경직 중 누른 공격은 기억했다가 경직이 끝나면 바로 낸다 (줄이기 전에 확인)
       p.landLag--;
+    } else if (p.grab) {
+      updateGrab(p);
+    } else if (p.throwRecover > 0) {
+      if (hit('KeyZ', 'KeyJ')) p.buffered = true;   // 던진 뒤 회수 중 누른 공격도 기억
+      p.throwRecover--;
     } else {
       if (p.attack > 0) {
         p.attack--;
@@ -470,11 +582,21 @@ function update() {
         p.x += (mx / len) * p.speed;
         p.y += (my / len) * p.speed * 0.6;
 
-        if ((p.buffered || hit('KeyZ', 'KeyJ')) && p.z === 0) startAttack(p);      // 땅: 공격 (같은 프레임 점프는 무시)
+        // 잡기: 잡을 수 있는 적 쪽으로 계속 밀면 잡는다. 미는 동안 그 적 몸에 막힌다
+        const target = (p.z === 0 && mx !== 0 && mx === p.dir) ? enemies.find(e => canGrab(p, e)) : null;
+        if (target) {
+          if ((target.x - p.x) * p.dir < GRAB.holdDist) p.x = target.x - p.dir * GRAB.holdDist;
+          p.grabPush = (p.grabTarget === target ? p.grabPush : 0) + 1;
+          p.grabTarget = target;
+        } else { p.grabPush = 0; p.grabTarget = null; }
+
+        if (target && p.grabPush >= GRAB.pushFrames) startGrab(p, target);
+        else if ((p.buffered || hit('KeyZ', 'KeyJ')) && p.z === 0) startAttack(p);      // 땅: 공격 (같은 프레임 점프는 무시)
         else if (hit('KeyX', 'KeyK') && p.z === 0) { p.vz = 9; p.z = 1; p.jumped = true; }   // 땅: 점프
         else if (hit('KeyZ', 'KeyJ') && p.z > 0 && !p.jumpKickUsed) {         // 공중: 점프 공격 (점프당 1회)
           p.jumpKick = { t: 0, hit: false }; p.jumpKickUsed = true;
         }
+        if (p.attack > 0) { p.grabPush = 0; p.grabTarget = null; }
         if (p.jumpKick) {
           p.jumpKick.t++;
           if (p.jumpKick.t > JUMP_KICK.prep && !p.jumpKick.hit) resolveJumpKick(p);
@@ -497,6 +619,13 @@ function update() {
   const leftWall = cam + 20;
   const rightWall = waveState === 'fight' ? cam + W - 20 : Math.min(STAGE_LENGTH - 20, cam + W + 200);
   p.x = clamp(p.x, leftWall, rightWall);
+  // 잡힌 적은 주인공 앞에 붙들림. 화면 밖이면 주인공을 밀어 맞춘다
+  if (p.grab) {
+    const e = p.grab.e;
+    e.x = p.x + p.dir * GRAB.holdDist; e.y = p.y; e.z = 0; e.vz = 0; e.dir = -p.dir;
+    const cx = clamp(e.x, cam + 20, cam + W - 20);
+    if (cx !== e.x) { e.x = cx; p.x = e.x - p.dir * GRAB.holdDist; }
+  }
 
   // --- 카메라 / 웨이브 ---
   if (waveState !== 'fight') {
@@ -519,10 +648,12 @@ function update() {
     if (e.dead) continue;
     if (e.flash > 0) e.flash--;
     if (frozen(e)) continue;
+    if (e.grabbed) continue;   // 잡힌 적은 아무것도 못 한다 (위치는 주인공 쪽에서 고정)
     if (e.invuln > 0) e.invuln--;
     slide(e);
     keepOnScreen(e);
     if (e.z > 0 || e.vz !== 0) { e.z += e.vz; e.vz -= 0.45; if (e.z <= 0) { e.z = 0; e.vz = 0; } }
+    if (e.thrown) updateThrown(e);
 
     if (e.down > 0) {
       e.down--;
@@ -581,7 +712,7 @@ function update() {
   // 적끼리 겹침 완화
   for (let i = 0; i < enemies.length; i++) for (let j = i + 1; j < enemies.length; j++) {
     const a = enemies[i], b = enemies[j];
-    if (a.dead || b.dead || frozen(a) || frozen(b)) continue;   // 히트스톱 중인 적은 밀리지 않는다
+    if (a.dead || b.dead || frozen(a) || frozen(b) || a.grabbed || b.grabbed) continue;   // 히트스톱 중·잡힌 적은 밀리지 않는다
     if (Math.abs(a.x - b.x) < 30 && Math.abs(a.y - b.y) < 14) {
       const s = a.x < b.x ? -1 : 1; a.x += s * 0.8; b.x -= s * 0.8;
     }
@@ -617,9 +748,17 @@ function drawBackground() {
 function frameName(f, isPlayer) {
   // 히트스톱 동안은 맞은 순간의 포즈로 멈춘다. 바닥에 누워 있다가 추가타를 맞은 적은 누운 그림 그대로
   if (frozen(f) && (f.hitstun > 0 || (f.down > 0 && f.z > 0))) return 'hurt';
+  if (!isPlayer && f.grabbed) return 'hurt';
   if (f.down > 0) return f.z > 2 ? 'hurt' : 'down';
   if (f.hitstun > 0) return 'hurt';
   if (isPlayer) {
+    if (f.grab) {   // 잡기: 붙든 팔(punch) / 무릎(stomp) / 던지기 준비(windup)
+      const g = f.grab, k = GRAB.knee;
+      if (g.throwT > 0) return 'windup';
+      if (g.kneeT > k.prep && g.kneeT <= k.prep + k.active + POSE_HOLD) return 'stomp';
+      return 'punch';
+    }
+    if (f.throwRecover > 0) return 'punch2';   // 던진 직후 밀어낸 팔
     if (f.jumpKick) return f.jumpKick.t <= JUMP_KICK.prep ? 'jump' : 'kick';
     if (f.attack > 0) {
       const a = f.move, t = attackTotal(a) - f.attack + 1;
@@ -750,7 +889,8 @@ function draw() {
   drawBackground();
 
   // 깊이(y) 순으로 정렬해서 뒤에 있는 캐릭터부터 그린다
-  const all = [player, ...enemies.filter(e => !e.dead)].sort((a, b) => a.y - b.y);
+  const depth = f => f.y + (f === player && f.grab ? 0.5 : 0);   // 잡고 있을 땐 주인공을 앞에 (무릎이 보이게)
+  const all = [player, ...enemies.filter(e => !e.dead)].sort((a, b) => depth(a) - depth(b));
   for (const f of all) drawFighter(f, f === player);
 
   for (const q of particles) {
