@@ -15,7 +15,7 @@
 - 위 답 반영 → plan.md "6단계 이후": CLAUDE.md 9번 기획 모드로 다음 계획.
 
 ## 측정 스크립트 저장소 보관 (오너 요청, 2026-10-27)
-- 작업 환경 임시 폴더에만 있던 측정 28개를 `tests/` 로. 고정 경로를 없애 어느 컴퓨터에서나 돌아감, `node run-all.js` 로 전부 실행, 다른 버전은 `GAME_URL` 로. 저장소에서 돌린 결과가 옮기기 전과 같음(실제 시간 기반 touch 의 걸은 거리만 원래처럼 다름).
+- 작업 환경 임시 폴더의 스크립트 45개(director 것 제외) 중 측정 31개를 `tests/` 로. 뺀 14개는 진단·사진용(diag·probe·ptr·ptr2·throwdbg·enterfs·size·zoom·sheet·grabshot·heavyshot·hshot·s4shot·stompvar). director 지적으로 처음에 빠졌던 회귀 측정 fix3·fix4·action 추가. 고정 경로를 없애 어느 컴퓨터에서나 돌아감, `node run-all.js` 로 전부 실행, 다른 버전은 `GAME_URL` 로. 저장소에서 돌린 결과가 옮기기 전과 같음(실제 시간 기반 touch 의 걸은 거리만 원래처럼 다름).
 - 게임 파일은 안 바꿈.
 
 ## 6단계 결과 (2026-10-27)
