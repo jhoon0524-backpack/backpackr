@@ -1,0 +1,17 @@
+{
+  "name": "beltscroll",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "snap": "node tools/snap.js",
+    "snap:strip": "node tools/snap.js --strip"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "pngjs": "7.0.0",
+    "vite": "7.3.7"
+  }
+}
