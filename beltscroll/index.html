@@ -310,6 +310,8 @@ function resolveAttack(p, a) {
 // ===== 업데이트 =====
 function update() {
   time++;
+  // 카메라 킥은 상태(게임오버 등)와 상관없이 매 프레임 복귀한다. 맞은 프레임에는 최대치로 그려진다
+  if (camKick && ++camKick.t >= camKick.dur) camKick = null;
   if (hit('KeyH')) debug.hitbox = !debug.hitbox;
   if (hit('KeyF')) debug.feel = { auto: 'normal', normal: 'heavy', heavy: 'auto' }[debug.feel];
   if (hit('KeyG')) debug.slow = !debug.slow;
@@ -438,7 +440,7 @@ function update() {
   // 적끼리 겹침 완화
   for (let i = 0; i < enemies.length; i++) for (let j = i + 1; j < enemies.length; j++) {
     const a = enemies[i], b = enemies[j];
-    if (a.dead || b.dead) continue;
+    if (a.dead || b.dead || frozen(a) || frozen(b)) continue;   // 히트스톱 중인 적은 밀리지 않는다
     if (Math.abs(a.x - b.x) < 30 && Math.abs(a.y - b.y) < 14) {
       const s = a.x < b.x ? -1 : 1; a.x += s * 0.8; b.x -= s * 0.8;
     }
@@ -455,7 +457,6 @@ function update() {
   sparks = sparks.filter(s => s.t < 9);
   for (const q of particles) { q.x += q.vx; q.y += q.vy; q.vy += 0.3; q.life--; }
   particles = particles.filter(q => q.life > 0);
-  if (camKick && ++camKick.t >= camKick.dur) camKick = null;
 }
 
 // ===== 그리기 =====
