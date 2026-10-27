@@ -445,7 +445,7 @@ function kneeHit(p) {
   if (last || e.hp - dmg <= 0) {           // 3번째(또는 처치) 무릎: 놓으면서 넘어뜨림 (heavy). 무릎 포즈와 회수는 끝까지
     releaseGrab(p);
     const k = GRAB.knee;
-    setAfterGrab(p, k.active + k.recover - 1, 'stomp', k.active + POSE_HOLD - 1);
+    setAfterGrab(p, k.active + k.recover - 1, 'stomp', k.active + POSE_HOLD);   // 다른 무릎과 같은 포즈 길이
     damageEnemy(e, dmg, true, p.dir, p);
   } else {
     damageEnemy(e, dmg, false, p.dir, p);
@@ -634,7 +634,7 @@ function update() {
     const swing = g.throwT > 0 && g.throwDir !== p.dir ? 1 - 2 * Math.min(1, g.throwT / GRAB.throwPrep) : 1;
     e.x = p.x + p.dir * GRAB.holdDist * swing; e.y = p.y; e.z = 0; e.vz = 0; e.dir = -p.dir;
     const cx = clamp(e.x, cam + 20, cam + W - 20);
-    if (cx !== e.x) { e.x = cx; p.x = e.x - p.dir * GRAB.holdDist; }
+    if (cx !== e.x) { e.x = cx; p.x = e.x - p.dir * GRAB.holdDist * swing; }   // 위 공식의 역 (뒤로 던지기 중이면 swing 반영)
   }
 
   // --- 카메라 / 웨이브 ---
