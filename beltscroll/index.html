@@ -101,7 +101,7 @@ addEventListener('keydown', e => {
   keys[e.code] = true;
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
-addEventListener('pointerdown', () => { if (debug.sound) ensureAudio(); }, true);   // 첫 탭에서 오디오 장치
+for (const ev of ['pointerdown', 'pointerup', 'click']) addEventListener(ev, () => { if (debug.sound) ensureAudio(); }, true);   // 첫 탭에서 오디오 장치 (휴대폰은 손가락을 뗄 때 소리를 허락한다)
 let pressed = {};   // 이번 프레임에 새로 눌린 키
 
 const down = (...codes) => codes.some(c => keys[c]);
