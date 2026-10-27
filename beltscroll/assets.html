@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belt Brawl Assets</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 24px 16px; background: #15131d; color: #e8e8ef; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p { margin: 0 0 20px; color: #9aa0ad; font-size: 13px; }
+  h2 { font-size: 15px; margin: 24px 0 8px; color: #cfd3dc; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  figure { margin: 0; background: #221f2e; border-radius: 6px; padding: 6px; text-align: center; }
+  figcaption { font-size: 11px; color: #9aa0ad; margin-top: 2px; }
+  canvas { display: block; image-rendering: pixelated; }
+  .wide { overflow-x: auto; max-width: 100%; }
+</style>
+</head>
+<body>
+<h1>Belt Brawl 디자인 에셋</h1>
+<p>모든 그림은 art.js 가 코드로 그립니다. 색은 art.js 의 CHARACTERS 에서 바꿀 수 있습니다.</p>
+<div id="out"></div>
+<script src="art.js"></script>
+<script>
+const out = document.getElementById('out');
+const SCALE = 3;
+function scaled(src, s = SCALE) {
+  const c = document.createElement('canvas');
+  c.width = src.width * s; c.height = src.height * s;
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+  g.drawImage(src, 0, 0, c.width, c.height);
+  return c;
+}
+function section(title) { const h = document.createElement('h2'); h.textContent = title; out.appendChild(h); const row = document.createElement('div'); row.className = 'row'; out.appendChild(row); return row; }
+function tile(row, img, label) { const f = document.createElement('figure'); f.appendChild(img); const cap = document.createElement('figcaption'); cap.textContent = label; f.appendChild(cap); row.appendChild(f); }
+
+for (const [id, set] of Object.entries(ART.characters)) {
+  const row = section(`${ART.CHARACTERS[id].name} (${id})`);
+  tile(row, scaled(set.face), 'face');
+  for (const [name, img] of Object.entries(set.frames)) tile(row, scaled(img), name);
+}
+const fx = section('타격 이펙트');
+ART.sparks.forEach((img, i) => tile(fx, scaled(img, 6), `spark${i}`));
+
+const bg = ART.buildStage({ W: 960, H: 540, groundTop: 310, stageLength: 3600 });
+const sec = section('배경 (일부)');
+sec.className = 'wide';
+const comp = document.createElement('canvas');
+comp.width = 330; comp.height = 180;
+const g = comp.getContext('2d'); g.imageSmoothingEnabled = false;
+g.drawImage(bg.sky, 0, 0);
+for (const l of bg.layers) g.drawImage(l.img, 0, 0);
+g.drawImage(bg.floor, 0, Math.ceil(310 / 3));
+tile(sec, scaled(comp, 2), '하늘 + 먼 빌딩 + 가까운 빌딩 + 가게 거리 + 바닥');
+</script>
+</body>
+</html>

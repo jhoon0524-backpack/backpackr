@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Belt Brawl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #111318; color: #e8e8ef; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
@@ -22,7 +25,7 @@
   #stick .base { width: 110px; height: 110px; margin: -55px 0 0 -55px; border: 2px solid rgba(255,255,255,.45); background: rgba(255,255,255,.08); }
   #stick .knob { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: rgba(255,255,255,.6); }
   #stick.active .base, #stick.active .knob { opacity: 1; }
-  .btn { position: absolute; width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(255,255,255,.5); background: rgba(255,255,255,.12); color: #fff; font: bold 15px system-ui, sans-serif; display: flex; align-items: center; justify-content: center; }
+  .btn { position: absolute; width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(255,255,255,.5); background: rgba(255,255,255,.12); color: #fff; font: bold 15px system-ui, sans-serif; align-items: center; justify-content: center; }
   .btn:active, .btn.down { background: rgba(255,255,255,.4); }
   #btnAttack { right: 6%; bottom: 10%; }
   #btnJump { right: 18%; bottom: 32%; }
@@ -39,6 +42,7 @@
 <div class="help">
   <b>이동</b> 방향키 / WASD &nbsp;·&nbsp; <b>공격</b> Z 또는 J &nbsp;·&nbsp; <b>점프</b> X 또는 K &nbsp;·&nbsp; <b>시작/재시작</b> Enter
 </div>
+<script src="art.js"></script>
 <script>
 'use strict';
 
@@ -49,6 +53,13 @@ const STAGE_LENGTH = 3600;                     // 스테이지 전체 길이 (x)
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// ===== 그림 (art.js 에서 만든다) =====
+const S = ART.S;
+const BG = ART.buildStage({ W, H, groundTop: GROUND_TOP, stageLength: STAGE_LENGTH });
+const FONT = '"Press Start 2P", monospace';
+document.fonts && document.fonts.load('16px "Press Start 2P"').catch(() => {});
 
 const keys = {};
 addEventListener('keydown', e => {
@@ -130,12 +141,12 @@ const WAVES = [
 ];
 
 const ENEMY_TYPES = {
-  thug:  { hp: 30, speed: 1.4, w: 34, h: 70, dmg: 8,  color: '#d9534f', score: 100, windup: 28 },
-  brute: { hp: 70, speed: 1.0, w: 46, h: 84, dmg: 15, color: '#8e5bd6', score: 300, windup: 40 },
+  thug:  { hp: 30, speed: 1.4, w: 34, h: 70, dmg: 8,  score: 100, windup: 28 },
+  brute: { hp: 70, speed: 1.0, w: 46, h: 84, dmg: 15, score: 300, windup: 40 },
 };
 
 // ===== 상태 =====
-let state, player, enemies, particles, cam, waveIndex, waveState, score, shake, time;
+let state, player, enemies, particles, sparks, cam, waveIndex, waveState, score, shake, time;
 
 function reset() {
   state = 'title';
@@ -146,6 +157,7 @@ function reset() {
   };
   enemies = [];
   particles = [];
+  sparks = [];
   cam = 0;
   waveIndex = 0;
   waveState = 'walk';   // walk → fight → clear
@@ -185,6 +197,7 @@ function damageEnemy(e, dmg, knockdown, dir) {
   e.flash = 6;
   e.attack = 0;
   burst(e.x, e.y - e.h / 2 - e.z, '#ffd36b');
+  sparks.push({ x: e.x - dir * 10, y: e.y, h: e.z + e.h * 0.65, t: 0 });
   shake = Math.max(shake, knockdown ? 8 : 3);
   if (e.hp <= 0 || knockdown) {
     e.down = 50;
@@ -204,6 +217,7 @@ function damagePlayer(dmg, dir, knockdown) {
   player.hp = Math.max(0, player.hp - dmg);
   player.attack = 0; player.combo = 0;
   burst(player.x, player.y - player.h / 2 - player.z, '#ff6b6b');
+  sparks.push({ x: player.x - dir * 10, y: player.y, h: player.z + player.h * 0.65, t: 0 });
   shake = Math.max(shake, 6);
   if (knockdown || player.hp <= 0) {
     player.down = 50; player.vz = 6; player.z = Math.max(player.z, 1); player.x += dir * 30;
@@ -221,6 +235,9 @@ function update() {
     if (hit('Enter')) { reset(); state = 'play'; }
     return;
   }
+
+  // 걷는 애니메이션용: 이번 프레임 시작 위치 기억
+  for (const f of [player, ...enemies]) { f.ox = f.x; f.oy = f.y; }
 
   // --- 플레이어 ---
   const p = player;
@@ -341,7 +358,15 @@ function update() {
     }
   }
 
+  for (const f of [player, ...enemies]) {
+    const d = Math.hypot(f.x - f.ox, f.y - f.oy);
+    f.moving = d > 0.3;
+    f.walk = (f.walk || 0) + d;
+  }
+
   // --- 파티클 ---
+  for (const s of sparks) s.t++;
+  sparks = sparks.filter(s => s.t < 9);
   for (const q of particles) { q.x += q.vx; q.y += q.vy; q.vy += 0.3; q.life--; }
   particles = particles.filter(q => q.life > 0);
   if (shake > 0) shake--;
@@ -349,102 +374,102 @@ function update() {
 
 // ===== 그리기 =====
 function drawBackground() {
-  // 하늘
-  const sky = ctx.createLinearGradient(0, 0, 0, GROUND_TOP);
-  sky.addColorStop(0, '#1b1f3a'); sky.addColorStop(1, '#4a2f5a');
-  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, GROUND_TOP);
+  ctx.drawImage(BG.sky, 0, 0, BG.sky.width * S, BG.sky.height * S);
+  const cols = Math.ceil(W / S) + 1;
+  for (const layer of BG.layers) {   // 멀리 있는 층일수록 천천히 움직인다
+    const off = cam * layer.f, u = Math.floor(off / S);
+    ctx.drawImage(layer.img, u, 0, cols, layer.img.height, Math.round(u * S - off), 0, cols * S, layer.img.height * S);
+  }
+  const u = Math.floor(cam / S);
+  ctx.drawImage(BG.floor, u, 0, cols, BG.floor.height, Math.round(u * S - cam), GROUND_TOP, cols * S, BG.floor.height * S);
+}
 
-  // 먼 건물 (느린 패럴랙스)
-  ctx.fillStyle = '#242846';
-  for (let i = -1; i < 14; i++) {
-    const bx = ((i * 180 - cam * 0.3) % (W + 360) + W + 360) % (W + 360) - 180;
-    const bh = 90 + ((i * 53) % 90);
-    ctx.fillRect(bx, GROUND_TOP - bh, 120, bh);
-  }
-  // 가까운 건물 + 창문
-  for (let i = -1; i < 10; i++) {
-    const bx = ((i * 260 - cam * 0.6) % (W + 520) + W + 520) % (W + 520) - 260;
-    const bh = 140 + ((i * 97) % 110);
-    ctx.fillStyle = '#15172b'; ctx.fillRect(bx, GROUND_TOP - bh, 200, bh);
-    ctx.fillStyle = '#f0c75e';
-    for (let r = 0; r < bh / 28 - 1; r++) for (let c = 0; c < 5; c++) {
-      if (((i * 7 + r * 3 + c) % 4) === 0) ctx.fillRect(bx + 16 + c * 36, GROUND_TOP - bh + 14 + r * 28, 14, 16);
+// 지금 상태에 맞는 그림 이름
+function frameName(f, isPlayer) {
+  if (f.down > 0) return f.z > 2 ? 'hurt' : 'down';
+  if (f.hitstun > 0) return 'hurt';
+  if (isPlayer) {
+    if (f.attack > 0) {
+      if (f.attack > 13 || f.attack <= 3) return 'idle0';   // 준비 / 회수
+      return f.combo === 3 ? 'kick' : f.combo === 2 ? 'punch2' : 'punch';
     }
+    if (f.z > 0) return 'jump';
+  } else if (f.attack > 0) {
+    return f.attack > 8 ? 'windup' : 'punch';
   }
-  // 바닥
-  ctx.fillStyle = '#3a3a44'; ctx.fillRect(0, GROUND_TOP, W, H - GROUND_TOP);
-  ctx.fillStyle = '#2d2d36';
-  for (let x = -((cam) % 80); x < W; x += 80) ctx.fillRect(x, GROUND_TOP, 40, H - GROUND_TOP);
-  ctx.fillStyle = '#50505c'; ctx.fillRect(0, GROUND_TOP, W, 6);
+  if (f.moving) return 'walk' + (Math.floor(f.walk / 12) % 4);
+  return 'idle' + (Math.floor(time / 30) % 2);
 }
 
 function drawFighter(f, isPlayer) {
-  const sx = f.x - cam;
-  const baseY = f.y;
+  const sx = Math.round(f.x - cam);
+  const baseY = Math.round(f.y);
   // 그림자
   ctx.fillStyle = 'rgba(0,0,0,.45)';
   ctx.beginPath(); ctx.ellipse(sx, baseY, f.w * 0.7, 8, 0, 0, Math.PI * 2); ctx.fill();
 
-  const top = baseY - f.h - f.z;
-  let body = isPlayer ? '#4fa3ff' : f.color;
-  if (f.flash > 0) body = '#ffffff';
-  if (isPlayer && f.invuln > 0 && Math.floor(time / 3) % 2) body = '#a9d3ff';
-
+  const set = ART.characters[isPlayer ? 'player' : f.type];
+  const img = (f.flash > 0 ? set.flash : set.frames)[frameName(f, isPlayer)];
   ctx.save();
-  if (f.down > 0) {   // 쓰러진 모습: 눕힌다
-    ctx.translate(sx, baseY - f.z);
-    ctx.rotate(-f.dir * Math.PI / 2);
-    ctx.translate(-sx, -(baseY - f.z));
-  }
-  // 몸통
-  ctx.fillStyle = body;
-  ctx.fillRect(sx - f.w / 2, top + 18, f.w, f.h - 18);
-  // 머리
-  ctx.fillStyle = isPlayer ? '#ffd9b3' : '#e8c39e';
-  ctx.fillRect(sx - 12, top, 24, 20);
-  // 눈 (방향 표시)
-  ctx.fillStyle = '#222';
-  ctx.fillRect(sx + f.dir * 5 - 2, top + 7, 4, 4);
-  // 팔: 공격 중이면 앞으로 뻗음
-  ctx.fillStyle = isPlayer ? '#ffd9b3' : '#e8c39e';
-  if (f.attack > 0 && f.attack < (isPlayer ? 14 : 10)) {
-    const reach = isPlayer && f.combo === 3 ? 44 : 34;
-    ctx.fillRect(f.dir > 0 ? sx + f.w / 2 : sx - f.w / 2 - reach, top + 30, reach, 10);
-  } else if (!isPlayer && f.attack > 0) {
-    // 적 준비 동작: 팔을 뒤로 당김 (경고)
-    ctx.fillRect(f.dir > 0 ? sx - f.w / 2 - 16 : sx + f.w / 2, top + 26, 16, 10);
-  }
+  if (isPlayer && f.invuln > 0 && Math.floor(time / 3) % 2) ctx.globalAlpha = 0.45;
+  if (!isPlayer && f.hp <= 0 && f.down < 24 && Math.floor(time / 3) % 2) ctx.globalAlpha = 0.3;   // 사라지기 전 깜빡임
+  ctx.translate(sx, baseY - Math.round(f.z));
+  if (f.dir < 0) ctx.scale(-1, 1);
+  ctx.drawImage(img, -ART.CX * S, -ART.FOOT * S, img.width * S, img.height * S);
   ctx.restore();
 
   // 적 체력바
+  const top = baseY - f.h - f.z;
   if (!isPlayer && f.hp < f.maxHp && f.hp > 0) {
-    ctx.fillStyle = '#000'; ctx.fillRect(sx - 20, top - 12, 40, 5);
-    ctx.fillStyle = '#ff5c5c'; ctx.fillRect(sx - 20, top - 12, 40 * f.hp / f.maxHp, 5);
+    ctx.fillStyle = '#0e0b16'; ctx.fillRect(sx - 21, top - 16, 42, 7);
+    ctx.fillStyle = '#ff5c5c'; ctx.fillRect(sx - 20, top - 15, 40 * f.hp / f.maxHp, 5);
   }
 }
 
 function drawHUD() {
-  ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, W, 48);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 16px system-ui, sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText('PLAYER', 16, 20);
-  ctx.fillStyle = '#333'; ctx.fillRect(16, 26, 220, 12);
-  ctx.fillStyle = player.hp > 30 ? '#4cd964' : '#ff5c5c'; ctx.fillRect(16, 26, 220 * player.hp / player.maxHp, 12);
-  ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-  ctx.fillText(`WAVE ${Math.min(waveIndex + 1, WAVES.length)} / ${WAVES.length}`, W / 2, 30);
+  ctx.fillStyle = 'rgba(14,11,22,.8)'; ctx.fillRect(0, 0, W, 48);
+  // 얼굴 + 체력
+  const face = ART.characters.player.face;
+  ctx.fillStyle = '#2a2438'; ctx.fillRect(10, 4, face.width * S + 4, 40);
+  ctx.drawImage(face, 12, 6, face.width * S, face.height * S);
+  const bx = 12 + face.width * S + 12;
+  ctx.font = `10px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';
+  ctx.fillText('PLAYER', bx, 18);
+  ctx.fillStyle = '#0e0b16'; ctx.fillRect(bx - 2, 24, 224, 16);
+  ctx.fillStyle = '#3a3346'; ctx.fillRect(bx, 26, 220, 12);
+  ctx.fillStyle = player.hp > 30 ? '#4cd964' : '#ff5c5c'; ctx.fillRect(bx, 26, 220 * player.hp / player.maxHp, 12);
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(bx, 26, 220 * player.hp / player.maxHp, 3);
+
+  ctx.font = `12px ${FONT}`; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+  ctx.fillText(`WAVE ${Math.min(waveIndex + 1, WAVES.length)}/${WAVES.length}`, W / 2, 30);
   ctx.textAlign = 'right';
   ctx.fillText(`SCORE ${String(score).padStart(6, '0')}`, W - 16, 30);
 
   if (state === 'play' && waveState === 'walk' && Math.floor(time / 20) % 2) {
-    ctx.fillStyle = '#ffd36b'; ctx.font = 'bold 36px system-ui, sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText('GO →', W - 30, H / 2);
+    ctx.font = `28px ${FONT}`; ctx.textAlign = 'right';
+    ctx.fillStyle = '#0e0b16'; ctx.fillText('GO', W - 74, H / 2 + 3);
+    ctx.fillStyle = '#ffd34d'; ctx.fillText('GO', W - 77, H / 2);
+    ctx.beginPath(); ctx.moveTo(W - 64, H / 2 - 28); ctx.lineTo(W - 30, H / 2 - 14); ctx.lineTo(W - 64, H / 2); ctx.closePath(); ctx.fill();
   }
 }
 
 function drawOverlay(title, sub) {
-  ctx.fillStyle = 'rgba(0,0,0,.65)'; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-  ctx.font = 'bold 56px system-ui, sans-serif'; ctx.fillText(title, W / 2, H / 2 - 20);
-  ctx.font = '20px system-ui, sans-serif'; ctx.fillStyle = '#cfd3dc'; ctx.fillText(sub, W / 2, H / 2 + 30);
+  ctx.fillStyle = 'rgba(14,11,22,.7)'; ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+  ctx.font = `44px ${FONT}`;
+  ctx.fillStyle = '#0e0b16'; ctx.fillText(title, W / 2 + 4, H / 2 - 16);
+  ctx.fillStyle = '#ffd34d'; ctx.fillText(title, W / 2, H / 2 - 20);
+  ctx.font = '20px system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif'; ctx.fillStyle = '#e8e8ef';
+  ctx.fillText(sub, W / 2, H / 2 + 36);
+  if (state === 'title') {   // 등장인물 소개
+    const cast = [['player', 1, W / 2 - 200], ['thug', -1, W / 2 + 130], ['brute', -1, W / 2 + 230]];
+    for (const [id, dir, x] of cast) {
+      const img = ART.characters[id].frames.idle0;
+      ctx.save(); ctx.translate(x, H - 30); ctx.scale(dir, 1);
+      ctx.drawImage(img, -ART.CX * S, -ART.FOOT * S, img.width * S, img.height * S);
+      ctx.restore();
+    }
+  }
 }
 
 function draw() {
@@ -461,6 +486,10 @@ function draw() {
     ctx.fillStyle = q.color; ctx.fillRect(q.x - cam - 2, q.y - 2, 4, 4);
   }
   ctx.globalAlpha = 1;
+  for (const sp of sparks) {
+    const img = ART.sparks[Math.min(2, Math.floor(sp.t / 3))];
+    ctx.drawImage(img, Math.round(sp.x - cam - img.width * S / 2), Math.round(sp.y - sp.h - img.height * S / 2), img.width * S, img.height * S);
+  }
   ctx.restore();
 
   drawHUD();
