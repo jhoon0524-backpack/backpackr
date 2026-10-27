@@ -3,7 +3,7 @@
 작업 순서와 단계별 지시는 `docs/plan.md`(이번 지시는 `docs/instructions-3.md`), 규칙은 `CLAUDE.md`, 실수 기록은 `docs/mistakes.md`.
 
 ## 현재 단계
-(브랜치 `joseon-sword-reach`, PR #30 위에 따로) 벽사검 사거리 확장 구현·측정 완료, director 검수 중. 상세 `docs/sword-reach.md`.
+(브랜치 `joseon-sword-reach`, PR #30 위에 따로) 벽사검 사거리 확장 구현·측정 완료, director 조건부 통과(즉시 수정 반영). 오너 판단 대기 3개: 적 몸 폭 기준, 3타 그림, 적 돌진 체감. 상세 `docs/sword-reach.md` 7절, 전후 비교 `docs/sword-reach-compare.png`.
 PR #30(`joseon-p0-assets`, 조선 P0 시각 전환)과 원래 브랜치 `ccr-05037f70-jcsww6`·원래 게임 링크는 그대로.
 
 ## 막힌 것 (오너 답 대기)

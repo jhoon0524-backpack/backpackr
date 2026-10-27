@@ -46,7 +46,7 @@ const BEFORE = process.env.BEFORE_URL;   // 비교할 예전 버전 index.html �
       out['자동 플레이'] = { 결과: state, 프레임: f, 남은_체력: player.hp, 맞은_횟수: hits };
       return out;
     });
-    console.log('==', label); for (const [k, v] of Object.entries(r)) console.log('  ', k.padEnd(10), JSON.stringify(v)); if (errs.length) console.log(errs);
+    console.log(`[${label}]`); for (const [k, v] of Object.entries(r)) console.log('  ', k.padEnd(10), JSON.stringify(v)); if (errs.length) console.log(errs);
     await p.close();
   }
   await b.close();
