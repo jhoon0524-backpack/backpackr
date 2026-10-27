@@ -25,6 +25,8 @@
   #stage:-webkit-full-screen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
   #stage:-webkit-full-screen #frame { width: min(100vw, 100vh * 16 / 9); }
   #stage:-webkit-full-screen canvas { border-radius: 0; box-shadow: none; }
+  #btnVibe { position: absolute; top: calc(9% + 8px); right: 104px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 18px; line-height: 1; padding: 0; cursor: pointer; opacity: .55; }
+  #btnVibe.on { opacity: 1; }
   #btnSound { position: absolute; top: calc(9% + 8px); right: 56px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 18px; line-height: 1; padding: 0; cursor: pointer; }
   #btnFull { position: absolute; top: calc(9% + 8px); right: 8px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 20px; line-height: 1; padding: 0; cursor: pointer; }
   /* 휴대폰(폭 600px 이하 터치 전용 기기)을 세로로 들면 가로로 돌리라는 안내 (게임은 잠시 멈춤).
@@ -60,6 +62,7 @@
   <div id="stick" class="touch"><div class="base"></div><div class="knob"></div></div>
   <div id="btnJump" class="btn touch">점프</div>
   <div id="btnAttack" class="btn touch">공격</div>
+  <button id="btnVibe" type="button" aria-label="진동 켜기" title="진동 켜기/끄기">📳</button>
   <button id="btnSound" type="button" aria-label="타격음 켜기" title="타격음 켜기/끄기 (M)">🔇</button>
   <button id="btnFull" type="button" aria-label="전체화면" title="전체화면">⛶</button>
  </div>
@@ -159,7 +162,10 @@ const btnFull = document.getElementById('btnFull');
 const btnSound = document.getElementById('btnSound');
 if (!(window.AudioContext || window.webkitAudioContext)) btnSound.style.display = 'none';   // 소리를 낼 수 없는 브라우저
 btnSound.addEventListener('click', () => { btnSound.blur(); toggleSound(); });   // 포커스가 남으면 Enter 가 버튼을 누른다
-if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) { btnFull.style.display = 'none'; btnSound.style.right = '8px'; }   // 전체화면이 없으면 소리 버튼을 끝으로
+const btnVibe = document.getElementById('btnVibe');
+if (typeof navigator.vibrate !== 'function') btnVibe.style.display = 'none';   // 진동을 못 쓰는 브라우저 (아이폰 사파리 등)
+btnVibe.addEventListener('click', () => { btnVibe.blur(); toggleVibe(); });
+if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) { btnFull.style.display = 'none'; btnSound.style.right = '8px'; btnVibe.style.right = '56px'; }   // 전체화면이 없으면 한 칸씩 끝으로
 btnFull.addEventListener('click', () => {
   btnFull.blur();   // 버튼에 포커스가 남으면 Enter(시작 키)가 버튼을 다시 눌러버린다
   if (document.fullscreenElement || document.webkitFullscreenElement) {
@@ -253,7 +259,7 @@ const KILL_FLASH_MULT = 2;   // 적을 죽이는 타격은 흰 번쩍임 2배
 
 // ===== 디버그 =====
 // H: 판정 범위 표시 / F: 타격감 강제 (auto → normal → heavy) / G: 0.25배속 / M: 타격음 켜기·끄기
-const debug = { hitbox: false, feel: 'auto', slow: false, sound: false };
+const debug = { hitbox: false, feel: 'auto', slow: false, sound: false, vibe: false };
 
 // ===== 타격음 (5단계). 코드로 합성, 파일 없음. normal·heavy 는 음높이·길이만 다르다 (설계: docs/stage5-sound.md) =====
 const SOUND = {
@@ -278,12 +284,27 @@ function toggleSound() {
 }
 // 타격 순간에는 모아 두기만 한다. 한 프레임에 여러 번 맞혀도 가장 센 것 1개를 프레임 끝(flushSound)에 낸다
 function playHit(kind) {
-  if (!debug.sound || !audio) return;
-  if (pendingSound !== 'heavy') pendingSound = kind;
+  if (debug.sound && audio && pendingSound !== 'heavy') pendingSound = kind;
+  if (debug.vibe && pendingVibe !== 'heavy') pendingVibe = kind;
 }
 function flushSound() {
   if (pendingSound) synthHit(pendingSound);
-  pendingSound = null;
+  if (pendingVibe) vibrate(pendingVibe);
+  pendingSound = null; pendingVibe = null;
+}
+
+// ===== 진동 (오너 요청). 약 12ms / 강 35ms, 길이만 다르다. 안드로이드만 (아이폰 사파리는 웹 진동 미지원) =====
+const HAPTIC = { normal: 12, heavy: 35 };
+const canVibrate = typeof navigator.vibrate === 'function';
+let pendingVibe = null;
+function vibrate(kind) { if (canVibrate) navigator.vibrate(HAPTIC[kind]); }
+function toggleVibe() {
+  if (!canVibrate) return;
+  debug.vibe = !debug.vibe;
+  if (debug.vibe) vibrate('heavy');   // 켰다는 확인
+  const b = document.getElementById('btnVibe');
+  b.classList.toggle('on', debug.vibe);
+  b.setAttribute('aria-label', debug.vibe ? '진동 끄기' : '진동 켜기');
 }
 function synthHit(kind) {
   if (!debug.sound || !audio) return;
@@ -330,7 +351,7 @@ function reset() {
   waveState = 'walk';   // walk → fight → clear
   score = 0;
   camKick = null;
-  pendingSound = null;
+  pendingSound = null; pendingVibe = null;
   time = 0;
 }
 reset();
@@ -930,6 +951,7 @@ function drawDebugModes() {   // F·G·M 상태를 오른쪽 아래 구석에 �
   if (debug.feel !== 'auto') tags.push(`FEEL ${debug.feel.toUpperCase()}`);
   if (debug.slow) tags.push('x0.25');
   if (debug.sound) tags.push('SOUND');
+  if (debug.vibe) tags.push('VIBE');
   if (!tags.length) return;
   ctx.font = `10px ${FONT}`; ctx.textAlign = 'right'; ctx.fillStyle = '#ffd34d';
   ctx.fillText(tags.join('  '), W - 12, H - 12);
