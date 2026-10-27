@@ -2,19 +2,40 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Belt Brawl</title>
 <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #111318; color: #e8e8ef; font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
-  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; box-sizing: border-box; }
-  canvas { background: #000; width: min(100%, 960px); aspect-ratio: 16 / 9; image-rendering: pixelated; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; box-sizing: border-box; overscroll-behavior: none; }
+  #stage { position: relative; width: min(100%, 960px, calc((100vh - 32px) * 16 / 9)); touch-action: none; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; background: #000; width: 100%; aspect-ratio: 16 / 9; image-rendering: pixelated; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
   .help { font-size: 13px; color: #9aa0ad; text-align: center; line-height: 1.6; }
   .help b { color: #e8e8ef; }
+  /* 터치 조작: 터치 기기에서만 보인다 */
+  .touch { display: none; }
+  body.has-touch .touch { display: block; }
+  body.has-touch .btn { display: flex; }
+  body.has-touch .help { display: none; }
+  #stick { position: absolute; left: 0; top: 0; width: 55%; height: 100%; }
+  #stick .base, #stick .knob { position: absolute; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .15s; }
+  #stick .base { width: 110px; height: 110px; margin: -55px 0 0 -55px; border: 2px solid rgba(255,255,255,.45); background: rgba(255,255,255,.08); }
+  #stick .knob { width: 50px; height: 50px; margin: -25px 0 0 -25px; background: rgba(255,255,255,.6); }
+  #stick.active .base, #stick.active .knob { opacity: 1; }
+  .btn { position: absolute; width: 72px; height: 72px; border-radius: 50%; border: 2px solid rgba(255,255,255,.5); background: rgba(255,255,255,.12); color: #fff; font: bold 15px system-ui, sans-serif; display: flex; align-items: center; justify-content: center; }
+  .btn:active, .btn.down { background: rgba(255,255,255,.4); }
+  #btnAttack { right: 6%; bottom: 10%; }
+  #btnJump { right: 18%; bottom: 32%; }
+  @media (max-height: 420px) { body { padding: 6px; } .btn { width: 60px; height: 60px; } }
 </style>
 </head>
 <body>
-<canvas id="game" width="960" height="540"></canvas>
+<div id="stage">
+  <canvas id="game" width="960" height="540"></canvas>
+  <div id="stick" class="touch"><div class="base"></div><div class="knob"></div></div>
+  <div id="btnJump" class="btn touch">점프</div>
+  <div id="btnAttack" class="btn touch">공격</div>
+</div>
 <div class="help">
   <b>이동</b> 방향키 / WASD &nbsp;·&nbsp; <b>공격</b> Z 또는 J &nbsp;·&nbsp; <b>점프</b> X 또는 K &nbsp;·&nbsp; <b>시작/재시작</b> Enter
 </div>
@@ -39,6 +60,65 @@ addEventListener('keyup', e => { keys[e.code] = false; });
 let pressed = {};   // 이번 프레임에 새로 눌린 키
 
 const down = (...codes) => codes.some(c => keys[c]);
+
+// ===== 터치 조작 (키보드와 같은 keys/pressed 에 넣는다) =====
+const stage = document.getElementById('stage');
+const stick = document.getElementById('stick');
+const knob = stick.querySelector('.knob'), base = stick.querySelector('.base');
+let stickId = null, stickOrigin = null;
+const STICK_RADIUS = 45, DEAD = 12;
+
+function setStickKeys(dx, dy) {
+  keys.ArrowLeft = dx < -DEAD; keys.ArrowRight = dx > DEAD;
+  keys.ArrowUp = dy < -DEAD;   keys.ArrowDown = dy > DEAD;
+}
+stick.addEventListener('pointerdown', e => {
+  if (stickId !== null) return;
+  document.body.classList.add('has-touch');
+  stickId = e.pointerId; stickOrigin = { x: e.clientX, y: e.clientY };
+  const r = stage.getBoundingClientRect();
+  base.style.left = knob.style.left = (e.clientX - r.left) + 'px';
+  base.style.top = knob.style.top = (e.clientY - r.top) + 'px';
+  stick.classList.add('active');
+  stick.setPointerCapture(e.pointerId);
+  tapToStart();
+});
+stick.addEventListener('pointermove', e => {
+  if (e.pointerId !== stickId) return;
+  let dx = e.clientX - stickOrigin.x, dy = e.clientY - stickOrigin.y;
+  const len = Math.hypot(dx, dy);
+  if (len > STICK_RADIUS) { dx *= STICK_RADIUS / len; dy *= STICK_RADIUS / len; }
+  const r = stage.getBoundingClientRect();
+  knob.style.left = (stickOrigin.x + dx - r.left) + 'px';
+  knob.style.top = (stickOrigin.y + dy - r.top) + 'px';
+  setStickKeys(dx, dy);
+});
+const stickEnd = e => {
+  if (e.pointerId !== stickId) return;
+  stickId = null; stick.classList.remove('active'); setStickKeys(0, 0);
+};
+stick.addEventListener('pointerup', stickEnd);
+stick.addEventListener('pointercancel', stickEnd);
+
+function bindButton(id, code) {
+  const el = document.getElementById(id);
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); el.classList.add('down');
+    pressed[code] = true; keys[code] = true;
+    tapToStart();
+  });
+  const up = () => { el.classList.remove('down'); keys[code] = false; };
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+  el.addEventListener('pointerleave', up);
+}
+bindButton('btnAttack', 'KeyZ');
+bindButton('btnJump', 'KeyX');
+
+// 시작/게임오버/클리어 화면에서는 아무 데나 탭하면 Enter 와 같다
+function tapToStart() { if (state !== 'play') pressed.Enter = true; }
+canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') document.body.classList.add('has-touch'); tapToStart(); });
+if (matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window) document.body.classList.add('has-touch');
 const hit = (...codes) => codes.some(c => pressed[c]);
 
 // ===== 웨이브 구성 =====
@@ -384,9 +464,9 @@ function draw() {
   ctx.restore();
 
   drawHUD();
-  if (state === 'title') drawOverlay('BELT BRAWL', 'Enter 키를 눌러 시작  ·  Z 공격  X 점프');
-  if (state === 'gameover') drawOverlay('GAME OVER', `점수 ${score}  ·  Enter 키로 재시작`);
-  if (state === 'clear') drawOverlay('STAGE CLEAR!', `점수 ${score}  ·  Enter 키로 다시 하기`);
+  if (state === 'title') drawOverlay('BELT BRAWL', '화면을 탭하거나 Enter 키를 눌러 시작');
+  if (state === 'gameover') drawOverlay('GAME OVER', `점수 ${score}  ·  탭 또는 Enter 키로 재시작`);
+  if (state === 'clear') drawOverlay('STAGE CLEAR!', `점수 ${score}  ·  탭 또는 Enter 키로 다시 하기`);
 }
 
 // ===== 메인 루프 (60fps 고정 스텝) =====
