@@ -17,8 +17,10 @@ canvas.width = CONFIG.WIDTH;
 canvas.height = CONFIG.HEIGHT;
 const ctx = canvas.getContext('2d');
 
+// 정수 배율로 확대. 폰처럼 화면이 640px보다 좁으면 정수 배율이 안 되므로 그때만 비율대로 줄인다.
 function fitToWindow() {
-  const k = Math.max(1, Math.floor(Math.min(innerWidth / CONFIG.WIDTH, innerHeight / CONFIG.HEIGHT)));
+  const fit = Math.min(innerWidth / CONFIG.WIDTH, innerHeight / CONFIG.HEIGHT);
+  const k = fit >= 1 ? Math.floor(fit) : fit;
   canvas.style.width = `${CONFIG.WIDTH * k}px`;
   canvas.style.height = `${CONFIG.HEIGHT * k}px`;
 }
@@ -30,20 +32,41 @@ const KEYMAP = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDow
 const held = {};
 const tapped = {}; // 프레임 사이에 눌렀다 뗀 짧은 입력도 다음 프레임에 한 번 반영한다
 const debug = { hitboxes: false, feel: 'basic' };
+const DEBUG_ACTIONS = {
+  KeyF: () => (debug.feel = debug.feel === 'basic' ? 'strong' : 'basic'),
+  KeyH: () => (debug.hitboxes = !debug.hitboxes),
+  KeyS: () => startReplay(),
+};
+const press = (k) => {
+  held[k] = true;
+  tapped[k] = true;
+};
+const release = (k) => {
+  held[k] = false;
+};
 addEventListener('keydown', (ev) => {
   if (KEYMAP[ev.code]) {
-    held[KEYMAP[ev.code]] = true;
-    tapped[KEYMAP[ev.code]] = true;
+    press(KEYMAP[ev.code]);
     ev.preventDefault();
   }
-  if (ev.repeat) return;
-  if (ev.code === 'KeyF') debug.feel = debug.feel === 'basic' ? 'strong' : 'basic';
-  if (ev.code === 'KeyH') debug.hitboxes = !debug.hitboxes;
-  if (ev.code === 'KeyS') startReplay();
+  if (!ev.repeat && DEBUG_ACTIONS[ev.code]) DEBUG_ACTIONS[ev.code]();
 });
 addEventListener('keyup', (ev) => {
-  if (KEYMAP[ev.code]) held[KEYMAP[ev.code]] = false;
+  if (KEYMAP[ev.code]) release(KEYMAP[ev.code]);
 });
+
+// 모바일 터치 버튼: data-key는 이동·공격, data-debug는 디버그 키(F/S/H)와 같은 동작
+for (const btn of document.querySelectorAll('[data-key]')) {
+  const k = btn.dataset.key;
+  btn.addEventListener('pointerdown', (ev) => {
+    btn.setPointerCapture(ev.pointerId);
+    press(k);
+  });
+  for (const type of ['pointerup', 'pointercancel']) btn.addEventListener(type, () => release(k));
+}
+for (const btn of document.querySelectorAll('[data-debug]')) {
+  btn.addEventListener('pointerdown', () => DEBUG_ACTIONS[btn.dataset.debug]());
+}
 
 // 매 프레임 입력을 기록해 둔다. S키 재생은 같은 시드로 처음부터 이 기록을 다시 돌려서 만든다.
 const inputLog = [];

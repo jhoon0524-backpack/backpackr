@@ -2,16 +2,47 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>Beltscroll</title>
   <style>
     html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
-    body { display: flex; align-items: center; justify-content: center; }
+    body { display: flex; align-items: center; justify-content: center; touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
     canvas { image-rendering: pixelated; display: block; }
+
+    /* 터치 버튼: 손가락이 있는 기기에서만 보인다 */
+    #touch { display: none; }
+    @media (pointer: coarse) {
+      #touch { display: block; position: fixed; inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); pointer-events: none; }
+      /* 세로 화면: 게임은 위, 버튼은 아래 */
+      @media (orientation: portrait) { body { align-items: flex-start; padding-top: 12vh; } }
+    }
+    #touch button {
+      pointer-events: auto; position: absolute; border: 2px solid #fff1e8; border-radius: 12px;
+      background: rgba(29, 43, 83, 0.55); color: #fff1e8; font: bold 18px monospace; touch-action: none;
+    }
+    #touch button:active { background: rgba(255, 0, 77, 0.7); }
+    .pad { width: 64px; height: 64px; }
+    #up    { left: 84px;  bottom: 156px; }
+    #left  { left: 16px;  bottom: 88px; }
+    #right { left: 152px; bottom: 88px; }
+    #down  { left: 84px;  bottom: 20px; }
+    #attack { right: 24px; bottom: 50px; width: 96px; height: 96px; border-radius: 50%; font-size: 28px; }
+    .dbg { top: 12px; width: 48px; height: 40px; font-size: 14px !important; }
+    #dbgF { right: 128px; } #dbgS { right: 72px; } #dbgH { right: 16px; }
   </style>
 </head>
 <body>
   <canvas id="screen"></canvas>
+  <div id="touch">
+    <button class="pad" id="up" data-key="up">▲</button>
+    <button class="pad" id="left" data-key="left">◀</button>
+    <button class="pad" id="right" data-key="right">▶</button>
+    <button class="pad" id="down" data-key="down">▼</button>
+    <button id="attack" data-key="attack">Z</button>
+    <button class="dbg" id="dbgF" data-debug="KeyF">F</button>
+    <button class="dbg" id="dbgS" data-debug="KeyS">S</button>
+    <button class="dbg" id="dbgH" data-debug="KeyH">H</button>
+  </div>
   <script type="module" src="/engine/main.js"></script>
 </body>
 </html>
