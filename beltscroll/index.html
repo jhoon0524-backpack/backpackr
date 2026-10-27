@@ -74,6 +74,9 @@
   <b>이동</b> 방향키 / WASD &nbsp;·&nbsp; <b>공격</b> Z 또는 J &nbsp;·&nbsp; <b>점프</b> X 또는 K &nbsp;·&nbsp; <b>시작/재시작</b> Enter
 </div>
 <script src="art.js"></script>
+<script src="data/enemies.js"></script>
+<script src="data/waves.js"></script>
+<script src="data/feel.js"></script>
 <script>
 'use strict';
 
@@ -191,18 +194,21 @@ canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') doc
 if (matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window) document.body.classList.add('has-touch');
 const hit = (...codes) => codes.some(c => pressed[c]);
 
-// ===== 웨이브 구성 =====
-// lockX: 이 지점에 도달하면 카메라가 잠기고 적이 나온다.
-const WAVES = [
-  { lockX: 300,  enemies: [{ type: 'thug' }, { type: 'thug' }] },
-  { lockX: 1500, enemies: [{ type: 'thug' }, { type: 'thug' }, { type: 'brute' }] },
-  { lockX: 2800, enemies: [{ type: 'thug' }, { type: 'brute' }, { type: 'brute' }, { type: 'thug' }] },
-];
+// ===== 웨이브·적 종류 (data/waves.js, data/enemies.js) =====
+const WAVES = BB_DATA.waves;
+const ENEMY_TYPES = BB_DATA.enemies;
 
-const ENEMY_TYPES = {
-  thug:  { hp: 30, speed: 1.4, w: 34, h: 70, dmg: 8,  score: 100, windup: 28 },
-  brute: { hp: 70, speed: 1.0, w: 46, h: 84, dmg: 15, score: 300, windup: 40 },
-};
+// ===== 무작위 (6단계): 시드 고정 난수 하나. reset() 때 같은 시드로 다시 시작 → 같은 입력이면 같은 판 =====
+// 적 등장 위치·적 공격 간격·파티클에 쓴다. 소리 잡음은 판에 영향이 없어 Math.random 그대로 (소리를 켜고 끄는 것으로 판이 바뀌지 않게)
+const RNG_SEED = 20261027;
+let rngState;
+function rng() {   // mulberry32: 0 이상 1 미만
+  rngState = (rngState + 0x6D2B79F5) | 0;
+  let t = rngState;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
 
 // ===== 공격 리듬 (프레임 단위, 60프레임 = 1초) =====
 // prep 준비(windup 포즈) → active 타격(첫 프레임에 판정) → recover 회수
@@ -252,13 +258,8 @@ const GRAB = {
   bodyDmg: 10, bodyReach: 28,   // 날아가는 적에 부딪힌 다른 적 (heavy, 넘어짐, 적마다 1번)
 };
 
-// ===== 타격감 (3단계). 프레임 단위, px =====
-// hitstop: 맞는 순간 공격자·맞은 쪽만 멈추는 프레임 / kick: 카메라가 타격 방향으로 밀리는 px, kickFrames: 복귀까지 프레임
-// kbSpeed: 넉백 첫 프레임 속도, kbFriction: 매 프레임 남는 속도 비율 (총 거리 ≈ kbSpeed / (1 - kbFriction)) / flash: 흰 번쩍임 프레임
-const FEEL = {
-  normal: { hitstop: 4,  kick: 2, kickFrames: 3, kbSpeed: 2,  kbFriction: 0.5, flash: 6 },   // 1·2타, 플레이어 피격 (넉백 약 4px)
-  heavy:  { hitstop: 10, kick: 7, kickFrames: 8, kbSpeed: 13, kbFriction: 0.8, flash: 10 },  // 3타, 적을 죽이는 타격 (넉백 약 65px)
-};
+// ===== 타격감 (3단계, 값과 설명은 data/feel.js) =====
+const FEEL = BB_DATA.feel;
 const KILL_FLASH_MULT = 2;   // 적을 죽이는 타격은 흰 번쩍임 2배
 
 // ===== 디버그 =====
@@ -376,6 +377,7 @@ function reset() {
   camKick = null;
   pendingSound = null; pendingVibe = null;
   time = 0;
+  rngState = RNG_SEED;
 }
 reset();
 
@@ -387,7 +389,7 @@ function spawnWave(i) {
     enemies.push({
       type: e.type, ...t, maxHp: t.hp,
       x: cam + (fromRight ? W + 40 + k * 60 : -60 - k * 40),
-      y: GROUND_TOP + 30 + Math.random() * (GROUND_BOTTOM - GROUND_TOP - 60),
+      y: GROUND_TOP + 30 + rng() * (GROUND_BOTTOM - GROUND_TOP - 60),
       z: 0, vz: 0, dir: fromRight ? -1 : 1,
       hitstun: 0, down: 0, attack: 0, cooldown: 60 + k * 30, dead: 0, flash: 0, entered: false, frozenUntil: 0, vx: 0, kbFriction: 0, invuln: 0, stomped: false, grabbed: false, thrown: null,
     });
@@ -400,7 +402,7 @@ const overlapDepth = (a, b) => Math.abs(a.y - b.y) < 22;
 
 function burst(x, y, color, n = 8) {
   for (let i = 0; i < n; i++) {
-    particles.push({ x, y, vx: (Math.random() - .5) * 6, vy: -Math.random() * 5 - 1, life: 30 + Math.random() * 15, color });
+    particles.push({ x, y, vx: (rng() - .5) * 6, vy: -rng() * 5 - 1, life: 30 + rng() * 15, color });
   }
 }
 
@@ -795,7 +797,7 @@ function update() {
       }
       if (e.attack === 8) {   // 준비 동작 끝에 타격. 보는 방향 앞쪽만 맞는다
         const f2 = (p.x - e.x) * e.dir;
-        if (f2 > -10 && f2 < ENEMY_AI.reach && overlapDepth(e, p) && p.z < 30) damagePlayer(e.dmg, e.dir, e.type === 'brute', e);
+        if (f2 > -10 && f2 < ENEMY_AI.reach && overlapDepth(e, p) && p.z < 30) damagePlayer(e.dmg, e.dir, e.knockdown, e);
       }
       continue;
     }
@@ -823,7 +825,7 @@ function update() {
     if (Math.abs(dx) <= ENEMY_AI.attackStart && Math.abs(dx) >= ENEMY_AI.lungeMinGap && Math.abs(dy) < 16 && e.cooldown <= 0 && e.invuln === 0 && e.entered && p.down === 0 && attackers < maxA) {   // 화면에 들어온 적만, 주인공과 겹쳐 있지 않을 때만, 기상 무적 중엔 안 함
       e.dir = dx > 0 ? 1 : -1;
       e.attack = e.windup;
-      e.cooldown = 90 + Math.floor(Math.random() * 60);
+      e.cooldown = 90 + Math.floor(rng() * 60);
     }
   }
 
@@ -900,7 +902,7 @@ function drawFighter(f, isPlayer) {
   ctx.fillStyle = 'rgba(0,0,0,.45)';
   ctx.beginPath(); ctx.ellipse(sx, baseY, f.w * 0.7, 8, 0, 0, Math.PI * 2); ctx.fill();
 
-  const set = ART.characters[isPlayer ? 'player' : f.type];
+  const set = ART.characters[isPlayer ? 'player' : f.art];
   const img = (f.flash > 0 ? set.flash : set.frames)[frameName(f, isPlayer)];
   ctx.save();
   if (isPlayer && f.invuln > 0 && Math.floor(time / 3) % 2) ctx.globalAlpha = 0.45;
