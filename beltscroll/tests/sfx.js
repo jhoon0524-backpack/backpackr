@@ -1,0 +1,33 @@
+const { GAME, OUT, ROOT } = require('./paths');
+const { chromium, devices } = require('playwright');
+(async () => {
+  const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] }); const errors = []; let n = 0;
+  const p = await b.newPage(); p.on('pageerror', e => errors.push(e.message));
+  await p.goto(GAME); await p.waitForTimeout(300);
+  const R = async (label, v) => { n++; console.log(label.padEnd(30), JSON.stringify(v)); };
+  await R('1 첫 입력 전', await p.evaluate(() => ({ soundOn: debug.sound, audioMade: !!audio, button: document.getElementById('btnSound').textContent })));
+  await p.keyboard.press('Enter'); await p.waitForTimeout(100);
+  await R('1 첫 키(Enter) 뒤', await p.evaluate(() => ({ soundOn: debug.sound, audioMade: !!audio, audioState: audio && audio.state, state })));
+  await p.evaluate(() => { window.realUpdate = update; update = () => {}; window.step = (n = 1, k = {}) => { for (let i = 0; i < n; i++) { Object.assign(pressed, k); realUpdate(); pressed = {}; k = {}; } };
+    window.heard = []; const orig = synth; synth = (kind) => { heard.push({ kind, t: time }); return orig(kind); };
+    window.mk = (x, extra = {}) => Object.assign({ type: 'thug', ...ENEMY_TYPES.thug, maxHp: 999, hp: 999, x, y: 420, z: 0, vz: 0, dir: -1, hitstun: 0, down: 0, attack: 0, cooldown: 9999, dead: 0, flash: 0, entered: true, frozenUntil: 0, vx: 0, kbFriction: 0, invuln: 0, stomped: false, grabbed: false, thrown: null }, extra);
+    window.fresh = () => { reset(); state = 'play'; waveState = 'fight'; cam = 0; time = 5; player.x = 480; player.y = 420; player.dir = 1; player.hp = 9999; heard.length = 0; };
+    window.kinds = () => heard.map(h => h.kind).join(','); });
+  await R('3 허공 1타 / 적에게 1타', await p.evaluate(() => { fresh(); enemies = []; step(1, { KeyZ: true }); step(20); const air = kinds(); fresh(); enemies = [mk(518)]; step(1, { KeyZ: true }); step(10); return { miss: air, hit: kinds() }; }));
+  await R('3 1·2·3타 콤보', await p.evaluate(() => { fresh(); enemies = [mk(518)]; step(1, { KeyZ: true }); for (let i = 0; i < 80; i++) step(1, (player.attack > 0 && player.attack <= 8 && !player.buffered) ? { KeyZ: true } : {}); return kinds(); }));
+  await R('4 잡기 → 무릎 2번 → 던지기', await p.evaluate(() => { fresh(); const e = mk(514); enemies = [e]; keys.ArrowRight = true; while (!player.grab) step(); keys.ArrowRight = false; const g = kinds();
+    step(1, { KeyZ: true }); step(17); step(1, { KeyZ: true }); step(17); step(1, { KeyX: true }); while (!e.thrown) step(); while (e.thrown) step(); step(2); return { atGrab: g, all: kinds() }; }));
+  await R('6 처치 → 쓰러짐', await p.evaluate(() => { fresh(); const e = mk(518, { hp: 5 }); enemies = [e, mk(900, { cooldown: 9999 })]; step(1, { KeyZ: true }); let f = 0; while (!e.dead && f < 120) { step(); f++; } step(1); return kinds(); }));
+  await R('6 웨이브 마지막 적 쓰러짐', await p.evaluate(() => { fresh(); const e = mk(518, { hp: 5 }); enemies = [e]; step(1, { KeyZ: true }); let f = 0; while (!e.dead && f < 120) { step(); f++; } step(1); return { kinds: kinds(), waveIndex, waveState }; }));
+  await R('3 한 프레임 겹침(헛+맞음 없음 확인)', await p.evaluate(() => { fresh(); enemies = [mk(518), mk(700)]; step(1, { KeyZ: true }); step(10); return kinds(); }));
+  await p.keyboard.press('KeyM'); await p.waitForTimeout(50);
+  await R('2 M → 꺼짐, 무음', await p.evaluate(() => { fresh(); enemies = []; step(1, { KeyZ: true }); step(20); return { soundOn: debug.sound, heard: heard.length }; }));
+  // 휴대폰: 첫 탭이 소리 버튼
+  const ctx = await b.newContext({ ...devices['Pixel 7'], viewport: { width: 915, height: 412 } }); const m = await ctx.newPage(); m.on('pageerror', e => errors.push('m:' + e.message));
+  await m.goto(GAME); await m.waitForTimeout(300);
+  const bb = await m.locator('#btnSound').boundingBox(); await m.touchscreen.tap(bb.x + bb.width / 2, bb.y + bb.height / 2); await m.waitForTimeout(100);
+  await R('2 휴대폰 첫 탭이 소리 버튼', await m.evaluate(() => ({ soundOn: debug.sound, audioMade: !!audio, button: document.getElementById('btnSound').textContent, state })));
+  await m.touchscreen.tap(600, 150); await m.waitForTimeout(100);
+  await R('1 휴대폰 첫 탭이 화면', await (async () => { const c2 = await b.newContext({ ...devices['Pixel 7'], viewport: { width: 915, height: 412 } }); const q = await c2.newPage(); await q.goto(GAME); await q.waitForTimeout(300); await q.touchscreen.tap(600, 150); await q.waitForTimeout(100); return q.evaluate(() => ({ soundOn: debug.sound, audioMade: !!audio, state })); })());
+  console.log(`측정 ${n} / 기대 11`, 'errors', errors); await b.close();
+})();
