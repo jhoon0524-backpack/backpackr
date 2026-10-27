@@ -276,6 +276,13 @@ function impact(feel, victim, attacker, dir) {
 
 // 넉백: 순간이동 대신 첫 속도에서 매 프레임 줄어들며 미끄러진다 (멈춤이 끝난 뒤부터)
 function knockback(f, dir, feel) { f.vx = dir * feel.kbSpeed; f.kbFriction = feel.kbFriction; }
+// 한 번 화면에 들어온 적은 걷기·경직·다운·넉백·겹침 밀기 중 언제든 화면 밖으로 나가지 못한다 (벽에 닿으면 미끄러짐도 멈춤)
+function keepOnScreen(e) {
+  if (!e.entered) return;
+  const cx = clamp(e.x, cam + 20, cam + W - 20);
+  if (cx !== e.x) { e.x = cx; e.vx = 0; }
+}
+
 function slide(f) {
   if (f.vx === 0) return;
   f.x += f.vx;
@@ -445,11 +452,7 @@ function update() {
     if (e.flash > 0) e.flash--;
     if (frozen(e)) continue;
     slide(e);
-    // 한 번 화면에 들어온 적은 걷기·경직·다운·넉백 중 언제든 화면 밖으로 나가지 못한다 (벽에 닿으면 미끄러짐도 멈춤)
-    if (e.entered) {
-      const cx = clamp(e.x, cam + 20, cam + W - 20);
-      if (cx !== e.x) { e.x = cx; e.vx = 0; }
-    }
+    keepOnScreen(e);
     if (e.z > 0 || e.vz !== 0) { e.z += e.vz; e.vz -= 0.45; if (e.z <= 0) { e.z = 0; e.vz = 0; } }
 
     if (e.down > 0) {
@@ -479,7 +482,7 @@ function update() {
     e.y = clamp(e.y, GROUND_TOP, GROUND_BOTTOM);
     // 한 번 화면에 들어온 적은 화면 밖으로 숨지 못한다
     if (e.x > cam + 20 && e.x < cam + W - 20) e.entered = true;
-    if (e.entered) e.x = clamp(e.x, cam + 20, cam + W - 20);   // 이번 프레임 걸음 뒤에도 한 번 더
+    keepOnScreen(e);   // 걸음 뒤에도 (벽에 붙은 플레이어 옆 자리가 화면 밖일 수 있다)
 
     if (Math.abs(dx) <= ENEMY_STOP + 4 && Math.abs(dy) < 16 && e.cooldown <= 0 && p.down === 0) {
       e.attack = e.windup;
@@ -495,6 +498,7 @@ function update() {
       const s = a.x < b.x ? -1 : 1; a.x += s * 0.8; b.x -= s * 0.8;
     }
   }
+  for (const e of enemies) if (!e.dead) keepOnScreen(e);   // 겹침 밀기 뒤에도 화면 제한 (위치를 바꾸는 마지막 줄)
 
   for (const f of [player, ...enemies]) {
     const d = Math.hypot(f.x - f.ox, f.y - f.oy);
