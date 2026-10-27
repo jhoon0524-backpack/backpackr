@@ -69,6 +69,32 @@ const ART = (() => {
            pants: '#3b302c', pantsD: '#29211e', boots: '#1d1a1a', bootsD: '#121010', accent: '#e8b33a',
            belt: '#1d1a1a', eye: '#111111', fist: '#c98a5c', fistD: '#985f39' },
     },
+    // ----- 조선 퇴마전 (설정화 assets/reference/03·02·07 참고. 몸 비율·포즈는 위 3종을 복제) -----
+    // 윤무겸 (임시 전투 스프라이트): 설정화 03 기준 — 키 큰 체형·작은 머리, 상투와 금속 관, 얼굴 옆으로 흘러내린 머리,
+    // 어깨 망토가 얹힌 먹색·남청 도포(정강이까지, 앞이 갈라져 누런 백색 속옷), 주홍 가슴끈·술, 가죽 팔토시, 중목 신발, 벽사검(평소 칼집, 공격 때 뽑음)
+    // 색은 03 "주요 색상" 견본에서 뽑음: 먹색 #1b1b1a, 남청 #292c30(조금 푸르게), 회갈 #706255, 주홍 #913324(화면용으로 조금 밝게), 금속 #987c5c, 누런 백색 #e7dbc7
+    mugyeom: {
+      name: '윤무겸', style: 'mugyeom', sleeves: true, skirt: 10, sword: true,
+      head: [6, 7], torso: [8, 10], legLen: 14, legW: 3, armW: 3, upper: 4, fore: 4,
+      c: { skin: '#e2b48c', skinD: '#b08260', hair: '#141316', top: '#252a38', topD: '#1b1b1a', shirt: '#e7dbc7', inner: '#b9ae9b',
+           pants: '#2c2a2e', pantsD: '#1c1b1e', boots: '#1b1b1a', bootsD: '#101010', accent: '#a83a2b',
+           belt: '#4a3426', eye: '#1a1020', fist: '#e2b48c', fistD: '#b08260', gold: '#987c5c', sheath: '#1b1b1a',
+           steel: '#c3ccd2', steelHi: '#f1f4f6', bracer: '#3a2a20' },
+    },
+    wongwi: {    // 원귀 (thug 복제): 흰 소복, 얼굴을 가린 긴 머리, 푸른 눈빛
+      name: '원귀', style: 'wongwi', sleeves: true, skirt: 6,
+      head: [7, 7], torso: [8, 8], legLen: 9, legW: 3, armW: 3, upper: 4, fore: 4,
+      c: { skin: '#b4c0c6', skinD: '#87949b', hair: '#0f0f15', top: '#d6d2c6', topD: '#a29e92', shirt: '#eeebe2',
+           pants: '#c9c5b9', pantsD: '#99958a', boots: '#87949b', bootsD: '#6a767d', accent: '#8fe6ff',
+           belt: '#8c877b', eye: '#0a0a0e', fist: '#6a767d', fistD: '#4f5a60' },
+    },
+    dokkaebi: {  // 도깨비 (brute 복제): 붉은 몸, 큰 뿔, 헝클어진 머리, 새끼줄 띠와 방울. 윤무겸보다 위압적으로 — 어깨·몸통·팔을 넓고 두껍게 (오너 결정)
+      name: '도깨비', style: 'dokkaebi',
+      head: [9, 8], torso: [16, 13], legLen: 11, legW: 5, armW: 5, upper: 5, fore: 5,   // 팔 길이는 덩치와 같게: 주먹 끝 48px ≤ 공격 사거리 52px
+      c: { skin: '#b5463b', skinD: '#842e27', shine: '#d66a5c', hair: '#1a1414', top: '#8c7a52', topD: '#6a5a3a',
+           pants: '#3b3226', pantsD: '#2a231b', boots: '#c9b994', bootsD: '#9c8e6c', accent: '#d8b04a',
+           belt: '#a08a5a', eye: '#f2d14a', fist: '#b5463b', fistD: '#842e27', horn: '#e6dcc2' },
+    },
   };
 
   // 동작(포즈). near/far = 앞다리/뒷다리 [앞뒤 위치, 들어 올림], arm/farArm = 팔 모양,
@@ -88,6 +114,9 @@ const ART = (() => {
     stomp:  { near: [6, 3],  far: [-3, 0], arm: 'back',   farArm: 'guard', lean: -1 },   // 쓰러진 적 내려찍기 (4단계 추가)
     hurt:   { near: [-1, 0], far: [-4, 0], arm: 'back',   farArm: 'back',  lean: -2, bob: 1, face: 'hurt' },
   };
+  // 잡기·무릎·던지기용: 그림 포즈는 punch·stomp·windup·punch2 와 같고 칼을 뽑지 않는다 (맨손으로 붙잡음)
+  const BARE = { hold: 'punch', knee: 'stomp', throwPrep: 'windup', throw: 'punch2' };
+  for (const [alias, base] of Object.entries(BARE)) POSES[alias] = { ...POSES[base] };
 
   function geometry(def, pose = {}) {
     const [hw, hh] = def.head, [tw, th] = def.torso;
@@ -103,6 +132,9 @@ const ART = (() => {
   function drawPose(def, pose) {
     const [c, g] = canvas(FW, FH);
     const R = painter(g), k = def.c;
+    // 칼 든 캐릭터: 공격 포즈(준비·1·2·3타·내려찍기)에서만 칼을 뽑는다. 잡기 별칭 포즈(hold 등)는 맨손
+    const armed = !!def.sword && [POSES.windup, POSES.punch, POSES.punch2, POSES.kick, POSES.stomp].includes(pose);
+    const swap = armed && pose.farArm === 'punch';   // 2타: 칼 든 손(앞팔)으로 벤다
     const { hw, hh, tw, th, bob, hipY, tTop, tx, hx, hy } = geometry(def, pose);
     const lw = def.legW, aw = def.armW, u = def.upper, f = def.fore;
     const sy = tTop + 1;
@@ -122,12 +154,34 @@ const ART = (() => {
       R(x2, hipY + up, lw, len - up, pc);
       if (near) { R(x1, hipY, 1, up, k.pantsD); R(x2, hipY + up, 1, len - up, k.pantsD); }
       R(x2, hipY + len, lw + 1, 2, bc);   // 신발 (앞코가 1칸 나옴)
+      if (def.style === 'mugyeom') R(x2, hipY + len - 3, lw, 3, bc);   // 중목 신발
     }
 
     function arm(kind, sx, near) {
       const skin = near ? k.skin : k.skinD;
       const sleeve = def.sleeves ? (near ? k.top : k.topD) : skin;
       const fist = near ? k.fist : k.fistD;
+      if (armed && near && kind === 'punch') {   // 칼 베기: 칼을 대각선으로 길게(약 17칸) 그리되 칼끝 가로 위치는 몸 중심 앞 13칸(39px)
+        // — 1·2타 판정 끝 48px 에서 적 몸 앞면에 닿는 자리 (원래 주먹 끝 11칸과 같은 감). 1타 내려베기(앞 아래로), 2타 올려베기(앞 위로)
+        const hy0 = swap ? sy + 6 : sy, tip = CX + 13, dy = swap ? -1 : 1;
+        R(sx - 1, hy0, 2, aw, sleeve); R(sx, hy0, 1, aw, k.bracer);
+        const fx = sx + 1; R(fx, hy0, aw, aw, fist);   // 손은 가슴 앞
+        const gx = fx + aw, gy = hy0 + 1;
+        R(gx, gy - 1, 1, 3, k.gold);   // 코등이
+        for (let i = 1; gx + i <= tip; i++) {   // 가로 1칸에 세로 1.5칸 → 가로 약 9칸, 세로 약 14칸, 칼날 약 17칸
+          const x = gx + i, y0 = gy + Math.round((i - 1) * 1.5) * dy, y1 = gy + Math.round(i * 1.5) * dy;
+          for (let y = Math.min(y0, y1); y <= Math.max(y0, y1); y++) R(x, y, 1, 1, k.steel);
+          if (gx + i < tip) R(x - 1, y1, 1, 1, k.steelHi);
+        }
+        return;
+      }
+      if (armed && near && kind === 'windup') {   // 칼을 어깨 뒤로 들어 올림
+        R(sx - u, sy, u + 1, aw, sleeve);
+        R(sx - u, sy - f, aw, f, sleeve);
+        R(sx - u, sy - f - aw + 1, aw, aw, fist);
+        for (let i = 1; i <= 11; i++) R(sx - u - i, sy - f - aw + 1 - (i >> 1), 1, 1, i === 1 ? k.gold : k.steel);   // 칼을 어깨 뒤로 길게 젖힘
+        return;
+      }
       if (kind === 'guard') {        // 팔꿈치 굽히고 주먹은 얼굴 앞
         const ox = near ? 0 : 3, oy = near ? 0 : -3;
         R(sx + ox, sy, aw, u + 1, sleeve);
@@ -145,6 +199,7 @@ const ART = (() => {
         R(sx - 1, sy + 1, aw, 3, sleeve);
         R(sx - 3, sy + 3, aw, 3, sleeve);
         R(sx - 5, sy + 5, aw, aw, fist);
+        if (armed && near) for (let i = 1; i <= 12; i++) R(sx - 5 - i, sy + 6 + (i >> 1), 1, 1, i === 1 ? k.gold : k.steel);   // 칼을 뒤로 길게 늘어뜨림
       } else if (kind === 'up') {    // 점프할 때 위로
         R(sx + 1, sy - u + 1, aw, u, sleeve);
         R(sx + 2, sy - u - aw + 1, aw, aw, fist);
@@ -152,7 +207,18 @@ const ART = (() => {
     }
 
     function torso() {
-      if (def.style === 'brute') {   // 민소매: 어깨가 드러남
+      if (def.style === 'mugyeom') {   // 칼집: 허리에서 뒤 아래로 비스듬히 늘어짐 (몸통 뒤에 먼저 그림). 칼을 뽑았으면 손잡이 없음
+        for (let i = 0; i < 14; i++) R(tx - i, hipY + bob - 2 + (i * 2 / 3 | 0), 1, 2, k.sheath);
+        R(tx - 13, hipY + bob + 6, 1, 2, k.gold); R(tx - 7, hipY + bob + 2, 1, 2, k.gold);
+        if (!armed) { R(tx + tw - 1, hipY + bob - 3, 4, 1, k.sheath); R(tx + tw - 1, hipY + bob - 4, 1, 3, k.gold); }
+      }
+      if (def.style === 'dokkaebi') {   // 맨몸 + 솟은 어깨 근육 + 어깨에 걸친 새끼줄 천
+        R(tx, tTop, tw, th, k.skin);
+        R(tx - 1, tTop + 1, tw + 2, 4, k.skin); R(tx + 1, tTop - 1, tw - 2, 1, k.skin);   // 어깨를 넓고 둥글게
+        R(tx, tTop, 1, th, k.skinD); R(tx - 1, tTop + 1, 1, 4, k.skinD);
+        R(tx + 3, tTop + 2, 3, 2, k.shine); R(tx + tw - 5, tTop + 5, 3, 1, k.skinD); R(tx + tw - 6, tTop + 8, 4, 1, k.skinD);   // 가슴·배 근육 그림자
+        for (let i = 0; i < th - 1; i++) R(tx + 2 + Math.round(i * (tw - 5) / th), tTop + i, 3, 1, i % 3 ? k.top : k.topD);
+      } else if (def.style === 'brute') {   // 민소매: 어깨가 드러남
         R(tx, tTop, tw, th, k.skin);
         R(tx, tTop, 1, th, k.skinD);
         R(tx + 1, tTop + 3, tw - 2, th - 3, k.top);
@@ -163,10 +229,21 @@ const ART = (() => {
         R(tx, tTop, 1, th, k.topD);
         if (def.style === 'player') { R(tx + tw - 3, tTop + 1, 2, th - 2, k.shirt); R(tx + tw - 4, tTop + 1, 1, th - 2, k.topD); }
         if (def.style === 'thug') { R(tx + 1, tTop, tw - 2, 1, k.topD); R(tx + tw - 2, tTop + 1, 1, th - 1, k.shirt); }
+        if (def.style === 'mugyeom' || def.style === 'wongwi') {   // 겹쳐 여민 깃 (흰 속깃이 V 로 보임)
+          R(tx + tw - 3, tTop, 2, 1, k.shirt); R(tx + tw - 4, tTop + 1, 2, 1, k.shirt); R(tx + tw - 5, tTop + 2, 2, 1, k.shirt);
+          R(tx + tw - 6, tTop + 3, 1, th - 3, k.topD);
+        }
+        if (def.style === 'mugyeom') {   // 어깨 망토(해진 끝) + 주홍 가슴끈
+          R(tx - 1, tTop, tw + 1, 3, k.topD); R(tx - 1, tTop + 3, 1, 1, k.topD); R(tx + 2, tTop + 3, 1, 1, k.topD); R(tx + 5, tTop + 3, 1, 1, k.topD);
+          for (let i = 0; i < 5; i++) R(tx + 1 + i, tTop + 3 + i, 1, 1, k.accent);
+        }
       }
-      const bh = def.style === 'brute' ? 2 : 1;
+      const big = def.style === 'brute' || def.style === 'dokkaebi';
+      const bh = big ? 2 : 1;
       R(tx, hipY + bob - bh, tw, bh, k.belt);
-      if (def.style === 'brute') R(tx + tw - 4, hipY + bob - 2, 2, 2, k.accent);
+      if (big) R(tx + tw - 4, hipY + bob - 2, 2, 2, k.accent);   // 덩치 버클 / 도깨비 방울
+      if (def.style === 'dokkaebi') R(tx + tw - 4, hipY + bob, 2, 1, k.accent);
+      if (def.style === 'mugyeom') R(tx + tw - 3, hipY + bob - 1, 2, 1, k.gold);   // 허리 장식 (주홍 술은 자락 위에 그림)
       R(tx + 1, hipY + bob, tw - 2, 2, k.pants);   // 골반
     }
 
@@ -188,6 +265,27 @@ const ART = (() => {
         R(hx, hy, hw - 1, 2, k.skinD);
         R(hx + 1, hy - 3, 4, 3, k.hair); R(hx + 2, hy - 4, 2, 1, k.hair);
         if (!hurt) { R(hx + 3, hy + 2, hw - 2, 2, k.accent); R(hx + hw - 1, hy + 2, 1, 1, '#9be7ff'); }
+      } else if (def.style === 'mugyeom') {   // 높은 상투(금속 관·동곳) + 얼굴 옆으로 흘러내린 가닥 + 뒤로 날리는 머리
+        R(hx - 1, hy - 1, hw + 1, 2, k.hair);
+        R(hx - 1, hy + 1, 2, 6, k.hair);
+        R(hx + 1, hy - 4, 3, 3, k.hair); R(hx + 1, hy - 3, 3, 1, k.gold); R(hx + 2, hy - 5, 1, 1, k.gold);
+        R(hx + hw - 2, hy + 1, 2, 1, k.hair); R(hx + 2, hy + 1, 1, 5, k.hair);   // 앞머리 + 귀 앞 가닥
+        if (!hurt) R(hx + hw - 3, hy + 2, 2, 1, k.hair);   // 날카로운 눈썹
+        R(hx - 3, hy - 2 - bob, 3, 1, k.hair); R(hx - 4, hy - 1 - bob, 2, 1, k.hair);
+        R(hx - 1, hy - 3, 2, 1, k.accent);
+      } else if (def.style === 'wongwi') {    // 얼굴을 가린 긴 머리, 틈으로 보이는 눈빛
+        R(hx - 1, hy - 1, hw + 1, 3, k.hair);
+        R(hx - 1, hy, 4, hh + 5, k.hair);
+        R(hx + 3, hy + 1, 2, hh - 1, k.hair);
+        R(hx + hw - 1, hy + 1, 1, 2, k.hair);
+        if (!hurt) R(hx + hw - 2, hy + 3, 1, 1, k.accent);
+      } else if (def.style === 'dokkaebi') {  // 굵게 휜 큰 뿔 2개 + 헝클어진 머리 + 수염 + 송곳니
+        R(hx, hy - 3, 2, 3, k.horn); R(hx - 1, hy - 5, 2, 2, k.horn); R(hx - 1, hy - 6, 1, 1, k.horn);
+        R(hx + hw - 3, hy - 3, 2, 3, k.horn); R(hx + hw - 2, hy - 5, 2, 2, k.horn); R(hx + hw - 1, hy - 6, 1, 1, k.horn);
+        R(hx - 1, hy - 1, hw + 1, 2, k.hair); R(hx - 1, hy, 3, 6, k.hair);
+        R(hx + hw - 4, hy + hh - 3, 5, 3, k.hair);
+        if (!hurt) R(hx + hw - 2, hy + 3, 1, 1, k.eye);
+        R(hx + hw - 1, hy + hh - 3, 1, 1, '#f4efe2');
       } else {                           // 대머리 + 수염
         R(hx + 3, hy, 2, 1, k.shine);
         R(hx + hw - 3, hy + 2, 3, 1, k.hair);
@@ -196,13 +294,30 @@ const ART = (() => {
       }
     }
 
+    function skirt() {   // 도포·소복 자락: 허리에서 넓어지며 내려옴 (발차기 때는 짧게)
+      const len = pose.near === 'kick' ? 2 : def.skirt, mg = def.style === 'mugyeom';
+      for (let i = 0; i < len; i++) {
+        const off = mg ? i >> 2 : i >> 1, x0 = tx - 1 - off, w = tw + 2 + off * 2;
+        R(x0, hipY + bob + i, w, 1, i === len - 1 ? k.topD : k.top);
+        if (mg && i > 0 && i < len - 1) R(x0 + w - 4, hipY + bob + i, 2, 1, k.inner);   // 앞이 갈라져 보이는 속옷
+      }
+      R(tx - 1, hipY + bob, 1, len, k.topD);
+      if (mg) {   // 해진 끝단 + 주홍 술 2가닥 (자락 위)
+        for (let x = tx - 1 - (len >> 2); x < tx + tw + 1 + (len >> 2); x += 3) R(x, hipY + bob + len, 1, 1, k.topD);
+        const tl = Math.min(7, len + 1);
+        R(tx + tw - 3, hipY + bob, 1, tl, k.accent); R(tx + tw - 1, hipY + bob + 1, 1, tl - 2, k.accent); R(tx + tw - 3, hipY + bob, 1, 1, k.gold);
+      }
+      if (def.style === 'wongwi') for (let x = tx - 2; x < tx + tw + 2; x += 2) R(x, hipY + bob + len, 1, 1, k.topD);   // 해진 끝단
+    }
+
     // 뒤에 있는 것부터 그린다
-    arm(pose.farArm, tx + 1, false);
+    arm(swap ? 'guard' : pose.farArm, tx + 1, false);
     leg(pose.far, CX - lw, false);
     torso();
     leg(pose.near, CX, true);
+    if (def.skirt) skirt();
     head();
-    arm(pose.arm, tx + Math.floor(tw / 2) - 1, true);
+    arm(swap ? 'punch' : pose.arm, tx + Math.floor(tw / 2) - 1, true);
     return c;
   }
 
@@ -220,6 +335,10 @@ const ART = (() => {
     if (def.style === 'player') { R(x - 1, y - hw, 3, hw, k.hair); R(x + 2, y - hw, 1, hw, k.accent); }
     if (def.style === 'thug') R(x - 3, y - hw + 1, 3, 4, k.hair);
     if (def.style === 'brute') R(x + hh - 3, y - hw, 3, hw - 1, k.hair);
+    if (def.style === 'mugyeom') { R(x - 1, y - hw, 3, hw, k.hair); R(x - 3, y - hw + 2, 2, 3, k.hair); R(x - 3, y - hw + 3, 2, 1, k.gold); R(x - 4, y - hw + 1, 1, 1, k.accent); }
+    const coat = def.skirt ? Math.min(def.skirt, def.legLen - 2) : 0;   // 도포 자락이 다리를 덮음
+    if (def.style === 'wongwi') { R(x - 5, y - hw + 1, 6, hw - 1, k.hair); R(x + 1, y - hw, 2, hw - 2, k.hair); }
+    if (def.style === 'dokkaebi') { R(x - 1, y - hw, 3, hw, k.hair); R(x - 2, y - hw + 1, 2, 1, k.horn); R(x - 2, y - 3, 2, 1, k.horn); R(x + hh - 3, y - hw, 3, hw - 1, k.hair); }
     x += hh;
     R(x, y - thick, th, thick, k.top);
     R(x, y - 1, th, 1, k.topD);
@@ -230,6 +349,7 @@ const ART = (() => {
     R(x, y - def.legW - 2, def.legLen, def.legW, k.pantsD);
     R(x, y - def.legW, def.legLen, def.legW, k.pants);
     R(x + def.legLen, y - def.legW - 4, 2, def.legW + 4, k.boots);
+    if (coat) { R(x, y - def.legW - 3, coat, def.legW + 3, k.top); R(x, y - 1, coat, 1, k.topD); }
     return c;
   }
 
@@ -246,7 +366,10 @@ const ART = (() => {
     const { hw, hh, hx, hy } = geometry(def);
     const [face, fg] = canvas(hw + 8, hh + 7);
     fg.drawImage(bust, hx - 4, hy - 4, hw + 8, hh + 7, 0, 0, hw + 8, hh + 7);
-    return { frames, flash, face };
+    // 그림 키(칸, 외곽선 포함): 맨 위 불투명 줄 ~ 발바닥. 맞을 때 불꽃·체력바 높이에 쓴다 (판정과 무관). 서 있을 때·누웠을 때
+    const tall = c => { const d = c.getContext('2d').getImageData(0, 0, FW, FH).data; let top = 0;
+      while (top < FH && ![...Array(FW).keys()].some(x => d[(top * FW + x) * 4 + 3])) top++; return FOOT + 1 - top; };
+    return { frames, flash, face, sheet: {}, height: tall(frames.idle0), downHeight: tall(frames.down) };
   }
 
   // ----- 타격 이펙트 (3장) -----
@@ -444,11 +567,190 @@ const ART = (() => {
     return c;
   }
 
-  // 스테이지 배경 한 벌. f = 카메라를 따라 움직이는 비율 (작을수록 멀리 있음)
-  function buildStage({ W, H, groundTop, stageLength }) {
+  // ----- 배경: 조선 마을 밤 (설정화 assets/reference/06·05·04 참고) -----
+  function hanokRoof(R, cx, y, w, h, col, line, ridge) {   // 기와지붕: 아래로 넓어지고 처마 끝이 들림
+    for (let i = 0; i < h; i++) {
+      const rw = Math.round(w * 0.6 + w * 0.4 * (i / Math.max(1, h - 1)));
+      R(cx - (rw >> 1), y + i, rw, 1, col);
+      if (line && i > 1) for (let gx = cx - (rw >> 1) + 1; gx < cx + (rw >> 1); gx += 3) R(gx, y + i, 1, 1, line);   // 기와 고랑
+    }
+    R(cx - (w >> 1) - 2, y + h - 3, 3, 2, col); R(cx + (w >> 1) - 1, y + h - 3, 3, 2, col);   // 들린 처마 끝
+    if (ridge) { R(cx - Math.round(w * 0.32), y - 1, Math.round(w * 0.64), 2, ridge); R(cx - Math.round(w * 0.32) - 1, y - 2, 2, 1, ridge); R(cx + Math.round(w * 0.32) - 1, y - 2, 2, 1, ridge); }
+  }
+  function lantern(g, R, x, y) {   // 처마에 매단 종이 등불 + 빛 번짐
+    g.globalAlpha = 0.10; R(x - 6, y - 4, 15, 14, '#ffb35a'); R(x - 3, y - 7, 9, 20, '#ffb35a'); g.globalAlpha = 1;
+    R(x + 1, y - 3, 1, 3, '#2a1c16');
+    R(x, y, 3, 1, '#6b1f1a'); R(x - 1, y + 1, 5, 4, '#e8913a'); R(x, y + 1, 1, 4, '#ffd08a'); R(x, y + 5, 3, 1, '#6b1f1a');
+  }
+
+  function jSky(wu, hu) {
+    const [c, g] = canvas(wu, hu); const R = painter(g); const r = rng(7);
+    const bands = ['#0a0e1a', '#0d1322', '#11182b', '#151d33', '#1a233b', '#1f2941', '#252f46', '#2b354a'];
+    const bh = Math.ceil(hu / bands.length);
+    bands.forEach((col, i) => {
+      R(0, i * bh, wu, bh, col);
+      const next = bands[i + 1];
+      if (next) for (let x = 0; x < wu; x += 2) { R(x, i * bh + bh - 1, 1, 1, next); if (x % 4 === 0) R(x + 1, i * bh + bh - 2, 1, 1, next); }
+    });
+    for (let i = 0; i < 40; i++) R(r() * wu | 0, r() * hu * 0.45 | 0, 1, 1, r() < 0.2 ? '#e8e4d6' : '#7d86a8');
+    const mx = Math.round(wu * 0.78), my = 22;
+    const disk = (rad, color) => { for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) if (dx * dx + dy * dy <= rad * rad + rad * 0.8) R(mx + dx, my + dy, 1, 1, color); };
+    g.globalAlpha = 0.12; disk(14, '#efe6cc'); g.globalAlpha = 1;
+    disk(9, '#efe6cc');
+    R(mx - 3, my - 2, 3, 2, '#d6cba8'); R(mx + 2, my + 3, 2, 2, '#d6cba8');
+    g.globalAlpha = 0.55;   // 달을 가로지르는 먹구름
+    R(mx - 22, my + 3, 30, 2, '#1a2134'); R(mx - 6, my + 6, 34, 1, '#1a2134'); R(mx - 30, my - 8, 18, 1, '#1a2134');
+    g.globalAlpha = 1;
+    return c;
+  }
+
+  function jFar(wu, hu) {   // 겹겹 산 능선 + 소나무 + 가끔 탑
+    const [c, g] = canvas(wu, hu); const R = painter(g); const r = rng(11);
+    const ridge = (base, amp, col, seed) => {
+      const q = rng(seed), p1 = q() * 6, p2 = q() * 6, ys = [];
+      for (let x = 0; x < wu; x++) {
+        const y = Math.round(base - amp * (0.55 + 0.3 * Math.sin(x / 37 + p1) + 0.15 * Math.sin(x / 13 + p2)));
+        R(x, y, 1, hu - y, col); ys.push(y);
+      }
+      return ys;
+    };
+    ridge(hu - 22, 40, '#121a2c', 3);
+    g.globalAlpha = 0.25; R(0, hu - 40, wu, 40, '#3a4560'); g.globalAlpha = 1;   // 산 사이 안개
+    const near = ridge(hu - 6, 26, '#172036', 9);
+    for (let x = 4; x < wu; x += 6 + (r() * 14 | 0)) {   // 능선 위 소나무
+      const y = near[x], th = 4 + (r() * 4 | 0);
+      for (let i = 0; i < th; i++) R(x - (i >> 1), y - th + i, 1 + (i >> 1) * 2, 1, '#121a2c');
+    }
+    for (let x = 60; x < wu; x += 180 + (r() * 120 | 0)) {   // 먼 탑 실루엣
+      const y = near[Math.min(x, wu - 1)];
+      R(x - 1, y - 22, 2, 22, '#121a2c');
+      for (let k = 0; k < 4; k++) hanokRoof(R, x, y - 20 + k * 5, 12 - k * 2 + 6, 3, '#121a2c');
+    }
+    return c;
+  }
+
+  function jMid(wu, hu) {   // 뒷마을 지붕들 + 소나무
+    const [c, g] = canvas(wu, hu); const R = painter(g); const r = rng(23);
+    for (let x = -5; x < wu;) {
+      const bw = 30 + (r() * 26 | 0), wallTop = hu - 18 - (r() * 14 | 0);
+      if (r() < 0.25) {   // 소나무
+        const tx0 = x + (bw >> 1), top = wallTop - 26;
+        R(tx0, top + 10, 2, hu - top - 10, '#141820');
+        for (let k = 0; k < 3; k++) R(tx0 - 9 + k * 2, top + k * 7, 20 - k * 3, 5, '#151d24');
+        x += bw; continue;
+      }
+      R(x + 3, wallTop, bw - 6, hu - wallTop, '#1d2332');
+      for (let wx = x + 6; wx < x + bw - 8; wx += 7) if (r() < 0.35) { R(wx, wallTop + 4, 4, 5, '#b9803a'); R(wx + 2, wallTop + 4, 1, 5, '#7a4f24'); }   // 불 켜진 창호
+      hanokRoof(R, x + (bw >> 1), wallTop - 9, bw + 4, 9, '#161b27', '#11151e', '#1c2230');
+      x += bw + 2 + (r() * 8 | 0);
+    }
+    return c;
+  }
+
+  function jFacade(wu, hu) {   // 캐릭터 바로 뒤 마을 길: 기와집·초가집·돌담·대나무·장독
+    const [c, g] = canvas(wu, hu); const R = painter(g); const r = rng(42);
+    const lamps = [];
+    const stoneBase = (x, w, h) => {   // 주춧돌 줄
+      R(x, hu - h, w, h, '#3c3a37');
+      for (let sx = x; sx < x + w; sx += 4 + (r() * 3 | 0)) R(sx, hu - h, 3, h - 1, ['#5b5852', '#4f4c47', '#66625b'][r() * 3 | 0]);
+    };
+    for (let x = 0; x < wu;) {
+      const kind = r();
+      if (x > 0 && kind < 0.28) {   // 돌담 (기와 얹음) + 뒤로 대나무
+        const ww = 34 + (r() * 30 | 0), wh = 18 + (r() * 4 | 0);
+        for (let bx = x + 2; bx < x + ww - 2; bx += 3 + (r() * 3 | 0)) { const bh = 14 + (r() * 14 | 0); R(bx, hu - wh - bh, 1, bh, '#1e3328'); R(bx - 1, hu - wh - bh + 3, 3, 1, '#28432f'); }
+        R(x, hu - wh, ww, wh, '#2e2c2a');
+        for (let y = hu - wh + 1; y < hu; y += 4) for (let sx = x + ((y >> 2) % 2 ? 0 : 3); sx < x + ww; sx += 6) R(sx, y, 5, 3, ['#5d5a55', '#535049', '#67635c', '#4a4743'][r() * 4 | 0]);
+        hanokRoof(R, x + (ww >> 1), hu - wh - 4, ww + 2, 4, '#252a33', '#1a1e26');
+        if (r() < 0.6) for (let j = 0; j < 2 + (r() * 2 | 0); j++) { const jx = x + 4 + j * 7; R(jx, hu - 7, 6, 6, '#4a2c1e'); R(jx + 1, hu - 8, 4, 1, '#5a3626'); R(jx + 1, hu - 6, 1, 3, '#7a4a33'); }   // 장독
+        x += ww; continue;
+      }
+      const giwa = kind < 0.68;
+      const bw = giwa ? 70 + (r() * 30 | 0) : 56 + (r() * 22 | 0);
+      const wallTop = hu - (giwa ? 34 : 28) - (r() * 4 | 0);
+      stoneBase(x + 2, bw - 4, 4);
+      const wall = giwa ? '#7c776b' : '#6e5a44', wallD = giwa ? '#625e53' : '#584634';
+      R(x + 2, wallTop, bw - 4, hu - 4 - wallTop, wall);
+      R(x + 2, wallTop + ((hu - 4 - wallTop) >> 1), bw - 4, (hu - 4 - wallTop) >> 1, wallD);   // 아래 반은 흙벽
+      for (let px = x + 2; px < x + bw - 2; px += 18) R(px, wallTop, 2, hu - 4 - wallTop, '#3d2a1c');   // 기둥
+      R(x + bw - 4, wallTop, 2, hu - 4 - wallTop, '#3d2a1c');
+      R(x + 2, wallTop, bw - 4, 2, '#3d2a1c');   // 들보
+      for (let dx = x + 6; dx + 12 < x + bw - 4; dx += 18) {   // 창호문: 불 켜진 한지 + 살
+        const lit = r() < 0.55, dh = 14, dy = hu - 4 - dh - 2;
+        R(dx - 1, dy - 1, 12, dh + 2, '#3d2a1c');
+        R(dx, dy, 10, dh, lit ? '#e3b064' : '#5d564a');
+        if (lit) R(dx, dy + dh - 5, 10, 5, '#c98d43');
+        for (let lx = dx + 3; lx < dx + 10; lx += 3) R(lx, dy, 1, dh, lit ? '#7a4f24' : '#3d362d');
+        for (let ly = dy + 3; ly < dy + dh; ly += 4) R(dx, ly, 10, 1, lit ? '#7a4f24' : '#3d362d');
+      }
+      if (giwa) hanokRoof(R, x + (bw >> 1), wallTop - 14, bw + 14, 14, '#262b35', '#1b1f27', '#30363f');
+      else {   // 초가지붕: 둥근 짚 더미 + 새끼줄
+        const rh = 13;
+        for (let i = 0; i < rh; i++) { const rw = Math.round((bw + 10) * (0.55 + 0.45 * Math.sqrt(i / (rh - 1)))); R(x + (bw >> 1) - (rw >> 1), wallTop - rh + i, rw, 1, i < 2 ? '#9a8252' : '#7d6845'); }
+        for (let i = 0; i < 3; i++) R(x - 3, wallTop - 2 - i * 4, bw + 6, 1, '#5e4d31');
+        for (let fx = x - 4; fx < x + bw + 5; fx += 2) R(fx, wallTop, 1, 1 + (fx & 1), '#6a5738');   // 처마 짚 끝
+      }
+      for (const lx of [x + 6, x + bw - 9]) if (r() < 0.7) { lantern(g, R, lx, wallTop + 2); lamps.push(lx + 1); }
+      x += bw;
+    }
+    return { c, lamps };
+  }
+
+  function jFloorEdge(R, wu) {   // 집 앞 디딤돌 줄 (질감 위에도 그림)
+    R(0, 0, wu, 3, '#2e2c2a');
+    const r = rng(77);
+    for (let x = 0; x < wu; x += 5 + (r() * 4 | 0)) R(x, 0, 4 + (r() * 2 | 0), 2, ['#5d5a55', '#535049', '#67635c'][r() * 3 | 0]);
+    R(0, 3, wu, 1, '#1d1914');
+  }
+  function jGlow(g, R, lamps) {   // 등불 빛이 바닥에 비침
+    g.globalAlpha = 0.07;
+    for (const lx of lamps) for (let dy = -7; dy <= 7; dy++) {
+      const half = Math.round(Math.sqrt(1 - (dy / 7.5) ** 2) * 22);
+      R(lx - half, 9 + dy, half * 2, 1, '#ffb35a');
+    }
+    g.globalAlpha = 1;
+  }
+  function jFloor(wu, hu, lamps) {   // 흙길 (그림 질감을 못 불러올 때 쓰는 코드 그림)
+    const [c, g] = canvas(wu, hu); const R = painter(g); const r = rng(5);
+    R(0, 0, wu, hu, '#3f3428');
+    for (let i = 0; i < wu * 3; i++) R(r() * wu | 0, r() * hu | 0, 1, 1, ['#4a3d2e', '#352b21', '#47402f'][r() * 3 | 0]);
+    for (let i = 0; i < wu / 6; i++) { const x = r() * wu | 0, y = 6 + (r() * (hu - 8) | 0); R(x, y, 3, 2, '#55524c'); R(x, y + 2, 3, 1, '#2a2620'); }   // 돌
+    for (let i = 0; i < wu / 10; i++) R(r() * wu | 0, 6 + (r() * (hu - 8) | 0), 1, 1, ['#b5462a', '#d08a2a'][r() * 2 | 0]);   // 낙엽
+    for (let x = 80; x < wu; x += 170 + (r() * 90 | 0)) { const y = 20 + (r() * 40 | 0); R(x, y, 14, 3, '#2a3550'); R(x + 3, y, 6, 1, '#6e86b8'); }   // 물웅덩이
+    jFloorEdge(R, wu);
+    jGlow(g, R, lamps);
+    return c;
+  }
+  // 그림 질감(assets/joseon/floor_dirt.png)으로 바닥을 깐다. 질감은 원본 assets/reference/06 의 흙길 띠 3개(높이 330·560·760px)를
+  // 150px 씩 겹쳐 서서히 섞고 끝을 처음과 이어 붙인 고리라, 뒤집지 않고 그대로 반복해도 이음매가 없다 (가로 801칸)
+  function texturedFloor(img, wu, hu, lamps) {
+    const [c, g] = canvas(wu, hu); const R = painter(g);
+    R(0, 0, wu, hu, '#3f3428');
+    for (let x = 0; x < wu; x += img.width) g.drawImage(img, x, 0, img.width, hu);
+    jFloorEdge(R, wu);
+    jGlow(g, R, lamps);
+    return c;
+  }
+
+  // 스테이지 배경 한 벌. f = 카메라를 따라 움직이는 비율 (작을수록 멀리 있음). theme: 'joseon'(조선 마을) | 'street'(원래 밤거리)
+  function buildStage({ W, H, groundTop, stageLength, theme = 'joseon' }) {
     const viewU = Math.ceil(W / S) + 2;
     const backU = Math.ceil(groundTop / S) + 1;
     const width = f => Math.ceil(((stageLength - W) * f + W) / S) + 4;
+    const floorU = Math.ceil((H - groundTop) / S) + 1;
+    if (theme === 'joseon') {
+      const facade = jFacade(width(1), backU);
+      return {
+        sky: jSky(viewU, backU),
+        layers: [
+          { img: jFar(width(0.2), backU), f: 0.2 },
+          { img: jMid(width(0.5), backU), f: 0.5 },
+          { img: facade.c, f: 1 },
+        ],
+        floor: jFloor(width(1), floorU, facade.lamps),
+        lamps: facade.lamps,
+      };
+    }
     const facade = buildFacade(width(1), backU);
     return {
       sky: buildSky(viewU, backU),
@@ -457,12 +759,46 @@ const ART = (() => {
         { img: buildMid(width(0.5), backU), f: 0.5 },
         { img: facade.c, f: 1 },
       ],
-      floor: buildFloor(width(1), Math.ceil((H - groundTop) / S) + 1, facade.lamps),
+      floor: buildFloor(width(1), floorU, facade.lamps),
+      lamps: facade.lamps,
     };
   }
 
   const characters = {};
   for (const [id, def] of Object.entries(CHARACTERS)) characters[id] = buildCharacter(def);
 
-  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, text };
+  // ----- 정식 캐릭터 스프라이트로 바꾸기 (규격: docs/sprite-spec.md, 목록: data/sprites.js) -----
+  // 코드 그림은 임시 전투 스프라이트다. 시트를 불러오면 시트에 있는 동작만 바뀌고, 없는 동작은 코드 그림을 그대로 쓴다
+  function useSpriteSheet(id, img, spec) {
+    const set = characters[id];
+    for (const [name, [col, row]] of Object.entries(spec.frames)) {
+      const [c, g] = canvas(spec.frameW, spec.frameH);
+      g.drawImage(img, col * spec.frameW, row * spec.frameH, spec.frameW, spec.frameH, 0, 0, spec.frameW, spec.frameH);
+      set.sheet[name] = { img: c, flash: silhouette(c, '#ffffff') };
+    }
+    set.spec = spec;
+    if (spec.height) set.sheetHeight = spec.height;
+    if (spec.downHeight) set.sheetDownHeight = spec.downHeight;
+    if (spec.face && set.sheet.idle0) {
+      const [x, y, w, h] = spec.face, [c, g] = canvas(w, h);
+      g.drawImage(set.sheet.idle0.img, x, y, w, h, 0, 0, w, h);
+      set.sheetFace = c;
+    }
+  }
+  // 그릴 그림 한 장: { img, scale(화면 px / 그림 px), ax·ay(그림 안 발 기준점) }. 잡기 별칭 칸이 시트에 없으면 원래 동작 칸을 쓴다
+  function frameOf(id, name, flash) {
+    const set = characters[id], sh = set.sheet[name] || set.sheet[BARE[name]];
+    if (sh) return { img: flash ? sh.flash : sh.img, scale: set.spec.scale, ax: set.spec.footX, ay: set.spec.footY };
+    return { img: (flash ? set.flash : set.frames)[name], scale: S, ax: CX, ay: FOOT };
+  }
+  function heightOf(id, lying) {   // 화면 키 px (누워 있으면 누운 그림 높이. 시트에 height·downHeight 가 있으면 그 값)
+    const set = characters[id];
+    return lying ? set.sheetDownHeight || set.downHeight * S : set.sheetHeight || set.height * S;
+  }
+  function faceOf(id) {   // HUD 얼굴: 시트 얼굴은 높이 42px 로 맞춘다
+    const set = characters[id];
+    return set.sheetFace ? { img: set.sheetFace, scale: 42 / set.sheetFace.height } : { img: set.face, scale: S };
+  }
+
+  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, texturedFloor, useSpriteSheet, frameOf, faceOf, heightOf, BARE, text };
 })();
