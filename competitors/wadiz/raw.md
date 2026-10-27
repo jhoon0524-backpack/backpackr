@@ -63,3 +63,7 @@ WZ-20261026-03 | 2026-10-26 | https://www.wadiz.io/web/maker/makercenter/board/e
 WZ-20261026-04 | 2026-10-26 | https://job.wadiz.io/ko/o/241851 | 공고 241851(펀딩 프로모션 마케터)이 채용 목록에 나타남. 마케팅/홍보, 경력 3년 이상, 정규직. 마감 2026. 11. 09, 14:59까지 | 조직 | 관찰
 WZ-20261025-02 | 2026-10-25 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=23acad3e-22fa-4691-b1b3-5ad044c8a80b | [Android ★1 v26.40.0] 투자펀딩 참여했던거 100%손실내고 6년만에 로그인 했더니 투자이력자체가 사라져있어요. 사망여우님은 개인이라 고소당하고 나락가셧죠? 와디즈는 수수료로 돈 쓸어담은 공룡이라 일방적으로 팻을거고요 | 수요 | 외부
 WZ-20261025-03 | 2026-10-25 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=bfff777b-9b65-4990-8ed8-cc3033062e06 | [Android ★5 v26.40.0] 매우 중요하다. | 수요 | 외부
+WZ-20261027-01 | 2026-10-27 | https://helpcenter.wadiz.io/hc/ko/articles/63633379064473 | [와디즈] 투명성 보고서 Vol.23 (도움말 문서 수정 2026-10-27T00:04Z) | 정책 | 관찰
+WZ-20261027-02 | 2026-10-27 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.43.2] 사용성 개선 및 안정화를 위해 업데이트 했습니다. | 공급 | 공식
+WZ-20261027-03 | 2026-10-27 | https://job.wadiz.io/ko/o/242007 | 공고 242007(채용 담당자 (채용연계형 인턴))이 채용 목록에 나타남. 스태프, 경력 무관, 인턴. 마감 2026. 11. 01, 23:59까지 | 조직 | 관찰
+WZ-20261026-05 | 2026-10-26 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=5f2efd05-ad10-493e-a718-4021c4a69e7a | [Android ★1 v26.40.0] 8월에 결제했는데 제품을 아직도 못받음 판매자는 기다리라고함 와디즈는 아무조치안함 구매자가 호구인가? | 수요 | 외부

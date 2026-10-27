@@ -83,3 +83,6 @@
 | KS-20261024-03 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=34d2ec83-2c18-47b8-90a4-7e8daf39b117) |
 | KS-20261024-04 | 2026-10-24 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 로그인이 안 된다. 이메일을 입력하는 페이지로 보내 놓고 계속 버튼 위에 로딩 원만 표시된다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=49fd6dcb-d51c-404b-b4a4-63482e323eac) |
 | KS-20261025-01 | 2026-10-25 | 수요 | 외부 | [iOS ★1 v5.38.0] 사기꾼들 — 심사한다고 하면서 사기꾼이 아무거나 올리게 두고, 미리 신고를 받았는데도 결제를 한다. 사기에 가담한 것이다 | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261026-01 | 2026-10-26 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 앱에 AI 사용 고지가 표시되지 않는다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=06614b76-715d-462a-b142-947f3e41f088) |
+| KS-20261026-02 | 2026-10-26 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 아주 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a9ebd504-d2eb-42b5-b52d-a7a9a24d5b8a) |
+| KS-20261026-03 | 2026-10-26 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 내가 후원한 프로젝트 정보는 받지 못하고, 관심 없는 프로젝트 소식만 계속 받는다. 팔로우하는 프로젝트 정보를 받기 쉽게 해 달라 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a5bcd192-1ebb-4bc9-a888-575f3e1c7799) |
