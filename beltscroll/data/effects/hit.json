@@ -1,6 +1,6 @@
 {
-  "id": "hit-b",
-  "note": "시안 B: 픽셀 십자 별 + 네모 파편",
+  "id": "hit",
+  "note": "타격 이펙트 1종: 픽셀 십자 별 + 네모 파편",
   "layers": [
     { "type": "ring", "color": "#ffec27", "r": [8, 54], "w": 6, "frames": 10 },
     { "type": "flash", "shape": "star", "points": 4, "inner": 0.28, "rot": 45, "color": "#ffa300", "r": [10, 40], "frames": 10, "grow": 0.25 },

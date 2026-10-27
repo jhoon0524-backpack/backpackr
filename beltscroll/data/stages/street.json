@@ -1,6 +1,6 @@
 {
-  "id": "look-b",
-  "note": "시안 B 저해상도 픽셀형: 320x180에 그린 뒤 2배 확대, 16색 팔레트로 색 맞춤. 밤 골목",
+  "id": "street",
+  "note": "스테이지 1 (픽셀형): 320x180에 그린 뒤 2배 확대, 16색 팔레트로 색 맞춤. 밤 골목",
   "render": { "style": "pixel", "downscale": 2 },
   "floor": { "top": 240, "bottom": 340, "left": 20, "right": 620 },
   "palette": {

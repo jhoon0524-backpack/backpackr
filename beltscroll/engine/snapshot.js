@@ -5,11 +5,13 @@ import { CONFIG, SNAP } from './config.js';
 export function installSnapApi(api) {
   const { scene, createWorld, stepWorld, scriptInput, renderFrame, frameInfo, worldPalette } = api;
 
+  const input = (frame, feel) => ({ ...scriptInput(scene, frame), feel });
+
   // 장면을 처음부터 돌려 n번째 타격(hit) 이벤트가 난 프레임을 찾는다.
-  function findHit(seed, n) {
+  function findHit(seed, n, feel) {
     const w = createWorld(scene, seed);
     while (w.frame < SNAP.MAX_SEARCH_FRAMES) {
-      stepWorld(w, scriptInput(scene, w.frame));
+      stepWorld(w, input(w.frame, feel));
       const hits = w.events.filter((e) => e.type === 'hit');
       if (hits.length >= n) return hits[n - 1].frame;
     }
@@ -17,13 +19,13 @@ export function installSnapApi(api) {
   }
 
   const stripLabel = (info) => [
-    `F${info.frame}  time x${info.timeScale}`,
+    `F${info.frame}  time x${info.timeScale}  ${info.feel}`,
     `shake ${info.shakeX},${info.shakeY}  enemyX ${info.enemyX}`,
   ];
 
   // frames: 오름차순 프레임 번호 목록. 각 프레임을 찍어 가로로 이어붙인다.
   // labels: null(글씨 없음) | 'strip'(수치) | 칸별 문자열 배열
-  function capture(seed, frames, labels) {
+  function capture(seed, frames, labels, feel) {
     const labelFn = labels === 'strip' ? stripLabel : Array.isArray(labels) ? (_, i) => [labels[i]] : null;
     const w = createWorld(scene, seed);
     const cell = document.createElement('canvas');
@@ -39,7 +41,7 @@ export function installSnapApi(api) {
     sctx.fillRect(0, 0, sheet.width, sheet.height);
     const infos = [];
     frames.forEach((f, i) => {
-      while (w.frame < f) stepWorld(w, scriptInput(scene, w.frame));
+      while (w.frame < f) stepWorld(w, input(w.frame, feel));
       renderFrame(cctx, w);
       sctx.drawImage(cell, CONFIG.WIDTH * i, 0);
       const info = frameInfo(w);
@@ -56,11 +58,11 @@ export function installSnapApi(api) {
   }
 
   // 장면 전체를 돌리며 프레임별 수치를 모은다 (타격감 판정용).
-  function trace(seed, frames) {
+  function trace(seed, frames, feel) {
     const w = createWorld(scene, seed);
     const rows = [];
     while (w.frame < frames) {
-      stepWorld(w, scriptInput(scene, w.frame));
+      stepWorld(w, input(w.frame, feel));
       rows.push({ ...frameInfo(w), xs: w.entities.map((e) => e.x) });
     }
     return { rows, events: w.events };

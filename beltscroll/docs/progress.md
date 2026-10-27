@@ -1,22 +1,25 @@
 # 진행 상황
 
 ## 현재 단계
-2단계 — 룩 시안 3종 완료, **오너 선택 대기 중** (다음 단계로 가지 않음)
+3a단계 — 손맛 먼저 검증 완료, **오너가 직접 눌러보고 손맛 방향을 확인할 때까지 대기**
 
-시안 PNG: `docs/look-candidates/look-a.png`, `look-b.png`, `look-c.png`
-다시 찍기: `npm run snap -- look-a --frames=6,hit+1,hit+16 --labels="1 IDLE|2 HIT (3rd)|3 KNOCKBACK" --out=look-a`
+## 만든 것
+- 플레이어: 대기 + 공격 1타 (예비 → 타격 → 복귀, 키프레임 3개. 타격 키: 공격 팔 스케일 1.3 / 몸통 0.9)
+- 적(고블린): 대기 + 피격 1포즈, 서 있기만 함
+- 타격 이펙트 1종 (`data/effects/hit.json`)
+- 타격감 프리셋 2종: 기본 `data/feel/basic.json` / 강 `data/feel/strong.json`
+- 디버그 키: F(프리셋 전환) / S(직전 타격 0.25배속 재생) / H(히트박스)
+- 방향키 이동 (걷기 포즈는 3b에서. 지금은 대기 자세로 미끄러짐)
+
+## 수치 (npm run snap:strip -- hit-test --feel=basic|strong)
+| 프리셋 | 히트스톱 | 흔들림 최대 | 넉백 |
+|---|---|---|---|
+| 기본 | 4프레임 | 2px | 10px |
+| 강 | 10프레임 | 5px (설정 6px, 난수로 흔들려 최대 5px) | 34px |
+콘택트 시트·수치 사본: `docs/feel-check/`
 
 ## 막힌 것
-없음 (오너 결정 대기)
+없음 (오너 확인 대기)
 
 ## 다음 할 일
-1. 오너가 A/B/C 중 하나를 고른다
-2. 고른 PNG를 `data/_reference/look.png`로 저장, `docs/decisions.md`에 기록
-3. 고르지 않은 시안 데이터(characters/effects/stages/scenes의 look-*, a-*, b-*, c-*) 정리
-4. 3a단계 — 손맛 먼저 검증
-
-## 메모
-- 1단계 지시서의 `git init`은 하지 않았다. 이 폴더는 이미 backpackr 저장소 안에 있어서 중첩 저장소를 만들면 커밋이 꼬인다.
-- `npx playwright install chromium`도 이 클라우드 환경에서는 실행하지 않았다. 브라우저가 이미 설치돼 있다. 오너 PC에서 snap을 돌리려면 한 번 실행해야 한다.
-- 장면 스크립트(정해진 입력 순서)는 `data/scenes/`에 둔다. CLAUDE.md 폴더 구조에 없던 폴더를 하나 추가한 것이다.
-- 팔레트 검사: 두세 색이 만나는 가장자리의 섞인 색은 안티에일리어싱으로 보고 허용한다.
+3b단계 — 오너 의견 반영 후 나머지 포즈(걷기·3연타·적 공격·쓰러짐) 채우고 `data/_reference/`에 기준 에셋 저장

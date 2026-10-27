@@ -6,9 +6,18 @@ export const CONFIG = {
   STEP: 1 / 60,               // 고정 스텝 (초)
   MAX_STEPS_PER_TICK: 5,      // 탭 전환 후 복귀 시 따라잡기 상한
   DEFAULT_SEED: 1,
-  DEFAULT_SCENE: 'empty',
+  DEFAULT_SCENE: 'sandbox',
   DEPTH_TOLERANCE: 24,        // 공격 판정 깊이(y) 허용치
   SHAKE_MARGIN: 32,           // 흔들림 때 화면 가장자리가 비지 않게 배경을 더 그리는 폭
+  REPLAY_SPEED: 0.25,         // S키: 직전 타격 구간 재생 배속
+  REPLAY_BEFORE: 20,          // S키: 타격 전 몇 프레임부터 재생
+  REPLAY_AFTER: 40,           // S키: 타격 후 몇 프레임까지 재생
+  HUD_FONT: '10px monospace',
+  HUD_COLOR: '#fff1e8',
+  HUD_SHADOW: '#000000',
+  HUD_X: 8,
+  HUD_Y: 14,
+  HUD_LINE: 12,
   RAD_PER_DEG: Math.PI / 180,
   EASE_OUT_POWER: 2,          // 키프레임 보간 이즈아웃 강도
   DEBUG_BODY_COLOR: '#00ff66',   // H키 히트박스: 몸통

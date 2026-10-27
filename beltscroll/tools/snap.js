@@ -1,6 +1,6 @@
 // 장면을 PNG로 찍는 검수 스크립트.
 //   npm run snap -- <장면> [프레임] [--seed=N] [--frames=5,hit+1,hit+16] [--labels="a|b|c"] [--out=이름]
-//   npm run snap:strip -- <장면> [--seed=N] [--hit=N]
+//   npm run snap:strip -- <장면> [--seed=N] [--hit=N] [--feel=basic|strong]
 // 프레임 토큰: 숫자 | hit+k | hit-k | hit2+k (n번째 타격 기준)
 // vite build → vite preview를 직접 띄우고, 끝나면 끈다.
 import { spawn, spawnSync } from 'node:child_process';
@@ -26,6 +26,7 @@ const opts = Object.fromEntries(args.filter((a) => a.startsWith('--')).map((a) =
 }));
 const [sceneName = 'empty', frameArg = '0'] = args.filter((a) => !a.startsWith('--'));
 const seed = Number(opts.seed ?? 1);
+const feel = opts.feel || null; // 타격감 프리셋 강제 (F키와 같음). 없으면 데이터에 적힌 값
 
 function startPreview() {
   const build = spawnSync(process.execPath, [VITE, 'build', '--logLevel', 'warn'], { cwd: ROOT, stdio: 'inherit' });
@@ -49,7 +50,7 @@ function resolveFrames(page, tokens) {
     const m = /^hit(\d*)([+-]\d+)?$/.exec(tok);
     if (!m) return Number(tok);
     const n = Number(m[1] || 1);
-    const hit = await page.evaluate(([s, k]) => window.__game.findHit(s, k), [seed, n]);
+    const hit = await page.evaluate(([s, k, f]) => window.__game.findHit(s, k, f), [seed, n, feel]);
     if (hit === null) throw new Error(`장면 "${sceneName}"에서 ${n}번째 타격이 일어나지 않았습니다`);
     return hit + Number(m[2] || 0);
   }));
@@ -134,14 +135,14 @@ async function main() {
       const [hit] = await resolveFrames(page, [`hit${hitN}`]);
       tokens = Array.from({ length: STRIP_COUNT }, (_, i) => String(hit - STRIP_BEFORE + i));
       labels = 'strip';
-      outName = opts.out || `${sceneName}-strip`;
+      outName = opts.out || `${sceneName}${feel ? '-' + feel : ''}-strip`;
     } else {
       tokens = opts.frames ? String(opts.frames).split(',') : [frameArg];
       labels = opts.labels ? String(opts.labels).split('|') : null;
       outName = opts.out || `${sceneName}-f${tokens.join('_')}-s${seed}`;
     }
     const frames = await resolveFrames(page, tokens);
-    const shot = await page.evaluate(([s, f, l]) => window.__game.capture(s, f, l), [seed, frames, labels]);
+    const shot = await page.evaluate(([s, f, l, fe]) => window.__game.capture(s, f, l, fe), [seed, frames, labels, feel]);
     const file = path.join(ROOT, 'snaps', `${outName}.png`);
     const buf = Buffer.from(shot.png.split(',')[1], 'base64');
     writeFileSync(file, buf);
@@ -154,10 +155,10 @@ async function main() {
 
     if (opts.strip) {
       const last = Math.max(frames.at(-1), ...shot.events.map((e) => e.frame)) + TRACE_AFTER_LAST_HIT;
-      const trace = await page.evaluate(([s, n]) => window.__game.trace(s, n), [seed, last]);
+      const trace = await page.evaluate(([s, n, fe]) => window.__game.trace(s, n, fe), [seed, last, feel]);
       const hits = summarizeHits(trace);
       const json = { scene: sceneName, seed, hitIndex: Number(opts.hit ?? 1), frames: shot.infos, hits };
-      const jfile = path.join(ROOT, 'snaps', `${opts.out || sceneName}.json`);
+      const jfile = path.join(ROOT, 'snaps', `${opts.out || sceneName + (feel ? '-' + feel : '')}.json`);
       writeFileSync(jfile, JSON.stringify(json, null, 2));
       console.log(`수치 저장: ${path.relative(ROOT, jfile)}`);
       for (const h of hits) console.log(`  ${h.hit}타 (F${h.frame}, ${h.feel}): 히트스톱 ${h.hitstopFrames}프레임, 흔들림 최대 ${h.shakeMaxPx}px, 넉백 ${h.knockbackPx}px`);

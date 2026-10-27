@@ -1,0 +1,121 @@
+{
+  "scene": "hit-test",
+  "seed": 1,
+  "hitIndex": 1,
+  "frames": [
+    {
+      "frame": 17,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 322
+    },
+    {
+      "frame": 18,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 322
+    },
+    {
+      "frame": 19,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 1,
+      "enemyX": 322
+    },
+    {
+      "frame": 20,
+      "feel": "basic",
+      "timeScale": 0,
+      "shakeX": -1,
+      "shakeY": 2,
+      "enemyX": 322
+    },
+    {
+      "frame": 21,
+      "feel": "basic",
+      "timeScale": 0,
+      "shakeX": 1,
+      "shakeY": 0,
+      "enemyX": 322
+    },
+    {
+      "frame": 22,
+      "feel": "basic",
+      "timeScale": 0,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 322
+    },
+    {
+      "frame": 23,
+      "feel": "basic",
+      "timeScale": 0,
+      "shakeX": 1,
+      "shakeY": 1,
+      "enemyX": 322
+    },
+    {
+      "frame": 24,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 325.06
+    },
+    {
+      "frame": 25,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 327.56
+    },
+    {
+      "frame": 26,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 329.5
+    },
+    {
+      "frame": 27,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 330.89
+    },
+    {
+      "frame": 28,
+      "feel": "basic",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 331.72
+    }
+  ],
+  "hits": [
+    {
+      "hit": 1,
+      "frame": 19,
+      "feel": "basic",
+      "hitstopFrames": 4,
+      "shakeMaxPx": 2,
+      "knockbackPx": 10
+    },
+    {
+      "hit": 2,
+      "frame": 59,
+      "feel": "basic",
+      "hitstopFrames": 4,
+      "shakeMaxPx": 2,
+      "knockbackPx": 10
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "id": "sandbox",
+  "note": "3a단계 시험장: 방향키로 움직이고 Z로 서 있는 적을 때린다 (적은 행동하지 않음)",
+  "stage": "street",
+  "player": { "char": "player", "x": 250, "y": 300, "facing": 1 },
+  "enemies": [{ "char": "enemy", "x": 330, "y": 300, "facing": -1 }]
+}

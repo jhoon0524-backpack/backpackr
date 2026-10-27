@@ -32,6 +32,7 @@ export function createWorld(scene, seed) {
     timeScale: 1,
     shake: { t: 0, frames: 0, amp: 0, x: 0, y: 0 },
     prevInput: {},
+    feelOverride: null,
   };
 }
 
@@ -64,15 +65,30 @@ function updatePlayer(w, e, input, pressed) {
   if (pressed.attack && e.def.attacks?.length) {
     setState(e, 'attack', e.def.attacks[0].pose);
     e.attack = { index: 0, hit: new Set() };
+    return;
   }
+  // 걷기 포즈는 3b단계에서 추가한다. 지금은 대기 포즈로 미끄러지듯 움직인다.
+  const dx = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+  const dy = (input.down ? 1 : 0) - (input.up ? 1 : 0);
+  if (dx) e.facing = dx;
+  e.x += dx * e.def.speed.x;
+  e.y += dy * e.def.speed.y;
+  clampToFloor(w, e);
 }
 
-function updateHurt(e) {
+function clampToFloor(w, e) {
+  const f = w.stage.floor;
+  e.x = Math.min(Math.max(e.x, f.left), f.right);
+  e.y = Math.min(Math.max(e.y, f.top), f.bottom);
+}
+
+function updateHurt(w, e) {
   if (e.state !== 'hurt') return;
   if (e.knock) {
     const k = e.knock;
     k.t++;
     e.x = k.from + k.dist * easeOut(Math.min(k.t / k.frames, 1));
+    clampToFloor(w, e);
     if (k.t >= k.frames) e.knock = null;
   }
   if (e.t >= e.def.hurtFrames) setState(e, 'idle', 'idle');
@@ -100,7 +116,7 @@ export function activeAttackBox(e) {
 
 function applyHit(w, attacker, target) {
   const atk = attacker.def.attacks[attacker.attack.index];
-  const feel = get('feel', atk.feel);
+  const feel = get('feel', w.feelOverride || atk.feel);
   attacker.attack.hit.add(target.id);
   target.hp -= atk.damage;
   target.facing = -attacker.facing;
@@ -145,8 +161,9 @@ function updateShake(w) {
 
 export function stepWorld(w, input) {
   w.frame++;
+  w.feelOverride = input.feel || null; // F키 디버그: 모든 공격에 이 타격감 프리셋을 쓴다
   const pressed = {};
-  for (const k of Object.keys(input)) pressed[k] = input[k] && !w.prevInput[k];
+  for (const k of Object.keys(input)) pressed[k] = !!input[k] && !w.prevInput[k];
   w.prevInput = { ...input };
 
   for (const e of w.entities) if (e.flash > 0) e.flash--;
@@ -158,7 +175,7 @@ export function stepWorld(w, input) {
     for (const e of w.entities) {
       e.t++;
       if (e.role === 'player') updatePlayer(w, e, input, pressed);
-      updateHurt(e);
+      updateHurt(w, e);
     }
     detectHits(w);
   }
@@ -171,6 +188,7 @@ export function frameInfo(w) {
   const enemy = w.entities.find((e) => e.role === 'enemy');
   return {
     frame: w.frame,
+    feel: w.feelOverride || 'data',
     timeScale: w.timeScale,
     shakeX: w.shake.x,
     shakeY: w.shake.y,

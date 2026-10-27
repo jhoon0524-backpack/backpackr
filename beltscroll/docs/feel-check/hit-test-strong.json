@@ -1,0 +1,113 @@
+{
+  "scene": "hit-test",
+  "seed": 1,
+  "hitIndex": 1,
+  "frames": [
+    {
+      "frame": 17,
+      "feel": "strong",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 322
+    },
+    {
+      "frame": 18,
+      "feel": "strong",
+      "timeScale": 1,
+      "shakeX": 0,
+      "shakeY": 0,
+      "enemyX": 322
+    },
+    {
+      "frame": 19,
+      "feel": "strong",
+      "timeScale": 1,
+      "shakeX": 1,
+      "shakeY": 4,
+      "enemyX": 322
+    },
+    {
+      "frame": 20,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": -3,
+      "shakeY": 5,
+      "enemyX": 322
+    },
+    {
+      "frame": 21,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": 2,
+      "shakeY": -1,
+      "enemyX": 322
+    },
+    {
+      "frame": 22,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": -2,
+      "shakeY": 2,
+      "enemyX": 322
+    },
+    {
+      "frame": 23,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": 4,
+      "shakeY": 4,
+      "enemyX": 322
+    },
+    {
+      "frame": 24,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": 1,
+      "shakeY": 3,
+      "enemyX": 322
+    },
+    {
+      "frame": 25,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": 2,
+      "shakeY": 3,
+      "enemyX": 322
+    },
+    {
+      "frame": 26,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": -2,
+      "shakeY": -3,
+      "enemyX": 322
+    },
+    {
+      "frame": 27,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": 2,
+      "shakeY": -1,
+      "enemyX": 322
+    },
+    {
+      "frame": 28,
+      "feel": "strong",
+      "timeScale": 0,
+      "shakeX": 2,
+      "shakeY": 0,
+      "enemyX": 322
+    }
+  ],
+  "hits": [
+    {
+      "hit": 1,
+      "frame": 19,
+      "feel": "strong",
+      "hitstopFrames": 10,
+      "shakeMaxPx": 5,
+      "knockbackPx": 34
+    }
+  ]
+}
