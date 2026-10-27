@@ -214,6 +214,7 @@ const ENEMY_AI = {
   punishWindow: 10,     // 주인공 공격의 마지막 이 프레임 동안 (회수 구간)
   punishSpeed: 1.5,     // 적 걷기 속도 배율
 };
+const DOWN_FRAMES = 50;    // 쓰러져 있는 프레임 (넘어뜨림·사망·던지기 착지)
 const GETUP_INVULN = 20;   // 일어난 뒤 무적 프레임 (적·주인공)
 const LANDING_LAG = 6;     // 점프 착지 후 아무것도 못 하는 프레임 (점프가 공짜 회피가 되지 않게)
 // 쓰러진 적 추가타: 아래 + Z. 다운당 1회, 다운 시간을 늘리지 않는다
@@ -341,7 +342,7 @@ function damageEnemy(e, dmg, knockdown, dir, attacker) {
     // 다운 시간을 늘리지 않는다. 체력이 0이 되면 다운이 끝날 때 사라진다
   } else if (lethal || knockdown) {
     knockback(e, dir, feel);
-    e.down = 50;
+    e.down = DOWN_FRAMES;
     e.vz = 6;
     e.z = Math.max(e.z, 1);
     e.hitstun = 0;
@@ -366,7 +367,7 @@ function damagePlayer(dmg, dir, knockdown, attacker) {
   player.flash = feel.flash;
   impact(feel, player, attacker, dir);
   if (knockdown || player.hp <= 0) {
-    player.down = 50; player.vz = 6; player.z = Math.max(player.z, 1);
+    player.down = DOWN_FRAMES; player.vz = 6; player.z = Math.max(player.z, 1);
     knockback(player, dir, feelFor('heavy'));   // 넘어질 때는 날아가는 거리 (역할 기준)
   } else {
     player.hitstun = 14;
@@ -457,7 +458,7 @@ function releaseThrow(p) {
   e.x = p.x + dir * GRAB.holdDist;
   e.vx = dir * GRAB.throwSpeed; e.kbFriction = GRAB.throwFriction;
   e.vz = GRAB.throwVz; e.z = 1;
-  e.down = 50; e.attack = 0; e.stomped = false;
+  e.down = DOWN_FRAMES; e.attack = 0; e.stomped = false;
   e.thrown = { dir, hits: [] };
   p.dir = dir;
   setAfterGrab(p, GRAB.throwRecover, 'punch2', GRAB.throwRecover);
@@ -506,6 +507,7 @@ function updateThrown(e) {
     return;
   }
   e.thrown = null;
+  e.down = DOWN_FRAMES;   // 쓰러진 시간은 착지 순간부터 (달려가 추가타 가능, 오너 결정)
   const lethal = e.hp - GRAB.throwDmg <= 0, feel = feelFor('heavy');
   e.hp -= GRAB.throwDmg;
   e.flash = feel.flash * (lethal ? KILL_FLASH_MULT : 1);
