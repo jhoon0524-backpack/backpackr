@@ -161,14 +161,17 @@ const ART = (() => {
       const skin = near ? k.skin : k.skinD;
       const sleeve = def.sleeves ? (near ? k.top : k.topD) : skin;
       const fist = near ? k.fist : k.fistD;
-      if (armed && near && kind === 'punch') {   // 칼 찌르기: 칼끝을 몸 중심 앞 13칸(39px)에 둔다 — 판정 끝 48px 에서 적 몸 앞면에 닿는 자리 (주먹 끝 11칸과 같은 감)
-        const L = 4, fx = sx + L, gx = fx + aw, tip = CX + 13;
-        R(sx, sy, L, aw, sleeve); R(fx - 1, sy, 1, aw, k.bracer);
-        R(fx, sy, aw, aw, fist);
-        R(gx, sy - 1, 1, aw + 1, k.gold);   // 코등이
-        for (let x = gx + 1; x <= tip; x++) {
-          const up = swap ? ((x - gx) / 3 | 0) : 0;   // 2타는 칼끝이 살짝 올라가는 베기
-          R(x, sy + 1 - up, 1, 1, k.steel); if (x < tip) R(x, sy - up, 1, 1, k.steelHi);
+      if (armed && near && kind === 'punch') {   // 칼 베기: 칼을 대각선으로 길게(약 17칸) 그리되 칼끝 가로 위치는 몸 중심 앞 13칸(39px)
+        // — 1·2타 판정 끝 48px 에서 적 몸 앞면에 닿는 자리 (원래 주먹 끝 11칸과 같은 감). 1타 내려베기(앞 아래로), 2타 올려베기(앞 위로)
+        const hy0 = swap ? sy + 6 : sy, tip = CX + 13, dy = swap ? -1 : 1;
+        R(sx - 1, hy0, 2, aw, sleeve); R(sx, hy0, 1, aw, k.bracer);
+        const fx = sx + 1; R(fx, hy0, aw, aw, fist);   // 손은 가슴 앞
+        const gx = fx + aw, gy = hy0 + 1;
+        R(gx, gy - 1, 1, 3, k.gold);   // 코등이
+        for (let i = 1; gx + i <= tip; i++) {   // 가로 1칸에 세로 1.5칸 → 가로 약 9칸, 세로 약 14칸, 칼날 약 17칸
+          const x = gx + i, y0 = gy + Math.round((i - 1) * 1.5) * dy, y1 = gy + Math.round(i * 1.5) * dy;
+          for (let y = Math.min(y0, y1); y <= Math.max(y0, y1); y++) R(x, y, 1, 1, k.steel);
+          if (gx + i < tip) R(x - 1, y1, 1, 1, k.steelHi);
         }
         return;
       }
@@ -176,7 +179,7 @@ const ART = (() => {
         R(sx - u, sy, u + 1, aw, sleeve);
         R(sx - u, sy - f, aw, f, sleeve);
         R(sx - u, sy - f - aw + 1, aw, aw, fist);
-        for (let i = 1; i <= 6; i++) R(sx - u - i, sy - f - aw + 1 - i, 1, 1, i === 1 ? k.gold : k.steel);
+        for (let i = 1; i <= 11; i++) R(sx - u - i, sy - f - aw + 1 - (i >> 1), 1, 1, i === 1 ? k.gold : k.steel);   // 칼을 어깨 뒤로 길게 젖힘
         return;
       }
       if (kind === 'guard') {        // 팔꿈치 굽히고 주먹은 얼굴 앞
@@ -196,7 +199,7 @@ const ART = (() => {
         R(sx - 1, sy + 1, aw, 3, sleeve);
         R(sx - 3, sy + 3, aw, 3, sleeve);
         R(sx - 5, sy + 5, aw, aw, fist);
-        if (armed && near) for (let i = 1; i <= 6; i++) R(sx - 5 - i, sy + 6 + (i >> 1), 1, 1, i === 1 ? k.gold : k.steel);   // 칼을 뒤로 늘어뜨림
+        if (armed && near) for (let i = 1; i <= 12; i++) R(sx - 5 - i, sy + 6 + (i >> 1), 1, 1, i === 1 ? k.gold : k.steel);   // 칼을 뒤로 길게 늘어뜨림
       } else if (kind === 'up') {    // 점프할 때 위로
         R(sx + 1, sy - u + 1, aw, u, sleeve);
         R(sx + 2, sy - u - aw + 1, aw, aw, fist);
@@ -204,9 +207,9 @@ const ART = (() => {
     }
 
     function torso() {
-      if (def.style === 'mugyeom') {   // 칼집: 허리에서 뒤로 비스듬히 길게 (몸통 뒤에 먼저 그림). 칼을 뽑았으면 손잡이 없음
-        for (let i = 0; i < 13; i++) R(tx - i, hipY + bob - 2 + (i >> 2), 1, 2, k.sheath);
-        R(tx - 13, hipY + bob + 1, 1, 2, k.gold); R(tx - 6, hipY + bob - 1, 1, 2, k.gold);
+      if (def.style === 'mugyeom') {   // 칼집: 허리에서 뒤 아래로 비스듬히 늘어짐 (몸통 뒤에 먼저 그림). 칼을 뽑았으면 손잡이 없음
+        for (let i = 0; i < 14; i++) R(tx - i, hipY + bob - 2 + (i * 2 / 3 | 0), 1, 2, k.sheath);
+        R(tx - 13, hipY + bob + 6, 1, 2, k.gold); R(tx - 7, hipY + bob + 2, 1, 2, k.gold);
         if (!armed) { R(tx + tw - 1, hipY + bob - 3, 4, 1, k.sheath); R(tx + tw - 1, hipY + bob - 4, 1, 3, k.gold); }
       }
       if (def.style === 'dokkaebi') {   // 맨몸 + 어깨에 걸친 새끼줄 천
