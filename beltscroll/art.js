@@ -69,20 +69,24 @@ const ART = (() => {
            pants: '#3b302c', pantsD: '#29211e', boots: '#1d1a1a', bootsD: '#121010', accent: '#e8b33a',
            belt: '#1d1a1a', eye: '#111111', fist: '#c98a5c', fistD: '#985f39' },
     },
-    // ----- 조선 퇴마전 (설정화 assets/joseon/03·02·07 참고. 몸 비율·포즈는 위 3종을 복제) -----
-    mugyeom: {   // 윤무겸: 상투, 남청 도포, 주홍 술, 허리에 칼집 (색은 설정화 03 의 "주요 색상")
-      name: '윤무겸', style: 'mugyeom', sleeves: true, skirt: 5,
-      head: [7, 7], torso: [8, 9], legLen: 10, legW: 3, armW: 3, upper: 4, fore: 4,
-      c: { skin: '#e6bd96', skinD: '#b48660', hair: '#16141b', top: '#27324d', topD: '#171d30', shirt: '#e6dcc4',
-           pants: '#2b2a33', pantsD: '#1b1a21', boots: '#221c1a', bootsD: '#141010', accent: '#c8372d',
-           belt: '#5a3a22', eye: '#1a1020', fist: '#e6bd96', fistD: '#b48660', gold: '#b8945a', sheath: '#2a1c16' },
+    // ----- 조선 퇴마전 (설정화 assets/reference/03·02·07 참고. 몸 비율·포즈는 위 3종을 복제) -----
+    // 윤무겸 (임시 전투 스프라이트): 설정화 03 기준 — 키 큰 체형·작은 머리, 상투와 금속 관, 얼굴 옆으로 흘러내린 머리,
+    // 어깨 망토가 얹힌 먹색·남청 도포(정강이까지, 앞이 갈라져 누런 백색 속옷), 주홍 가슴끈·술, 가죽 팔토시, 중목 신발, 벽사검(평소 칼집, 공격 때 뽑음)
+    // 색은 03 "주요 색상" 견본에서 뽑음: 먹색 #1b1b1a, 남청 #292c30(조금 푸르게), 회갈 #706255, 주홍 #913324(화면용으로 조금 밝게), 금속 #987c5c, 누런 백색 #e7dbc7
+    mugyeom: {
+      name: '윤무겸', style: 'mugyeom', sleeves: true, skirt: 10, sword: true,
+      head: [6, 7], torso: [8, 10], legLen: 14, legW: 3, armW: 3, upper: 4, fore: 4,
+      c: { skin: '#e2b48c', skinD: '#b08260', hair: '#141316', top: '#252a38', topD: '#1b1b1a', shirt: '#e7dbc7', inner: '#b9ae9b',
+           pants: '#2c2a2e', pantsD: '#1c1b1e', boots: '#1b1b1a', bootsD: '#101010', accent: '#a83a2b',
+           belt: '#4a3426', eye: '#1a1020', fist: '#e2b48c', fistD: '#b08260', gold: '#987c5c', sheath: '#1b1b1a',
+           steel: '#c3ccd2', steelHi: '#f1f4f6', bracer: '#3a2a20' },
     },
     wongwi: {    // 원귀 (thug 복제): 흰 소복, 얼굴을 가린 긴 머리, 푸른 눈빛
       name: '원귀', style: 'wongwi', sleeves: true, skirt: 6,
       head: [7, 7], torso: [8, 8], legLen: 9, legW: 3, armW: 3, upper: 4, fore: 4,
       c: { skin: '#b4c0c6', skinD: '#87949b', hair: '#0f0f15', top: '#d6d2c6', topD: '#a29e92', shirt: '#eeebe2',
            pants: '#c9c5b9', pantsD: '#99958a', boots: '#87949b', bootsD: '#6a767d', accent: '#8fe6ff',
-           belt: '#8c877b', eye: '#0a0a0e', fist: '#b4c0c6', fistD: '#87949b' },
+           belt: '#8c877b', eye: '#0a0a0e', fist: '#6a767d', fistD: '#4f5a60' },
     },
     dokkaebi: {  // 도깨비 (brute 복제): 붉은 몸, 뿔, 헝클어진 머리, 새끼줄 띠와 방울
       name: '도깨비', style: 'dokkaebi',
@@ -110,6 +114,9 @@ const ART = (() => {
     stomp:  { near: [6, 3],  far: [-3, 0], arm: 'back',   farArm: 'guard', lean: -1 },   // 쓰러진 적 내려찍기 (4단계 추가)
     hurt:   { near: [-1, 0], far: [-4, 0], arm: 'back',   farArm: 'back',  lean: -2, bob: 1, face: 'hurt' },
   };
+  // 잡기·무릎·던지기용: 그림 포즈는 punch·stomp·windup·punch2 와 같고 칼을 뽑지 않는다 (맨손으로 붙잡음)
+  const BARE = { hold: 'punch', knee: 'stomp', throwPrep: 'windup', throw: 'punch2' };
+  for (const [alias, base] of Object.entries(BARE)) POSES[alias] = { ...POSES[base] };
 
   function geometry(def, pose = {}) {
     const [hw, hh] = def.head, [tw, th] = def.torso;
@@ -125,6 +132,9 @@ const ART = (() => {
   function drawPose(def, pose) {
     const [c, g] = canvas(FW, FH);
     const R = painter(g), k = def.c;
+    // 칼 든 캐릭터: 공격 포즈(준비·1·2·3타·내려찍기)에서만 칼을 뽑는다. 잡기 별칭 포즈(hold 등)는 맨손
+    const armed = !!def.sword && [POSES.windup, POSES.punch, POSES.punch2, POSES.kick, POSES.stomp].includes(pose);
+    const swap = armed && pose.farArm === 'punch';   // 2타: 칼 든 손(앞팔)으로 벤다
     const { hw, hh, tw, th, bob, hipY, tTop, tx, hx, hy } = geometry(def, pose);
     const lw = def.legW, aw = def.armW, u = def.upper, f = def.fore;
     const sy = tTop + 1;
@@ -144,12 +154,31 @@ const ART = (() => {
       R(x2, hipY + up, lw, len - up, pc);
       if (near) { R(x1, hipY, 1, up, k.pantsD); R(x2, hipY + up, 1, len - up, k.pantsD); }
       R(x2, hipY + len, lw + 1, 2, bc);   // 신발 (앞코가 1칸 나옴)
+      if (def.style === 'mugyeom') R(x2, hipY + len - 3, lw, 3, bc);   // 중목 신발
     }
 
     function arm(kind, sx, near) {
       const skin = near ? k.skin : k.skinD;
       const sleeve = def.sleeves ? (near ? k.top : k.topD) : skin;
       const fist = near ? k.fist : k.fistD;
+      if (armed && near && kind === 'punch') {   // 칼 찌르기: 칼끝을 몸 중심 앞 13칸(39px)에 둔다 — 판정 끝 48px 에서 적 몸 앞면에 닿는 자리 (주먹 끝 11칸과 같은 감)
+        const L = 4, fx = sx + L, gx = fx + aw, tip = CX + 13;
+        R(sx, sy, L, aw, sleeve); R(fx - 1, sy, 1, aw, k.bracer);
+        R(fx, sy, aw, aw, fist);
+        R(gx, sy - 1, 1, aw + 1, k.gold);   // 코등이
+        for (let x = gx + 1; x <= tip; x++) {
+          const up = swap ? ((x - gx) / 3 | 0) : 0;   // 2타는 칼끝이 살짝 올라가는 베기
+          R(x, sy + 1 - up, 1, 1, k.steel); if (x < tip) R(x, sy - up, 1, 1, k.steelHi);
+        }
+        return;
+      }
+      if (armed && near && kind === 'windup') {   // 칼을 어깨 뒤로 들어 올림
+        R(sx - u, sy, u + 1, aw, sleeve);
+        R(sx - u, sy - f, aw, f, sleeve);
+        R(sx - u, sy - f - aw + 1, aw, aw, fist);
+        for (let i = 1; i <= 6; i++) R(sx - u - i, sy - f - aw + 1 - i, 1, 1, i === 1 ? k.gold : k.steel);
+        return;
+      }
       if (kind === 'guard') {        // 팔꿈치 굽히고 주먹은 얼굴 앞
         const ox = near ? 0 : 3, oy = near ? 0 : -3;
         R(sx + ox, sy, aw, u + 1, sleeve);
@@ -167,6 +196,7 @@ const ART = (() => {
         R(sx - 1, sy + 1, aw, 3, sleeve);
         R(sx - 3, sy + 3, aw, 3, sleeve);
         R(sx - 5, sy + 5, aw, aw, fist);
+        if (armed && near) for (let i = 1; i <= 6; i++) R(sx - 5 - i, sy + 6 + (i >> 1), 1, 1, i === 1 ? k.gold : k.steel);   // 칼을 뒤로 늘어뜨림
       } else if (kind === 'up') {    // 점프할 때 위로
         R(sx + 1, sy - u + 1, aw, u, sleeve);
         R(sx + 2, sy - u - aw + 1, aw, aw, fist);
@@ -174,9 +204,10 @@ const ART = (() => {
     }
 
     function torso() {
-      if (def.style === 'mugyeom') {   // 칼집: 허리 뒤로 비스듬히 (몸통 뒤에 먼저 그림)
-        for (let i = 0; i < 8; i++) R(tx - i, hipY + bob - 2 + (i >> 2), 1, 2, k.sheath);
-        R(tx - 8, hipY + bob, 1, 2, k.gold);
+      if (def.style === 'mugyeom') {   // 칼집: 허리에서 뒤로 비스듬히 길게 (몸통 뒤에 먼저 그림). 칼을 뽑았으면 손잡이 없음
+        for (let i = 0; i < 13; i++) R(tx - i, hipY + bob - 2 + (i >> 2), 1, 2, k.sheath);
+        R(tx - 13, hipY + bob + 1, 1, 2, k.gold); R(tx - 6, hipY + bob - 1, 1, 2, k.gold);
+        if (!armed) { R(tx + tw - 1, hipY + bob - 3, 4, 1, k.sheath); R(tx + tw - 1, hipY + bob - 4, 1, 3, k.gold); }
       }
       if (def.style === 'dokkaebi') {   // 맨몸 + 어깨에 걸친 새끼줄 천
         R(tx, tTop, tw, th, k.skin);
@@ -198,13 +229,17 @@ const ART = (() => {
           R(tx + tw - 3, tTop, 2, 1, k.shirt); R(tx + tw - 4, tTop + 1, 2, 1, k.shirt); R(tx + tw - 5, tTop + 2, 2, 1, k.shirt);
           R(tx + tw - 6, tTop + 3, 1, th - 3, k.topD);
         }
+        if (def.style === 'mugyeom') {   // 어깨 망토(해진 끝) + 주홍 가슴끈
+          R(tx - 1, tTop, tw + 1, 3, k.topD); R(tx - 1, tTop + 3, 1, 1, k.topD); R(tx + 2, tTop + 3, 1, 1, k.topD); R(tx + 5, tTop + 3, 1, 1, k.topD);
+          for (let i = 0; i < 5; i++) R(tx + 1 + i, tTop + 3 + i, 1, 1, k.accent);
+        }
       }
       const big = def.style === 'brute' || def.style === 'dokkaebi';
       const bh = big ? 2 : 1;
       R(tx, hipY + bob - bh, tw, bh, k.belt);
       if (big) R(tx + tw - 4, hipY + bob - 2, 2, 2, k.accent);   // 덩치 버클 / 도깨비 방울
       if (def.style === 'dokkaebi') R(tx + tw - 4, hipY + bob, 2, 1, k.accent);
-      if (def.style === 'mugyeom') { R(tx + tw - 3, hipY + bob - 1, 2, 1, k.gold); R(tx + tw - 2, hipY + bob, 1, 4, k.accent); }   // 허리 장식 + 주홍 술
+      if (def.style === 'mugyeom') R(tx + tw - 3, hipY + bob - 1, 2, 1, k.gold);   // 허리 장식 (주홍 술은 자락 위에 그림)
       R(tx + 1, hipY + bob, tw - 2, 2, k.pants);   // 골반
     }
 
@@ -226,12 +261,14 @@ const ART = (() => {
         R(hx, hy, hw - 1, 2, k.skinD);
         R(hx + 1, hy - 3, 4, 3, k.hair); R(hx + 2, hy - 4, 2, 1, k.hair);
         if (!hurt) { R(hx + 3, hy + 2, hw - 2, 2, k.accent); R(hx + hw - 1, hy + 2, 1, 1, '#9be7ff'); }
-      } else if (def.style === 'mugyeom') {   // 상투(금속 장식) + 흘러내린 머리 + 주홍 끈
+      } else if (def.style === 'mugyeom') {   // 높은 상투(금속 관·동곳) + 얼굴 옆으로 흘러내린 가닥 + 뒤로 날리는 머리
         R(hx - 1, hy - 1, hw + 1, 2, k.hair);
-        R(hx - 1, hy + 1, 3, 6, k.hair);
-        R(hx + 1, hy - 4, 3, 3, k.hair); R(hx + 1, hy - 3, 3, 1, k.gold);
-        R(hx + hw - 2, hy + 1, 1, 2, k.hair);
-        R(hx - 2, hy - 3, 3, 1, k.accent); R(hx - 4, hy - 2 - bob, 2, 1, k.accent);
+        R(hx - 1, hy + 1, 2, 6, k.hair);
+        R(hx + 1, hy - 4, 3, 3, k.hair); R(hx + 1, hy - 3, 3, 1, k.gold); R(hx + 2, hy - 5, 1, 1, k.gold);
+        R(hx + hw - 2, hy + 1, 2, 1, k.hair); R(hx + 2, hy + 1, 1, 5, k.hair);   // 앞머리 + 귀 앞 가닥
+        if (!hurt) R(hx + hw - 3, hy + 2, 2, 1, k.hair);   // 날카로운 눈썹
+        R(hx - 3, hy - 2 - bob, 3, 1, k.hair); R(hx - 4, hy - 1 - bob, 2, 1, k.hair);
+        R(hx - 1, hy - 3, 2, 1, k.accent);
       } else if (def.style === 'wongwi') {    // 얼굴을 가린 긴 머리, 틈으로 보이는 눈빛
         R(hx - 1, hy - 1, hw + 1, 3, k.hair);
         R(hx - 1, hy, 4, hh + 5, k.hair);
@@ -254,20 +291,29 @@ const ART = (() => {
     }
 
     function skirt() {   // 도포·소복 자락: 허리에서 넓어지며 내려옴 (발차기 때는 짧게)
-      const len = pose.near === 'kick' ? 2 : def.skirt;
-      for (let i = 0; i < len; i++) R(tx - 1 - (i >> 1), hipY + bob + i, tw + 2 + (i >> 1) * 2, 1, i === len - 1 ? k.topD : k.top);
+      const len = pose.near === 'kick' ? 2 : def.skirt, mg = def.style === 'mugyeom';
+      for (let i = 0; i < len; i++) {
+        const off = mg ? i >> 2 : i >> 1, x0 = tx - 1 - off, w = tw + 2 + off * 2;
+        R(x0, hipY + bob + i, w, 1, i === len - 1 ? k.topD : k.top);
+        if (mg && i > 0 && i < len - 1) R(x0 + w - 4, hipY + bob + i, 2, 1, k.inner);   // 앞이 갈라져 보이는 속옷
+      }
       R(tx - 1, hipY + bob, 1, len, k.topD);
+      if (mg) {   // 해진 끝단 + 주홍 술 2가닥 (자락 위)
+        for (let x = tx - 1 - (len >> 2); x < tx + tw + 1 + (len >> 2); x += 3) R(x, hipY + bob + len, 1, 1, k.topD);
+        const tl = Math.min(7, len + 1);
+        R(tx + tw - 3, hipY + bob, 1, tl, k.accent); R(tx + tw - 1, hipY + bob + 1, 1, tl - 2, k.accent); R(tx + tw - 3, hipY + bob, 1, 1, k.gold);
+      }
       if (def.style === 'wongwi') for (let x = tx - 2; x < tx + tw + 2; x += 2) R(x, hipY + bob + len, 1, 1, k.topD);   // 해진 끝단
     }
 
     // 뒤에 있는 것부터 그린다
-    arm(pose.farArm, tx + 1, false);
+    arm(swap ? 'guard' : pose.farArm, tx + 1, false);
     leg(pose.far, CX - lw, false);
     torso();
     leg(pose.near, CX, true);
     if (def.skirt) skirt();
     head();
-    arm(pose.arm, tx + Math.floor(tw / 2) - 1, true);
+    arm(swap ? 'punch' : pose.arm, tx + Math.floor(tw / 2) - 1, true);
     return c;
   }
 
@@ -286,6 +332,7 @@ const ART = (() => {
     if (def.style === 'thug') R(x - 3, y - hw + 1, 3, 4, k.hair);
     if (def.style === 'brute') R(x + hh - 3, y - hw, 3, hw - 1, k.hair);
     if (def.style === 'mugyeom') { R(x - 1, y - hw, 3, hw, k.hair); R(x - 3, y - hw + 2, 2, 3, k.hair); R(x - 3, y - hw + 3, 2, 1, k.gold); R(x - 4, y - hw + 1, 1, 1, k.accent); }
+    const coat = def.skirt ? Math.min(def.skirt, def.legLen - 2) : 0;   // 도포 자락이 다리를 덮음
     if (def.style === 'wongwi') { R(x - 5, y - hw + 1, 6, hw - 1, k.hair); R(x + 1, y - hw, 2, hw - 2, k.hair); }
     if (def.style === 'dokkaebi') { R(x - 1, y - hw, 3, hw, k.hair); R(x - 3, y - hw + 1, 2, 1, k.horn); R(x - 3, y - 3, 2, 1, k.horn); R(x + hh - 3, y - hw, 3, hw - 1, k.hair); }
     x += hh;
@@ -298,6 +345,7 @@ const ART = (() => {
     R(x, y - def.legW - 2, def.legLen, def.legW, k.pantsD);
     R(x, y - def.legW, def.legLen, def.legW, k.pants);
     R(x + def.legLen, y - def.legW - 4, 2, def.legW + 4, k.boots);
+    if (coat) { R(x, y - def.legW - 3, coat, def.legW + 3, k.top); R(x, y - 1, coat, 1, k.topD); }
     return c;
   }
 
@@ -314,7 +362,7 @@ const ART = (() => {
     const { hw, hh, hx, hy } = geometry(def);
     const [face, fg] = canvas(hw + 8, hh + 7);
     fg.drawImage(bust, hx - 4, hy - 4, hw + 8, hh + 7, 0, 0, hw + 8, hh + 7);
-    return { frames, flash, face };
+    return { frames, flash, face, sheet: {} };
   }
 
   // ----- 타격 이펙트 (3장) -----
@@ -512,7 +560,7 @@ const ART = (() => {
     return c;
   }
 
-  // ----- 배경: 조선 마을 밤 (설정화 assets/joseon/06·05·04 참고) -----
+  // ----- 배경: 조선 마을 밤 (설정화 assets/reference/06·05·04 참고) -----
   function hanokRoof(R, cx, y, w, h, col, line, ridge) {   // 기와지붕: 아래로 넓어지고 처마 끝이 들림
     for (let i = 0; i < h; i++) {
       const rw = Math.round(w * 0.6 + w * 0.4 * (i / Math.max(1, h - 1)));
@@ -666,7 +714,7 @@ const ART = (() => {
     jGlow(g, R, lamps);
     return c;
   }
-  // 그림 질감(assets/joseon/floor_dirt.png, 원본 06 에서 잘라 1/3 로 줄인 것)으로 바닥을 깐다. 좌우를 번갈아 뒤집어 이음매를 없앤다
+  // 그림 질감(assets/joseon/floor_dirt.png, 원본 assets/reference/06 에서 잘라 1/3 로 줄인 것)으로 바닥을 깐다. 좌우를 번갈아 뒤집어 잇는다 (이음매가 좌우 대칭 무늬로 보임 — 오너 판단 대기, docs/joseon-p0.md)
   function texturedFloor(img, wu, hu, lamps) {
     const [c, g] = canvas(wu, hu); const R = painter(g);
     R(0, 0, wu, hu, '#3f3428');
@@ -716,5 +764,32 @@ const ART = (() => {
   const characters = {};
   for (const [id, def] of Object.entries(CHARACTERS)) characters[id] = buildCharacter(def);
 
-  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, texturedFloor, text };
+  // ----- 정식 캐릭터 스프라이트로 바꾸기 (규격: docs/sprite-spec.md, 목록: data/sprites.js) -----
+  // 코드 그림은 임시 전투 스프라이트다. 시트를 불러오면 시트에 있는 동작만 바뀌고, 없는 동작은 코드 그림을 그대로 쓴다
+  function useSpriteSheet(id, img, spec) {
+    const set = characters[id];
+    for (const [name, [col, row]] of Object.entries(spec.frames)) {
+      const [c, g] = canvas(spec.frameW, spec.frameH);
+      g.drawImage(img, col * spec.frameW, row * spec.frameH, spec.frameW, spec.frameH, 0, 0, spec.frameW, spec.frameH);
+      set.sheet[name] = { img: c, flash: silhouette(c, '#ffffff') };
+    }
+    set.spec = spec;
+    if (spec.face && set.sheet.idle0) {
+      const [x, y, w, h] = spec.face, [c, g] = canvas(w, h);
+      g.drawImage(set.sheet.idle0.img, x, y, w, h, 0, 0, w, h);
+      set.sheetFace = c;
+    }
+  }
+  // 그릴 그림 한 장: { img, scale(화면 px / 그림 px), ax·ay(그림 안 발 기준점) }. 잡기 별칭 칸이 시트에 없으면 원래 동작 칸을 쓴다
+  function frameOf(id, name, flash) {
+    const set = characters[id], sh = set.sheet[name] || set.sheet[BARE[name]];
+    if (sh) return { img: flash ? sh.flash : sh.img, scale: set.spec.scale, ax: set.spec.footX, ay: set.spec.footY };
+    return { img: (flash ? set.flash : set.frames)[name], scale: S, ax: CX, ay: FOOT };
+  }
+  function faceOf(id) {   // HUD 얼굴: 시트 얼굴은 높이 42px 로 맞춘다
+    const set = characters[id];
+    return set.sheetFace ? { img: set.sheetFace, scale: 42 / set.sheetFace.height } : { img: set.face, scale: S };
+  }
+
+  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, texturedFloor, useSpriteSheet, frameOf, faceOf, BARE, text };
 })();

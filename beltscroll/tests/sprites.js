@@ -7,7 +7,7 @@ const SPEC = { src: 'assets/sprites/mugyeom.png', frameW: 64, frameH: 64, footX:
   frames: { idle0: [0, 0], idle1: [1, 0], walk0: [2, 0], punch: [3, 0] } };
 function copyGame(spec) {
   fs.rmSync(base, { recursive: true, force: true });
-  fs.cpSync(ROOT, base, { recursive: true, filter: s => !s.startsWith(ROOT + '/tests') && !s.startsWith(ROOT + '/assets/reference') && !s.startsWith(ROOT + '/docs') });
+  for (const f of ['index.html', 'art.js', 'data', 'assets/joseon']) fs.cpSync(ROOT + '/' + f, base + '/' + f, { recursive: true });
   fs.writeFileSync(base + '/data/sprites.js', `window.BB_DATA = window.BB_DATA || {};\nBB_DATA.sprites = ${JSON.stringify(spec ? { mugyeom: spec } : {})};\n`);
 }
 async function fakeSheet(b) {   // 칸마다 다른 색 사람 모양 4칸

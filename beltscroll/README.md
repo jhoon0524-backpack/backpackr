@@ -13,7 +13,9 @@
 | `data/waves.js` | 웨이브 구성 (어디서 몇 명, 어떤 적) |
 | `data/feel.js` | 타격감 숫자 (멈춤·화면 밀림·밀려남·번쩍임) |
 | `tests/` | 자동 측정 스크립트 (게임 실행엔 필요 없음, 돌리는 법은 `tests/README.md`) |
-| `assets/joseon/` | 조선 퇴마전 그림: `floor_dirt.png`(바닥 질감, 게임이 읽음), `reference/`(설정화 원본 7장, 참고용) |
+| `assets/reference/` | 조선 퇴마전 설정화 원본 7장 + README. **공식 아트 스타일 기준** (게임은 직접 읽지 않음) |
+| `assets/joseon/floor_dirt.png` | 바닥 질감 (06 설정화에서 잘라 줄임, 게임이 읽음) |
+| `data/sprites.js` | 정식 캐릭터 스프라이트 시트 목록 (비어 있으면 코드 그림 = 임시 전투 스프라이트). 규격 `docs/sprite-spec.md` |
 
 ## 실행하는 법
 

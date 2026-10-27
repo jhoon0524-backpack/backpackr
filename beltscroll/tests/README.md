@@ -49,5 +49,6 @@ GAME_URL=file:///전버전/폴더/index.html node run-all.js
 | `determ` | 같은 입력이면 같은 판인지: 클리어까지 3판 기록 비교 |
 | `addenemy` | data 파일만 고쳐 새 적을 넣으면 동작하는지 (사본에서) |
 | `typo` | data 파일 이름 오타 알림창 |
+| `sprites` | 정식 스프라이트 교체 구조: 가짜 시트 적용·빠진 칸·파일 없음, 그림만 바뀌고 판은 같은지 |
 | `test` | 자동 플레이로 웨이브 3개 클리어 (스크린샷 `out/0*.png`). 실제 시간으로 노는 측정이라 돌릴 때마다 위치 숫자가 다름 |
 | `shots.js` (run-all 에 없음) | 전후 비교 사진: `node shots.js before` → 고친 뒤 `node shots.js after` |
