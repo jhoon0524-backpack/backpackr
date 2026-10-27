@@ -306,6 +306,7 @@ function update() {
         if (hit('KeyZ', 'KeyJ') && p.attack <= BUFFER_FRAMES) p.buffered = true;  // 선입력
       } else {
         p.comboTimer = COMBO_WINDOW;
+        if (p.z > 0) p.buffered = false;   // 공중에서 끝난 공격의 선입력은 버린다 (착지 때 멋대로 나가지 않게)
       }
     }
     if (p.attack === 0) {
