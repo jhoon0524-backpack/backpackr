@@ -25,6 +25,7 @@
   #stage:-webkit-full-screen { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; }
   #stage:-webkit-full-screen #frame { width: min(100vw, 100vh * 16 / 9); }
   #stage:-webkit-full-screen canvas { border-radius: 0; box-shadow: none; }
+  #btnSound { position: absolute; top: calc(9% + 8px); right: 56px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 18px; line-height: 1; padding: 0; cursor: pointer; }
   #btnFull { position: absolute; top: calc(9% + 8px); right: 8px; width: 40px; height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,.4); background: rgba(14,11,22,.55); color: #fff; font-size: 20px; line-height: 1; padding: 0; cursor: pointer; }
   /* 휴대폰(폭 600px 이하 터치 전용 기기)을 세로로 들면 가로로 돌리라는 안내 (게임은 잠시 멈춤).
      전체화면 중에도 보이도록 #stage 안에 둔다. 터치 노트북·태블릿은 막지 않는다 */
@@ -59,6 +60,7 @@
   <div id="stick" class="touch"><div class="base"></div><div class="knob"></div></div>
   <div id="btnJump" class="btn touch">점프</div>
   <div id="btnAttack" class="btn touch">공격</div>
+  <button id="btnSound" type="button" aria-label="타격음 켜기" title="타격음 켜기/끄기 (M)">🔇</button>
   <button id="btnFull" type="button" aria-label="전체화면" title="전체화면">⛶</button>
  </div>
  <div id="rotate"><div class="phone"></div><div>휴대폰을 가로로 돌리면<br>크게 할 수 있어요</div></div>
@@ -87,6 +89,7 @@ document.fonts && document.fonts.load('16px "Press Start 2P"').catch(() => {});
 
 const keys = {};
 addEventListener('keydown', e => {
+  if (e.code === 'KeyM' && !e.repeat) toggleSound();   // 소리는 키 누름 안에서 켜야 브라우저가 허락한다
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
   if (!e.repeat) pressed[e.code] = true;
   keys[e.code] = true;
@@ -153,6 +156,9 @@ bindButton('btnJump', 'KeyX');
 
 // ===== 화면 크게: 전체화면 + 가로 고정 (지원하는 기기만. 아이폰 사파리는 전체화면을 지원하지 않아 버튼을 숨긴다) =====
 const btnFull = document.getElementById('btnFull');
+const btnSound = document.getElementById('btnSound');
+if (!(window.AudioContext || window.webkitAudioContext)) btnSound.style.display = 'none';   // 소리를 낼 수 없는 브라우저
+btnSound.addEventListener('click', () => { btnSound.blur(); toggleSound(); });   // 포커스가 남으면 Enter 가 버튼을 누른다
 if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) btnFull.style.display = 'none';
 btnFull.addEventListener('click', () => {
   btnFull.blur();   // 버튼에 포커스가 남으면 Enter(시작 키)가 버튼을 다시 눌러버린다
@@ -246,8 +252,54 @@ const FEEL = {
 const KILL_FLASH_MULT = 2;   // 적을 죽이는 타격은 흰 번쩍임 2배
 
 // ===== 디버그 =====
-// H: 판정 범위 표시 / F: 타격감 강제 (auto → normal → heavy) / G: 0.25배속
-const debug = { hitbox: false, feel: 'auto', slow: false };
+// H: 판정 범위 표시 / F: 타격감 강제 (auto → normal → heavy) / G: 0.25배속 / M: 타격음 켜기·끄기
+const debug = { hitbox: false, feel: 'auto', slow: false, sound: false };
+
+// ===== 타격음 (5단계). 코드로 합성, 파일 없음. normal·heavy 는 음높이·길이만 다르다 (설계: docs/stage5-sound.md) =====
+const SOUND = {
+  normal: { freq: 220, dur: 0.09 },   // Hz, 초
+  heavy:  { freq: 110, dur: 0.20 },
+  volume: 0.5,      // 최대 음량
+  noiseMix: 0.35,   // "탁" 잡음 비율
+};
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audio = null, lastSound = { time: -1, kind: null };
+function toggleSound() {
+  if (!AudioCtx) return;
+  debug.sound = !debug.sound;
+  if (debug.sound) {
+    if (!audio) audio = new AudioCtx();
+    if (audio.resume) audio.resume();
+    playHit('normal', true);   // 켰다는 확인
+  }
+  const b = document.getElementById('btnSound');
+  b.textContent = debug.sound ? '🔊' : '🔇';
+  b.setAttribute('aria-label', debug.sound ? '타격음 끄기' : '타격음 켜기');
+}
+function playHit(kind, preview) {
+  if (!debug.sound || !audio) return;
+  if (!preview) {   // 한 프레임에 여러 번 맞혀도 1번 (heavy 가 있으면 heavy)
+    if (lastSound.time === time && (lastSound.kind === 'heavy' || lastSound.kind === kind)) return;
+    lastSound = { time, kind };
+  }
+  const sd = SOUND[kind], t0 = audio.currentTime;
+  const out = audio.createGain();
+  out.gain.setValueAtTime(0.0001, t0);
+  out.gain.exponentialRampToValueAtTime(SOUND.volume, t0 + 0.002);
+  out.gain.exponentialRampToValueAtTime(0.0001, t0 + sd.dur);
+  out.connect(audio.destination);
+  const osc = audio.createOscillator();   // "퍽": 음높이가 빠르게 떨어지는 낮은 소리
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(sd.freq, t0);
+  osc.frequency.exponentialRampToValueAtTime(sd.freq * 0.4, t0 + sd.dur);
+  osc.connect(out); osc.start(t0); osc.stop(t0 + sd.dur + 0.02);
+  const len = Math.ceil(audio.sampleRate * sd.dur), buf = audio.createBuffer(1, len, audio.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const noise = audio.createBufferSource(); noise.buffer = buf;   // "탁": 음높이에 맞춘 대역의 짧은 잡음
+  const bp = audio.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = sd.freq * 8;
+  const ng = audio.createGain(); ng.gain.value = SOUND.noiseMix;
+  noise.connect(bp); bp.connect(ng); ng.connect(out); noise.start(t0);
+}
 const feelFor = kind => FEEL[debug.feel === 'auto' ? kind : debug.feel];
 
 // ===== 상태 =====
@@ -306,6 +358,7 @@ function burst(x, y, color, n = 8) {
 // 카메라 킥: 타격 방향으로 밀렸다 돌아온다 (더 센 킥이 덮어쓴다)
 const frozen = f => time <= f.frozenUntil;
 function impact(feel, victim, attacker, dir) {
+  playHit(feel === FEEL.heavy ? 'heavy' : 'normal');   // 소리도 타격감을 따른다 (F 강제 포함)
   victim.frozenUntil = Math.max(victim.frozenUntil, time + feel.hitstop);
   if (attacker) attacker.frozenUntil = Math.max(attacker.frozenUntil, time + feel.hitstop);
   const left = camKick ? camKick.amp * (1 - camKick.t / camKick.dur) : 0;
@@ -865,10 +918,11 @@ function drawHUD() {
   }
 }
 
-function drawDebugModes() {   // F·G 상태를 오른쪽 아래 구석에 표시
+function drawDebugModes() {   // F·G·M 상태를 오른쪽 아래 구석에 표시
   const tags = [];
   if (debug.feel !== 'auto') tags.push(`FEEL ${debug.feel.toUpperCase()}`);
   if (debug.slow) tags.push('x0.25');
+  if (debug.sound) tags.push('SOUND');
   if (!tags.length) return;
   ctx.font = `10px ${FONT}`; ctx.textAlign = 'right'; ctx.fillStyle = '#ffd34d';
   ctx.fillText(tags.join('  '), W - 12, H - 12);
