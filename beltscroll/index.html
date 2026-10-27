@@ -245,7 +245,7 @@ function reset() {
     attack: 0, combo: 0, comboTimer: 0, hitstun: 0, invuln: 0, down: 0,
     lastHit: false, buffered: false, lunge: 0, swing: null,
     frozenUntil: 0, vx: 0, kbFriction: 0, flash: 0,
-    move: null, jumpKick: null, jumpKickUsed: false, landLag: 0,
+    move: null, jumpKick: null, jumpKickUsed: false, landLag: 0, jumped: false,
   };
   debug.hits = 0; debug.misses = 0;
   enemies = [];
@@ -341,7 +341,7 @@ function damagePlayer(dmg, dir, knockdown, attacker) {
   if (player.invuln > 0 || player.down > 0) return;
   player.hp = Math.max(0, player.hp - dmg);
   player.attack = 0; player.combo = 0; player.buffered = false; player.lunge = 0;
-  player.jumpKick = null; player.landLag = 0;
+  player.jumpKick = null; player.landLag = 0; player.jumped = false;
   burst(player.x, player.y - player.h / 2 - player.z, '#ff6b6b');
   sparks.push({ x: player.x - dir * 10, y: player.y, h: player.z + player.h * 0.65, t: 0 });
   const feel = feelFor('normal');
@@ -431,8 +431,8 @@ function update() {
       p.z += p.vz; p.vz -= 0.45;
       if (p.z <= 0) {
         p.z = 0; p.vz = 0;
-        if (p.down === 0 && p.hitstun === 0) p.landLag = LANDING_LAG;
-        p.jumpKick = null; p.jumpKickUsed = false;
+        if (p.jumped) p.landLag = LANDING_LAG;   // 스스로 뛴 점프만. 공중에서 맞았거나 넘어진 착지는 제외
+        p.jumped = false; p.jumpKick = null; p.jumpKickUsed = false;
       }
     }
 
@@ -445,6 +445,7 @@ function update() {
     } else if (p.hitstun > 0) {
       p.hitstun--;
     } else if (p.landLag > 0) {
+      if (hit('KeyZ', 'KeyJ')) p.buffered = true;   // 착지 경직 중 누른 공격은 기억했다가 경직이 끝나면 바로 낸다 (줄이기 전에 확인)
       p.landLag--;
     } else {
       if (p.attack > 0) {
@@ -469,7 +470,7 @@ function update() {
         p.y += (my / len) * p.speed * 0.6;
 
         if ((p.buffered || hit('KeyZ', 'KeyJ')) && p.z === 0) startAttack(p);      // 땅: 공격 (같은 프레임 점프는 무시)
-        else if (hit('KeyX', 'KeyK') && p.z === 0) { p.vz = 9; p.z = 1; }       // 땅: 점프
+        else if (hit('KeyX', 'KeyK') && p.z === 0) { p.vz = 9; p.z = 1; p.jumped = true; }   // 땅: 점프
         else if (hit('KeyZ', 'KeyJ') && p.z > 0 && !p.jumpKickUsed) {         // 공중: 점프 공격 (점프당 1회)
           p.jumpKick = { t: 0, hit: false }; p.jumpKickUsed = true;
         }
@@ -552,8 +553,9 @@ function update() {
     // 플레이어 옆 자리(좌 또는 우)로 접근
     const wantX = p.x - e.dir * ENEMY_STOP;
     const ddx = wantX - e.x;
-    // 주인공 공격의 회수 구간에만 빨라진다 (헛손질을 노린다)
-    const spd = e.speed * (p.attack > 0 && p.attack <= ENEMY_AI.punishWindow ? ENEMY_AI.punishSpeed : 1);
+    // 주인공 공격의 회수 구간·착지 경직에만 빨라진다 (헛손질을 노린다)
+    const recovering = (p.attack > 0 && p.attack <= ENEMY_AI.punishWindow) || p.landLag > 0;   // 착지 경직도 회수 구간
+    const spd = e.speed * (recovering ? ENEMY_AI.punishSpeed : 1);
     if (Math.abs(ddx) > 4) e.x += Math.sign(ddx) * spd;
     if (Math.abs(dy) > 4) e.y += Math.sign(dy) * spd * 0.7;
     e.y = clamp(e.y, GROUND_TOP, GROUND_BOTTOM);
@@ -564,7 +566,7 @@ function update() {
     const alive = enemies.filter(o => !o.dead).length;
     const attackers = enemies.filter(o => !o.dead && o.attack > 0).length;
     const maxA = alive >= ENEMY_AI.crowdSize ? ENEMY_AI.maxAttackersCrowd : ENEMY_AI.maxAttackers;
-    if (Math.abs(dx) <= ENEMY_AI.attackStart && Math.abs(dy) < 16 && e.cooldown <= 0 && p.down === 0 && attackers < maxA) {
+    if (Math.abs(dx) <= ENEMY_AI.attackStart && Math.abs(dy) < 16 && e.cooldown <= 0 && e.invuln === 0 && p.down === 0 && attackers < maxA) {   // 기상 무적 중엔 공격도 안 한다
       e.dir = dx > 0 ? 1 : -1;
       e.attack = e.windup;
       e.cooldown = 90 + Math.floor(Math.random() * 60);
