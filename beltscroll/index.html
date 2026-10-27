@@ -767,13 +767,16 @@ function update() {
     if (e.invuln > 0) e.invuln--;
     slide(e);
     keepOnScreen(e);
-    if (e.z > 0 || e.vz !== 0) { e.z += e.vz; e.vz -= 0.45; if (e.z <= 0) { e.z = 0; e.vz = 0; } }
+    if (e.z > 0 || e.vz !== 0) {
+      e.z += e.vz; e.vz -= 0.45;
+      if (e.z <= 0) { e.z = 0; e.vz = 0; if (e.down > 0 && e.hp <= 0) queueSound('ko'); }   // 처치된 적이 바닥에 닿는 순간 "쓰러짐"
+    }
     if (e.thrown) updateThrown(e);
 
     if (e.down > 0) {
       e.down--;
       if (e.down === 0) {
-        if (e.hp <= 0) { e.dead = 1; burst(e.x, e.y - 30, '#ffffff', 14); queueSound('ko'); }   // 쓰러져 사라짐
+        if (e.hp <= 0) { e.dead = 1; burst(e.x, e.y - 30, '#ffffff', 14); }
         else e.invuln = GETUP_INVULN;   // 기상 무적
       }
       continue;
