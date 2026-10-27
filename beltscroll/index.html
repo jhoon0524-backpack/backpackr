@@ -65,7 +65,7 @@
   <div id="btnJump" class="btn touch">점프</div>
   <div id="btnAttack" class="btn touch">공격</div>
   <button id="btnVibe" type="button" aria-label="진동 켜기" title="진동 켜기/끄기">📳</button>
-  <button id="btnSound" type="button" aria-label="타격음 켜기" title="타격음 켜기/끄기 (M)">🔇</button>
+  <button id="btnSound" type="button" aria-label="타격음 끄기" title="타격음 켜기/끄기 (M)">🔊</button>
   <button id="btnFull" type="button" aria-label="전체화면" title="전체화면">⛶</button>
  </div>
  <div id="rotate"><div class="phone"></div><div>휴대폰을 가로로 돌리면<br>크게 할 수 있어요</div></div>
@@ -94,12 +94,14 @@ document.fonts && document.fonts.load('16px "Press Start 2P"').catch(() => {});
 
 const keys = {};
 addEventListener('keydown', e => {
+  if (e.code !== 'KeyM' && debug.sound) ensureAudio();   // 소리 기본 켜짐: 첫 키에서 오디오 장치
   if (e.code === 'KeyM' && !e.repeat) toggleSound();   // 소리는 키 누름 안에서 켜야 브라우저가 허락한다
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
   if (!e.repeat) pressed[e.code] = true;
   keys[e.code] = true;
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
+addEventListener('pointerdown', () => { if (debug.sound) ensureAudio(); }, true);   // 첫 탭에서 오디오 장치
 let pressed = {};   // 이번 프레임에 새로 눌린 키
 
 const down = (...codes) => codes.some(c => keys[c]);
@@ -261,36 +263,49 @@ const KILL_FLASH_MULT = 2;   // 적을 죽이는 타격은 흰 번쩍임 2배
 
 // ===== 디버그 =====
 // H: 판정 범위 표시 / F: 타격감 강제 (auto → normal → heavy) / G: 0.25배속 / M: 타격음 켜기·끄기
-const debug = { hitbox: false, feel: 'auto', slow: false, sound: false, vibe: false };
+const debug = { hitbox: false, feel: 'auto', slow: false, sound: true, vibe: false };   // 소리 기본 켜짐 (5단계 판정 뒤 오너 결정)
 
-// ===== 타격음 (5단계). 코드로 합성, 파일 없음. normal·heavy 는 음높이·길이만 다르다 (설계: docs/stage5-sound.md) =====
+// ===== 소리 (5단계 + 후속). 코드로 합성, 파일 없음 (설계: docs/stage5-sound.md) =====
+// freq: "퍽" 사인파 시작 음높이(Hz, 끝은 freq×drop) / dur: 길이(초) / noise: "탁" 잡음 비율, band: 잡음 대역(Hz, bandTo 가 있으면 그쪽으로 미끄러짐) / vol: 최대 음량
+// 타격음 normal·heavy 는 음높이·길이만 다르다
 const SOUND = {
-  normal: { freq: 220, dur: 0.09 },   // Hz, 초
-  heavy:  { freq: 110, dur: 0.20 },
-  volume: 0.5,      // 최대 음량
-  noiseMix: 0.35,   // "탁" 잡음 비율
+  normal: { freq: 220, dur: 0.09, noise: 0.35, band: 1760 },   // 약타격
+  heavy:  { freq: 110, dur: 0.20, noise: 0.35, band: 880 },    // 강타격
+  grab:   { freq: 330, dur: 0.05, noise: 0.2, band: 2640, vol: 0.35 },   // 잡기 "턱"
+  thud:   { freq: 70,  dur: 0.32, noise: 0.5, band: 300,  vol: 0.6 },    // 던진 적 착지 "쿵"
+  whoosh: { dur: 0.08, noise: 1, band: 2400, bandTo: 600, vol: 0.18 },   // 헛스윙 "휙" (잡음만)
+  ko:     { freq: 440, drop: 0.25, dur: 0.35, wave: 'triangle', vol: 0.18 },   // 적 쓰러짐 (내려가는 음)
+  volume: 0.5,      // vol 이 없을 때 최대 음량
+  drop: 0.4,        // drop 이 없을 때 끝 음높이 비율
 };
+// 한 프레임에 소리 1개. 겹치면 높은 쪽: 쿵 > 강타격 > 쓰러짐 > 잡기 > 약타격 > 휙
+const SOUND_RANK = { whoosh: 1, normal: 2, grab: 3, ko: 4, heavy: 5, thud: 6 };
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audio = null, pendingSound = null;   // 이번 프레임에 낼 가장 센 소리 (프레임 끝에 1번)
+let audio = null, pendingSound = null;   // 이번 프레임에 낼 소리 (프레임 끝에 1번)
+// 브라우저는 사용자 입력 전에는 소리를 못 내게 하므로 첫 키·첫 탭에서 오디오 장치를 만든다
+function ensureAudio() {
+  if (!AudioCtx) return;
+  if (!audio) audio = new AudioCtx();
+  if (audio.state === 'suspended' && audio.resume) audio.resume();
+}
 function toggleSound() {
   if (!AudioCtx) return;
   debug.sound = !debug.sound;
-  if (debug.sound) {
-    if (!audio) audio = new AudioCtx();
-    if (audio.resume) audio.resume();
-    synthHit('normal');   // 켰다는 확인 (바로)
-  }
+  if (debug.sound) { ensureAudio(); synth('normal'); }   // 켰다는 확인 (바로)
   const b = document.getElementById('btnSound');
   b.textContent = debug.sound ? '🔊' : '🔇';
   b.setAttribute('aria-label', debug.sound ? '타격음 끄기' : '타격음 켜기');
 }
-// 타격 순간에는 모아 두기만 한다. 한 프레임에 여러 번 맞혀도 가장 센 것 1개를 프레임 끝(flushSound)에 낸다
+function queueSound(kind) {
+  if (debug.sound && audio && (!pendingSound || SOUND_RANK[kind] > SOUND_RANK[pendingSound])) pendingSound = kind;
+}
+// 타격 순간에는 모아 두기만 한다 (소리·진동). 프레임 끝(flushSound)에 1번씩
 function playHit(kind, playerHurt) {
-  if (debug.sound && audio && pendingSound !== 'heavy') pendingSound = kind;
+  queueSound(kind);
   if (debug.vibe) pendingVibe = Math.max(pendingVibe || 0, HAPTIC[playerHurt ? 'hurt' : kind]);   // 이번 프레임 가장 긴 진동 1번
 }
 function flushSound() {
-  if (pendingSound) synthHit(pendingSound);
+  if (pendingSound) synth(pendingSound);
   if (pendingVibe && canVibrate) navigator.vibrate(pendingVibe);
   pendingSound = null; pendingVibe = null;
 }
@@ -308,25 +323,31 @@ function toggleVibe() {
   b.classList.toggle('on', debug.vibe);
   b.setAttribute('aria-label', debug.vibe ? '진동 끄기' : '진동 켜기');
 }
-function synthHit(kind) {
+function synth(kind) {
   if (!debug.sound || !audio) return;
   const sd = SOUND[kind], t0 = audio.currentTime;
   const out = audio.createGain();
   out.gain.setValueAtTime(0.0001, t0);
-  out.gain.exponentialRampToValueAtTime(SOUND.volume, t0 + 0.002);
+  out.gain.exponentialRampToValueAtTime(sd.vol || SOUND.volume, t0 + 0.002);
   out.gain.exponentialRampToValueAtTime(0.0001, t0 + sd.dur);
   out.connect(audio.destination);
-  const osc = audio.createOscillator();   // "퍽": 음높이가 빠르게 떨어지는 낮은 소리
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(sd.freq, t0);
-  osc.frequency.exponentialRampToValueAtTime(sd.freq * 0.4, t0 + sd.dur);
-  osc.connect(out); osc.start(t0); osc.stop(t0 + sd.dur + 0.02);
-  const len = Math.ceil(audio.sampleRate * sd.dur), buf = audio.createBuffer(1, len, audio.sampleRate), d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
-  const noise = audio.createBufferSource(); noise.buffer = buf;   // "탁": 음높이에 맞춘 대역의 짧은 잡음
-  const bp = audio.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = sd.freq * 8;
-  const ng = audio.createGain(); ng.gain.value = SOUND.noiseMix;
-  noise.connect(bp); bp.connect(ng); ng.connect(out); noise.start(t0);
+  if (sd.freq) {   // "퍽": 음높이가 빠르게 떨어지는 소리
+    const osc = audio.createOscillator();
+    osc.type = sd.wave || 'sine';
+    osc.frequency.setValueAtTime(sd.freq, t0);
+    osc.frequency.exponentialRampToValueAtTime(sd.freq * (sd.drop || SOUND.drop), t0 + sd.dur);
+    osc.connect(out); osc.start(t0); osc.stop(t0 + sd.dur + 0.02);
+  }
+  if (sd.noise) {  // "탁"·"휙": 대역을 거른 짧은 잡음
+    const len = Math.ceil(audio.sampleRate * sd.dur), buf = audio.createBuffer(1, len, audio.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = audio.createBufferSource(); src.buffer = buf;
+    const bp = audio.createBiquadFilter(); bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(sd.band, t0);
+    if (sd.bandTo) bp.frequency.exponentialRampToValueAtTime(sd.bandTo, t0 + sd.dur);
+    const ng = audio.createGain(); ng.gain.value = sd.noise;
+    src.connect(bp); bp.connect(ng); ng.connect(out); src.start(t0);
+  }
 }
 const feelFor = kind => FEEL[debug.feel === 'auto' ? kind : debug.feel];
 
@@ -487,7 +508,7 @@ function resolveAttack(p, a) {
     any = true;
   }
   p.lastHit = any;
-  if (any) { p.lunge = a.step; debug.hits++; } else debug.misses++;
+  if (any) { p.lunge = a.step; debug.hits++; } else { debug.misses++; queueSound('whoosh'); }   // 헛스윙 "휙"
   p.swing = { x: p.x, y: p.y, dir: p.dir, reach: a.reach, hit: any, t: time };
 }
 
@@ -508,6 +529,7 @@ const canGrab = (p, e) => !e.dead && !e.grabbed && e.entered && e.down === 0 && 
   && (e.x - p.x) * p.dir > 0 && (e.x - p.x) * p.dir <= GRAB.range && Math.abs(e.y - p.y) < 14;
 
 function startGrab(p, e) {
+  queueSound('grab');   // "턱"
   p.grab = { e, t: 0, knees: 0, kneeT: 0, throwT: 0, throwDir: p.dir, queue: null };
   e.grabbed = true; e.attack = 0; e.hitstun = 0; e.vx = 0;
   p.grabPush = 0; p.grabTarget = null; p.buffered = false; p.combo = 0; p.lastHit = false;
@@ -596,6 +618,7 @@ function updateThrown(e) {
   burst(e.x, e.y - 10, '#ffd36b', 12);
   sparks.push({ x: e.x, y: e.y, h: 8, t: 0 });
   impact(feel, e, null, t.dir);
+  queueSound('thud');   // 착지 "쿵" (같은 프레임 강타격음보다 우선)
   if (lethal) score += e.score;
 }
 
@@ -750,7 +773,7 @@ function update() {
     if (e.down > 0) {
       e.down--;
       if (e.down === 0) {
-        if (e.hp <= 0) { e.dead = 1; burst(e.x, e.y - 30, '#ffffff', 14); }
+        if (e.hp <= 0) { e.dead = 1; burst(e.x, e.y - 30, '#ffffff', 14); queueSound('ko'); }   // 쓰러져 사라짐
         else e.invuln = GETUP_INVULN;   // 기상 무적
       }
       continue;
