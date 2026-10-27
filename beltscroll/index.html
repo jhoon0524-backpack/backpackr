@@ -159,7 +159,7 @@ const btnFull = document.getElementById('btnFull');
 const btnSound = document.getElementById('btnSound');
 if (!(window.AudioContext || window.webkitAudioContext)) btnSound.style.display = 'none';   // 소리를 낼 수 없는 브라우저
 btnSound.addEventListener('click', () => { btnSound.blur(); toggleSound(); });   // 포커스가 남으면 Enter 가 버튼을 누른다
-if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) btnFull.style.display = 'none';
+if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) { btnFull.style.display = 'none'; btnSound.style.right = '8px'; }   // 전체화면이 없으면 소리 버튼을 끝으로
 btnFull.addEventListener('click', () => {
   btnFull.blur();   // 버튼에 포커스가 남으면 Enter(시작 키)가 버튼을 다시 눌러버린다
   if (document.fullscreenElement || document.webkitFullscreenElement) {
@@ -263,25 +263,30 @@ const SOUND = {
   noiseMix: 0.35,   // "탁" 잡음 비율
 };
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audio = null, lastSound = { time: -1, kind: null };
+let audio = null, pendingSound = null;   // 이번 프레임에 낼 가장 센 소리 (프레임 끝에 1번)
 function toggleSound() {
   if (!AudioCtx) return;
   debug.sound = !debug.sound;
   if (debug.sound) {
     if (!audio) audio = new AudioCtx();
     if (audio.resume) audio.resume();
-    playHit('normal', true);   // 켰다는 확인
+    synthHit('normal');   // 켰다는 확인 (바로)
   }
   const b = document.getElementById('btnSound');
   b.textContent = debug.sound ? '🔊' : '🔇';
   b.setAttribute('aria-label', debug.sound ? '타격음 끄기' : '타격음 켜기');
 }
-function playHit(kind, preview) {
+// 타격 순간에는 모아 두기만 한다. 한 프레임에 여러 번 맞혀도 가장 센 것 1개를 프레임 끝(flushSound)에 낸다
+function playHit(kind) {
   if (!debug.sound || !audio) return;
-  if (!preview) {   // 한 프레임에 여러 번 맞혀도 1번 (heavy 가 있으면 heavy)
-    if (lastSound.time === time && (lastSound.kind === 'heavy' || lastSound.kind === kind)) return;
-    lastSound = { time, kind };
-  }
+  if (pendingSound !== 'heavy') pendingSound = kind;
+}
+function flushSound() {
+  if (pendingSound) synthHit(pendingSound);
+  pendingSound = null;
+}
+function synthHit(kind) {
+  if (!debug.sound || !audio) return;
   const sd = SOUND[kind], t0 = audio.currentTime;
   const out = audio.createGain();
   out.gain.setValueAtTime(0.0001, t0);
@@ -325,6 +330,7 @@ function reset() {
   waveState = 'walk';   // walk → fight → clear
   score = 0;
   camKick = null;
+  pendingSound = null;
   time = 0;
 }
 reset();
@@ -793,6 +799,7 @@ function update() {
   sparks = sparks.filter(s => s.t < 9);
   for (const q of particles) { q.x += q.vx; q.y += q.vy; q.vy += 0.3; q.life--; }
   particles = particles.filter(q => q.life > 0);
+  flushSound();   // 이번 프레임 타격음 (가장 센 것 1번)
 }
 
 // ===== 그리기 =====
