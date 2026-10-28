@@ -1,5 +1,5 @@
 // 도트 밀도 비교 (2026-10-28 오너 지시): 같은 장면을 코드 그림(3px 칸) · 1px 시안 · 2px 시험으로, 화면 조건별로 찍어 나란히.
-// 조건: PC 960×540 배율 1 / 휴대폰 가로 915×412 배율 2.625(Pixel 7) / 같은 화면 배율 1(저해상도·작은 창) / 배율 2.
+// 조건: PC 960×540 배율 1 / PC 1440×900 창(오너 PC 실측, 1.47배) / 휴대폰 가로 915×412 배율 2.625(Pixel 7) / 같은 화면 배율 1(저해상도·작은 창) / 배율 2.
 // 사진은 기기 픽셀 그대로(다시 줄이거나 늘리지 않음) 붙인다 — 비교 사진 자체가 축소로 뭉개지지 않게.
 // 쓰는 법: node tools/p1-draft/density-compare.js <코드 그림 버전 index.html 주소> → docs/p1/density-*.png
 const { chromium } = require('playwright');
@@ -17,7 +17,8 @@ const m2 = `"mugyeom": { "src": "assets/sprites/trial/mugyeom-2px.png", "frameW"
 fs.writeFileSync(path.join(copy2, 'data', 'sprites.js'), sprites.replace(/"mugyeom": \{[\s\S]*?\} \},\n/, m2 + '\n'));
 const VARIANTS = [['code', CODE_URL, '지금 코드 그림 (3px 칸)'], ['1px', pathToFileURL(path.join(ROOT, 'index.html')).href, '1px 시안 (128칸, scale 1)'], ['2px', pathToFileURL(path.join(copy2, 'index.html')).href, '2px 시험 (64칸, scale 2)']];
 const CONDS = [
-  ['pc', { viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 }, 'PC 960×540 · 배율 1 (게임 1px = 화면 1px)'],
+  ['pc', { viewport: { width: 960, height: 540 }, deviceScaleFactor: 1 }, 'PC 960×540 · 배율 1 (게임 1px = 화면 1px — 창이 정확히 게임 크기일 때만)'],
+  ['pc-window', { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 }, 'PC 1440×900 창 · 배율 1 (오너 PC 실측: 게임 1408×792 = 1.47배 비정수 확대 → 1px 선은 1·2px 로 섞이고 2px 선은 3px 로 고름)'],
   ['phone', { viewport: { width: 915, height: 412 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true }, '휴대폰 가로 915×412 · 배율 2.625 (Pixel 7 같은 보통 폰: 게임 1px = 기기 약 2px, 빠지는 칸 없음)'],
   ['phone-dpr1', { viewport: { width: 915, height: 412 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true }, '같은 화면 · 배율 1 (저해상도 기기·작은 창: 게임 1px = 기기 0.76px, 가장 가까운 픽셀만 남김 → 1px 줄 약 4줄에 1줄 빠짐)'],
   ['dpr2', { viewport: { width: 915, height: 412 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }, '같은 화면 · 배율 2 (게임 1px = 기기 1.53px → 1px 줄 굵기가 1·2px 로 고르지 않음)'],
