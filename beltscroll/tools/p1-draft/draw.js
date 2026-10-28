@@ -151,6 +151,7 @@ function makeDrawer(R) {   // R = 그림 1칸이 화면 몇 px 인지 (1 또는 
   }
   // 윤무겸 한 칸
   function mugyeom(p) {
+    if (R === 2 && p.nearArm.wr2) p = { ...p, nearArm: { el: p.nearArm.el2, wr: p.nearArm.wr2 } };   // 2px 판만 손 자리를 옮김 (칼날이 손에 가리지 않게)
     const fr = newFrame(), { C, Pv, Hc } = p;
     const shF = add(C, [-5, 1]), shN = add(C, [5, -1]);   // 먼 어깨·가까운 어깨
     // 먼 팔 → 먼 다리 → 가까운 다리 → (칼집) → 몸 → 머리 → 가까운 팔 → 칼 → 가까운 손
@@ -164,7 +165,7 @@ function makeDrawer(R) {   // R = 그림 1칸이 화면 몇 px 인지 (1 또는 
     head(fr, Hc, p.tilt || 0);
     sleeve(fr, shN, p.nearArm.el, p.nearArm.wr, false);
     let tip = null;
-    if (p.sword) tip = sword(fr, p.sword.grip, p.sword.ang, p.sword.blade);
+    if (p.sword) tip = sword(fr, (R === 2 && p.sword.grip2) || p.sword.grip, p.sword.ang, (R === 2 && p.sword.blade2) || p.sword.blade);   // grip2·blade2: 2px 판 칼끝 56px(판정 57 이하)·칼날 45px 이상에 맞춘 손 자리·길이
     if (p.farArm.onGrip) hand(fr, p.farArm.wr, p.farArm.el, true);
     hand(fr, p.nearArm.wr, p.nearArm.el, false);
     return { fr, tip };
@@ -198,7 +199,7 @@ function makeDrawer(R) {   // R = 그림 1칸이 화면 몇 px 인지 (1 또는 
                 farArm: { el: [-6, 77], wr: [3, 76] }, nearArm: { el: [-22, 68], wr: [-17, 63] }, sword: { grip: [-16, 63], ang: 2, blade: 46 } },
     // 3타 찌르기: 앞발을 크게 내딛고 상체를 앞으로(준비보다 약 11px), 칼 수평 (칼끝 57, 칼날 46, 높이 약 61)
     kick: { C: [-6, 76], Pv: [-11, 51], Hc: [-1, 89], tilt: 2, legs: [lg([-25, 24], [-38, 5], true), lg([5, 27], [11, 5], false)],
-            farArm: { el: [-20, 72], wr: [-28, 66] }, nearArm: { el: [-1, 68], wr: [6, 63] }, sword: { grip: [5, 61], ang: 0, blade: 50 } },
+            farArm: { el: [-20, 72], wr: [-28, 66] }, nearArm: { el: [-1, 68], wr: [6, 63], el2: [-6, 69], wr2: [1, 63] }, sword: { grip: [5, 61], ang: 0, blade: 50, grip2: [0, 61], blade2: 53 } },
     // 3타 회수: 칼끝을 앞 아래로 내리며 거두고 기본 자세로 돌아옴
     kickRecover: { C: [-4, 80], Pv: [-4, 56], Hc: [-2, 94], legs: [lg([-10, 30], [-15, 5], true), lg([5, 31], [8, 5], false)],
                    farArm: { el: [-9, 67], wr: [-4, 60] }, nearArm: { el: [3, 67], wr: [8, 62] }, sword: { grip: [8, 62], ang: -28, blade: 46 } },
@@ -287,7 +288,7 @@ function makeDrawer(R) {   // R = 그림 1칸이 화면 몇 px 인지 (1 또는 
     return { url: c.toDataURL('image/png'), info };
   }
   return {
-    R, W, H, FX, FY, MUG, DOK, MUG_ORDER, DOK_ORDER,
+    R, W, H, FX, FY, M, MUG, DOK, MUG_ORDER, DOK_ORDER,
     mugyeom: (order = MUG_ORDER) => sheet(order, mugyeom, MUG),
     dokkaebi: (order = DOK_ORDER) => sheet(order, dokkaebi, DOK),
   };

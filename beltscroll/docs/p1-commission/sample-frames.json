@@ -1,0 +1,19 @@
+{
+  "_설명": "윤무겸 샘플 6칸 칸 이름표 (프레임 매핑). 칸 이름 → [열, 행] (0부터). footX·footY·scale 은 게임 쪽에서 채움 — 아티스트는 frames 와 face(HUD 얼굴 영역 [x, y, 너비, 높이], 서기 칸 기준 — 지금 값은 시안 기준 자리표시)만 맞추면 됨. 형식은 docs/sprite-spec.md 의 data/sprites.js 와 같음.",
+  "src": "assets/sprites/mugyeom.png",
+  "frameW": 64,
+  "frameH": 64,
+  "footX": 32,
+  "footY": 60.5,
+  "scale": 2,
+  "height": 110,
+  "face": [22, 4, 21, 21],
+  "frames": {
+    "idle0": [0, 0],
+    "walk0": [1, 0],
+    "punch": [2, 0],
+    "kickPrep": [3, 0],
+    "kick": [4, 0],
+    "kickRecover": [5, 0]
+  }
+}
