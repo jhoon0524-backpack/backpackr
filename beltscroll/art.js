@@ -7,6 +7,8 @@
 // =====================================================================
 const ART = (() => {
   const S = 3;               // 픽셀 1칸 = 화면 3px
+  const SWORD_TIP = 18;      // 칼끝: 몸 중심 앞 18칸 (그 칸 오른쪽 끝 = 57px). index.html 의 1·2·3타 사거리가 이 값과 같아야 한다 (tests/reach.js)
+  const THRUST_BACK = 5;     // 3타 찌르기 그림을 뒤로 물리는 칸 수 (칼날 16칸 = 48px 가 40칸 프레임 안에 들어가게)
   const FW = 40, FH = 40;    // 캐릭터 프레임 한 장 크기 (칸)
   const CX = 20, FOOT = 38;  // 프레임 안 기준점: 몸 중심, 발바닥
   const INK = '#0e0b16';     // 외곽선 색
@@ -115,8 +117,12 @@ const ART = (() => {
     hurt:   { near: [-1, 0], far: [-4, 0], arm: 'back',   farArm: 'back',  lean: -2, bob: 1, face: 'hurt' },
   };
   // 잡기·무릎·던지기용: 그림 포즈는 punch·stomp·windup·punch2 와 같고 칼을 뽑지 않는다 (맨손으로 붙잡음)
-  const BARE = { hold: 'punch', knee: 'stomp', throwPrep: 'windup', throw: 'punch2' };
-  for (const [alias, base] of Object.entries(BARE)) POSES[alias] = { ...POSES[base] };
+  // airKick: 점프 공격 — 칼 든 캐릭터도 발차기 그림 (3타 kick 칸은 칼 찌르기라 따로)
+  // rush0·1: 적이 공격 직전 달려드는 그림 (팔은 예고 자세로 당긴 채 뜀). 정식 시트에 없으면 windup 칸
+  POSES.rush0 = { near: [5, 0], far: [-4, 2], arm: 'windup', farArm: 'guard', lean: 2, bob: 1 };
+  POSES.rush1 = { near: [-1, 2], far: [3, 0], arm: 'windup', farArm: 'guard', lean: 2 };
+  const BARE = { hold: 'punch', knee: 'stomp', throwPrep: 'windup', throw: 'punch2', airKick: 'kick', rush0: 'windup', rush1: 'windup' };
+  for (const [alias, base] of Object.entries(BARE)) if (!POSES[alias]) POSES[alias] = { ...POSES[base] };   // 따로 정의한 포즈(rush)는 그대로
 
   function geometry(def, pose = {}) {
     const [hw, hh] = def.head, [tw, th] = def.torso;
@@ -131,10 +137,19 @@ const ART = (() => {
 
   function drawPose(def, pose) {
     const [c, g] = canvas(FW, FH);
-    const R = painter(g), k = def.c;
+    const k = def.c, R0 = painter(g);
+    let shiftX = 0;   // 그림 전체를 가로로 옮김 (찌르기: 몸을 뒤로 물려 칼날을 길게)
+    const R = (x, y, w, h, col) => R0(x + shiftX, y, w, h, col);
+    const hit = { fists: [], blade: [] };   // 판정용 모양 (칸 좌표, 옮긴 뒤): 가드 주먹 사각형, 칼날 칸들
+    c.hit = hit;
     // 칼 든 캐릭터: 공격 포즈(준비·1·2·3타·내려찍기)에서만 칼을 뽑는다. 잡기 별칭 포즈(hold 등)는 맨손
     const armed = !!def.sword && [POSES.windup, POSES.punch, POSES.punch2, POSES.kick, POSES.stomp].includes(pose);
     const swap = armed && pose.farArm === 'punch';   // 2타: 칼 든 손(앞팔)으로 벤다
+    const thrust = armed && pose === POSES.kick;     // 3타: 발차기 대신 앞으로 내딛으며 찌르기 (점프 공격은 airKick 별칭으로 발차기 그대로)
+    // 찌르기 자세: 앞발 크게 내딛고 뒷다리 뻗음, 어깨·상체를 앞으로(lean 2), 자세를 낮추고(bob 1), 반대 팔은 뒤로 젖혀 힘을 실음.
+    // 칼끝은 57px 그대로 두고 칼날을 길게(16칸 = 48px) 보이려고 그림 전체를 THRUST_BACK 칸 뒤로 물린다 — 뒷다리가 길게 뻗은 깊은 찌르기
+    if (thrust) { pose = { ...pose, near: [8, 0], far: [-5, 0], arm: 'punch', farArm: 'back', lean: 2, bob: 1 }; shiftX = -THRUST_BACK; }
+    const nearSpec = pose.near;
     const { hw, hh, tw, th, bob, hipY, tTop, tx, hx, hy } = geometry(def, pose);
     const lw = def.legW, aw = def.armW, u = def.upper, f = def.fore;
     const sy = tTop + 1;
@@ -161,18 +176,22 @@ const ART = (() => {
       const skin = near ? k.skin : k.skinD;
       const sleeve = def.sleeves ? (near ? k.top : k.topD) : skin;
       const fist = near ? k.fist : k.fistD;
-      if (armed && near && kind === 'punch') {   // 칼 베기: 칼을 대각선으로 길게(약 17칸) 그리되 칼끝 가로 위치는 몸 중심 앞 13칸(39px)
-        // — 1·2타 판정 끝 48px 에서 적 몸 앞면에 닿는 자리 (원래 주먹 끝 11칸과 같은 감). 1타 내려베기(앞 아래로), 2타 올려베기(앞 위로)
-        const hy0 = swap ? sy + 6 : sy, tip = CX + 13, dy = swap ? -1 : 1;
-        R(sx - 1, hy0, 2, aw, sleeve); R(sx, hy0, 1, aw, k.bracer);
-        const fx = sx + 1; R(fx, hy0, aw, aw, fist);   // 손은 가슴 앞
-        const gx = fx + aw, gy = hy0 + 1;
+      if (armed && near && kind === 'punch') {   // 칼끝은 몸 중심 앞 18칸(오른쪽 끝 57px) — 이 자리가 1·2·3타 판정 끝 (벽사검 사거리, 오너 결정). 40칸 프레임 오른쪽 끝(외곽선 1칸 남김)
+        // 1타 내려베기: 가슴 앞 손에서 45° 앞 아래로 칼날 약 17칸 / 2타 올려베기: 허리 앞 손에서 45° 앞 위로
+        // 3타 찌르기: 팔을 앞으로 쭉 뻗고 칼을 수평으로. 그림 전체를 THRUST_BACK 칸 뒤로 물려 칼끝은 같은 57px, 칼날은 16칸(48px)
+        const dy = thrust ? 0 : swap ? -1 : 1, tip = CX + SWORD_TIP - shiftX;   // 옮긴 뒤 칼끝이 CX + SWORD_TIP 에 오게
+        const hy0 = thrust ? sy + 1 : swap ? sy + 6 : sy;
+        const gx = thrust ? sx + 3 + aw : tip - 12, n = tip - gx, fx = gx - aw, gy = hy0 + 1;
+        R(Math.min(sx, fx) - 1, hy0, Math.max(2, fx - sx + 1), aw, sleeve); R(fx - 1, hy0, 1, aw, k.bracer);
+        R(fx, hy0, aw, aw, fist);
         R(gx, gy - 1, 1, 3, k.gold);   // 코등이
-        for (let i = 1; gx + i <= tip; i++) {   // 가로 1칸에 세로 1.5칸 → 가로 약 9칸, 세로 약 14칸, 칼날 약 17칸
-          const x = gx + i, y0 = gy + Math.round((i - 1) * 1.5) * dy, y1 = gy + Math.round(i * 1.5) * dy;
-          for (let y = Math.min(y0, y1); y <= Math.max(y0, y1); y++) R(x, y, 1, 1, k.steel);
-          if (gx + i < tip) R(x - 1, y1, 1, 1, k.steelHi);
+        for (let i = 1; i <= n; i++) {
+          const x = gx + i, y = gy + i * dy;
+          R(x, y, 1, 1, k.steel); if (dy) R(x, y - dy, 1, 1, k.steel);   // 대각선은 2칸 두께로 끊김 없이
+          hit.blade.push([x + shiftX, y]); if (dy) hit.blade.push([x + shiftX, y - dy]); else hit.blade.push([x + shiftX, y + 1]);
+          if (i < n) { R(x, y - (dy || 1) * (dy ? 2 : 1), 1, 1, k.steelHi); hit.blade.push([x + shiftX, y - (dy || 1) * (dy ? 2 : 1)]); }   // 칼날 밝은 면도 칼날
         }
+        if (thrust) { R(gx + 1, gy + 1, n - 1, 1, k.steel); R(tip, gy - 1, 1, 3, k.steelHi); }   // 찌르기: 칼날 3칸 두께 + 칼끝 번쩍임
         return;
       }
       if (armed && near && kind === 'windup') {   // 칼을 어깨 뒤로 들어 올림
@@ -187,6 +206,7 @@ const ART = (() => {
         R(sx + ox, sy, aw, u + 1, sleeve);
         R(sx + ox + aw - 1, sy + u - 1 + oy, f, aw - 1, sleeve);
         R(sx + ox + aw - 2 + f, sy + u - aw + oy, aw, aw, fist);
+        hit.fists.push([sx + ox + aw - 2 + f + shiftX, sy + u - aw + oy, aw, aw]);   // 가드 주먹 (판정용)
       } else if (kind === 'punch') { // 앞으로 쭉
         R(sx, sy, u + f, aw, sleeve);
         if (near) R(sx, sy + aw - 1, u + f, 1, def.sleeves ? k.topD : k.skinD);
@@ -208,8 +228,8 @@ const ART = (() => {
 
     function torso() {
       if (def.style === 'mugyeom') {   // 칼집: 허리에서 뒤 아래로 비스듬히 늘어짐 (몸통 뒤에 먼저 그림). 칼을 뽑았으면 손잡이 없음
-        for (let i = 0; i < 14; i++) R(tx - i, hipY + bob - 2 + (i * 2 / 3 | 0), 1, 2, k.sheath);
-        R(tx - 13, hipY + bob + 6, 1, 2, k.gold); R(tx - 7, hipY + bob + 2, 1, 2, k.gold);
+        for (let i = 0; i < (thrust ? 9 : 14); i++) R(tx - i, hipY + bob - 2 + (i * 2 / 3 | 0), 1, 2, k.sheath);   // 찌르기는 뒤로 물린 만큼 짧게 (프레임 밖으로 안 나가게)
+        if (!thrust) R(tx - 13, hipY + bob + 6, 1, 2, k.gold); R(tx - 7, hipY + bob + 2, 1, 2, k.gold);
         if (!armed) { R(tx + tw - 1, hipY + bob - 3, 4, 1, k.sheath); R(tx + tw - 1, hipY + bob - 4, 1, 3, k.gold); }
       }
       if (def.style === 'dokkaebi') {   // 맨몸 + 솟은 어깨 근육 + 어깨에 걸친 새끼줄 천
@@ -295,7 +315,7 @@ const ART = (() => {
     }
 
     function skirt() {   // 도포·소복 자락: 허리에서 넓어지며 내려옴 (발차기 때는 짧게)
-      const len = pose.near === 'kick' ? 2 : def.skirt, mg = def.style === 'mugyeom';
+      const len = nearSpec === 'kick' ? 2 : thrust ? 5 : def.skirt, mg = def.style === 'mugyeom';   // 찌르기는 내딛은 다리가 보이게 짧게
       for (let i = 0; i < len; i++) {
         const off = mg ? i >> 2 : i >> 1, x0 = tx - 1 - off, w = tw + 2 + off * 2;
         R(x0, hipY + bob + i, w, 1, i === len - 1 ? k.topD : k.top);
@@ -314,7 +334,7 @@ const ART = (() => {
     arm(swap ? 'guard' : pose.farArm, tx + 1, false);
     leg(pose.far, CX - lw, false);
     torso();
-    leg(pose.near, CX, true);
+    leg(nearSpec, CX, true);
     if (def.skirt) skirt();
     head();
     arm(swap ? 'punch' : pose.arm, tx + Math.floor(tw / 2) - 1, true);
@@ -791,6 +811,8 @@ const ART = (() => {
     if (sh) return { img: flash ? sh.flash : sh.img, scale: set.spec.scale, ax: set.spec.footX, ay: set.spec.footY };
     return { img: (flash ? set.flash : set.frames)[name], scale: S, ax: CX, ay: FOOT };
   }
+  // 판정용 모양 (코드 그림 기준): 가드 주먹 사각형 [x, y, w, h] 과 칼날 칸 [x, y] 들, 프레임 칸 좌표 (CX·FOOT 기준)
+  function hitShapes(id, name) { const fr = characters[id].frames[name]; return (fr && fr.hit) || { fists: [], blade: [] }; }
   function heightOf(id, lying) {   // 화면 키 px (누워 있으면 누운 그림 높이. 시트에 height·downHeight 가 있으면 그 값)
     const set = characters[id];
     return lying ? set.sheetDownHeight || set.downHeight * S : set.sheetHeight || set.height * S;
@@ -800,5 +822,5 @@ const ART = (() => {
     return set.sheetFace ? { img: set.sheetFace, scale: 42 / set.sheetFace.height } : { img: set.face, scale: S };
   }
 
-  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, texturedFloor, useSpriteSheet, frameOf, faceOf, heightOf, BARE, text };
+  return { S, CX, FOOT, CHARACTERS, POSES, characters, sparks: buildSparks(), buildStage, texturedFloor, useSpriteSheet, frameOf, faceOf, heightOf, hitShapes, BARE, SWORD_TIP, text };
 })();

@@ -3,8 +3,8 @@ const { GAME, OUT, ROOT } = require('./paths');
 const { chromium } = require('playwright'); const fs = require('fs'); const { pathToFileURL } = require('url');
 const base = OUT + '/addtest';
 fs.rmSync(base, { recursive: true, force: true }); fs.mkdirSync(base + '/data', { recursive: true });
-for (const f of ['index.html', 'art.js', 'data/feel.js']) fs.copyFileSync(ROOT + '/' + f, base + '/' + f);
-fs.writeFileSync(base + '/data/enemies.js', fs.readFileSync(ROOT + '/data/enemies.js', 'utf8').replace('"knockdown": true }\n};', '"knockdown": true },\n  "boss":  { "hp": 120, "speed": 1.2, "w": 46, "h": 84, "dmg": 20, "score": 900, "windup": 34, "art": "brute", "knockdown": true }\n};'));
+for (const f of ['index.html', 'art.js', 'data/feel.js', 'data/sprites.js', 'data/classes.js']) fs.copyFileSync(ROOT + '/' + f, base + '/' + f);
+fs.writeFileSync(base + '/data/enemies.js', fs.readFileSync(ROOT + '/data/enemies.js', 'utf8').replace(/ }\n};\s*$/, ' },\n  "boss":  { "hp": 120, "speed": 1.2, "w": 46, "h": 84, "dmg": 20, "score": 900, "windup": 34, "art": "brute", "knockdown": true }\n};'));
 fs.writeFileSync(base + '/data/waves.js', fs.readFileSync(ROOT + '/data/waves.js', 'utf8').replace('{ "lockX": 300,  "enemies": [{ "type": "thug" }, { "type": "thug" }] }', '{ "lockX": 300,  "enemies": [{ "type": "boss" }, { "type": "thug" }] }'));
 (async () => {
   const b = await chromium.launch(); const errors = [];

@@ -16,6 +16,8 @@ node run-all.js
 ```
 각 측정의 마지막 줄이 화면에 나오고, 전체 출력은 `tests/out/results.txt` 에 남습니다. 마지막 줄의 `errors` 가 비어 있고 `기대 N / N` 이 맞는지 먼저 보되, **정상 여부의 판정은 고치기 전·후 results.txt 를 통째로 비교해 달라진 줄이 없는지**로 합니다(측정마다 출력 모양이 달라 마지막 줄만으로는 판정이 안 됩니다).
 
+밤거리(원래) 모드로 전부 돌리기: `GAME_URL="file:///…/index.html?theme=street" node run-all.js`
+
 바꾸기 전 버전과 비교하려면, 전 버전 사본의 index.html 주소를 주고 한 번 더 돌린 뒤 두 results.txt 를 비교합니다:
 ```
 GAME_URL=file:///전버전/폴더/index.html node run-all.js
@@ -49,6 +51,11 @@ GAME_URL=file:///전버전/폴더/index.html node run-all.js
 | `determ` | 같은 입력이면 같은 판인지: 클리어까지 3판 기록 비교 |
 | `addenemy` | data 파일만 고쳐 새 적을 넣으면 동작하는지 (사본에서) |
 | `typo` | data 파일 이름 오타 알림창 |
+| `reach` | 벽사검객(조선): 칼끝 vs 판정 차이, 몸 앞끝(27px) ±1px, 뒤쪽·다른 줄, 여러 거리에서 1→2→3타. 밤거리 격투가(`?theme=street`): 원래 주먹 판정 그대로인지 |
+| `fists` | 벽사검객: 적 가드 주먹(서 있기·걷기 그림) 판정 — 자세별·1·2·3타 경계 ±1px, 다른 자세는 판정 없음, 높이 어긋나면 헛침, 뒤쪽 규칙 |
+| `fists-group` | 벽사검객: 여러 적 상대로 3타(가드 주먹 판정)가 적 예고를 끊는지 — 같은 판을 주먹 판정 켬/끔으로 비교 |
+| `dodge` | 적 공격 예고 뒤 몇 프레임 안에 물러나면 피하는지 (원귀·도깨비, `BEFORE_URL=…` 로 예전과 비교) |
+| `dominance` | 제자리 연타로 적이 예고·공격할 기회가 있는지 — 시작 거리·화면 가운데/왼쪽 벽·양쪽·무리 3~4명 포함 (`BEFORE_URL=…` 로 예전 버전과 비교) |
 | `sprites` | 정식 스프라이트 교체 구조: 가짜 시트 적용·빠진 칸·파일 없음, 그림만 바뀌고 판은 같은지 |
 | `test` | 자동 플레이로 웨이브 3개 클리어 (스크린샷 `out/0*.png`). 실제 시간으로 노는 측정이라 돌릴 때마다 위치 숫자가 다름 |
 | `shots.js` (run-all 에 없음) | 전후 비교 사진: `node shots.js before` → 고친 뒤 `node shots.js after` |

@@ -8,7 +8,7 @@ const base = OUT + '/typo';
   for (const [name, fn] of Object.entries(cases)) {
     fs.rmSync(base, { recursive: true, force: true }); fs.mkdirSync(base + '/data', { recursive: true });
     for (const f of ['index.html', 'art.js']) fs.copyFileSync(ROOT + '/' + f, base + '/' + f);
-    for (const f of ['enemies.js', 'waves.js', 'feel.js']) fs.writeFileSync(base + '/data/' + f, fn(fs.readFileSync(ROOT + '/data/' + f, 'utf8'), f));
+    for (const f of ['enemies.js', 'waves.js', 'feel.js', 'sprites.js', 'classes.js']) fs.writeFileSync(base + '/data/' + f, fn(fs.readFileSync(ROOT + '/data/' + f, 'utf8'), f));
     const p = await b.newPage(); const alerts = [], errors = [];
     p.on('dialog', d => { alerts.push(d.message()); d.dismiss(); }); p.on('pageerror', e => errors.push(e.message));
     await p.goto(pathToFileURL(base + '/index.html').href); await p.waitForTimeout(300);

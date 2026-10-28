@@ -3,7 +3,7 @@
 const { OUT } = require('./paths');
 const { execFileSync } = require('child_process'); const fs = require('fs'); const path = require('path');
 const SCRIPTS = ['rhythm', 'still', 'combo', 'bufwin', 'jumpbuf', 'feel', 'edge', 'wall2', 'wallthrow', 'stage4', 's4f', 'grab', 'grabfix', 'throwstomp',
-  'sound', 'sound2', 'sound3', 'sfx', 'sfx2', 'ko', 'vibe', 'vibe2', 'vibe3', 'touch', 'action', 'fix3', 'fix4', 'determ', 'addenemy', 'typo', 'sprites', 'test'];
+  'sound', 'sound2', 'sound3', 'sfx', 'sfx2', 'ko', 'vibe', 'vibe2', 'vibe3', 'touch', 'action', 'fix3', 'fix4', 'determ', 'addenemy', 'typo', 'sprites', 'reach', 'fists', 'fists-group', 'dominance', 'dodge', 'test'];
 const all = [];
 for (const s of SCRIPTS) {
   let text;

@@ -43,9 +43,9 @@
 | 글자 | 타이틀 "조선 퇴마전"(Song Myung 글꼴), HUD 이름 "윤무겸", 브라우저 탭 제목 |
 | **정식 스프라이트 교체 구조** | `data/sprites.js` 에 시트 한 줄을 적으면 그 캐릭터의 그 동작만 시트 그림으로 바뀐다(규격 `docs/sprite-spec.md`). 시트에 없는 동작·파일 없음은 코드 그림. 시트 칸 크기·발 기준점·배율을 따로 가져 코드 그림(40칸·3배)과 섞여도 발 위치가 맞는다. HUD 얼굴도 시트에서 잘라 쓸 수 있다 |
 | 폴백 | 바닥 그림을 못 불러오면 코드로 그린 흙길. 스프라이트 시트를 못 불러오면 코드 그림 |
-| 원래 그림으로 | index.html `THEME = 'street'` + data/enemies.js 의 art 를 thug·brute 로 (원래 그림 코드는 지우지 않음) |
+| 원래 그림으로 | 주소 끝에 `?theme=street` (2026-10-28 부터, 그 전엔 index.html 의 `THEME`) + data/enemies.js 의 art 를 thug·brute 로 (원래 그림 코드는 지우지 않음) |
 
-**칼 길이와 판정:** 1·2타 판정은 몸 중심에서 48px. 원래 주먹 끝은 33px 로, 판정 끝에 선 적의 몸 앞면(약 36px)에 닿는 자리였다. 칼을 대각선으로 그려 칼날은 길게(54px) 하고 칼끝의 가로 위치는 39px 에 둬, 눈에 보이는 사거리와 실제 판정이 그대로 맞게 했다 (director 추천안). 처음엔 수평 찌르기로 칼날이 18px 뿐이라 설정화와 달랐다(2차 검수 지적). 설정화의 벽사검은 키의 약 70% 라 아직 조금 짧다.
+**칼 길이와 판정:** 1·2타 판정은 몸 중심에서 48px. 원래 주먹 끝은 33px 로, 판정 끝에 선 적의 몸 앞면(약 36px)에 닿는 자리였다. 칼을 대각선으로 그려 칼날은 길게(54px) 하고 칼끝의 가로 위치는 39px 에 둬, 눈에 보이는 사거리와 실제 판정이 그대로 맞게 했다 (director 추천안). 처음엔 수평 찌르기로 칼날이 18px 뿐이라 설정화와 달랐다(2차 검수 지적). 설정화의 벽사검은 키의 약 70% 라 아직 조금 짧다. → 이후 오너 결정으로 칼끝까지 명중하게 사거리를 넓힘(칼끝·판정 57px, 별도 브랜치·PR): `docs/sword-reach.md`.
 
 바뀐 파일: `art.js`(캐릭터 3종, 칼 든 자세, 잡기 별칭 포즈, 배경 함수, `texturedFloor`, 스프라이트 교체 `useSpriteSheet`·`frameOf`·`faceOf`), `index.html`(THEME·PLAYER_ART, 바닥 질감·스프라이트 시트 불러오기, 그림 그리기를 `frameOf`·`faceOf` 로, 잡기 중 맨손 그림, 타이틀·HUD 글자), `data/enemies.js`(art 이름), 새 `data/sprites.js`(빈 목록), `tests/typo.js`, 새 `tests/sprites.js`·`tests/shots.js`, `assets/`.
 전투 숫자·판정·프레임 선택(frameName)·몸 판정 크기(w·h)·ART.S 는 그대로. 원래 3종(player·thug·brute) 그림은 픽셀 단위로 그대로(director 해시 비교).
@@ -97,4 +97,4 @@
 
 ## 7. 되돌리기
 - 이 작업 전체: 원래 브랜치 `ccr-05037f70-jcsww6` 를 쓰면 된다 (이 브랜치와 별개).
-- 이 브랜치 안에서 그림만 원래대로: index.html `const THEME = 'joseon'` → `'street'`, data/enemies.js 의 `"art": "wongwi"` → `"thug"`, `"art": "dokkaebi"` → `"brute"`.
+- 이 브랜치 안에서 그림만 원래대로: index.html `const THEME = 'joseon'` → `'street'` (PR #31 이후에는 주소 끝에 `?theme=street`), data/enemies.js 의 `"art": "wongwi"` → `"thug"`, `"art": "dokkaebi"` → `"brute"`.
