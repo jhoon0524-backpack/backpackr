@@ -531,6 +531,29 @@ function startAttack(p) {
 }
 
 const hurtHalf = e => e.hurtHalfWidth ?? e.w / 2;   // 칼 판정용 몸 앞끝 (data 에 없으면 몸 폭의 절반)
+// 칼날이 적의 가드 주먹(서 있기·걷기 그림에서 몸 앞끝 밖으로 나온 주먹)에 실제로 겹치면 명중 (2026-10-28 오너 결정).
+// 그림의 칼날 칸과 주먹 사각형을 세계 좌표로 옮겨 가로·높이가 모두 겹칠 때만. 공격·예고 등 다른 자세의 주먹은 판정 없음. 몸 폭·잡기·밀기는 그대로
+const GUARD_POSE = /^(idle|walk)/;
+function fistBoxes(e) {   // 지금 그림의 가드 주먹: [가로 최소, 최대, 높이 최소, 최대] (세계 x, 발바닥 위 높이)
+  const name = frameName(e, false);
+  if (!GUARD_POSE.test(name)) return [];
+  return ART.hitShapes(e.art, name).fists.map(([fx, fy, fw, fh]) => {
+    const x0 = e.x + e.dir * (fx - ART.CX) * S, x1 = e.x + e.dir * (fx + fw - ART.CX) * S;
+    return [Math.min(x0, x1), Math.max(x0, x1), (ART.FOOT + 1 - fy - fh) * S + e.z, (ART.FOOT + 1 - fy) * S + e.z];
+  });
+}
+function bladeBoxes(p, pose, dir = p.dir, x = p.x, z = p.z) {   // 칼날 칸들: 같은 형식
+  return ART.hitShapes(PLAYER_ART, pose).blade.map(([bx, by]) => {
+    const x0 = x + dir * (bx - ART.CX) * S, x1 = x + dir * (bx + 1 - ART.CX) * S;
+    return [Math.min(x0, x1), Math.max(x0, x1), (ART.FOOT - by) * S + z, (ART.FOOT + 1 - by) * S + z];
+  });
+}
+function fistHit(p, e, a) {
+  if ((e.x - p.x) * p.dir <= -10 || !overlapDepth(p, e)) return false;   // 뒤쪽 규칙(적 중심이 등 뒤 10px 넘게)은 몸 판정과 같이
+  const fists = fistBoxes(e); if (!fists.length) return false;
+  const blade = bladeBoxes(p, a.pose);
+  return fists.some(f => blade.some(b => Math.max(b[0], f[0]) < Math.min(b[1], f[1]) && Math.max(b[2], f[2]) < Math.min(b[3], f[3])));
+}
 const inFront = (p, e, reach, body) => { const dx = (e.x - p.x) * p.dir; return dx > -10 && (body ? dx - hurtHalf(e) : dx) < reach && overlapDepth(p, e); };
 const canStomp = (p, e) => !e.dead && e.down > 0 && e.z === 0 && !e.stomped && e.hp > 0 && inFront(p, e, STOMP.reach);
 
@@ -538,14 +561,14 @@ function resolveAttack(p, a) {
   let any = false;
   for (const e of enemies) {
     if (e.dead || e.invuln > 0) continue;
-    if (a.otg ? !canStomp(p, e) : (e.down > 0 || !inFront(p, e, a.reach, a.body) || Math.abs(e.z - p.z) >= 40)) continue;
+    if (a.otg ? !canStomp(p, e) : (e.down > 0 || !(inFront(p, e, a.reach, a.body) || (a.body && fistHit(p, e, a))) || Math.abs(e.z - p.z) >= 40)) continue;
     damageEnemy(e, a.dmg, a.heavy, p.dir, p);
     if (a.otg) e.stomped = true;
     any = true;
   }
   p.lastHit = any;
   if (any) { p.lunge = a.step; debug.hits++; } else { debug.misses++; queueSound('whoosh'); }   // 헛스윙 "휙"
-  p.swing = { x: p.x, y: p.y, dir: p.dir, reach: a.reach, body: a.body, hit: any, t: time };
+  p.swing = { x: p.x, y: p.y, z: p.z, dir: p.dir, reach: a.reach, body: a.body, pose: a.pose, hit: any, t: time };
 }
 
 // 점프 공격: 발을 뻗은 동안 처음 닿는 적들에게 1번 (heavy, 넘어뜨림)
@@ -827,9 +850,9 @@ function update() {
       const front = (p.x - e.x) * e.dir;
       if (e.attack > 8 && e.attack <= 8 + ENEMY_AI.lungeFrames && front > ENEMY_AI.lungeMinGap) {
         // 판정 직전 돌진. 합은 전체 돌진 거리(예고 시작 거리 − lungeLeft). 달려들기 연출(enemyRush, 벽사검객 상대)이면 점점 빨라지게:
-        // k번째 프레임에 전체의 (2k−1)/n² — 처음엔 천천히 내딛고 끝에서 몰아친다. 아니면 매 프레임 같게 (격투가 상대, 원래)
+        // k번째 프레임에 전체의 (k+3)/(n(n+1)/2+3n) — 9프레임이면 3.3px 에서 10px 까지 고르게 빨라진다 (2026-10-28 오너 결정, 예전 0.7→12.6px 대신). 아니면 매 프레임 같게 (격투가 상대, 원래)
         const n = ENEMY_AI.lungeFrames, k = 9 + n - e.attack;   // 1..n
-        const part = PLAYER_CLASS.enemyRush ? (2 * k - 1) / (n * n) : 1 / n;
+        const part = PLAYER_CLASS.enemyRush ? (k + 3) / (n * (n + 1) / 2 + 3 * n) : 1 / n;
         e.x += e.dir * Math.min((attackStartOf(e) - ENEMY_AI.lungeLeft) * part, front - ENEMY_AI.lungeMinGap);
         keepOnScreen(e);
       }
@@ -978,6 +1001,7 @@ function drawHitboxes() {
   if (p.swing && time - p.swing.t < 12) {
     const c = p.swing.hit ? '76,217,100' : '255,92,92';
     box(p.swing.x, p.swing.y, p.swing.dir, -10, p.swing.reach, `rgb(${c})`, `rgba(${c},.35)`);
+    if (p.swing.body) { ctx.fillStyle = `rgba(${c},.9)`; for (const [x0, x1, h0, h1] of bladeBoxes(p, p.swing.pose, p.swing.dir, p.swing.x, p.swing.z)) ctx.fillRect(x0 - cam, p.swing.y - h1, x1 - x0, h1 - h0); }   // 방금 휘두른 칼날 칸 (높이 포함)
   }
   for (const e of enemies) {
     if (e.dead) continue;
@@ -985,7 +1009,10 @@ function drawHitboxes() {
     ctx.strokeStyle = e.down > 0 ? '#888' : '#ff5c5c'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(ex - 6, e.y); ctx.lineTo(ex + 6, e.y); ctx.moveTo(ex, e.y - 6); ctx.lineTo(ex, e.y + 6); ctx.stroke();
     // 몸 앞끝 막대 (칼 판정용, 벽사검객만): 적 중심에서 주인공 쪽으로 hurtHalfWidth. 이 막대가 노란 상자에 닿으면 칼이 맞는다 (뒤쪽은 판정이 적 중심 기준이라 막대를 중심까지만 그림)
-    if (ATTACKS[0].body) { const hh = hurtHalf(e); ctx.fillStyle = e.down > 0 ? 'rgba(136,136,136,.6)' : 'rgba(255,92,92,.7)'; ctx.fillRect(p.dir > 0 ? ex - hh : ex, e.y + 8, hh, 3); }
+    if (ATTACKS[0].body) { const hh = hurtHalf(e); ctx.fillStyle = e.down > 0 ? 'rgba(136,136,136,.6)' : 'rgba(255,92,92,.7)'; ctx.fillRect(p.dir > 0 ? ex - hh : ex, e.y + 8, hh, 3);
+      // 가드 주먹 피격 영역 (주황 테두리): 칼날 칸이 이 상자에 가로·높이 모두 겹쳐야 맞는다
+      ctx.strokeStyle = 'rgba(255,170,60,.95)'; ctx.lineWidth = 2;
+      for (const [x0, x1, h0, h1] of fistBoxes(e)) ctx.strokeRect(x0 - cam, e.y - h1, x1 - x0, h1 - h0); }
     if (e.attack > 0) box(e.x, e.y, e.dir, -10, ENEMY_AI.reach, 'rgba(255,92,92,.8)', 'rgba(255,92,92,.1)');   // 적 공격 범위 (준비 중, 돌진하면 같이 움직임)
   }
   ctx.font = `10px ${FONT}`; ctx.textAlign = 'left'; ctx.fillStyle = '#fff';

@@ -1,6 +1,7 @@
 // 검사가 사거리 밖에서 적을 일방적으로 제압하는지 (비교: BEFORE_URL=file:///.../index.html node dominance.js)
 // A) 제자리 연타: 주인공은 서서 3프레임마다 Z (적 쪽을 봄), 적 1명이 300px 밖에서 걸어옴 (보통 AI), 900프레임
 // B) 자동 플레이(determ 와 같은 봇) 클리어까지: 남은 체력, 맞은 횟수
+// C) 제자리 연타(가장 가까운 적 쪽으로만 돌아섬): 시작 거리·화면 가운데/왼쪽 벽·양쪽·무리 3~4명
 const { chromium } = require('playwright');
 const { GAME } = require('./paths');
 const BEFORE = process.env.BEFORE_URL;   // 비교할 예전 버전 index.html 주소 (없으면 지금 버전만)
@@ -27,6 +28,30 @@ const BEFORE = process.env.BEFORE_URL;   // 비교할 예전 버전 index.html �
           player.dir = 1;
         }
         out[name] = { 적_공격예고: windups, 주인공_맞음: hurt, 첫_명중_거리: firstHitDist, 전멸_프레임: kill };
+      }
+      // C) 제자리 연타로 적을 묶어 둘 수 있는지 — 시작 거리·주인공 위치(화면 가운데/왼쪽 벽)·양쪽·무리(3~4명, 섞어서).
+      //    주인공은 움직이지 않고 3프레임마다 Z, 가장 가까운 서 있는 적 쪽으로만 돌아선다. 1200프레임
+      const scen = [
+        ['원귀 1 · 120px', 480, [['thug', 120]]], ['원귀 1 · 160px', 480, [['thug', 160]]], ['도깨비 1 · 120px', 480, [['brute', 120]]], ['도깨비 1 · 160px', 480, [['brute', 160]]],
+        ['원귀 1 · 왼쪽 벽', 40, [['thug', 300]]], ['도깨비 1 · 왼쪽 벽', 40, [['brute', 300]]],
+        ['양쪽 원귀 2', 480, [['thug', 300], ['thug', -300]]], ['양쪽 원귀+도깨비', 480, [['thug', 300], ['brute', -300]]],
+        ['원귀 3', 480, [['thug', 260], ['thug', 330, 6], ['thug', 400, -6]]], ['원귀 2+도깨비 1', 480, [['thug', 260], ['brute', 330, 6], ['thug', -300, -6]]],
+        ['원귀 2+도깨비 2', 480, [['thug', 260], ['brute', 330, 6], ['thug', -300, -6], ['brute', -380, 3]]],
+        ['왼쪽 벽 원귀 2+도깨비 2', 40, [['thug', 260], ['brute', 330, 6], ['thug', 400, -6], ['brute', 470, 3]]],
+      ];
+      for (const [name, px, list] of scen) {
+        reset(); state = 'play'; waveState = 'fight'; cam = 0; time = 5; player.x = px; player.y = 420; player.dir = 1; player.hp = 9999;
+        enemies = list.map(([t, off, dy = 0]) => mk(t, px + off, { y: 420 + dy, dir: off > 0 ? -1 : 1 }));
+        let hurt = 0, kill = null, hp0 = player.hp;
+        for (let f = 0; f < 1200; f++) {
+          const live = enemies.filter(e => !e.dead && e.down === 0 && e.hp > 0).sort((a, c) => Math.abs(a.x - player.x) - Math.abs(c.x - player.x));
+          if (live.length && player.attack === 0) player.dir = live[0].x >= player.x ? 1 : -1;
+          if (f % 3 === 0) pressed.KeyZ = true;
+          realUpdate(); pressed = {};
+          if (player.hp < hp0) { hurt++; hp0 = player.hp; }
+          if (kill === null && enemies.every(e => e.dead || e.hp <= 0)) kill = f;
+        }
+        out['C ' + name] = { 주인공_맞음: hurt, 전멸_프레임: kill };
       }
       // B) 자동 플레이
       reset(); state = 'play'; let f = 0, hits = 0, hp0 = player.hp;
