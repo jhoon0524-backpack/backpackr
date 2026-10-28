@@ -57,7 +57,7 @@ const { chromium } = require('playwright');
     // 도깨비(같은 줄, 94~102px — 주인공이 1·2타로 약 10px 내디딘 뒤 3타 때 85~92px)의 쿨다운 끝 시점을 0~80프레임으로 바꿔 가며:
     // 3타가 예고 직전(쿨다운 끝·예고 거리 안)의 도깨비를 주먹 판정으로만 맞히는 경우가 있는지
     for (const d of [94, 98, 102]) { const sweep = [];
-      for (let cd = 0; cd <= 80; cd += 2) { const st = run(480, [['thug', 40, 0, { cooldown: 9999, speed: 0 }], ['brute', d, 0, { cooldown: cd, speed: 0 }]], 200, true, false);
+      for (let cd = 0; cd <= 80; cd++) { const st = run(480, [['thug', 40, 0, { cooldown: 9999, speed: 0 }], ['brute', d, 0, { cooldown: cd, speed: 0 }]], 200, true, false);
         if (st.주먹만_명중) sweep.push(`${cd}:${st.주먹만_예고직전 ? '예고직전' : '쿨다운중'}`); }
       out[`도깨비 ${d} 쿨다운 0~80 (주먹만 명중)`] = sweep.join(' ') || '없음'; }
     for (const [name, px, list, frames, chase] of scen) {

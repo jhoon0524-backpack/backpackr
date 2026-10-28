@@ -1,14 +1,16 @@
-// 정식 스프라이트 교체 구조: 가짜 시트(PNG)를 data/sprites.js 에 적으면 그 칸만 바뀌는지, 빠진 칸·파일 없음은 코드 그림으로 버티는지,
+// 정식 스프라이트 교체 구조: 가짜 시트(PNG)를 data/sprites.js 에 적으면 그 칸만 바뀌는지, 빠진 칸·파일 없음은 코드 그림으로 버티는지, 별칭 칸(잡기·점프 공격·3타 준비/회수·달려들기)이 어느 그림을 쓰는지,
 // 그림을 바꿔도 판(위치·체력·점수)은 그대로인지 (사본에서, 실제 게임은 안 고침)
 const { GAME, OUT, ROOT } = require('./paths');
 const { chromium } = require('playwright'); const fs = require('fs'); const { pathToFileURL } = require('url');
 const base = OUT + '/spritetest';
 const SPEC = { src: 'assets/sprites/mugyeom.png', frameW: 64, frameH: 64, footX: 32, footY: 60, scale: 1.5, face: [20, 4, 24, 24],
-  frames: { idle0: [0, 0], idle1: [1, 0], walk0: [2, 0], punch: [3, 0] } };
+  frames: { idle0: [0, 0], idle1: [1, 0], walk0: [2, 0], punch: [3, 0], kick: [2, 0] } };
+// 칼 없는 캐릭터(도깨비)용: 같은 가짜 그림의 한 칸을 공격 예고로 — 달려들기(rush) 별칭이 시트 예고 칸을 쓰는지
+const DOK = { src: 'assets/sprites/mugyeom.png', frameW: 64, frameH: 64, footX: 32, footY: 60, scale: 1.5, frames: { windup: [1, 0] } };
 function copyGame(spec) {
   fs.rmSync(base, { recursive: true, force: true });
   for (const f of ['index.html', 'art.js', 'data', 'assets/joseon']) fs.cpSync(ROOT + '/' + f, base + '/' + f, { recursive: true });
-  fs.writeFileSync(base + '/data/sprites.js', `window.BB_DATA = window.BB_DATA || {};\nBB_DATA.sprites = ${JSON.stringify(spec ? { mugyeom: spec } : {})};\n`);
+  fs.writeFileSync(base + '/data/sprites.js', `window.BB_DATA = window.BB_DATA || {};\nBB_DATA.sprites = ${JSON.stringify(spec ? { mugyeom: spec, dokkaebi: DOK } : {})};\n`);
 }
 async function fakeSheet(b) {   // 칸마다 다른 색 사람 모양 4칸
   const p = await b.newPage();
@@ -25,6 +27,10 @@ async function run(b, label) {
   await p.goto(pathToFileURL(base + '/index.html').href); await p.waitForTimeout(500);
   const r = await p.evaluate(() => {
     const f0 = ART.frameOf('mugyeom', 'idle0'), fk = ART.frameOf('mugyeom', 'kick'), face = ART.faceOf('mugyeom');
+    // 별칭 칸 (2026-10-28): 칼 든 윤무겸의 잡기·점프 공격은 시트에 없으면 시트의 칼 든 칸(punch·kick)이 아니라 맨손 코드 그림(scale 3),
+    // 3타 전용 준비·회수는 시트 windup·idle0 → 코드 그림 순, 칼 없는 도깨비의 달려들기는 시트 예고 칸
+    const sc = (id, n) => ART.frameOf(id, n).scale;
+    const alias = { hold: sc('mugyeom', 'hold'), throw: sc('mugyeom', 'throw'), airKick: sc('mugyeom', 'airKick'), kickPrep: sc('mugyeom', 'kickPrep'), kickRecover: sc('mugyeom', 'kickRecover'), dokRush0: sc('dokkaebi', 'rush0') };
     window.realUpdate = update; update = () => {};
     reset(); state = 'play'; const trace = [];
     for (let f = 0; f < 900; f++) {   // 같은 입력: 오른쪽으로 걷다가 7프레임마다 Z
@@ -35,10 +41,11 @@ async function run(b, label) {
       if (f % 10 === 0) draw();
       if (f % 30 === 0) trace.push([Math.round(player.x), Math.round(player.y), player.hp, score, ...enemies.map(e => Math.round(e.x) + ':' + e.hp)].join(','));
     }
-    return { idle0: { w: f0.img.width, scale: f0.scale }, kick: { w: fk.img.width, scale: fk.scale }, faceW: face.img.width, trace: trace.join('|') };
+    return { idle0: { w: f0.img.width, scale: f0.scale }, kick: { w: fk.img.width, scale: fk.scale }, faceW: face.img.width, alias, trace: trace.join('|') };
   });
   await p.close();
   console.log(label.padEnd(16), JSON.stringify({ idle0: r.idle0, kick: r.kick, faceW: r.faceW }), '못 불러옴', failed, 'errors', errors);
+  console.log(''.padEnd(16), '별칭 칸 배율(3 = 코드 그림, 1.5 = 가짜 시트)', JSON.stringify(r.alias));
   return r.trace;
 }
 (async () => {
