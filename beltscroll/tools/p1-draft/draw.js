@@ -1,10 +1,12 @@
 // P1 정식 스프라이트 시안 (Claude 가 코드로 그린 시안, 2026-10-28). 설정화 03(윤무겸 디자인)·06·07(세밀한 도트 결) 기준.
-// 128×128 칸, 발 기준점 (64, 124), 화면 1px = 그림 1px (scale 1). 오른쪽을 보는 방향.
+// 기본 128×128 칸, 발바닥 아래끝 (64, 124), 화면 1px = 그림 1px (scale 1). 오른쪽을 보는 방향.
+// 2px 시험(2026-10-28 오너 결정): 같은 관절 자리·색으로 그림 1칸 = 화면 2px (64×64 칸, scale 2) — makeDrawer(2)
 // 칸마다 관절 자리(몸 기준점 앞쪽 dx, 바닥 위 높이 h)를 손으로 정하고, 부위마다 4단 색(외곽·그림자·바탕·밝은 면)으로 칠한다.
 // 브라우저에서 돌린다 (build.js 가 Playwright 로 열어 PNG 로 저장).
 (() => {
-  const W = 128, H = 128, FX = 64, FY = 124;
-  const X = dx => FX + dx, Y = h => FY - h;
+function makeDrawer(R) {   // R = 그림 1칸이 화면 몇 px 인지 (1 또는 2). 관절 자리는 화면 px 로 적고 여기서 칸으로 바꾼다
+  const W = 128 / R, H = 128 / R, FX = 64 / R, FY = 124 / R;
+  const X = dx => FX + dx / R, Y = h => FY - h / R;
 
   // ── 재질: [외곽, 그림자, 바탕, 밝은 면] — 03 "주요 색상"(먹색·남청·회갈·주홍·금속·누런 백색) + 07 의 3단 명암
   const M = {
@@ -39,7 +41,7 @@
   // ── 그리기 바탕: 칸 하나 = 색 번호 배열. 부위를 캔버스 경로로 그려 알파 128 이상만 칸으로 삼는다(반투명 테두리 없음)
   const scratch = document.createElement('canvas'); scratch.width = W; scratch.height = H;
   const sg = scratch.getContext('2d', { willReadFrequently: true });
-  function newFrame() { return { px: new Array(W * H).fill(null), part: new Int32Array(W * H).fill(-1), n: 0 }; }
+  function newFrame() { return { px: new Array(W * H).fill(null), part: new Int32Array(W * H).fill(-1), edge: new Array(W * H).fill(null), n: 0 }; }
   function maskOf(fn) {
     sg.clearRect(0, 0, W, H); sg.save(); sg.fillStyle = '#000'; sg.strokeStyle = '#000'; sg.lineCap = 'round'; sg.lineJoin = 'round';
     fn(sg); sg.restore();
@@ -57,19 +59,22 @@
       let c = b;
       if (!opt.noShade) {
         if (!at(m, x, y - 1) || !at(m, x + 1, y - 1)) c = hi;                                          // 위·앞(빛 쪽) 가장자리
-        else if (!at(m, x - 2, y + 1) || !at(m, x - 1, y + 2) || !at(m, x, y + 3) || !at(m, x - 3, y)) c = s;   // 뒤·아래 그림자 띠
+        else if (R === 1 ? (!at(m, x - 2, y + 1) || !at(m, x - 1, y + 2) || !at(m, x, y + 3) || !at(m, x - 3, y))
+                         : (!at(m, x - 1, y + 1) || !at(m, x, y + 2) || !at(m, x - 2, y))) c = s;   // 뒤·아래 그림자 띠 (2px 는 칸이 커서 1칸 남짓)
         else if (opt.tex && ((x * 7 + y * 13 + (x * y) % 5) % opt.tex === 0)) c = s;
       }
-      if (edge && !opt.flat) c = o;
+      // 2px 도트: 부위 경계는 그림자색, 바깥 윤곽(투명과 맞닿은 칸)만 외곽선 — 마지막에 sheet() 에서 정함 (1칸 = 2px 라 모든 경계를 외곽선으로 하면 뭉개짐)
+      if (edge && !opt.flat) { if (R === 1) c = o; else { c = s; fr.edge[y * W + x] = o; } } else fr.edge[y * W + x] = null;
       fr.px[y * W + x] = c; fr.part[y * W + x] = id;
     }
     return m;
   }
   // 경로 도우미 (dx, h 좌표)
   const P = (g, pts) => { g.beginPath(); pts.forEach(([dx, h], i) => i ? g.lineTo(X(dx), Y(h)) : g.moveTo(X(dx), Y(h))); g.closePath(); g.fill(); };
-  const L = (g, pts, w) => { g.lineWidth = w; g.beginPath(); pts.forEach(([dx, h], i) => i ? g.lineTo(X(dx), Y(h)) : g.moveTo(X(dx), Y(h))); g.stroke(); };
-  const Cc = (g, [dx, h], r) => { g.beginPath(); g.arc(X(dx), Y(h), r, 0, Math.PI * 2); g.fill(); };
-  const E = (g, [dx, h], rx, ry, rot = 0) => { g.beginPath(); g.ellipse(X(dx), Y(h), rx, ry, rot, 0, Math.PI * 2); g.fill(); };
+  const L = (g, pts, w) => { g.lineWidth = Math.max(w / R, 1); g.beginPath(); pts.forEach(([dx, h], i) => i ? g.lineTo(X(dx), Y(h)) : g.moveTo(X(dx), Y(h))); g.stroke(); };
+  const Cc = (g, [dx, h], r) => { g.beginPath(); g.arc(X(dx), Y(h), Math.max(r / R, 0.8), 0, Math.PI * 2); g.fill(); };
+  const E = (g, [dx, h], rx, ry, rot = 0) => { g.beginPath(); g.ellipse(X(dx), Y(h), Math.max(rx / R, 0.8), Math.max(ry / R, 0.8), rot, 0, Math.PI * 2); g.fill(); };
+  const box = (g, [x0, x1, h0, h1], r = 4) => { g.beginPath(); g.roundRect(X(x0), Y(h1), (x1 - x0) / R, (h1 - h0) / R, r / R); g.fill(); };   // [앞쪽 x0~x1, 높이 h0~h1] 둥근 네모
   const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
   const add = (a, v) => [a[0] + v[0], a[1] + v[1]];
   const dir = (deg, len) => [Math.cos(deg * Math.PI / 180) * len, Math.sin(deg * Math.PI / 180) * len];   // 0° = 앞, 90° = 위
@@ -139,9 +144,10 @@
     paint(fr, 'gold', g => P(g, [[hx - 5, hh + 10], [hx + 1, hh + 10], [hx + 1, hh + 13], [hx - 5, hh + 13]]), { flat: true });   // 금속 관
     paint(fr, 'red', g => { L(g, [[hx - 5, hh + 12], [hx - 11 - tilt, hh + 9]], 1.4); L(g, [[hx - 5, hh + 11], [hx - 10 - tilt, hh + 6]], 1.2); }, { flat: true });   // 붉은 끈
     // 눈·눈썹·입 (한 칸씩)
-    const set = (dx, h, c) => { const i = Y(h) * W + X(dx); if (i >= 0 && i < W * H) fr.px[i] = c; };
-    set(hx + 4, hh + 1, '#120d10'); set(hx + 5, hh + 1, '#120d10'); set(hx + 4, hh + 3, '#1a1414'); set(hx + 5, hh + 3, '#1a1414'); set(hx + 6, hh + 3, '#1a1414');
-    set(hx + 5, hh - 5, '#8a5a44');
+    const set = (dx, h, c) => { const i = Math.round(Y(h)) * W + Math.round(X(dx)); if (i >= 0 && i < W * H) fr.px[i] = c; };
+    if (R === 1) { set(hx + 4, hh + 1, '#120d10'); set(hx + 5, hh + 1, '#120d10'); set(hx + 4, hh + 3, '#1a1414'); set(hx + 5, hh + 3, '#1a1414'); set(hx + 6, hh + 3, '#1a1414');
+      set(hx + 5, hh - 5, '#8a5a44'); }
+    else { set(hx + 2, hh + 1, '#120d10'); set(hx + 2, hh + 3, '#2a1a16'); set(hx + 4, hh + 3, '#2a1a16'); set(hx + 4, hh - 5, '#8a5a44'); }   // 2px: 눈 1칸을 얼굴 안쪽으로(앞 윤곽에 묻히지 않게) + 눈썹 2칸 + 입
   }
   // 윤무겸 한 칸
   function mugyeom(p) {
@@ -207,7 +213,7 @@
     // 먼 팔
     limb('dskinF', shF, p.farArm.el, p.farArm.wr, 13, 11);
     paint(fr, 'wrap', g => L(g, [lerp(p.farArm.el, p.farArm.wr, 0.45), p.farArm.wr], 11));
-    paint(fr, 'dskinF', g => { const c0 = add(p.farArm.wr, p.farArm.fist || [2, 0]); g.beginPath(); g.roundRect(X(c0[0]) - 6, Y(c0[1]) - 6, 12, 12, 4); g.fill(); });
+    paint(fr, 'dskinF', g => { if (p.farArm.box) return box(g, p.farArm.box); const c0 = add(p.farArm.wr, p.farArm.fist || [2, 0]); box(g, [c0[0] - 6, c0[0] + 6, c0[1] - 6, c0[1] + 6]); });
     // 다리 (맨발, 정강이 붕대)
     for (const l of p.legs) {
       const hip = add(Pv, [l.far ? -7 : 7, 0]), mat = l.far ? 'dskinF' : 'dskin';
@@ -216,15 +222,16 @@
       paint(fr, mat, g => P(g, [add(l.ankle, [-6, 2]), add(l.ankle, [11, -1]), add(l.ankle, [12, -5]), add(l.ankle, [-6, -5])]));
     }
     // 몸통 (근육 덩어리) + 배
-    paint(fr, 'dskin', g => { P(g, [[C[0] - 15, C[1] + 4], [C[0] + 14, C[1] + 2], [C[0] + 16, C[1] - 12], [Pv[0] + 12, Pv[1] + 4], [Pv[0] - 12, Pv[1] + 4], [C[0] - 16, C[1] - 12]]);
-      E(g, [C[0] + 2, C[1] - 18], 13, 10); });
+    // 몸 앞끝(주먹 제외)이 판정 hurtHalfWidth 27px 근처에 오게 배를 앞으로 크게 (2026-10-28, tests/sheets.js)
+    paint(fr, 'dskin', g => { P(g, [[C[0] - 15, C[1] + 4], [C[0] + 16, C[1] + 2], [C[0] + 21, C[1] - 12], [Pv[0] + 20, Pv[1] + 4], [Pv[0] - 12, Pv[1] + 4], [C[0] - 16, C[1] - 12]]);
+      E(g, [C[0] + 8, C[1] - 20], 17, 11); });
     paint(fr, 'dskin', g => { E(g, [C[0] + 6, C[1] - 8], 7, 5); E(g, [C[0] - 5, C[1] - 7], 6, 5); });   // 가슴 근육
     // 근육 결 (그림자 줄)
     paint(fr, 'dskinF', g => { L(g, [[C[0] + 1, C[1] - 4], [C[0] + 2, C[1] - 24]], 1.2); L(g, [[C[0] - 6, C[1] - 9], [C[0] + 9, C[1] - 10]], 1.2); }, { flat: true, noShade: true });
     // 새끼줄 띠 + 짚 치마 + 방울
-    paint(fr, 'straw', g => P(g, [[Pv[0] - 15, Pv[1] + 6], [Pv[0] + 15, Pv[1] + 6], [Pv[0] + 19, Pv[1] - 16], [Pv[0] + 10, Pv[1] - 12], [Pv[0] + 5, Pv[1] - 18], [Pv[0] - 2, Pv[1] - 13],
+    paint(fr, 'straw', g => P(g, [[Pv[0] - 15, Pv[1] + 6], [Pv[0] + 21, Pv[1] + 6], [Pv[0] + 26, Pv[1] - 16], [Pv[0] + 14, Pv[1] - 12], [Pv[0] + 7, Pv[1] - 18], [Pv[0] - 2, Pv[1] - 13],
       [Pv[0] - 8, Pv[1] - 19], [Pv[0] - 13, Pv[1] - 13], [Pv[0] - 19, Pv[1] - 17]]), { tex: 5 });
-    paint(fr, 'rope', g => { L(g, [[Pv[0] - 15, Pv[1] + 6], [Pv[0] + 15, Pv[1] + 5]], 5); L(g, [[Pv[0] + 6, Pv[1] + 5], [Pv[0] + 9, Pv[1] - 8]], 2.5); });
+    paint(fr, 'rope', g => { L(g, [[Pv[0] - 15, Pv[1] + 6], [Pv[0] + 21, Pv[1] + 5]], 5); L(g, [[Pv[0] + 6, Pv[1] + 5], [Pv[0] + 9, Pv[1] - 8]], 2.5); });
     paint(fr, 'gold', g => { Cc(g, [Pv[0] + 9, Pv[1] - 10], 3); Cc(g, [Pv[0] - 9, Pv[1] + 1], 2.5); });
     // 머리: 갈기·뿔·얼굴
     const hx = Hc[0], hh = Hc[1];
@@ -239,19 +246,26 @@
     // 가까운 팔
     limb('dskin', shN, p.nearArm.el, p.nearArm.wr, 14, 12);
     paint(fr, 'wrap', g => L(g, [lerp(p.nearArm.el, p.nearArm.wr, 0.45), p.nearArm.wr], 12));
-    paint(fr, 'dskin', g => { const c0 = add(p.nearArm.wr, p.nearArm.fist || [3, 0]); g.beginPath(); g.roundRect(X(c0[0]) - 7, Y(c0[1]) - 6, 13, 12, 4); g.fill(); });
-    { const c0 = add(p.nearArm.wr, p.nearArm.fist || [3, 0]); paint(fr, 'dskinF', g => L(g, [[c0[0] + 2, c0[1] + 4], [c0[0] + 2, c0[1] - 4]], 1.2), { flat: true, noShade: true }); }   // 주먹 마디
+    const nb = p.nearArm.box || (c0 => [c0[0] - 7, c0[0] + 6, c0[1] - 6, c0[1] + 6])(add(p.nearArm.wr, p.nearArm.fist || [3, 0]));
+    paint(fr, 'dskin', g => box(g, nb));
+    paint(fr, 'dskinF', g => L(g, [[nb[1] - 4, nb[3] - 2], [nb[1] - 4, nb[2] + 2]], 1.2), { flat: true, noShade: true });   // 주먹 마디
     return { fr };
   }
   const DOK = {
     // 공격 예고: 오른 주먹을 어깨 뒤로 크게 당기고 상체를 뒤로 젖힘, 왼팔은 앞으로
-    windup: { C: [-4, 80], Pv: [-1, 49], Hc: [-2, 97], legs: [{ knee: [-11, 26], ankle: [-17, 6], far: true }, { knee: [10, 27], ankle: [14, 6] }],
-              farArm: { el: [8, 70], wr: [16, 76], fist: [3, 1] }, nearArm: { el: [-14, 76], wr: [-22, 88], fist: [-2, 2] } },
+    windup: { C: [-8, 80], Pv: [-2, 48], Hc: [-9, 97], legs: [{ knee: [-13, 26], ankle: [-21, 6], far: true }, { knee: [11, 26], ankle: [17, 6] }],
+              farArm: { el: [8, 66], wr: [18, 63], fist: [3, 0] }, nearArm: { el: [-20, 84], wr: [-26, 99], fist: [-1, 3] } },
     // 펀치: 오른팔을 앞으로 쭉 (주먹 끝 ≤ 52px), 몸을 앞으로 실음
     punch: { C: [4, 78], Pv: [0, 48], Hc: [8, 94], legs: [{ knee: [-12, 25], ankle: [-21, 6], far: true }, { knee: [14, 27], ankle: [19, 6] }],
              farArm: { el: [-14, 70], wr: [-12, 60], fist: [0, -3] }, nearArm: { el: [24, 77], wr: [38, 77], fist: [5, 0] } },
   };
-  const DOK_ORDER = ['windup', 'punch'];
+  // 서기·걷기 (2026-10-28 추가): 가드 주먹은 코드 그림의 가드 주먹 판정 칸과 같은 자리·크기 ([앞쪽 x0~x1, 높이 h0~h1], tests/fists.js 의 판정 칸)
+  //   서기 = 코드 idle0 (뒤 주먹 12~27·63~78, 앞 주먹 21~36·54~69), 걷기 = 코드 walk0 (각 3px 낮음)
+  DOK.idle0 = { C: [0, 80], Pv: [-1, 48], Hc: [3, 98], legs: [{ knee: [-10, 26], ankle: [-14, 6], far: true }, { knee: [10, 26], ankle: [13, 6] }],
+                farArm: { el: [3, 63], wr: [12, 70], box: [12, 27, 63, 78] }, nearArm: { el: [10, 58], wr: [20, 61], box: [21, 36, 54, 69] } };
+  DOK.walk0 = { C: [1, 78], Pv: [0, 46], Hc: [4, 96], legs: [{ knee: [-12, 25], ankle: [-20, 6], far: true }, { knee: [12, 27], ankle: [18, 8] }],
+                farArm: { el: [3, 60], wr: [12, 67], box: [12, 27, 60, 75] }, nearArm: { el: [10, 55], wr: [20, 58], box: [21, 36, 51, 66] } };
+  const DOK_ORDER = ['windup', 'punch', 'idle0', 'walk0'];
 
   // ── 시트 만들기: 칸들을 한 줄로
   function sheet(order, drawFn, poses) {
@@ -259,6 +273,11 @@
     const g = c.getContext('2d'), info = {};
     order.forEach((name, i) => {
       const { fr, tip } = drawFn(poses[name]);
+      if (R > 1) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {   // 2px: 바깥 윤곽만 외곽선
+        const i = y * W + x; if (!fr.edge[i] || !fr.px[i]) continue;
+        const empty = (xx, yy) => xx < 0 || yy < 0 || xx >= W || yy >= H || !fr.px[yy * W + xx];
+        if (empty(x - 1, y) || empty(x + 1, y) || empty(x, y - 1) || empty(x, y + 1)) fr.px[i] = fr.edge[i];
+      }
       const img = g.createImageData(W, H);
       for (let k = 0; k < W * H; k++) { const col = fr.px[k]; if (!col) continue;
         const v = parseInt(col.slice(1), 16); img.data[k * 4] = v >> 16; img.data[k * 4 + 1] = (v >> 8) & 255; img.data[k * 4 + 2] = v & 255; img.data[k * 4 + 3] = 255; }
@@ -267,9 +286,12 @@
     });
     return { url: c.toDataURL('image/png'), info };
   }
-  window.P1DRAFT = {
-    W, H, FX, FY, MUG, DOK, MUG_ORDER, DOK_ORDER,
-    mugyeom: () => sheet(MUG_ORDER, mugyeom, MUG),
-    dokkaebi: () => sheet(DOK_ORDER, dokkaebi, DOK),
+  return {
+    R, W, H, FX, FY, MUG, DOK, MUG_ORDER, DOK_ORDER,
+    mugyeom: (order = MUG_ORDER) => sheet(order, mugyeom, MUG),
+    dokkaebi: (order = DOK_ORDER) => sheet(order, dokkaebi, DOK),
   };
+}
+window.P1DRAFT = makeDrawer(1);
+window.P1DRAFT2 = makeDrawer(2);   // 2px 시험
 })();

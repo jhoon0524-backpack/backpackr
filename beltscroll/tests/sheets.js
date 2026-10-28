@@ -60,7 +60,17 @@ const { chromium } = require('playwright');
     if (specs.dokkaebi) {
       const d = scan('dokkaebi', 'punch'), dw = scan('dokkaebi', 'windup');
       if (d) out['도깨비 펀치 주먹 끝'] = `${front(d)}px / 적 사거리 ${ENEMY_AI.reach}px${front(d) > ENEMY_AI.reach ? ' ✗' : ''}`;
-      if (dw) out['도깨비 예고 앞끝'] = `${front(dw)}px (참고: 코드 그림 가드 주먹 36px, 몸 앞끝 판정 ${hurtHalf(ENEMY_TYPES.brute)}px)`;
+      if (dw) out['도깨비 예고 앞끝'] = `${front(dw)}px (예고 그림엔 주먹 판정 없음, 몸 앞끝 판정 ${hurtHalf(ENEMY_TYPES.brute)}px)`;
+      // 서기·걷기: 가드 주먹이 코드 그림의 주먹 판정 칸(tests/fists.js)과 같은 자리인지 — 판정 칸 안이 시트 그림으로 얼마나 차 있는지, 칸 밖으로 나온 주먹 끝,
+      // 주먹 높이 밖의 몸 앞끝 vs hurtHalfWidth. 판정 칸 높이는 발바닥 기준이라 시트 높이(바닥선 기준, 발바닥 −3)에 3 을 더해 비교
+      for (const n of ['idle0', 'idle1', 'walk0', 'walk1', 'walk2', 'walk3']) {
+        const d2 = scan('dokkaebi', n); if (!d2) continue;
+        const boxes = ART.hitShapes('dokkaebi', n).fists.map(([x, y, w, h]) => [(x - CX) * S, (x + w - CX) * S, (FOOT - y - h) * S, (FOOT - y) * S]);
+        const fill = boxes.map(([x0, x1, h0, h1]) => { let n0 = 0; for (const q of d2.px) if (q.dx >= x0 && q.dx < x1 && q.h + 3 >= h0 && q.h + 3 < h1) n0++; return Math.round(100 * n0 / ((x1 - x0) * (h1 - h0))); });
+        const inFist = q => boxes.some(([, , h0, h1]) => q.h + 3 >= h0 - 3 && q.h + 3 < h1 + 3);
+        const bodyFront = Math.max(...d2.px.filter(q => !inFist(q) && q.h > 6).map(q => q.dx1));
+        out[`도깨비 ${n} 가드 주먹`] = `판정 칸 채움 ${fill.join('% / ')}% · 주먹 끝 ${front(d2)}px (판정 칸 끝 ${Math.max(...boxes.map(b => b[1]))}px) · 주먹 높이 밖 몸 앞끝 ${bodyFront}px (판정 ${hurtHalf(ENEMY_TYPES.brute)} ±3)`;
+      }
     }
     return out;
   });
