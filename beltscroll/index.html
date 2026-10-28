@@ -98,6 +98,7 @@ const S = ART.S;
 const THEME = new URLSearchParams(location.search).get('theme') === 'street' ? 'street' : 'joseon';
 const PLAYER_CLASS = BB_DATA.classes[THEME === 'joseon' ? 'byeoksa' : 'brawler'];   // 조선: 벽사검객(칼, 몸 접촉 판정) / 밤거리: 격투가(주먹, 원래 판정)
 const PLAYER_ART = PLAYER_CLASS.art;
+if (!['center', 'body'].includes(PLAYER_CLASS.hit)) alert(`data/classes.js: ${PLAYER_CLASS.name} 의 hit "${PLAYER_CLASS.hit}" 은 center·body 중 하나여야 합니다`);
 const BG = ART.buildStage({ W, H, groundTop: GROUND_TOP, stageLength: STAGE_LENGTH, theme: THEME });
 if (THEME === 'joseon') {   // 바닥 그림 질감. 못 불러오면 코드로 그린 흙길 그대로 (폴백)
   const tex = new Image();

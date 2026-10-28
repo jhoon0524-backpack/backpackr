@@ -4,8 +4,10 @@ const { GAME } = require('./paths');
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const errors = [];
-  for (const [label, url] of [['벽사검객', GAME], ['밤거리 격투가', GAME + (GAME.includes('?') ? '&' : '?') + 'theme=street']]) {
-  const p = await b.newPage(); console.log(`[${label}]`);
+  // 주소에 이미 theme 가 있으면(예: GAME_URL=…?theme=street) 그 한 가지만, 없으면 조선·밤거리 두 가지
+  const pages = /[?&]theme=/.test(GAME) ? [['주소대로', GAME]] : [['벽사검객', GAME], ['밤거리 격투가', GAME + (GAME.includes('?') ? '&' : '?') + 'theme=street']];
+  for (const [label, url] of pages) {
+  const p = await b.newPage();
   p.on('pageerror', e => errors.push(e.message));
   await p.goto(url); await p.waitForTimeout(300);
   const r = await p.evaluate(() => {
@@ -43,7 +45,7 @@ const { chromium } = require('playwright');
     }
     return out;
   });
-  for (const [k, v] of Object.entries(r)) console.log(k.padEnd(32), v);
+  console.log(`[${label}]`); for (const [k, v] of Object.entries(r)) console.log(k.padEnd(32), v);
   await p.close();
   }
   console.log('errors', errors); await b.close();

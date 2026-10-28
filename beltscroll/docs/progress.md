@@ -3,7 +3,7 @@
 작업 순서와 단계별 지시는 `docs/plan.md`(이번 지시는 `docs/instructions-3.md`), 규칙은 `CLAUDE.md`, 실수 기록은 `docs/mistakes.md`.
 
 ## 현재 단계
-(브랜치 `joseon-sword-reach`, PR #31, 병합하지 않음) PR #31 검토 결정 반영: 적 몸 앞끝 27px(hurtHalfWidth), 3타 강력한 찌르기, 적 돌진 9프레임 가속·달리는 그림, 직업별 판정 구조(벽사검객/격투가) — 구현·측정 완료, director 검수 중. 상세 `docs/sword-reach.md` 8절.
+(브랜치 `joseon-sword-reach`, PR #31, 병합하지 않음) PR #31 검토 결정 반영: 적 몸 앞끝 27px(hurtHalfWidth), 3타 강력한 찌르기, 적 돌진 9프레임 가속·달리는 그림, 직업별 판정 구조(벽사검객/격투가) — 구현·측정 완료, director 조건부 통과(즉시 수정 반영: 문서 옛 사실 표시, 측정 라벨·결과 재생성, 직업 hit 오타 알림). 오너 판단 대기: 3타 칼 길이, 돌진 곡선, 도깨비 가드 주먹. 상세 `docs/sword-reach.md` 8절.
 PR #30·원래 브랜치·원래 게임 링크·조선 P0 링크는 그대로.
 
 ## 막힌 것 (오너 답 대기)
