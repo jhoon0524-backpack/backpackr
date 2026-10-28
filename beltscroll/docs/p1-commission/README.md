@@ -18,5 +18,5 @@
 
 ## 아티스트에게 보낼 묶음
 - 견적 단계: `quote-request.md` 설명문 + 명세서 + 이 폴더의 `references.md`·`poses.md`·`pose-guide.png`·`palette.png`·`ref-03-*.png` (설정화 부분 확대만).
-- 계약(또는 비밀유지 합의) 뒤: 위 + `palette.gpl`·`sample-frames.json` + 03·06·07 원본 PNG 3장(`assets/reference/png-originals/`). — 원본을 언제 보낼지는 오너 판단 대기 (추천: 이 순서).
+- 계약(또는 비밀유지 합의) 뒤: 위 + `palette.gpl`·`sample-frames.json` + 03·06·07 원본 PNG 3장(`assets/reference/png-originals/`). — 2026-10-28 오너 결정: 이 순서 (원본은 계약 또는 비밀유지 합의 뒤).
 - 내부 자료(`docs/p1-density.md` 등 비교 보고, `tests/`)는 보내지 않아도 된다.
