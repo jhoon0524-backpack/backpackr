@@ -114,3 +114,7 @@ P0 시각 전환(PR #30, 브랜치 `joseon-p0-assets`)과 별개의 전투 변�
 | 가속 돌진 | 위치를 바꾸는 줄 `e.x += …` 1곳 — `lungeMinGap` 20px 멈춤·`keepOnScreen` 벽 그대로. 히트스톱 중(멈춘 적)은 예전처럼 돌진 안 함. 돌진 중 맞으면 공격 취소(예전 그대로) |
 | rush 그림 | 그리기 이름만 (frameName 의 적 공격 중 일부 프레임). 판정 무관 |
 
+### 실행 링크 (비공개)
+- 이번 변경 시험판: https://claude.ai/artifact/XqEPM6X3mAbkDxD262VxwV (PR #31 커밋 42016dc 그대로, 탭 제목만 "벽사검 사거리 시험판")
+- 그대로 둔 링크: 조선 P0 https://claude.ai/artifact/XVrn1iFuMaEqmiA7AcvTkk , 원래 게임 https://claude.ai/artifact/URVnfoCiiRcYdEXHWXjwwB
+
