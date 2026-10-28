@@ -86,3 +86,7 @@
 | KS-20261026-01 | 2026-10-26 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 앱에 AI 사용 고지가 표시되지 않는다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=06614b76-715d-462a-b142-947f3e41f088) |
 | KS-20261026-02 | 2026-10-26 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 아주 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a9ebd504-d2eb-42b5-b52d-a7a9a24d5b8a) |
 | KS-20261026-03 | 2026-10-26 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 내가 후원한 프로젝트 정보는 받지 못하고, 관심 없는 프로젝트 소식만 계속 받는다. 팔로우하는 프로젝트 정보를 받기 쉽게 해 달라 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a5bcd192-1ebb-4bc9-a888-575f3e1c7799) |
+| KS-20261028-01 | 2026-10-28 | 수요 | 공식 | 블로그 신규 글: 위치스타터(Witchstarter) 기간에 만나볼 매혹적인 프로젝트 13선 | [링크](https://updates.kickstarter.com/13-spellbinding-projects-to-discover-during-witchstarter/) |
+| KS-20261026-04 | 2026-10-26 | 수요 | 외부 | [iOS ★1 v5.38.0] 쓰레기 — 전혀 작동하지 않는다. | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261027-01 | 2026-10-27 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 좋아하는 인디 창작자와 스튜디오를 후원할 수 있는 공간이 있어 즐겁다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2028bbb1-9f05-44ee-9e09-a78f82b28014) |
+| KS-20261027-02 | 2026-10-27 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 가입조차 할 수 없었다. 타이머가 계속 표시된다. 게임을 하나 사고 싶었을 뿐이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=426a430c-3133-4fd6-8c36-933f0b58e4f2) |

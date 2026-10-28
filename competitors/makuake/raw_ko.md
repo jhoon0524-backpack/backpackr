@@ -24,3 +24,10 @@
 | MK-20261017-02 | 2026-10-17 | 수요 | 외부 | [안드로이드 ★5 v4.8.0] 가젯을 좋아하면 저절로 갖고 싶어지는 상품이 많습니다. 인터넷에서 찾으면 비슷한 것도 있지만 그중에는 유일한 것도 있으니 숨은 보물을 찾아보세요. | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=657d87af-1580-4578-85bb-5a0afc7e269a) |
 | MK-20261023-01 | 2026-10-23 | 공급 | 관찰 | 환불 제도란 (도움말 문서 수정 2026-10-23T05:21Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/34328422593945) |
 | MK-20261023-02 | 2026-10-23 | 공급 | 관찰 | 심사 서류를 삭제할 수 있나요? (도움말 문서 수정 2026-10-23T05:41Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/63502529007513) |
+| MK-20261027-01 | 2026-10-27 | 수익 | 공식 | 2026년 9월 30일 종료 사업연도 별도 재무실적: 매출액 5,944백만 엔 (전년 대비 29.9%) | [링크](https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf) |
+| MK-20261027-02 | 2026-10-27 | 수익 | 공식 | 2026년 9월 30일 종료 사업연도: 영업이익 881백만 엔 (전년 대비 97.2%), 당기순이익 798백만 엔 (전년 대비 96.1%) | [링크](https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf) |
+| MK-20261027-03 | 2026-10-27 | 수익 | 공식 | 주당 배당금 14.00엔 (전년도 0.00엔), 배당금 총액 1억 7,800만 엔, 효력 발생일 2026년 12월 18일 | [링크](https://www.makuake.co.jp/files/uploads/1bmA1I2p2beh07Ge2bW91Y2j34y41bit2bW934y51b607G.pdf) |
+| MK-20261027-04 | 2026-10-27 | 수익 | 공식 | 자기주식 취득: 취득 총액 6억 엔(상한), 취득 기간 2026년 11월 9일~2027년 3월 31일 | [링크](https://www.makuake.co.jp/files/uploads/1bmA1I2p2beh07Ge2bW91Y2j34y41bit2bW934y51b607G.pdf) |
+| MK-20261027-05 | 2026-10-27 | 수익 | 공식 | 2027년 9월 30일 종료 사업연도 매출액은 6,000백만 엔~7,000백만 엔으로 예상 | [링크](https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf) |
+| MK-20261027-06 | 2026-10-27 | 수익 | 공식 | 2027년 9월 30일 종료 사업연도 영업이익은 800백만 엔~1,000백만 엔으로 예상 | [링크](https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf) |
+| MK-20261028-01 | 2026-10-28 | 공급 | 관찰 | 배송 상황을 알리는 방법이 있나요? (도움말 문서 수정 2026-10-28T06:20Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13794758587673) |

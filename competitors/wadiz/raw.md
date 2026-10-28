@@ -67,3 +67,8 @@ WZ-20261027-01 | 2026-10-27 | https://helpcenter.wadiz.io/hc/ko/articles/6363337
 WZ-20261027-02 | 2026-10-27 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.43.2] 사용성 개선 및 안정화를 위해 업데이트 했습니다. | 공급 | 공식
 WZ-20261027-03 | 2026-10-27 | https://job.wadiz.io/ko/o/242007 | 공고 242007(채용 담당자 (채용연계형 인턴))이 채용 목록에 나타남. 스태프, 경력 무관, 인턴. 마감 2026. 11. 01, 23:59까지 | 조직 | 관찰
 WZ-20261026-05 | 2026-10-26 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=5f2efd05-ad10-493e-a718-4021c4a69e7a | [Android ★1 v26.40.0] 8월에 결제했는데 제품을 아직도 못받음 판매자는 기다리라고함 와디즈는 아무조치안함 구매자가 호구인가? | 수요 | 외부
+WZ-20261028-01 | 2026-10-28 | https://www.wadiz.io/ | 메인 페이지 배너 신규: Yumi Script | 공급 | 관찰
+WZ-20261028-02 | 2026-10-28 | https://www.wadiz.io/ | 메인 페이지 배너 신규: Silver Chain | 공급 | 관찰
+WZ-20261028-03 | 2026-10-28 | https://www.wadiz.io/ | 메인 페이지 배너 신규: Smart Heater | 공급 | 관찰
+WZ-20261028-04 | 2026-10-28 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.43.3] 사용성 개선 및 안정화를 위해 업데이트 했습니다. | 공급 | 공식
+WZ-20261028-05 | 2026-10-28 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | [Android 업데이트 26.43.3] (릴리즈노트 필드 없음, 스토어 업데이트일 2026-10-28) | 공급 | 관찰

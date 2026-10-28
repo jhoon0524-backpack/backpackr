@@ -23,3 +23,7 @@
 | GF-20261019-02 | 2026-10-19 | 공급 | 관찰 | 'EU 제품 안전 규정: GPSR이 프로젝트에 의미하는 것' 문서 수정됨 (사이트맵 수정일 2026-10-19T09:24:37Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/768-eu-product-safety-rules-what-gpsr-means-for-your-projects) |
 | GF-20261021-01 | 2026-10-21 | 공급 | 관찰 | '프로젝트 이미지 설명' 문서 수정됨 (사이트맵 수정일 2026-10-21T08:53:33Z, 문서 표기 2026년 10월 21일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/304-required-project-images) |
 | GF-20261022-01 | 2026-10-22 | 수요 | 외부 | [안드로이드 ★5 v1.93.1] 비교할 만한 게 없다! | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=e724fd68-53b1-4ead-83cf-609057235b4a) |
+| GF-20261027-01 | 2026-10-27 | 수요 | 외부 | [안드로이드 ★2 v1.93.1] 제대로 작동하지 않는 앱... 정보가 화면 밖에 표시되고, 페이지 크기 조절이나 회전 등 정보를 실제로 볼 방법이 없다 | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=0ab6ddfa-f0b4-4ce7-9a42-3708aa68b1df) |
+| GF-20261028-01 | 2026-10-28 | 공급 | 관찰 | '분할 결제(Split payments)' 문서 수정됨 (사이트맵 수정일 2026-10-28T10:51:04Z, 문서 표기 2026년 10월 28일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/695-split-payments) |
+| GF-20261028-02 | 2026-10-28 | 공급 | 관찰 | '크라우드펀딩 시작하기(Getting started with crowdfunding)' 문서 수정됨 (사이트맵 수정일 2026-10-28T10:46:25Z, 문서 표기 2026년 10월 28일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/285-getting-started-with-crowdfunding) |
+| GF-20261028-03 | 2026-10-28 | 공급 | 관찰 | '엔드게임(Endgame)' 문서 수정됨 (사이트맵 수정일 2026-10-28T09:15:51Z, 문서 표기 2026년 10월 28일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/434-endgame) |
