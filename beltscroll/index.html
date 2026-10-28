@@ -943,10 +943,10 @@ function frameName(f, isPlayer) {
     if (f.afterGrab) { const a = f.afterGrab; return a.total - a.left < a.poseFrames ? a.pose : 'idle0'; }   // 던진 팔 / 마지막 무릎
     if (f.jumpKick) return f.jumpKick.t <= JUMP_KICK.prep ? 'jump' : 'kick';
     if (f.attack > 0) {
-      const a = f.move, t = attackTotal(a) - f.attack + 1;
-      if (t <= a.prep) return 'windup';                       // 준비
-      if (t <= a.prep + a.active + POSE_HOLD) return a.pose;   // 타격 (판정 프레임에 시작)
-      return 'idle0';                                          // 회수
+      const a = f.move, t = attackTotal(a) - f.attack + 1, third = a === ATTACKS[2];   // 3타는 전용 준비·회수 칸 (정식 시트에 없으면 windup·idle0 그림, 2026-10-28 P1)
+      if (t <= a.prep) return third ? 'kickPrep' : 'windup';            // 준비
+      if (t <= a.prep + a.active + POSE_HOLD) return a.pose;            // 타격 (판정 프레임에 시작)
+      return third ? 'kickRecover' : 'idle0';                           // 회수
     }
     if (f.z > 0) return 'jump';
   } else if (f.attack > 0) {

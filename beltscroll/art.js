@@ -805,11 +805,17 @@ const ART = (() => {
       set.sheetFace = c;
     }
   }
-  // 그릴 그림 한 장: { img, scale(화면 px / 그림 px), ax·ay(그림 안 발 기준점) }. 잡기 별칭 칸이 시트에 없으면 원래 동작 칸을 쓴다
+  // 정식 시트에만 있는 칸 (2026-10-28 P1, 3타 전용 준비·회수): 없으면 이 칸으로 (코드 그림도 이 칸)
+  const SHEET_ONLY = { kickPrep: 'windup', kickRecover: 'idle0' };
+  // 그릴 그림 한 장: { img, scale(화면 px / 그림 px), ax·ay(그림 안 발 기준점) }.
+  // 별칭 칸(잡기·점프 공격·달려들기)이 시트에 없으면 원래 동작 칸을 쓴다. 단 칼 든 캐릭터는 시트의 원래 동작 칸이 칼 든 그림이라
+  // 맨손 코드 그림(임시)을 쓴다 — 잡는 동안 칼이 보이거나 점프 공격이 찌르기로 보이지 않게
   function frameOf(id, name, flash) {
-    const set = characters[id], sh = set.sheet[name] || set.sheet[BARE[name]];
+    const set = characters[id], armed = !!CHARACTERS[id].sword;
+    const sh = set.sheet[name] || set.sheet[SHEET_ONLY[name]] || (!armed && set.sheet[BARE[name]]);
     if (sh) return { img: flash ? sh.flash : sh.img, scale: set.spec.scale, ax: set.spec.footX, ay: set.spec.footY };
-    return { img: (flash ? set.flash : set.frames)[name], scale: S, ax: CX, ay: FOOT };
+    const code = set.frames[name] ? name : SHEET_ONLY[name] || name;
+    return { img: (flash ? set.flash : set.frames)[code], scale: S, ax: CX, ay: FOOT };
   }
   // 판정용 모양 (코드 그림 기준): 가드 주먹 사각형 [x, y, w, h] 과 칼날 칸 [x, y] 들, 프레임 칸 좌표 (CX·FOOT 기준)
   function hitShapes(id, name) { const fr = characters[id].frames[name]; return (fr && fr.hit) || { fists: [], blade: [] }; }
