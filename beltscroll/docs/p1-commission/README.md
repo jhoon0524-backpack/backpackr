@@ -16,6 +16,7 @@
 - 칼끝 56px 검증: `../p1/tip56-check.png`, 도구 `tools/p1-draft/tip56-check.js`.
 - 다시 만들기: `node tools/p1-draft/commission-pack.js` (자세 가이드·팔레트·03 부분 확대).
 
-## 아티스트에게 보낼 묶음 (발주 때)
-명세서 1개 + 이 폴더의 `references.md`·`poses.md`·`pose-guide.png`·`palette.png`·`palette.gpl`·`sample-frames.json`·`ref-03-*.png` + 03·06·07 원본 PNG 3장(`assets/reference/png-originals/`).
+## 아티스트에게 보낼 묶음
+- 견적 단계: `quote-request.md` 설명문 + 명세서 + 이 폴더의 `references.md`·`poses.md`·`pose-guide.png`·`palette.png`·`ref-03-*.png` (설정화 부분 확대만).
+- 계약(또는 비밀유지 합의) 뒤: 위 + `palette.gpl`·`sample-frames.json` + 03·06·07 원본 PNG 3장(`assets/reference/png-originals/`). — 원본을 언제 보낼지는 오너 판단 대기 (추천: 이 순서).
 - 내부 자료(`docs/p1-density.md` 등 비교 보고, `tests/`)는 보내지 않아도 된다.

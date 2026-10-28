@@ -54,10 +54,13 @@ const NAMES = ['idle0', 'walk0', 'punch', 'punch2', 'kickPrep', 'kick', 'kickRec
         for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (cd[(y * c.width + x) * 4 + 3]) {
           const sx = (e.x - cam) + (e.dir < 0 ? -1 : 1) * ((x + 0.5 - fr.ax) * fr.scale), sy = e.y + (y + 0.5 - fr.ay) * fr.scale; ep.push([sx, sy]); }
         let near = Infinity; for (const [bx, by] of blade) for (const [qx, qy] of ep) { const dd = Math.max(0, Math.abs(bx + 0.5 - qx) - (fr.scale + 1) / 2, 0) + 0 * qy; if (Math.abs(by + 0.5 - qy) <= (fr.scale + 1) / 2 && dd < near) near = dd; }
+        // 직선으로 가장 가까운 거리 (칼날이 머리 위로 지나갈 때 같은 높이 가로 거리는 틈을 크게 잼 — 둘 다 냄)
+        let eu = Infinity; const half = fr.scale / 2 + 0.5;
+        for (const [bx, by] of blade) for (const [qx, qy] of ep) { const ddx = Math.max(0, Math.abs(bx + 0.5 - qx) - half), ddy = Math.max(0, Math.abs(by + 0.5 - qy) - half); const dd = Math.hypot(ddx, ddy); if (dd < eu) eu = dd; }
         draw();
         const bodyFront = dx - hurtHalf(e);   // 적 몸 앞면 (판정, 주인공 중심에서)
         const fist = guard ? Math.min(...ART.hitShapes(e.art, 'idle0').fists.map(([x, , w]) => dx - (x + w - ART.CX) * ART.S)) : null;   // 가드 주먹 앞끝
-        return { hit, tip, gapBody: +(bodyFront - tip).toFixed(1), gapFist: fist === null ? null : +(fist - tip).toFixed(1), gapArt: near === Infinity ? null : Math.round(near) };
+        return { hit, tip, gapBody: +(bodyFront - tip).toFixed(1), gapFist: fist === null ? null : +(fist - tip).toFixed(1), gapArt: near === Infinity ? null : Math.round(near), gapEu: Math.round(eu) };
       }
     };
   });
@@ -69,7 +72,7 @@ const NAMES = ['idle0', 'walk0', 'punch', 'punch2', 'kickPrep', 'kick', 'kickRec
     if (dx === 83 || dx === 92) { const file = path.join(OUT, `shot-${n}-${dir}-${type}.png`);
       const cx = dir > 0 ? 480 : 480 - 140; await p.screenshot({ path: file, clip: { x: cx - 30, y: 300, width: 200, height: 140 } }); shots.push({ file, cap: `${n}타 ${dir > 0 ? '→' : '←'} ${label} · ${r.hit ? '맞음' : '헛침'} · 칼끝 ${r.tip}px` }); }
   }
-  for (const r of rows) console.log(`${r.n}타 ${r.dir > 0 ? '→' : '←'} ${r.type.padEnd(5)} 적 중심 ${String(r.dx).padEnd(4)} ${r.label.padEnd(26)} ${r.hit ? '맞음' : '헛침'} · 화면 칼끝 ${r.tip}px · 칼끝~${r.gapFist === null ? '몸 앞면' : '가드 주먹'} 간격 ${r.gapFist === null ? r.gapBody : r.gapFist}px · 칼날~적 그림 같은 높이 최소 틈 ${r.gapArt}px`);
+  for (const r of rows) console.log(`${r.n}타 ${r.dir > 0 ? '→' : '←'} ${r.type.padEnd(5)} 적 중심 ${String(r.dx).padEnd(4)} ${r.label.padEnd(26)} ${r.hit ? '맞음' : '헛침'} · 화면 칼끝 ${r.tip}px · 칼끝~${r.gapFist === null ? '몸 앞면' : '가드 주먹'} 간격 ${r.gapFist === null ? r.gapBody : r.gapFist}px · 칼날~적 그림 같은 높이 최소 틈 ${r.gapArt}px · 직선 최단 ${r.gapEu}px`);
   if (OTHER) { console.log('errors', errors); await b.close(); return; }
   // 사진: 맞음 끝 장면 4배 확대
   const img = f => `<img style="width:600px;image-rendering:pixelated" src="data:image/png;base64,${fs.readFileSync(f).toString('base64')}">`;
