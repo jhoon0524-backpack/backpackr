@@ -31,3 +31,6 @@
 | MK-20261027-05 | 2026-10-27 | 수익 | 공식 | 2027년 9월 30일 종료 사업연도 매출액은 6,000백만 엔~7,000백만 엔으로 예상 | [링크](https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf) |
 | MK-20261027-06 | 2026-10-27 | 수익 | 공식 | 2027년 9월 30일 종료 사업연도 영업이익은 800백만 엔~1,000백만 엔으로 예상 | [링크](https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf) |
 | MK-20261028-01 | 2026-10-28 | 공급 | 관찰 | 배송 상황을 알리는 방법이 있나요? (도움말 문서 수정 2026-10-28T06:20Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13794758587673) |
+| MK-20261029-01 | 2026-10-29 | 수요 | 공식 | 2026년 1~9월에 게재를 시작한 오디오비주얼 관련 장르 프로젝트의 응원구매 총액이 역대 최고였던 2025년 연간의 약 1.8배를 기록 | [링크](https://www.makuake.co.jp/news/archives/397) |
+| MK-20261029-02 | 2026-10-29 | 수요 | 공식 | 11월 7일(토) 열리는 일본 최대급 헤드폰·이어폰 행사 '가을 헤드폰 축제 2026'에 5번째 부스 출전 | [링크](https://www.makuake.co.jp/news/archives/397) |
+| MK-20261029-03 | 2026-10-29 | 공급 | 관찰 | PayPay 결제 방법 (도움말 문서 수정 2026-10-29T03:20Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/63016413789977) |

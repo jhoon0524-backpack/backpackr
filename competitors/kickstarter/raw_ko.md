@@ -90,3 +90,7 @@
 | KS-20261026-04 | 2026-10-26 | 수요 | 외부 | [iOS ★1 v5.38.0] 쓰레기 — 전혀 작동하지 않는다. | [링크](https://apps.apple.com/us/app/id596961532) |
 | KS-20261027-01 | 2026-10-27 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 좋아하는 인디 창작자와 스튜디오를 후원할 수 있는 공간이 있어 즐겁다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2028bbb1-9f05-44ee-9e09-a78f82b28014) |
 | KS-20261027-02 | 2026-10-27 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 가입조차 할 수 없었다. 타이머가 계속 표시된다. 게임을 하나 사고 싶었을 뿐이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=426a430c-3133-4fd6-8c36-933f0b58e4f2) |
+| KS-20261028-02 | 2026-10-28 | 수요 | 외부 | [iOS ★1 v5.38.0] 끔찍한 디자인에 대한 남다른 헌신 — 그렇다, 모든 회사는 공개 웹사이트보다 객관적으로 더 나쁜 앱을 만들어야 한다 | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261028-03 | 2026-10-28 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 'Nocturnal' 시리즈 2편 라쿤 에디션은 반가운 후속작이며 아름다움이 가득하다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ebeb493a-642f-4149-aeae-40e0fc461af7) |
+| KS-20261029-01 | 2026-10-29 | 수요 | 공식 | 블로그 신규 글: Bringing Murderbot to Life: An Interview With Erika Schultz (머더봇 되살리기: 에리카 슐츠 인터뷰) | [링크](https://updates.kickstarter.com/bringing-murderbot-to-life-an-interview-with-erika-schultz/) |
+| KS-20261029-02 | 2026-10-29 | 조직 | 공식 | 채용 공고 5279194007 신규: Account Director, Design & Technology (I) - China, 중국 선전 (게시 2026-10-29). 공고 총 2건 | [링크](https://job-boards.greenhouse.io/kickstarter/jobs/5279194007) |

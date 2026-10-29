@@ -30,3 +30,6 @@ MK-20261027-04 | 2026-10-27 | https://www.makuake.co.jp/files/uploads/1bmA1I2p2b
 MK-20261027-05 | 2026-10-27 | https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf | For the fiscal year ending September 30, 2027, the Company expects net sales of ¥6,000 million to ¥7,000 million | 수익 | 공식
 MK-20261027-06 | 2026-10-27 | https://www.makuake.co.jp/files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf | For the fiscal year ending September 30, 2027, operating profit of ¥800 million to ¥1,000 million | 수익 | 공식
 MK-20261028-01 | 2026-10-28 | https://mkhelp.makuake.com/hc/ja/articles/13794758587673 | リターン発送状況のお知らせをする方法はありますか？ (도움말 문서 수정 2026-10-28T06:20Z) | 공급 | 관찰
+MK-20261029-01 | 2026-10-29 | https://www.makuake.co.jp/news/archives/397 | 2026年1〜9月に掲載を開始したオーディオビジュアル関連ジャンルのプロジェクトについて、応援購入総額が過去最高だった2025年通年の約1.8倍を記録 | 수요 | 공식
+MK-20261029-02 | 2026-10-29 | https://www.makuake.co.jp/news/archives/397 | 11月7日（土）に開催される国内最大級のヘッドフォン・イヤフォンイベント「秋のヘッドフォン祭 2026」に5回目のブース出展を行います | 수요 | 공식
+MK-20261029-03 | 2026-10-29 | https://mkhelp.makuake.com/hc/ja/articles/63016413789977 | PayPayでのお支払い方法 (도움말 문서 수정 2026-10-29T03:20Z) | 공급 | 관찰
