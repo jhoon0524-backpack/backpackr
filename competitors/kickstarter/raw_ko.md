@@ -94,3 +94,7 @@
 | KS-20261028-03 | 2026-10-28 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 'Nocturnal' 시리즈 2편 라쿤 에디션은 반가운 후속작이며 아름다움이 가득하다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ebeb493a-642f-4149-aeae-40e0fc461af7) |
 | KS-20261029-01 | 2026-10-29 | 수요 | 공식 | 블로그 신규 글: Bringing Murderbot to Life: An Interview With Erika Schultz (머더봇 되살리기: 에리카 슐츠 인터뷰) | [링크](https://updates.kickstarter.com/bringing-murderbot-to-life-an-interview-with-erika-schultz/) |
 | KS-20261029-02 | 2026-10-29 | 조직 | 공식 | 채용 공고 5279194007 신규: Account Director, Design & Technology (I) - China, 중국 선전 (게시 2026-10-29). 공고 총 2건 | [링크](https://job-boards.greenhouse.io/kickstarter/jobs/5279194007) |
+| KS-20261028-04 | 2026-10-28 | 수요 | 외부 | Kickstarter는 사기 공장 — 프로젝트를 올리는 사람들에 대한 책임 추궁이 전혀 없다. 많은 후원자가 환불을 요청 중 | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261029-03 | 2026-10-29 | 수요 | 외부 | 사기꾼들의 사이트 — 이제 일본도 돈을 훔치는 데 합류했다. 돈과 작별하라. spectre와 znaps만 검색해 보라 | [링크](https://apps.apple.com/us/app/id596961532) |
+| KS-20261029-04 | 2026-10-29 | 수요 | 외부 | 도박 플랫폼, 사용하지 말 것 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1bfa8e1d-e8df-4c84-8650-3cd1049bfc47) |
+| KS-20261029-05 | 2026-10-29 | 수요 | 외부 | 이 앱은 돈을 속여 빼앗는 서비스를 위한 앱이다. 후원으로 사기를 당해도 Kickstarter는 아무 보호도 제공하지 않는다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=35caede7-85b2-448b-ba6b-243d23b49a6e) |

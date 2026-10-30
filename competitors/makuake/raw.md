@@ -33,3 +33,6 @@ MK-20261028-01 | 2026-10-28 | https://mkhelp.makuake.com/hc/ja/articles/13794758
 MK-20261029-01 | 2026-10-29 | https://www.makuake.co.jp/news/archives/397 | 2026年1〜9月に掲載を開始したオーディオビジュアル関連ジャンルのプロジェクトについて、応援購入総額が過去最高だった2025年通年の約1.8倍を記録 | 수요 | 공식
 MK-20261029-02 | 2026-10-29 | https://www.makuake.co.jp/news/archives/397 | 11月7日（土）に開催される国内最大級のヘッドフォン・イヤフォンイベント「秋のヘッドフォン祭 2026」に5回目のブース出展を行います | 수요 | 공식
 MK-20261029-03 | 2026-10-29 | https://mkhelp.makuake.com/hc/ja/articles/63016413789977 | PayPayでのお支払い方法 (도움말 문서 수정 2026-10-29T03:20Z) | 공급 | 관찰
+MK-20261030-01 | 2026-10-30 | https://www.makuake.co.jp/news/archives/398 | 「Makuake Of The Year 2026」において、合計25件の受賞プロジェクトを選出しましたのでお知らせします | 수요 | 공식
+MK-20261030-02 | 2026-10-30 | https://www.makuake.co.jp/news/archives/398 | 「Makuake Award 2026 授賞式」を2026年12月2日（水）に開催します | 수요 | 공식
+MK-20261030-03 | 2026-10-30 | https://mkhelp.makuake.com/hc/ja/articles/13754763759513 | お支払い方法・決済手段について (도움말 문서 수정 2026-10-30T05:21Z) | 공급 | 관찰
