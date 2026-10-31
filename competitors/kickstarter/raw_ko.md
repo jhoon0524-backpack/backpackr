@@ -98,3 +98,4 @@
 | KS-20261029-03 | 2026-10-29 | 수요 | 외부 | 사기꾼들의 사이트 — 이제 일본도 돈을 훔치는 데 합류했다. 돈과 작별하라. spectre와 znaps만 검색해 보라 | [링크](https://apps.apple.com/us/app/id596961532) |
 | KS-20261029-04 | 2026-10-29 | 수요 | 외부 | 도박 플랫폼, 사용하지 말 것 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1bfa8e1d-e8df-4c84-8650-3cd1049bfc47) |
 | KS-20261029-05 | 2026-10-29 | 수요 | 외부 | 이 앱은 돈을 속여 빼앗는 서비스를 위한 앱이다. 후원으로 사기를 당해도 Kickstarter는 아무 보호도 제공하지 않는다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=35caede7-85b2-448b-ba6b-243d23b49a6e) |
+| KS-20261030-01 | 2026-10-30 | 수요 | 외부 | 쉽고 요점만 담겼다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2fcf22b9-3235-45ec-86eb-2248e22d7e83) |

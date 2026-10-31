@@ -75,3 +75,5 @@ WZ-20261028-05 | 2026-10-28 | https://play.google.com/store/apps/details?id=com.
 WZ-20261029-01 | 2026-10-29 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.43.4] 사용성 개선 및 안정화를 위해 업데이트 했습니다. | 공급 | 공식
 WZ-20261029-02 | 2026-10-29 | https://job.wadiz.io/ko/o/242434 | 공고 242434(광고상품 기획·운영 담당자)가 채용 목록에 나타남. 마케팅/홍보, 경력 3년 이상, 정규직. 마감 2026. 11. 24, 00:59까지 | 조직 | 관찰
 WZ-20261029-03 | 2026-10-29 | https://job.wadiz.io/ko/o/242338 | 공고 242338(광고기획 팀장)이 채용 목록에 나타남. 마케팅/홍보, 경력 7년 이상, 정규직. 마감 2026. 11. 24, 00:59까지 | 조직 | 관찰
+WZ-20261031-01 | 2026-10-31 | https://www.wadiz.io/ | 메인 페이지 배너 신규: Humidifier | 공급 | 관찰
+WZ-20261031-02 | 2026-10-30 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=447b34ca-31ca-4d94-8386-b99dfffe1551 | [Android ★5 v26.40.0] 새로운 컨셉의 제품을 먼저 저렴한 가격이 받아본다. | 수요 | 외부
