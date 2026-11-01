@@ -98,3 +98,4 @@ KS-20261029-03 | 2026-10-29 | https://apps.apple.com/us/app/id596961532 | [iOS �
 KS-20261029-04 | 2026-10-29 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1bfa8e1d-e8df-4c84-8650-3cd1049bfc47 | [Android ★1 v3.43.0] Gambling platform do not use | 수요 | 외부
 KS-20261029-05 | 2026-10-29 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=35caede7-85b2-448b-ba6b-243d23b49a6e | [Android ★1 v3.43.0] This is an app for a service dedicated to scamming you out of money. Kickstarter offers no protections if you are scammed by a pledge. | 수요 | 외부
 KS-20261030-01 | 2026-10-30 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2fcf22b9-3235-45ec-86eb-2248e22d7e83 | [Android ★5 v3.43.0] easy, to the point | 수요 | 외부
+KS-20261101-01 | 2026-10-30 | https://apps.apple.com/us/app/id596961532?see-all=reviews | [iOS ★1 v5.38.0] Can’t trust — Stay away from | 수요 | 외부

@@ -6,8 +6,8 @@
 | PR TIMES (companyrdf.php?company_id=19299) | 000000598.000019299 | 2026-10-22 | |
 | 서비스 뉴스 (camp-fire.jp/news, RSS feed.xml) | news/2026/11/11/casestudy | 2026-10-22 | |
 | 도움말센터 (help.camp-fire.jp/sitemap.xml lastmod) | 海外支援機能について（起案者向け） (lastmod 2026-10-29), 【外部サービス設定】Discordアカウント連携の設定方法は？ (lastmod 2026-10-29) | 2026-10-29 | HubSpot 지식베이스 |
-| 채용 (hrmos.co/pages/campfire/jobs) | 공고 0건 (직전 20260827 カスタマーサクセス アルバイト) | 2026-10-14 | 공고 총 0건 |
+| 채용 (hrmos.co/pages/campfire/jobs) | 공고 0건 (직전 20260827 カスタマーサクセス アルバイト) | 2026-11-01 | 공고 총 0건 |
 | 앱스토어 릴리즈노트 (id1496301418) | 2026.10.08 | 2026-10-13 | |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, jp) | 14637569725 | 2026-10-07 | |
 | 구글플레이 | 미확인 | - | 안드로이드 앱 패키지 못 찾음 |
-| 외부 뉴스 검색 "CAMPFIRE クラウドファンディング" | - | 2026-10-31 | |
+| 외부 뉴스 검색 "CAMPFIRE クラウドファンディング" | - | 2026-11-01 | |
