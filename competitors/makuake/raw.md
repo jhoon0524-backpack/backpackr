@@ -36,3 +36,12 @@ MK-20261029-03 | 2026-10-29 | https://mkhelp.makuake.com/hc/ja/articles/63016413
 MK-20261030-01 | 2026-10-30 | https://www.makuake.co.jp/news/archives/398 | 「Makuake Of The Year 2026」において、合計25件の受賞プロジェクトを選出しましたのでお知らせします | 수요 | 공식
 MK-20261030-02 | 2026-10-30 | https://www.makuake.co.jp/news/archives/398 | 「Makuake Award 2026 授賞式」を2026年12月2日（水）に開催します | 수요 | 공식
 MK-20261030-03 | 2026-10-30 | https://mkhelp.makuake.com/hc/ja/articles/13754763759513 | お支払い方法・決済手段について (도움말 문서 수정 2026-10-30T05:21Z) | 공급 | 관찰
+MK-20261102-01 | 2026-11-02 | https://www.makuake.co.jp/news/archives/399 | 【11/7開催！】ヘッドフォン・イヤフォンの祭典「秋のヘッドフォン祭 2026」に「Makuake」が出展 | 수요 | 공식
+MK-20261102-02 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/13899337331609 | Makuakeアナリティクスとは (도움말 문서 수정 2026-11-02T09:28Z) | 공급 | 관찰
+MK-20261102-03 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/13753442504345 | 応援購入したリターンをキャンセルしたい (도움말 문서 수정 2026-11-02T09:11Z) | 공급 | 관찰
+MK-20261102-04 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/25311940249625 | プロジェクト実施中にキャンセルになった場合の返金方法について (도움말 문서 수정 2026-11-02T08:04Z) | 공급 | 관찰
+MK-20261102-05 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/14225987033369 | 活動レポートへのコメント・応援コメントの投稿方法 (도움말 문서 수정 2026-11-02T07:22Z) | 공급 | 관찰
+MK-20261102-06 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/14215035372313 | プロジェクトの募集期間と終了日とは？ (도움말 문서 수정 2026-11-02T06:45Z) | 공급 | 관찰
+MK-20261102-07 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/16245142463001 | 寄附する際の決済方法について (도움말 문서 수정 2026-11-02T06:44Z) | 공급 | 관찰
+MK-20261102-08 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/14208071578649 | プロジェクトは実施期間最終日の何時に終了しますか？ (도움말 문서 수정 2026-11-02T06:34Z) | 공급 | 관찰
+MK-20261102-09 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/13753519323417 | All or Nothing 型のプロジェクトが未達成で終了した場合の返金時期と返金方法について (도움말 문서 수정 2026-11-02T06:30Z) | 공급 | 관찰

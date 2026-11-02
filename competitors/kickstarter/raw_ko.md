@@ -100,3 +100,8 @@
 | KS-20261029-05 | 2026-10-29 | 수요 | 외부 | 이 앱은 돈을 속여 빼앗는 서비스를 위한 앱이다. 후원으로 사기를 당해도 Kickstarter는 아무 보호도 제공하지 않는다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=35caede7-85b2-448b-ba6b-243d23b49a6e) |
 | KS-20261030-01 | 2026-10-30 | 수요 | 외부 | 쉽고 요점만 담겼다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2fcf22b9-3235-45ec-86eb-2248e22d7e83) |
 | KS-20261101-01 | 2026-10-30 | 수요 | 외부 | [iOS ★1 v5.38.0] 믿을 수 없다 — 멀리하라 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261102-01 | 2026-11-02 | 수요 | 공식 | 블로그 글: 작가 이바 세인트 존이 말하는 자가 출판의 힘 — 영국의 다작 SF·어반 스릴러 작가가 작업 방식 등을 이야기함 | [링크](https://updates.kickstarter.com/author-eva-st-john-on-the-power-of-self-publishing/) |
+| KS-20261102-02 | 2026-11-02 | 조직 | 공식 | 채용 공고 신규: Director, Growth & Product Marketing, 원격 (최초 게시 2026-11-02). 공고 총 3건 | [링크](https://job-boards.greenhouse.io/kickstarter/jobs/5281984007) |
+| KS-20261102-03 | 2026-11-01 | 수요 | 외부 | [Android ★1 v3.43.0] 킥스타터를 쓰지 마라. 사기꾼을 플랫폼에 허용하고, 사기를 당해도 전혀 구제해 주지 않는다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ca5375cb-d959-4082-8282-947301f670cd) |
+| KS-20261102-04 | 2026-11-01 | 수요 | 외부 | [Android ★1 v3.43.0] 오랫동안 후원자였고 많은 제품을 후원했다. 그런데 최근 후원한 제품에서 킥스타터가 프로젝트 주인과의 연락을 도와주지 못했다… | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=0a2e2f84-b5e6-490f-83b6-38ed34775647) |
+| KS-20261102-05 | 2026-11-01 | 수요 | 외부 | [Android ★3 v3.43.0] 변명 없음. 너무 오래 걸린다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=de4f5b1e-4e93-4e48-8465-bc28f88a5835) |
