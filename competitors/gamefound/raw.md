@@ -26,3 +26,4 @@ GF-20261027-01 | 2026-10-27 | https://play.google.com/store/apps/details?id=com.
 GF-20261028-01 | 2026-10-28 | https://help.gamefound.com/article/695-split-payments | 'Split payments' 문서 수정됨 (sitemap lastmod 2026-10-28T10:51:04Z, Last updated on October 28, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261028-02 | 2026-10-28 | https://help.gamefound.com/article/285-getting-started-with-crowdfunding | 'Getting started with crowdfunding' 문서 수정됨 (sitemap lastmod 2026-10-28T10:46:25Z, Last updated on October 28, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261028-03 | 2026-10-28 | https://help.gamefound.com/article/434-endgame | 'Endgame' 문서 수정됨 (sitemap lastmod 2026-10-28T09:15:51Z, Last updated on October 28, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261103-01 | 2026-11-03 | https://help.gamefound.com/article/743-find-and-download-digital-content | 'Find and Download Digital Content' 문서 수정됨 (sitemap lastmod 2026-11-03T11:57:45Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰

@@ -27,3 +27,4 @@
 | GF-20261028-01 | 2026-10-28 | 공급 | 관찰 | '분할 결제(Split payments)' 문서 수정됨 (사이트맵 수정일 2026-10-28T10:51:04Z, 문서 표기 2026년 10월 28일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/695-split-payments) |
 | GF-20261028-02 | 2026-10-28 | 공급 | 관찰 | '크라우드펀딩 시작하기(Getting started with crowdfunding)' 문서 수정됨 (사이트맵 수정일 2026-10-28T10:46:25Z, 문서 표기 2026년 10월 28일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/285-getting-started-with-crowdfunding) |
 | GF-20261028-03 | 2026-10-28 | 공급 | 관찰 | '엔드게임(Endgame)' 문서 수정됨 (사이트맵 수정일 2026-10-28T09:15:51Z, 문서 표기 2026년 10월 28일 최종 수정). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/434-endgame) |
+| GF-20261103-01 | 2026-11-03 | 공급 | 관찰 | '디지털 콘텐츠 찾기 및 다운로드(Find and Download Digital Content)' 문서 수정됨 (사이트맵 수정일 2026-11-03T11:57:45Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/743-find-and-download-digital-content) |

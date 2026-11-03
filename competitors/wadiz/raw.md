@@ -87,3 +87,7 @@ WZ-20261102-05 | 2026-11-02 | https://www.wadiz.io/ | 메인 페이지 배너 �
 WZ-20261102-06 | 2026-11-02 | https://www.wadiz.io/ | 메인 페이지 배너 신규: Hairpin | 공급 | 관찰
 WZ-20261102-07 | 2026-11-02 | https://www.wadiz.io/ | 메인 페이지 배너 신규: Travel Brush | 공급 | 관찰
 WZ-20261102-08 | 2026-11-02 | https://www.wadiz.io/ | 메인 페이지 배너 신규: Anti Snore | 공급 | 관찰
+WZ-20261103-01 | 2026-11-03 | https://blog.wadiz.io/%ed%95%98%eb%a3%a8-%ed%95%9c%ec%9e%a5-%ec%9d%bd%eb%8a%94-%ec%8a%b5%ea%b4%80%ec%97%90-%ed%8e%80%eb%94%a9/ | 최근 1년간 오픈한 어린이 신문 프로젝트의 펀딩액은 약 10억 6천만 원으로, 직전 1년 대비 2.2배 증가했다. | 수요 | 공식
+WZ-20261103-02 | 2026-11-03 | https://blog.wadiz.io/%ed%95%98%eb%a3%a8-%ed%95%9c%ec%9e%a5-%ec%9d%bd%eb%8a%94-%ec%8a%b5%ea%b4%80%ec%97%90-%ed%8e%80%eb%94%a9/ | 최근 1년 교구·문구 펀딩액은 약 29억 9천만 원으로, 3년 전 같은 기간의 18배 규모다. 키즈 카테고리 펀딩액의 38%를 차지하며 | 수요 | 공식
+WZ-20261103-03 | 2026-11-03 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.45.0] 사용성 개선 및 안정화를 위해 업데이트 했습니다. | 공급 | 공식
+WZ-20261103-04 | 2026-11-02 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=7a05fb6d-96bd-43cb-aac0-ef88fb4c378b | [Android ★5 v26.43.3] 좋은 제품 싸게 건집니다 | 수요 | 외부

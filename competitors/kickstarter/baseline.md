@@ -7,11 +7,11 @@
 | 블로그 (updates.kickstarter.com/rss) | author-eva-st-john-on-the-power-of-self-publishing | 2026-11-02 | |
 | 메인 페이지·프레스 (kickstarter.com) | 미확인 | - | 2026-10-02 사이트 봇 차단(Cloudflare 403) |
 | 도움말센터 (help.kickstarter.com, Intercom) | 미확인 | - | 최근 수정 목록/sitemap 없음 |
-| 채용 (Greenhouse kickstarter) | 5281984007 (Director, Growth & Product Marketing) 외 5279194007, 5238069007 | 2026-11-02 | 공고 총 3건 |
+| 채용 (Greenhouse kickstarter) | 5281921007 (Community Manager) 외 5281984007, 5279194007, 5238069007 | 2026-11-03 | 공고 총 4건 |
 | 앱스토어 릴리즈노트 (id596961532) | 5.38.0 | 2026-09-28 | 2026-10-02 기준 "4d ago" |
 | 구글플레이 릴리즈노트 (com.kickstarter.kickstarter) | 업데이트 2026-10-08 (3.43.0) | 2026-10-08 | |
 | 외부 뉴스 검색 "Kickstarter" | - | 2026-11-02 | 개별 프로젝트 기사는 기록 대상 아님 |
 | 기능 소개 (features.kickstarter.com) | 출시: Late Pledges, Backer Survey, Pre-Launch Editor, Rewards Tab/Images on Rewards / Coming Soon: Backings Dashboard, Pledge Redemption / 베타: Kickstarter Performance | 2026-10-02 | 페이지 하단 © 2024 |
 | 유튜브 (UCPV33YGEVLwtOotz9ZG0XQw) | How The Charismatic Voice Used Kickstarter to Fund Vocal Research | 2026-10-07 |  |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, us) | 14732336864 | 2026-10-30 | 2026-11-02 신규 없음 |
-| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | de4f5b1e-4e93-4e48-8465-bc28f88a5835 | 2026-11-01 | |
+| 구글플레이 리뷰 (google-play-scraper NEWEST, en/us) | 30ea3a73-6ff3-4cef-869b-3ade10baac88 | 2026-11-02 | |
