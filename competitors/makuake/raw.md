@@ -45,3 +45,4 @@ MK-20261102-06 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/14215035
 MK-20261102-07 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/16245142463001 | 寄附する際の決済方法について (도움말 문서 수정 2026-11-02T06:44Z) | 공급 | 관찰
 MK-20261102-08 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/14208071578649 | プロジェクトは実施期間最終日の何時に終了しますか？ (도움말 문서 수정 2026-11-02T06:34Z) | 공급 | 관찰
 MK-20261102-09 | 2026-11-02 | https://mkhelp.makuake.com/hc/ja/articles/13753519323417 | All or Nothing 型のプロジェクトが未達成で終了した場合の返金時期と返金方法について (도움말 문서 수정 2026-11-02T06:30Z) | 공급 | 관찰
+MK-20261104-01 | 2026-11-04 | https://www.makuake.co.jp/news/archives/400 | 【11/14〜15開催！】日本最大級の暮らしと遊びの祭典「FIELDSTYLE EXPO 2026」に「Makuake」が出展 | 수요 | 공식
