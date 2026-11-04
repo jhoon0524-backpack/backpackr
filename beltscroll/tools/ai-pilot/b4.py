@@ -68,6 +68,9 @@ def pose(a, lean, up_dx, up_dy, ctrl, drop, legs=None):
             part = np.zeros_like(can[sl]); part[m] = can[sl][m]; can[sl][m] = 0
             ys_, xs_ = np.nonzero(part[..., 3]); ty, tx = ys_ + OY + y0 + int(dy), xs_ + OX + x0 + int(dx)
             ok = (ty >= 0) & (ty < H) & (tx >= 0) & (tx < W); leg_layer[ty[ok], tx[ok]] = part[ys_[ok], xs_[ok]]
+        # 2026-11-04 오너 "걷는 발이 세 개로 보임": 두 다리 사이 도포 가운데 자락 끝(원본 y 258 아래, x 104~143)이 다리를 벌리면 혼자 늘어져 세 번째 다리처럼 보임 → 잘라냄
+        can[OY + 258:OY + H0, OX + NEAR_LEG[2]:OX + FAR_LEG[0]] = 0
+        can[OY + 264:OY + H0, OX - 40:OX + NEAR_LEG[0]] = 0                         # 망토 왼쪽 아래 끝도 뒷발 옆에서 발처럼 보여 조금 올림
     # 아래 (도포·다리·망토 자락): 줄마다 x 이동 = ctrl 을 이은 꺾은선 × t (허리 0 → 발 1), 세로는 허리선만 drop 만큼 내려 다리를 줄임
     bot = FY; k = (bot - WAIST - drop) / (bot - WAIST); cx = np.array(sorted(ctrl)); cs = np.array([ctrl[c] for c in cx])
     xs = np.arange(W) - OX
