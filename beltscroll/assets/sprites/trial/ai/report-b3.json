@@ -1,0 +1,21 @@
+{
+ "cells_per_source_px": 0.1821,
+ "palette": 24,
+ "cleaned_cells_idle": 41,
+ "height_px (발바닥 아래끝 기준, sheets 키는 +1)": {
+  "idle": 110,
+  "windup": 110,
+  "punch": 110
+ },
+ "front_px": {
+  "idle": 34,
+  "windup": 34,
+  "punch": 56
+ },
+ "blade_px (코등이~칼끝 직선)": {
+  "windup": 45.6,
+  "punch": 46.9,
+  "scabbard": 46.0
+ },
+ "colors": 24
+}
