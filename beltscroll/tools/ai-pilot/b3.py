@@ -222,7 +222,7 @@ def top_px(o): ys = np.nonzero(o[:, :, 3].any(axis=1))[0]; return int((SOLE - ys
 def front_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.max() + 1 - FOOTX) * 2)
 blade = lambda g, t: round(2 * math.hypot(t[0] - g[0], t[1] - g[1]), 1)
 report = {'cells_per_source_px': round(scale, 4), 'palette': len(PAL) + 2, 'cleaned_cells_idle': n_clean,
-          'height_px (발바닥 아래끝 기준, sheets 키는 +1)': {'idle': top_px(b3_idle), 'windup': top_px(b3_wind), 'punch': top_px(b3_punch)},
+          'height_px (발바닥 아래끝 기준 = sheets 키와 같은 식)': {'idle': top_px(b3_idle), 'windup': top_px(b3_wind), 'punch': top_px(b3_punch)},
           'front_px': {'idle': front_px(b3_idle), 'windup': front_px(b3_wind), 'punch': front_px(b3_punch)},
           'blade_px (코등이~칼끝 직선)': {'windup': blade(WIND_GUARD, WIND_TIP), 'punch': blade(PUNCH_GUARD, PUNCH_TIP), 'scabbard': blade((29, 39), SCAB_END)},
           'colors': int(len({tuple(c) for c in sheet[sheet[:, :, 3] > 0][:, :3]}))}

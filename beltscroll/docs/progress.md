@@ -3,7 +3,7 @@
 작업 순서와 단계별 지시는 `docs/plan.md`(이번 지시는 `docs/instructions-3.md`), 규칙은 `CLAUDE.md`, 실수 기록은 `docs/mistakes.md`.
 
 ## 현재 단계
-AI 스프라이트 B3 개선 실험 (브랜치 `experiment/mugyeom-ai-sprites`): AI 서기 디자인 하나로 서기·준비·1타 3칸(B3)을 만들고 A·B2·B3 를 PC·폰 같은 장면·움직임 GIF 로 비교. B3 키 110/110/110, 1타 칼끝 56(판정 57)·칼끝 높이 31, 칼 한 모양(칼날 46~47px). 상세 `docs/ai-pilot/README.md` 7절. B2·판정·타격감·38개 측정·P1·PR #30·#31·배포 링크 그대로. 오너가 다음 방향 결정 대기.
+AI 스프라이트 B3 개선 실험 (브랜치 `experiment/mugyeom-ai-sprites`): AI 서기 디자인 하나로 서기·준비·1타 3칸(B3, 팔·칼은 Claude 규칙 작화 — 사람 도트 아님)을 만들고 A·B2·B3 를 PC·폰 같은 장면·움직임 GIF 로 비교. B3 키 110/110/110, 1타 칼끝 56(판정 57)·칼끝 높이 31, 칼 한 모양(칼날 46~47px). 상세 `docs/ai-pilot/README.md` 7절. B2·판정·타격감·38개 측정·P1·PR #30·#31·배포 링크 그대로. 오너가 다음 방향 결정 대기.
 `joseon-p1-sprites`(P1 발주 자료, 외주 보류)·PR #31·PR #30·원래 브랜치·기존 실행 링크 그대로.
 
 ## 막힌 것 (오너 답 대기)

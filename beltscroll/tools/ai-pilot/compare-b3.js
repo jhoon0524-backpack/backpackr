@@ -1,7 +1,7 @@
 // B3 비교 (2026-11-04 오너 지시 "AI 스프라이트 B3 개선 실험"): A·B2·B3 를 같은 전투 장면·같은 크기(2px, scale 2, 키 110px)로
 //   A  = 지금 2px 코드 시안 (tools/p1-draft/draw.js 의 2px 판 서기·준비·1타 — 저장소 trial 시트는 서기·1타만이라 여기서 3칸으로 다시 그림)
 //   B2 = AI 자동 보정 (assets/sprites/trial/ai/mugyeom-ai-b2.png, 준비 칸 없음 → 게임은 코드 그림 준비 칸을 씀)
-//   B3 = AI 서기 디자인 + 도트 보정 (assets/sprites/trial/ai/mugyeom-ai-b3.png, 서기·준비·1타)
+//   B3 = AI 서기 디자인 + 규칙 작화 — Claude 가 규칙·좌표로 그림, 사람 도트 아님 (assets/sprites/trial/ai/mugyeom-ai-b3.png, 서기·준비·1타)
 // 세 판 모두 윤무겸 칸만 바꾼 게임 사본(tests/out/ai-pilot/b3-game-*)에서 찍는다. 본 게임 시트(data/sprites.js)는 그대로. 베기 이펙트는 게임 JS 이펙트 그대로.
 // 조건: PC 1440×900 창(게임 1.47배) / 휴대폰 가로 915×412 배율 2.625. 사진은 기기 픽셀 그대로.
 // 출력: docs/ai-pilot/b3-compare-pc.png · b3-compare-mobile.png (장면 비교), b3-sequence.png (칸 4배: 서기→준비→1타→회수),
@@ -12,7 +12,7 @@ const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'tests', 'o
 const THREE = { idle0: [0, 0], idle1: [0, 0], windup: [1, 0], punch: [2, 0] };
 const SHEETS = [['A', path.join(OUT, 'a3-2px.png'), 'A 지금 2px 코드 시안', THREE],
   ['B2', 'assets/sprites/trial/ai/mugyeom-ai-b2.png', 'B2 AI 자동 보정 (준비 칸 없음)', { idle0: [0, 0], idle1: [0, 0], punch: [1, 0] }],
-  ['B3', 'assets/sprites/trial/ai/mugyeom-ai-b3.png', 'B3 AI 디자인 + 도트 보정', THREE]];
+  ['B3', 'assets/sprites/trial/ai/mugyeom-ai-b3.png', 'B3 AI 디자인 + 규칙 작화 (사람 도트 아님)', THREE]];
 const CONDS = [
   ['pc', { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 }, 'PC 1440×900 창 (게임 1408×792, 1.47배)'],
   ['mobile', { viewport: { width: 915, height: 412 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true }, '휴대폰 가로 915×412 · 배율 2.625 (실제 기기 픽셀)'],

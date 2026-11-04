@@ -6,7 +6,7 @@ import sys, os, json
 from PIL import Image, ImageDraw
 ROOT = sys.argv[1]; OUT = os.path.join(ROOT, 'tests', 'out', 'ai-pilot'); D = os.path.join(ROOT, 'docs', 'ai-pilot')
 names = json.load(open(os.path.join(OUT, 'b3-motion.json'))); V = ['A', 'B2', 'B3']
-LABEL = {'A': 'A 코드 시안', 'B2': 'B2 AI 자동 보정', 'B3': 'B3 AI 디자인+도트 보정'}
+LABEL = {'A': 'A 코드 시안', 'B2': 'B2 AI 자동 보정', 'B3': 'B3 AI 디자인+규칙 작화(사람 도트 아님)'}
 frames = []
 for i in range(len(names['A'])):
     ims = [Image.open(os.path.join(OUT, f'b3-motion-{v}-{i:02d}.png')).convert('RGB') for v in V]

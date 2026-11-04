@@ -2,7 +2,7 @@
  "cells_per_source_px": 0.1821,
  "palette": 24,
  "cleaned_cells_idle": 41,
- "height_px (발바닥 아래끝 기준, sheets 키는 +1)": {
+ "height_px (발바닥 아래끝 기준 = sheets 키와 같은 식)": {
   "idle": 110,
   "windup": 110,
   "punch": 110
