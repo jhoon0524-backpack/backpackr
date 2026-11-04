@@ -69,6 +69,20 @@
    0
   ]
  },
+ "black_line_cells (줄 50~59 양옆 투명 검은 칸, 서기와 비교)": {
+  "idle": 2,
+  "windup": 1,
+  "punch": 0,
+  "walk0": 1,
+  "walk1": 1,
+  "walk2": 2,
+  "walk3": 1,
+  "jump": 2,
+  "hurt": 1,
+  "airKick": 2,
+  "walk4": 1,
+  "walk5": 2
+ },
  "pose_walk_more": {
   "walk4": {
    "lean": 2,

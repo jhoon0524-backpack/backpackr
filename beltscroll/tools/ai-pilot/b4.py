@@ -186,20 +186,31 @@ def put_legs(o, legs):
             top = min(y for y, x in placed if x == X); hit = next((y for y in range(top - 1, max(top - 11, -1), -1) if o[y, X, 3]), None)
             if hit is not None: g += top - hit - 1
         return g
-    before = gaps()
+    before = gaps(); FILLED.clear()
     for X in {x for _, x in placed}:
         top = min(y for y, x in placed if x == X)
         hit = next((y for y in range(top - 1, max(top - 11, -1), -1) if o[y, X, 3]), None)
         if hit is not None:
-            for y in range(hit + 1, top): o[y, X] = o[hit, X]          # 도포 자락을 아래로 늘여 덮음 (다리 색으로 메우면 정강이가 길어 보임)
+            # 도포 자락을 아래로 늘여 덮음 (다리 색으로 메우면 정강이가 길어 보임). 자락 끝 칸이 외곽선 검정이면 그 위의 도포·망토 색으로
+            #  (2026-11-04 director: 검정을 그대로 내리면 다리 사이 검은 세로선·검은 덩어리가 생김)
+            c = next((o[y, X].copy() for y in range(hit, max(hit - 6, -1), -1) if o[y, X, 3] and tuple(o[y, X, :3]) not in DARKS and lum(o[y, X]) < 1200), None)   # 흰 속자락도 빼고 (늘이면 흰 막대)
+            if c is None: c = np.array(G['ROBE'], np.uint8)                  # 위에 쓸 색이 없으면 도포 남청
+            for y in range(hit, top): o[y, X] = c; FILLED.add((y, X))
     LEG_GAP[name_now[0]] = (before, gaps())     # (메우기 전, 후) 다리 위끝~자락 사이 투명 칸 수 — 후는 0 이어야 함
+def black_lines(o):
+    """줄 50~59 에서 양옆이 투명한 검은(어두운 4색) 칸 수 — 다리 사이 검은 세로선 (0 이어야 함)"""
+    n = 0
+    for y in range(50, 60):
+        for x in range(1, CELL - 1):
+            if o[y, x, 3] and tuple(o[y, x, :3]) in DARKS and not o[y, x - 1, 3] and not o[y, x + 1, 3]: n += 1
+    return n
 def feet_blobs(o):
     cols = o[58:62, :, 3].any(axis=0); k = 0; prev = False
     for v in cols:
         if v and not prev: k += 1
         prev = v
     return k
-placed = set(); LEG_GAP = {}; name_now = ['']
+placed = set(); LEG_GAP = {}; name_now = ['']; FILLED = set(); DARKS = {tuple(G['col'](i)[:3]) for i in G['order'][:4]}   # 어두운 4색 (외곽선 규칙과 같음)
 def frame(lean, up_dx, up_dy, ctrl, drop, legs=None):
     a, fu, fl = pose(base, lean, up_dx, up_dy, ctrl, drop, legs); o = place_at(a); clean(o); outline(o)
     if legs: placed.clear(); put_legs(o, legs)
@@ -280,7 +291,7 @@ def front_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.max(
 def back_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.min() - FOOTX) * 2)
 cells_all = [b4_idle, b4_wind, b4_punch] + [b4_moves[n] for n in MOVES] + [b4_air] + [b4_moves[n] for n in WALK_MORE]
 names_all = ['idle', 'windup', 'punch'] + list(MOVES) + ['airKick'] + list(WALK_MORE)
-report = {'cells': names_all, 'feet_blobs (발밑 4줄 덩어리 수)': {n: feet_blobs(o) for n, o in zip(names_all, cells_all)}, 'leg_gap_cells (다리 위끝~도포 자락 사이 투명 칸: 메우기 전, 후 — 후는 0)': LEG_GAP, 'pose_walk_more': WALK_MORE, 'airKick': {'pose': AIR, 'tip_cell': AIR_TIP, 'tip_front_px': (AIR_TIP[0] + 1 - FOOTX) * 2, 'tip_height_px': (60.5 - AIR_TIP[1] - 1) * 2, 'blade_px': round(2 * math.hypot(AIR_TIP[0] - GA[0], AIR_TIP[1] - GA[1]), 1)}, 'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()}, 'pose_moves': MOVES,
+report = {'cells': names_all, 'feet_blobs (발밑 4줄 덩어리 수)': {n: feet_blobs(o) for n, o in zip(names_all, cells_all)}, 'leg_gap_cells (다리 위끝~도포 자락 사이 투명 칸: 메우기 전, 후 — 후는 0)': LEG_GAP, 'black_line_cells (줄 50~59 양옆 투명 검은 칸, 서기와 비교)': {n: black_lines(o) for n, o in zip(names_all, cells_all)}, 'pose_walk_more': WALK_MORE, 'airKick': {'pose': AIR, 'tip_cell': AIR_TIP, 'tip_front_px': (AIR_TIP[0] + 1 - FOOTX) * 2, 'tip_height_px': (60.5 - AIR_TIP[1] - 1) * 2, 'blade_px': round(2 * math.hypot(AIR_TIP[0] - GA[0], AIR_TIP[1] - GA[1]), 1)}, 'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()}, 'pose_moves': MOVES,
           'height_px': {'idle': top_px(b4_idle), 'windup': top_px(b4_wind), 'punch': top_px(b4_punch), **{n: top_px(o) for n, o in b4_moves.items()}, 'airKick': top_px(b4_air)},
           'front_px': {'idle': front_px(b4_idle), 'windup': front_px(b4_wind), 'punch': front_px(b4_punch)},
           'back_px': {'idle': back_px(b4_idle), 'windup': back_px(b4_wind), 'punch': back_px(b4_punch)},
