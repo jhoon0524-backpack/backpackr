@@ -21,18 +21,22 @@ if (!html.includes(WALK_OLD)) throw new Error('걷기 줄을 못 찾음 — inde
 // 2026-11-04 오너 "세로에서도 테스트할수있게": 시험판에서만 휴대폰 세로 화면을 막지 않고, 게임 화면 아래 빈 곳을 조작 영역으로 (본 게임은 "가로로 돌리세요" 안내 그대로)
 const ROT_OLD = 'const rotateBlocked = () => phonePortrait.matches;';
 if (!html.includes(ROT_OLD)) throw new Error('세로 막기 줄을 못 찾음 — index.html 이 바뀜');
-const PORTRAIT_CSS = `<style>/* 시험판: 휴대폰 세로 */
-  @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
+const PORTRAIT_CSS = `<style>/* 시험판: 휴대폰 세로 (본 게임이 "가로로 돌리세요" 로 막던 범위와 같음 — 폭 600 이하 터치 기기) */
+  @media (orientation: portrait) and (hover: none) and (pointer: coarse) and (max-width: 600px) {
     #rotate { display: none !important; }
     body.has-touch { justify-content: flex-start; }
     body.has-touch #frame { padding-bottom: min(62vw, 46vh); }
-    body.has-touch #stick { width: 50%; }
-    body.has-touch .btn { width: 84px; height: 84px; font-size: 17px; }
-    body.has-touch #btnAttack { right: 7%; bottom: 7%; }
-    body.has-touch #btnJump { right: 30%; bottom: 20%; }
+    body.has-touch #stick { width: 40%; }
+    body.has-touch .btn { width: 80px; height: 80px; font-size: 17px; }
+    body.has-touch #btnAttack { right: 5%; bottom: 6%; }
+    body.has-touch #btnJump { right: 30%; bottom: 33%; }
+    body.has-touch #btnVibe, body.has-touch #btnSound, body.has-touch #btnFull { top: 8px; }   /* #frame 높이 % 가 아니라 캔버스 위 고정 (2026-11-04 director) */
   }</style>`;
+const PORTRAIT_JS = `<script>/* 시험판: 세로에서 아래 조작 영역의 빈 곳을 탭해도 시작 */
+  document.getElementById('frame').addEventListener('pointerdown', () => tapToStart());</script>`;
 fs.writeFileSync(path.join(OUT, 'index.html'), html.replace(/<title>[^<]*<\/title>/, '<title>조선 퇴마전 — B4 몸 쓰는 공격 시험판</title>')
   .replace('</head>', PORTRAIT_CSS + '\n</head>')
   .replace(ROT_OLD, 'const rotateBlocked = () => false;   // 시험판: 세로도 플레이')
+  .replace('</body>', PORTRAIT_JS + '\n</body>')
   .replace(WALK_OLD, "if (f.moving) return 'walk' + (isPlayer ? Math.floor(f.walk / 16) % 6 : Math.floor(f.walk / 12) % 4);"));
 console.log('ok', Object.keys(frames).join(' '));

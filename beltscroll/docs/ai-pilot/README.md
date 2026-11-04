@@ -279,5 +279,30 @@
 ### 8-12. 시험판 세로 화면 (2026-11-04 오너 원문 "세로에서도 테스트할수있게히니")
 | 합의된 정의 (해석) | 실제 처리 | 다른 점·이유 |
 |---|---|---|
-| 휴대폰 세로로도 시험판을 할 수 있게 | 시험판 사본만 (`b4_build.js`): 세로 화면의 "가로로 돌리세요" 안내·멈춤을 끔(`rotateBlocked` → 항상 아님), 게임 화면(가로 16:9, 폭 꽉 채움) 아래에 조작 영역(높이 min(62vw, 46vh))을 두고 왼쪽 절반 = 이동 스틱(누른 자리에 나타남), 오른쪽 = 점프·공격 버튼 84px | 본 게임은 세로 안내 그대로. 게임 화면은 가로 그대로라 세로에선 작게 보임 (아이폰 13 폭 390 → 게임 390×219) |
-| 동작 확인 | 휴대폰 흉내(Playwright iPhone 13 390×664·Galaxy S9+ 320×658): 안내 안 뜸·탭으로 시작(state play)·공격 버튼 터치 → 준비(windup) 시작·조작 영역에서 오른쪽으로 끌기 → 걷기(walk0)·이동, 오류 0. 가로 화면은 바뀐 것 없음 (CSS 는 세로일 때만) | 실제 휴대폰은 오너 확인 |
+| 휴대폰 세로로도 시험판을 할 수 있게 | (→ 8-13: 폭 600 이하 휴대폰만, 버튼 위치 고침) 시험판 사본만 (`b4_build.js`): 세로 화면의 "가로로 돌리세요" 안내·멈춤을 끔(`rotateBlocked` → 항상 아님), 게임 화면(가로 16:9, 폭 꽉 채움) 아래에 조작 영역(높이 min(62vw, 46vh))을 두고 왼쪽 절반 = 이동 스틱(누른 자리에 나타남), 오른쪽 = 점프·공격 버튼 84px | 본 게임은 세로 안내 그대로. 게임 화면은 가로 그대로라 세로에선 작게 보임 (아이폰 13 폭 390 → 게임 390×219) |
+| 동작 확인 | (→ 8-13) 휴대폰 흉내(Playwright iPhone 13 390×664·Galaxy S9+ 320×658): 안내 안 뜸·탭으로 시작(state play)·공격 버튼 터치 → 준비(windup) 시작·조작 영역에서 오른쪽으로 끌기 → 걷기(walk0)·이동, 오류 0. 가로 화면은 바뀐 것 없음 (CSS 는 세로일 때만) | 실제 휴대폰은 오너 확인 |
+
+### 8-13. director 지적 반영 (세로 화면, 조건부 통과)
+| 지적 | 실제 처리 |
+|---|---|
+| 320폭에서 점프·공격 원이 맞닿고(틈 0.5px) 점프가 스틱 영역 침범 | 버튼 80px, 공격 right 5%·bottom 6%, 점프 right 30%·bottom 33%, 스틱 폭 40% — 아래 출력의 btnGap·jumpVsStick 모두 + |
+| 상단 버튼(진동·소리·전체화면)이 캔버스 가운데로 내려옴 (#frame 높이 % 기준) | 세로에서만 top: 8px 고정 — 게임 좌표 y 19~24 |
+| 태블릿 세로에도 적용됨, 3축 표 없음 | 조건에 max-width 600px 를 더해 본 게임이 막던 범위(폭 600 이하 휴대폰 세로)만 바꿈. 아래 표 — 폰 가로·태블릿 세로·PC 는 원본과 같음 |
+| 조작 영역 빈 곳 탭으로 시작 안 됨 | 시험판에 #frame 탭 → 시작 한 줄 |
+- 점검 출력 (`node tools/ai-pilot/portrait_check.js <원본> <시험판>`, 그대로):
+```
+S9+ 세로 320         원본   {"rotate":"flex","canvas":[320,180],"btnGap":-20.8,"jumpVsStick":10.4,"topBtnGameY":73,"scrollH":0} 
+S9+ 세로 320         시험판  {"rotate":"none","canvas":[320,180],"btnGap":45.8,"jumpVsStick":12,"topBtnGameY":24,"scrollH":0} 빈 곳 탭 → play
+iPhone13 세로 390    원본   {"rotate":"flex","canvas":[390,219],"btnGap":-8.8,"jumpVsStick":29.3,"topBtnGameY":68,"scrollH":0} 
+iPhone13 세로 390    시험판  {"rotate":"none","canvas":[390,219],"btnGap":74.1,"jumpVsStick":33,"topBtnGameY":20,"scrollH":0} 빈 곳 탭 → play
+Pixel7 세로 412      원본   {"rotate":"flex","canvas":[412,232],"btnGap":-5,"jumpVsStick":35.3,"topBtnGameY":67,"scrollH":0} 
+Pixel7 세로 412      시험판  {"rotate":"none","canvas":[412,232],"btnGap":83.1,"jumpVsStick":39.6,"topBtnGameY":19,"scrollH":0} 빈 곳 탭 → play
+폰 가로 915x412       원본   {"rotate":"none","canvas":[732,412],"btnGap":62.3,"jumpVsStick":133.8,"topBtnGameY":59,"scrollH":0} 
+폰 가로 915x412       시험판  {"rotate":"none","canvas":[732,412],"btnGap":62.3,"jumpVsStick":133.8,"topBtnGameY":59,"scrollH":0} 
+태블릿 세로 768x1024    원본   {"rotate":"none","canvas":[810,456],"btnGap":63.6,"jumpVsStick":142.7,"topBtnGameY":58,"scrollH":0} 
+태블릿 세로 768x1024    시험판  {"rotate":"none","canvas":[810,456],"btnGap":63.6,"jumpVsStick":142.7,"topBtnGameY":58,"scrollH":0} 빈 곳 탭 → title
+PC 1440x900        원본   {"rotate":"none","canvas":[1408,792],"btnGap":null,"jumpVsStick":null,"topBtnGameY":54,"scrollH":0} 
+PC 1440x900        시험판  {"rotate":"none","canvas":[1408,792],"btnGap":null,"jumpVsStick":null,"topBtnGameY":54,"scrollH":0}
+```
+- 전체화면 × 터치 기기 × 세로/가로: 세로 CSS 는 "폭 600 이하·터치·세로"에서만 → 폰 세로만 바뀜. 폰 가로·태블릿(세로·가로)·PC 는 원본과 같음(위 출력). 전체화면 버튼은 세로에서 누르면 본 게임처럼 가로 고정을 시도함(안드로이드) — 세로 시험 중엔 전체화면을 쓰지 않음.
+- 오너 판단 (낮음): 조작 영역이 게임 화면 바로 아래(화면 가운데쯤)에 있음 — (가) 지금대로 (나) 화면 맨 아래로 내림.
