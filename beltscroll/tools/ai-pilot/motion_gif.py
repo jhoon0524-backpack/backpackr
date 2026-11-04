@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw
 ROOT = sys.argv[1]; R = sys.argv[2] if len(sys.argv) > 2 else 'b3';   # b4 → A·B3·B4
 OUT = os.path.join(ROOT, 'tests', 'out', 'ai-pilot'); D = os.path.join(ROOT, 'docs', 'ai-pilot')
 names = json.load(open(os.path.join(OUT, f'{R}-motion.json'))); V = ['A', 'B3', 'B4'] if R == 'b4' else ['A', 'B2', 'B3']
-LABEL = {'A': 'A 코드 시안', 'B2': 'B2 AI 자동 보정', 'B3': 'B3 AI 디자인+규칙 작화(사람 도트 아님)', 'B4': 'B4 몸 쓰는 공격(Claude 작화)'}
+LABEL = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'labels.json')))   # 판 이름: compare-b3.js 와 같은 파일
 frames = []
 for i in range(len(names['A'])):
     ims = [Image.open(os.path.join(OUT, f'{R}-motion-{v}-{i:02d}.png')).convert('RGB') for v in V]

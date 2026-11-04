@@ -40,6 +40,11 @@
   "windup": -48,
   "punch": -44
  },
+ "scabbard_px (입구~끝 직선)": {
+  "idle": 46.0,
+  "windup": 46.0,
+  "punch": 46.0
+ },
  "blade_px": {
   "windup": 46.8,
   "punch": 46.9

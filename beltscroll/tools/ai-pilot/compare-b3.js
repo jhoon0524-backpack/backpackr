@@ -12,10 +12,11 @@ const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'tests', 'o
 // node tools/ai-pilot/compare-b3.js b4 → A·B3·B4 (B4 실험, 2026-11-04), 출력 docs/ai-pilot/b4-*.png·gif 원본 tests/out/ai-pilot/b4-* (인자 없으면 위 B3 판 그대로)
 const ROUND = process.argv[2] === 'b4' ? 'b4' : 'b3';
 const THREE = { idle0: [0, 0], idle1: [0, 0], windup: [1, 0], punch: [2, 0] };
-const SHEETS_B3 = [['A', path.join(OUT, 'a3-2px.png'), 'A 지금 2px 코드 시안', THREE],
-  ['B2', 'assets/sprites/trial/ai/mugyeom-ai-b2.png', 'B2 AI 자동 보정 (준비 칸 없음)', { idle0: [0, 0], idle1: [0, 0], punch: [1, 0] }],
-  ['B3', 'assets/sprites/trial/ai/mugyeom-ai-b3.png', 'B3 AI 디자인 + 규칙 작화 (사람 도트 아님)', THREE]];
-const SHEETS = ROUND === 'b4' ? [SHEETS_B3[0], SHEETS_B3[2], ['B4', 'assets/sprites/trial/ai/mugyeom-ai-b4.png', 'B4 몸 쓰는 공격 — Claude 작화 (사람 도트 아님)', THREE]] : SHEETS_B3;
+const LABEL = JSON.parse(fs.readFileSync(path.join(__dirname, 'labels.json'), 'utf8'));   // 판 이름: 사진·GIF 가 같은 파일을 읽음
+const SHEETS_B3 = [['A', path.join(OUT, 'a3-2px.png'), LABEL.A, THREE],
+  ['B2', 'assets/sprites/trial/ai/mugyeom-ai-b2.png', LABEL.B2, { idle0: [0, 0], idle1: [0, 0], punch: [1, 0] }],
+  ['B3', 'assets/sprites/trial/ai/mugyeom-ai-b3.png', LABEL.B3, THREE]];
+const SHEETS = ROUND === 'b4' ? [SHEETS_B3[0], SHEETS_B3[2], ['B4', 'assets/sprites/trial/ai/mugyeom-ai-b4.png', LABEL.B4, THREE]] : SHEETS_B3;
 const HI = ROUND === 'b4' ? 'B4' : 'B3';
 const CONDS = [
   ['pc', { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 }, 'PC 1440×900 창 (게임 1408×792, 1.47배)'],

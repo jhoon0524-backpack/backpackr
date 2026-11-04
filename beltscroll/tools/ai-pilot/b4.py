@@ -160,7 +160,9 @@ NEAR_SH, FAR_SH, MOUTH, SCAB_TAIL = (100, 112), (158, 110), (97, 180), (26, 233)
 # ── 준비: 뒷발에 체중, 상체를 뒤로 젖혀 틀고(−8°) 뒤로, 앞발 가볍게 앞으로, 망토·도포 자락은 앞으로 쏠림(몸이 뒤로 가는 반동)
 WIND = dict(lean=-8, up_dx=-6, up_dy=4, ctrl={-40: 10, 40: 6, 100: 0, 140: 3, 210: 8}, drop=4)
 b4_wind, cu, cl = frame(**WIND)
-m_w, e_w = cl(MOUTH), cl(SCAB_TAIL); scabbard(b4_wind, (round(m_w[0]), round(m_w[1])), (round(m_w[0] + (G['SCAB_END'][0] - 29)), round(m_w[1] + (G['SCAB_END'][1] - 39))))
+SV = (G['SCAB_END'][0] - 29, G['SCAB_END'][1] - 39)                                   # 칼집 = 서기와 같은 벡터 (같은 길이·각도)
+m_w = cl(MOUTH); SCABS = {'idle': ((29, 39), G['SCAB_END'])}
+SCABS['windup'] = ((round(m_w[0]), round(m_w[1])), (round(m_w[0]) + SV[0], round(m_w[1]) + SV[1])); scabbard(b4_wind, *SCABS['windup'])
 d = blade_dir(200); GW = (30, 23); TIP_W = (GW[0] + d[0] * BLADE, GW[1] + d[1] * BLADE)   # 두 손을 어깨 앞에 모아 칼을 어깨 위로 메듯 뒤위로 (칼끝이 머리보다 낮게)
 hs, fs = cu(NEAR_SH), cu(FAR_SH)
 limb(b4_wind, [fs, (fs[0] - 1, fs[1] + 4), (GW[0] + 4, GW[1] + 1.5)], [2.5, 2.5, 2], [0, 1, 1], base=(GREY, GREY))   # 뒷팔 (몸 뒤, 그늘색)
@@ -171,7 +173,7 @@ bracer(b4_wind, GW[0] + 1, GW[1] + 2); hand(b4_wind, GW[0] + 1, GW[1]); hand(b4_
 # ── 1타: 앞발 크게 내딛고(발끝 줄 +28px) 뒷발 조금 뒤로, 허리 내리고(7px) 상체를 앞으로 숙여(+9°) 앞으로, 망토·도포 뒷자락은 뒤로 끌림
 PUNCH = dict(lean=9, up_dx=9, up_dy=7, ctrl={-40: -34, 40: -18, 100: -8, 140: 6, 210: 28}, drop=7)
 b4_punch, cu, cl = frame(**PUNCH)
-m_p = cl(MOUTH); scabbard(b4_punch, (round(m_p[0]), round(m_p[1])), (round(m_p[0] + (G['SCAB_END'][0] - 29) * 0.95), round(m_p[1] + (G['SCAB_END'][1] - 39) * 0.8)))
+m_p = cl(MOUTH); SCABS['punch'] = ((round(m_p[0]), round(m_p[1])), (round(m_p[0]) + SV[0], round(m_p[1]) + SV[1])); scabbard(b4_punch, *SCABS['punch'])
 ang = 40; d = blade_dir(ang); GP = (TIP[0] - d[0] * BLADE, TIP[1] - d[1] * BLADE); GPr = (round(GP[0]), round(GP[1]))
 hs, fs = cu(NEAR_SH), cu(FAR_SH)
 limb(b4_punch, [fs, (fs[0] + 1, fs[1] + 4), (GPr[0] - 3, GPr[1] - 1)], [2.5, 2.5, 2], [0, 1, 1], base=(GREY, GREY))   # 뒷팔
@@ -188,6 +190,7 @@ report = {'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v fo
           'height_px': {'idle': top_px(b4_idle), 'windup': top_px(b4_wind), 'punch': top_px(b4_punch)},
           'front_px': {'idle': front_px(b4_idle), 'windup': front_px(b4_wind), 'punch': front_px(b4_punch)},
           'back_px': {'idle': back_px(b4_idle), 'windup': back_px(b4_wind), 'punch': back_px(b4_punch)},
+          'scabbard_px (입구~끝 직선)': {k: round(2 * math.hypot(e[0] - m[0], e[1] - m[1]), 1) for k, (m, e) in SCABS.items()},
           'blade_px': {'windup': round(2 * BLADE, 1), 'punch': round(2 * math.hypot(TIP[0] - GPr[0], TIP[1] - GPr[1]), 1)},
           'colors': int(len({tuple(c) for c in sheet[sheet[:, :, 3] > 0][:, :3]}))}
 json.dump(report, open(os.path.join(OUT, 'report-b4.json'), 'w'), ensure_ascii=False, indent=1)
