@@ -31,9 +31,16 @@ def poly_mask(pts, shape):
 med = lambda a, box: np.median(a[box[1]:box[3], box[0]:box[2]][a[box[1]:box[3], box[0]:box[2], 3] > 0][:, :4], axis=0).astype(np.int32)
 CAPE_SRC = med(src, (15, 205, 45, 245)); ROBE_SRC = med(src, (165, 225, 180, 245))   # 망토(검정)·도포(남청) 바탕색
 
-def strip_arms(a, scab=True):
-    """두 팔·칼자루(·칼집) 지우기: 앞팔 자리는 망토/도포색, 뒷팔 자리는 도포 앞끝 안쪽만 도포색·바깥은 투명"""
-    a = a.copy(); ys, xs = np.mgrid[0:H0, 0:W0]
+def strip_arms(a, scab=True, arms=True):
+    """두 팔·칼자루(·칼집) 지우기: 앞팔 자리는 망토/도포색, 뒷팔 자리는 도포 앞끝 안쪽만 도포색·바깥은 투명.
+    arms=False 면 팔은 두고 칼자루·칼집만 (걷기·점프·맞음: 서기처럼 칼집 쥔 손 그대로, 칼집은 2px 에서 같은 길이로 다시 그림)"""
+    a = a.copy(); ys, xs = np.mgrid[0:H0, 0:W0]; skin = G['cls_mask'](a, 'skin')
+    if not arms:
+        a[poly_mask([(96, 176), (126, 148), (136, 154), (104, 186)], a.shape) & ~skin] = ROBE_SRC
+        P0, P1 = np.array([97.0, 180.0]), np.array([26.0, 233.0]); d = (P1 - P0) / np.hypot(*(P1 - P0))
+        t = (xs - P0[0]) * d[0] + (ys - P0[1]) * d[1]; dist = np.abs((xs - P0[0]) * d[1] - (ys - P0[1]) * d[0])
+        a[(dist <= 6) & (t > -4) & (t < np.hypot(*(P1 - P0)) + 5) & (a[:, :, 3] > 0) & ~skin] = CAPE_SRC
+        return a
     near = poly_mask([(52, 128), (75, 120), (102, 126), (106, 150), (104, 180), (104, 212), (64, 214), (58, 182), (48, 158)], a.shape)
     a[near & (xs < 96)] = CAPE_SRC; a[near & (xs >= 96)] = ROBE_SRC
     far = poly_mask([(158, 116), (182, 118), (195, 140), (196, 180), (192, 206), (172, 206), (166, 186), (162, 150)], a.shape)
@@ -181,13 +188,36 @@ sword(b4_punch, GPr[0], GPr[1], None, tip=TIP)
 limb(b4_punch, [hs, ((hs[0] + GPr[0]) / 2, (hs[1] + GPr[1]) / 2 + 1.5), (GPr[0] - 2, GPr[1])], [3, 3, 2.5], [1, 3, 1])  # 앞팔: 어깨 → 팔꿈치(앞아래) → 손목, 소매가 아래로
 bracer(b4_punch, GPr[0] - 3, GPr[1] - 1); hand(b4_punch, GPr[0] - 1, GPr[1] - 1); hand(b4_punch, GPr[0] - 3, GPr[1] - 2, dark=True)
 
-sheet = np.concatenate([b4_idle, b4_wind, b4_punch], axis=1)
+# ── 걷기·점프·맞음 (2026-11-04 오너 추가): 팔은 서기처럼 칼집을 쥔 채, 몸만 같은 방식으로 움직임. 칼집은 서기와 같은 벡터로 다시 그리고 손(피부)을 위에
+base_arms = strip_arms(src, arms=False)
+SKIN = {tuple(v[:3]) for v in K['skin']}
+def frame_arms(lean, up_dx, up_dy, ctrl, drop):
+    a, fu, fl = pose(base_arms, lean, up_dx, up_dy, ctrl, drop); o = place_at(a); clean(o); outline(o)
+    keep = [(x, y, o[y, x].copy()) for y in range(30, 50) for x in range(14, 36) if o[y, x, 3] and tuple(o[y, x, :3]) in SKIN]
+    m = fl(*MOUTH); m = to_cell(m); mo = (round(m[0]), round(m[1])); scabbard(o, mo, (mo[0] + SV[0], mo[1] + SV[1]), hilt=True)
+    for x, y, c in keep: o[y, x] = c
+    SCABS[name_now[0]] = (mo, (mo[0] + SV[0], mo[1] + SV[1])); return o
+name_now = ['']
+# 걷기: 보폭이 넓어졌다(0·2) 좁아지며 몸이 올라감(1·3), 망토·도포 자락이 반대로 흔들림. 그림 한 장을 변형해 왼발·오른발이 바뀌지는 않음
+MOVES = {
+    'walk0': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -16, 40: -9, 85: -16, 125: 0, 170: 20, 210: 22}, drop=2),
+    'walk1': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 8, 40: 5, 85: 10, 125: 2, 170: -8, 210: -8}, drop=-5),
+    'walk2': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -22, 40: -12, 85: -10, 125: 2, 170: 22, 210: 26}, drop=2),
+    'walk3': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 14, 40: 8, 85: 6, 125: 0, 170: -10, 210: -10}, drop=-5),
+    # 점프: 무릎을 굽혀 다리를 당김(허리 22 내림) — 게임이 공중 높이만큼 올려 그림. 도포 자락은 앞뒤로 퍼짐
+    'jump': dict(lean=4, up_dx=2, up_dy=22, ctrl={-40: -20, 40: -10, 85: -6, 125: 0, 170: 10, 210: 18}, drop=22),
+    # 맞음: 상체가 뒤로 젖혀지고(−12°) 뒤로 밀림, 앞발이 뒤로 끌림, 망토는 앞으로 쏠림
+    'hurt': dict(lean=-12, up_dx=-10, up_dy=4, ctrl={-40: 16, 40: 10, 85: -4, 125: -2, 170: -8, 210: -12}, drop=4),
+}
+b4_moves = {}
+for n, kw in MOVES.items(): name_now[0] = n; b4_moves[n] = frame_arms(**kw)
+sheet = np.concatenate([b4_idle, b4_wind, b4_punch] + [b4_moves[n] for n in MOVES], axis=1)   # 칸 0 서기 · 1 준비 · 2 1타 · 3~6 걷기 · 7 점프 · 8 맞음
 Image.fromarray(sheet, 'RGBA').save(os.path.join(OUT, 'mugyeom-ai-b4.png'))
 def top_px(o): ys = np.nonzero(o[:, :, 3].any(axis=1))[0]; return int((SOLE - ys.min()) * 2)
 def front_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.max() + 1 - FOOTX) * 2)
 def back_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.min() - FOOTX) * 2)
-report = {'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()},
-          'height_px': {'idle': top_px(b4_idle), 'windup': top_px(b4_wind), 'punch': top_px(b4_punch)},
+report = {'cells': ['idle', 'windup', 'punch'] + list(MOVES), 'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()}, 'pose_moves': MOVES,
+          'height_px': {'idle': top_px(b4_idle), 'windup': top_px(b4_wind), 'punch': top_px(b4_punch), **{n: top_px(o) for n, o in b4_moves.items()}},
           'front_px': {'idle': front_px(b4_idle), 'windup': front_px(b4_wind), 'punch': front_px(b4_punch)},
           'back_px': {'idle': back_px(b4_idle), 'windup': back_px(b4_wind), 'punch': back_px(b4_punch)},
           'scabbard_px (입구~끝 직선)': {k: round(2 * math.hypot(e[0] - m[0], e[1] - m[1]), 1) for k, (m, e) in SCABS.items()},

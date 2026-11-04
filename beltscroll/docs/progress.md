@@ -3,7 +3,7 @@
 작업 순서와 단계별 지시는 `docs/plan.md`(이번 지시는 `docs/instructions-3.md`), 규칙은 `CLAUDE.md`, 실수 기록은 `docs/mistakes.md`.
 
 ## 현재 단계
-AI 스프라이트 B4 실험 (브랜치 `experiment/mugyeom-ai-sprites`): 오너 지시 "그냥 너가 그려봐"로 Claude 가 직접 준비·1타를 그림 — AI 서기 그림을 몸 부위별로 움직여(상체 젖힘·숙임, 앞발 내딛기, 망토 끌림) 몸 쓰는 공격, 칼집 검은·남청. 키 110/108/106, 칼끝 56(판정 57)·높이 31. 연속 재생 GIF `docs/ai-pilot/b4-motion.gif`. 상세 `docs/ai-pilot/README.md` 8절. B3·판정·38개·P1·PR #30·#31·배포 링크 그대로.
+AI 스프라이트 B4 실험 (브랜치 `experiment/mugyeom-ai-sprites`): 오너 지시 "그냥 너가 그려봐"로 Claude 가 직접 준비·1타를 그림 — AI 서기 그림을 몸 부위별로 움직여(상체 젖힘·숙임, 앞발 내딛기, 망토 끌림) 몸 쓰는 공격, 칼집 검은·남청. 키 110/108/106, 칼끝 56(판정 57)·높이 31. 연속 재생 GIF `docs/ai-pilot/b4-motion.gif`. 걷기 4칸·점프·맞음 칸 추가(8-2절, `b4m-motion.gif`), 시험판 https://claude.ai/artifact/5ZZR1EMPPCA3ucFv7WJCC4 . 상세 `docs/ai-pilot/README.md` 8절. B3·판정·38개·P1·PR #30·#31·배포 링크 그대로.
 `joseon-p1-sprites`(P1 발주 자료, 외주 보류)·PR #31·PR #30·원래 브랜치·기존 실행 링크 그대로.
 
 ## 막힌 것 (오너 답 대기)
