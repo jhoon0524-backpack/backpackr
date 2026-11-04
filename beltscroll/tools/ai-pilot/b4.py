@@ -53,10 +53,21 @@ def strip_arms(a, scab=True, arms=True):
         sm = (dist <= 6) & (t > -4) & (t < np.hypot(*(P1 - P0)) + 5) & (a[:, :, 3] > 0); a[sm] = CAPE_SRC
     return a
 
-def pose(a, lean, up_dx, up_dy, ctrl, drop):
-    """lean: 상체 기울기(도, + 앞으로), up_dx·dy: 상체 이동(원본 px), ctrl: 허리선 아래 가로 늘이기 {원본 x: 발끝 줄에서의 이동 px}, drop: 허리 내림 px"""
+NEAR_LEG, FAR_LEG = (60, 262, 104, 306), (143, 262, 197, 306)   # 원본 정강이·신발 상자 (뒤 = 화면 왼쪽 앞다리(가까운 쪽), 앞 = 화면 오른쪽 먼 다리)
+def pose(a, lean, up_dx, up_dy, ctrl, drop, legs=None):
+    """lean: 상체 기울기(도, + 앞으로), up_dx·dy: 상체 이동(원본 px), ctrl: 허리선 아래 가로 늘이기 {원본 x: 발끝 줄에서의 이동 px}, drop: 허리 내림 px,
+    legs: (가까운 다리 dx, dy, 먼 다리 dx, dy) — 2026-11-04 (나): 정강이·신발을 늘이지 않고 상자째 잘라 옮김(도포 남청은 남김). 다리는 도포 뒤에 그림"""
     W, H = W0 + 2 * OX, H0 + 2 * OY
     canvas = np.zeros((H, W, 4), np.uint8); can = np.zeros_like(canvas); can[OY:OY + H0, OX:OX + W0] = a.astype(np.uint8)
+    leg_layer = np.zeros_like(can)
+    if legs:
+        r, g, b = can[..., 0].astype(int), can[..., 1].astype(int), can[..., 2].astype(int)
+        navy = (b > r + 18) & (b > 55) & ((r + g + b) < 330)                          # 도포 남청 (다리 상자에 걸친 도포 자락은 그대로 둠)
+        for (x0, y0, x1, y1), dx, dy in ((FAR_LEG, legs[2], legs[3]), (NEAR_LEG, legs[0], legs[1])):   # 먼 다리 먼저, 가까운 다리 위에
+            sl = (slice(OY + y0, OY + y1), slice(OX + x0, OX + x1)); m = (can[sl][..., 3] > 0) & ~navy[sl]
+            part = np.zeros_like(can[sl]); part[m] = can[sl][m]; can[sl][m] = 0
+            ys_, xs_ = np.nonzero(part[..., 3]); ty, tx = ys_ + OY + y0 + int(dy), xs_ + OX + x0 + int(dx)
+            ok = (ty >= 0) & (ty < H) & (tx >= 0) & (tx < W); leg_layer[ty[ok], tx[ok]] = part[ys_[ok], xs_[ok]]
     # 아래 (도포·다리·망토 자락): 줄마다 x 이동 = ctrl 을 이은 꺾은선 × t (허리 0 → 발 1), 세로는 허리선만 drop 만큼 내려 다리를 줄임
     bot = FY; k = (bot - WAIST - drop) / (bot - WAIST); cx = np.array(sorted(ctrl)); cs = np.array([ctrl[c] for c in cx])
     xs = np.arange(W) - OX
@@ -78,7 +89,7 @@ def pose(a, lean, up_dx, up_dy, ctrl, drop):
     a_, b_, c_ = c, s, -c * (px + up_dx) - s * (py + up_dy) + px
     d_, e_, f_ = -s, c, s * (px + up_dx) - c * (py + up_dy) + py
     up = np.array(Image.fromarray(upper, 'RGBA').transform((W, H), Image.AFFINE, (a_, b_, c_, d_, e_, f_), resample=Image.NEAREST))
-    out = Image.fromarray(canvas, 'RGBA'); out.alpha_composite(Image.fromarray(up, 'RGBA'))
+    out = Image.fromarray(leg_layer, 'RGBA'); out.alpha_composite(Image.fromarray(canvas, 'RGBA')); out.alpha_composite(Image.fromarray(up, 'RGBA'))
     fwd_up = lambda x, y: (c * (x + OX - px) - s * (y + OY - py) + px + up_dx, s * (x + OX - px) + c * (y + OY - py) + py + up_dy)
     def fwd_low(x, y):
         t = min(1.0, max(0.0, (y - WAIST) / (bot - WAIST))); return (x + np.interp(x, cx, cs) * t + OX, bot - (bot - y) * k + OY)
@@ -157,8 +168,8 @@ for y in range(39, 44):
         if tuple(handcells[y, x, :3]) in {tuple(v[:3]) for v in K['skin']}: b4_idle[y, x] = handcells[y, x]
 
 base = strip_arms(src)
-def frame(lean, up_dx, up_dy, ctrl, drop):
-    a, fu, fl = pose(base, lean, up_dx, up_dy, ctrl, drop); o = place_at(a); clean(o); outline(o)
+def frame(lean, up_dx, up_dy, ctrl, drop, legs=None):
+    a, fu, fl = pose(base, lean, up_dx, up_dy, ctrl, drop, legs); o = place_at(a); clean(o); outline(o)
     return o, (lambda p: to_cell(fu(*p))), (lambda p: to_cell(fl(*p)))
 
 # 원본 좌표의 기준 부위
@@ -178,7 +189,7 @@ limb(b4_wind, [hs, (hs[0] - 1, hs[1] + 4), (GW[0] + 1.5, GW[1] + 1.5)], [3, 3, 2
 bracer(b4_wind, GW[0] + 1, GW[1] + 2); hand(b4_wind, GW[0] + 1, GW[1]); hand(b4_wind, GW[0] + 3, GW[1] + 1, dark=True)
 
 # ── 1타: 앞발 크게 내딛고(발끝 줄 +28px) 뒷발 조금 뒤로, 허리 내리고(7px) 상체를 앞으로 숙여(+9°) 앞으로, 망토·도포 뒷자락은 뒤로 끌림
-PUNCH = dict(lean=9, up_dx=9, up_dy=7, ctrl={-40: -34, 40: -18, 100: -8, 140: 6, 210: 28}, drop=7)
+PUNCH = dict(lean=9, up_dx=9, up_dy=7, ctrl={-40: -34, 40: -18, 100: -6, 140: 6, 210: 16}, drop=7, legs=(-10, 0, 26, 0))   # (나) 앞다리 통째로 +26 내딛고 뒷다리 −10, 도포 앞자락은 늘이기 16
 b4_punch, cu, cl = frame(**PUNCH)
 m_p = cl(MOUTH); SCABS['punch'] = ((round(m_p[0]), round(m_p[1])), (round(m_p[0]) + SV[0], round(m_p[1]) + SV[1])); scabbard(b4_punch, *SCABS['punch'])
 ang = 40; d = blade_dir(ang); GP = (TIP[0] - d[0] * BLADE, TIP[1] - d[1] * BLADE); GPr = (round(GP[0]), round(GP[1]))
@@ -191,8 +202,8 @@ bracer(b4_punch, GPr[0] - 3, GPr[1] - 1); hand(b4_punch, GPr[0] - 1, GPr[1] - 1)
 # ── 걷기·점프·맞음 (2026-11-04 오너 추가): 팔은 서기처럼 칼집을 쥔 채, 몸만 같은 방식으로 움직임. 칼집은 서기와 같은 벡터로 다시 그리고 손(피부)을 위에
 base_arms = strip_arms(src, arms=False)
 SKIN = {tuple(v[:3]) for v in K['skin']}
-def frame_arms(lean, up_dx, up_dy, ctrl, drop):
-    a, fu, fl = pose(base_arms, lean, up_dx, up_dy, ctrl, drop); o = place_at(a); clean(o); outline(o)
+def frame_arms(lean, up_dx, up_dy, ctrl, drop, legs=None):
+    a, fu, fl = pose(base_arms, lean, up_dx, up_dy, ctrl, drop, legs); o = place_at(a); clean(o); outline(o)
     keep = [(x, y, o[y, x].copy()) for y in range(30, 50) for x in range(14, 36) if o[y, x, 3] and tuple(o[y, x, :3]) in SKIN]
     m = fl(*MOUTH); m = to_cell(m); mo = (round(m[0]), round(m[1])); scabbard(o, mo, (mo[0] + SV[0], mo[1] + SV[1]), hilt=True)
     for x, y, c in keep: o[y, x] = c
@@ -200,14 +211,14 @@ def frame_arms(lean, up_dx, up_dy, ctrl, drop):
 name_now = ['']
 # 걷기: 보폭이 넓어졌다(0·2) 좁아지며 몸이 올라감(1·3), 망토·도포 자락이 반대로 흔들림. 그림 한 장을 변형해 왼발·오른발이 바뀌지는 않음
 MOVES = {
-    'walk0': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -16, 40: -9, 85: -16, 125: 0, 170: 20, 210: 22}, drop=2),
-    'walk1': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 8, 40: 5, 85: 10, 125: 2, 170: -8, 210: -8}, drop=-5),
-    'walk2': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -22, 40: -12, 85: -10, 125: 2, 170: 22, 210: 26}, drop=2),
-    'walk3': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 14, 40: 8, 85: 6, 125: 0, 170: -10, 210: -10}, drop=-5),
-    # 점프: 무릎을 굽혀 다리를 당김(허리 22 내림) — 게임이 공중 높이만큼 올려 그림. 도포 자락은 앞뒤로 퍼짐
-    'jump': dict(lean=4, up_dx=2, up_dy=22, ctrl={-40: -20, 40: -10, 85: -6, 125: 0, 170: 10, 210: 18}, drop=22),
-    # 맞음: 상체가 뒤로 젖혀지고(−12°) 뒤로 밀림, 앞발이 뒤로 끌림, 망토는 앞으로 쏠림
-    'hurt': dict(lean=-12, up_dx=-10, up_dy=4, ctrl={-40: 16, 40: 10, 85: -4, 125: -2, 170: -8, 210: -12}, drop=4),
+    'walk0': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -16, 40: -9, 85: -4, 125: 0, 170: 6, 210: 10}, drop=2, legs=(-8, 0, 12, 0)),      # 넓은 보폭: 가까운 다리 뒤·먼 다리 앞
+    'walk1': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 8, 40: 5, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-5, legs=(40, -6, -46, 0)),   # 모음: 가까운 다리가 들려 앞으로 지나감
+    'walk2': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -22, 40: -12, 85: -2, 125: 2, 170: 6, 210: 10}, drop=2, legs=(92, 0, -92, 0)),   # 바꾼 보폭: 가까운 다리 앞·먼 다리 뒤
+    'walk3': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 14, 40: 8, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-5, legs=(44, 0, -40, -6)),   # 모음: 먼 다리가 들려 앞으로 지나감
+    # 점프: 두 다리를 위로 당기고 가운데로 모음(늘이기 없음), 도포 자락 퍼짐 — 게임이 공중 높이만큼 올려 그림
+    'jump': dict(lean=4, up_dx=2, up_dy=4, ctrl={-40: -20, 40: -10, 85: -2, 125: 0, 170: 4, 210: 14}, drop=4, legs=(14, -20, -16, -14)),
+    # 맞음: 상체를 크게 뒤로 젖히고(−20°) 뒤로 밀리며 허리를 낮춤, 앞다리가 뒤로 끌림, 망토는 앞으로 쏠림
+    'hurt': dict(lean=-20, up_dx=-16, up_dy=10, ctrl={-40: 18, 40: 12, 85: -2, 125: -2, 170: -6, 210: -10}, drop=10, legs=(-6, 0, -16, 0)),
 }
 b4_moves = {}
 for n, kw in MOVES.items(): name_now[0] = n; b4_moves[n] = frame_arms(**kw)
