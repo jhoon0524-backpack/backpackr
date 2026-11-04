@@ -168,9 +168,9 @@ for y in range(39, 44):
         if tuple(handcells[y, x, :3]) in {tuple(v[:3]) for v in K['skin']}: b4_idle[y, x] = handcells[y, x]
 
 base = strip_arms(src)
-# 서기 칸(2px)의 다리 그림 — 가까운 다리 칸 x 24~30·줄 55~61, 먼 다리 x 39~48·줄 54~61 (바지 자락·신발·금테 그대로)
+# 서기 칸(2px)의 다리 그림 — 가까운 다리 칸 x 24~30, 먼 다리 x 39~48, 줄 51~61 (도포 자락 아래끝·바지 자락·신발·금테 그대로 — 2026-11-04 director: 줄 55·54 부터면 자락과 다리 사이가 비어 51 부터)
 LEG_TPL = {k: [(x, y, b4_idle[y, x].copy()) for y in range(y0, 62) for x in range(x0, x1) if b4_idle[y, x, 3]] for k, (x0, x1, y0) in
-           {'near': (24, 31, 55), 'far': (39, 49, 54)}.items()}
+           {'near': (24, 31, 51), 'far': (39, 49, 51)}.items()}
 def put_legs(o, legs):
     """서기 다리 그림을 통째로 옮겨 붙임 (도포 뒤 = 빈 칸에만). 먼 다리 먼저, 가까운 다리 나중 (가까운 다리가 겹치면 위)"""
     under = o[..., 3] == 0
@@ -179,7 +179,27 @@ def put_legs(o, legs):
         for x, y, c in LEG_TPL[k]:
             X, Y = x + cx, y + cy
             if 0 <= X < CELL and 0 <= Y < CELL and (under[Y, X] or k == 'near' and o[Y, X, 3] and (Y, X) in placed): o[Y, X] = c; placed.add((Y, X))
-placed = set()
+    # 2026-11-04 director: 다리 위끝과 도포 자락 사이 빈 줄(1~4줄) → 도포 자락 끝 색으로 아래로 이어 덮음 (10줄 안에 자락이 있을 때만)
+    def gaps():
+        g = 0
+        for X in {x for _, x in placed}:
+            top = min(y for y, x in placed if x == X); hit = next((y for y in range(top - 1, max(top - 11, -1), -1) if o[y, X, 3]), None)
+            if hit is not None: g += top - hit - 1
+        return g
+    before = gaps()
+    for X in {x for _, x in placed}:
+        top = min(y for y, x in placed if x == X)
+        hit = next((y for y in range(top - 1, max(top - 11, -1), -1) if o[y, X, 3]), None)
+        if hit is not None:
+            for y in range(hit + 1, top): o[y, X] = o[hit, X]          # 도포 자락을 아래로 늘여 덮음 (다리 색으로 메우면 정강이가 길어 보임)
+    LEG_GAP[name_now[0]] = (before, gaps())     # (메우기 전, 후) 다리 위끝~자락 사이 투명 칸 수 — 후는 0 이어야 함
+def feet_blobs(o):
+    cols = o[58:62, :, 3].any(axis=0); k = 0; prev = False
+    for v in cols:
+        if v and not prev: k += 1
+        prev = v
+    return k
+placed = set(); LEG_GAP = {}; name_now = ['']
 def frame(lean, up_dx, up_dy, ctrl, drop, legs=None):
     a, fu, fl = pose(base, lean, up_dx, up_dy, ctrl, drop, legs); o = place_at(a); clean(o); outline(o)
     if legs: placed.clear(); put_legs(o, legs)
@@ -203,7 +223,7 @@ bracer(b4_wind, GW[0] + 1, GW[1] + 2); hand(b4_wind, GW[0] + 1, GW[1]); hand(b4_
 
 # ── 1타: 앞발 크게 내딛고(발끝 줄 +28px) 뒷발 조금 뒤로, 허리 내리고(7px) 상체를 앞으로 숙여(+9°) 앞으로, 망토·도포 뒷자락은 뒤로 끌림
 PUNCH = dict(lean=9, up_dx=9, up_dy=7, ctrl={-40: -34, 40: -18, 100: -6, 140: 6, 210: 16}, drop=7, legs=(-10, 0, 26, 0))   # (나) 앞다리 통째로 +26 내딛고 뒷다리 −10, 도포 앞자락은 늘이기 16
-b4_punch, cu, cl = frame(**PUNCH)
+name_now[0] = 'punch'; b4_punch, cu, cl = frame(**PUNCH)
 m_p = cl(MOUTH); SCABS['punch'] = ((round(m_p[0]), round(m_p[1])), (round(m_p[0]) + SV[0], round(m_p[1]) + SV[1])); scabbard(b4_punch, *SCABS['punch'])
 ang = 40; d = blade_dir(ang); GP = (TIP[0] - d[0] * BLADE, TIP[1] - d[1] * BLADE); GPr = (round(GP[0]), round(GP[1]))
 hs, fs = cu(NEAR_SH), cu(FAR_SH)
@@ -240,7 +260,7 @@ for n, kw in MOVES.items(): name_now[0] = n; b4_moves[n] = frame_arms(**kw)
 # ── 점프 공격 (airKick, 2026-11-04 오너 "칼이 너무 밑으로만"): 다리 당긴 공중 자세, 상체 앞으로 숙이되 몸은 뒤로 물려 두 손을 가슴 앞에, 칼은 앞으로 25° 아래.
 #    칼끝 = 점프 공격 사거리 50px (index.html JUMP_KICK.reach, 적 중심 기준) → 칸 (56, 37), 높이 45px
 AIR = dict(lean=10, up_dx=-14, up_dy=4, ctrl={-40: -20, 40: -10, 85: -2, 125: 0, 170: 4, 210: 14}, drop=4, legs=(14, -20, -16, -14))
-b4_air, cu, cl = frame(**AIR)
+name_now[0] = 'airKick'; b4_air, cu, cl = frame(**AIR)
 m_a = cl(MOUTH); SCABS['airKick'] = ((round(m_a[0]), round(m_a[1])), (round(m_a[0]) + SV[0], round(m_a[1]) + SV[1])); scabbard(b4_air, *SCABS['airKick'])
 AIR_TIP = (56, 37); d = blade_dir(25); GA = (round(AIR_TIP[0] - d[0] * BLADE), round(AIR_TIP[1] - d[1] * BLADE))
 hs, fs = cu(NEAR_SH), cu(FAR_SH)
@@ -258,7 +278,9 @@ Image.fromarray(sheet, 'RGBA').save(os.path.join(OUT, 'mugyeom-ai-b4.png'))
 def top_px(o): ys = np.nonzero(o[:, :, 3].any(axis=1))[0]; return int((SOLE - ys.min()) * 2)
 def front_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.max() + 1 - FOOTX) * 2)
 def back_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.min() - FOOTX) * 2)
-report = {'cells': ['idle', 'windup', 'punch'] + list(MOVES) + ['airKick'] + list(WALK_MORE), 'pose_walk_more': WALK_MORE, 'airKick': {'pose': AIR, 'tip_cell': AIR_TIP, 'tip_front_px': (AIR_TIP[0] + 1 - FOOTX) * 2, 'tip_height_px': (60.5 - AIR_TIP[1] - 1) * 2, 'blade_px': round(2 * math.hypot(AIR_TIP[0] - GA[0], AIR_TIP[1] - GA[1]), 1)}, 'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()}, 'pose_moves': MOVES,
+cells_all = [b4_idle, b4_wind, b4_punch] + [b4_moves[n] for n in MOVES] + [b4_air] + [b4_moves[n] for n in WALK_MORE]
+names_all = ['idle', 'windup', 'punch'] + list(MOVES) + ['airKick'] + list(WALK_MORE)
+report = {'cells': names_all, 'feet_blobs (발밑 4줄 덩어리 수)': {n: feet_blobs(o) for n, o in zip(names_all, cells_all)}, 'leg_gap_cells (다리 위끝~도포 자락 사이 투명 칸: 메우기 전, 후 — 후는 0)': LEG_GAP, 'pose_walk_more': WALK_MORE, 'airKick': {'pose': AIR, 'tip_cell': AIR_TIP, 'tip_front_px': (AIR_TIP[0] + 1 - FOOTX) * 2, 'tip_height_px': (60.5 - AIR_TIP[1] - 1) * 2, 'blade_px': round(2 * math.hypot(AIR_TIP[0] - GA[0], AIR_TIP[1] - GA[1]), 1)}, 'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()}, 'pose_moves': MOVES,
           'height_px': {'idle': top_px(b4_idle), 'windup': top_px(b4_wind), 'punch': top_px(b4_punch), **{n: top_px(o) for n, o in b4_moves.items()}, 'airKick': top_px(b4_air)},
           'front_px': {'idle': front_px(b4_idle), 'windup': front_px(b4_wind), 'punch': front_px(b4_punch)},
           'back_px': {'idle': back_px(b4_idle), 'windup': back_px(b4_wind), 'punch': back_px(b4_punch)},

@@ -1,7 +1,7 @@
 // B4 걷기·점프·맞음 움직임 GIF (2026-11-04): node tools/ai-pilot/b4_moves_gif.js
 //  지금 게임(코드 그림)과 B4 시험판(tools/ai-pilot/b4_build.js 로 tests/out/ai-pilot/b4-build 에 만듦)을 같은 입력으로 돌려 PC 1440×900 화면을 매 프레임 찍음:
 //  서기 4f → 오른쪽으로 걷기 40f (시험판은 걷기 칸이 24px 이동마다 — 약 7~8프레임, 지금 게임은 12px) → 멈춤 4f → 점프(X), 10프레임 뒤 점프 공격(Z), 착지까지 + 4f → 앞에서 맞음(damagePlayer) 14f + 6f. 출력 tests/out/ai-pilot/b4m-*.png, b4m-motion.json
-//  GIF 는 python3 -I tools/ai-pilot/motion_gif.py . b4m → docs/ai-pilot/b4m-motion.gif · b4m-motion-slow.gif
+//  GIF 는 python3 -I tools/ai-pilot/motion_gif.py . b4m → tests/out/ai-pilot/b4m-motion*.gif (단계 끝에만 끝에 --docs → docs/ai-pilot, 2026-11-04 오너 결정)
 const { chromium } = require('playwright'); const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), { pathToFileURL } = require('url');
 const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'tests', 'out', 'ai-pilot'), BUILD = path.join(OUT, 'b4-build');
