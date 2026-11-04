@@ -46,10 +46,12 @@ const NAMES = ['idle0', 'walk0', 'punch', 'punch2', 'kickPrep', 'kick', 'kickRec
         // 칼끝: 적을 잠깐 화면 밖으로 빼고 그려 칼끝 픽셀을 잰 뒤 되돌림
         const ex = e.x, ck = camKick; e.x = -999; camKick = null; draw(); e.x = ex; camKick = ck;   // 카메라 킥(맞을 때 화면이 밀림)은 빼고 잰다
         const d = ctx.getImageData(0, 0, W, H).data; let tip = null;
+        // 칼날 칸: 정해 둔 강철색, 또는 (AI 시트처럼 색이 다를 때) 주인공 둘레 70px 안의 밝고 푸르스름한 색 (2026-11-04 AI 실험에서 넓힘)
+        const px0 = player.x - cam, isBlade = (x, r, g, b, hex) => steel.has(hex) || (Math.abs(x - px0) <= 70 && Math.min(r, g, b) > 140 && b >= r + 6);
         for (let y = 250; y < 440; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4, hex = ((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]).toString(16).padStart(6, '0');
-          if (steel.has(hex)) { const t = dir > 0 ? x + 1 - (player.x - cam) : (player.x - cam) - x; if (tip === null || t > tip) tip = t; } }
+          if (isBlade(x, d[i], d[i + 1], d[i + 2], hex)) { const t = dir > 0 ? x + 1 - (player.x - cam) : (player.x - cam) - x; if (tip === null || t > tip) tip = t; } }
         // 그림끼리 실제 거리: 칼날 픽셀과 적 그림(서기 칸) 픽셀 사이 가장 가까운 거리 (0 = 겹침). 판정과 무관한 화면상의 틈
-        const blade = []; for (let y = 250; y < 440; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (steel.has(((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]).toString(16).padStart(6, '0'))) blade.push([x, y]); }
+        const blade = []; for (let y = 250; y < 440; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (isBlade(x, d[i], d[i + 1], d[i + 2], ((d[i] << 16) | (d[i + 1] << 8) | d[i + 2]).toString(16).padStart(6, '0'))) blade.push([x, y]); }
         const fr = ART.frameOf(e.art, guard ? 'idle0' : 'idle0'), c = fr.img, cd = c.getContext('2d').getImageData(0, 0, c.width, c.height).data, ep = [];
         for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) if (cd[(y * c.width + x) * 4 + 3]) {
           const sx = (e.x - cam) + (e.dir < 0 ? -1 : 1) * ((x + 0.5 - fr.ax) * fr.scale), sy = e.y + (y + 0.5 - fr.ay) * fr.scale; ep.push([sx, sy]); }

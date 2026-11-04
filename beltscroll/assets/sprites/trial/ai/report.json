@@ -1,0 +1,66 @@
+{
+ "source_idle_height_px": 302,
+ "cells_per_source_px": 0.1821,
+ "source_px_per_cell": 5.49,
+ "b2_slash_blade": {
+  "guard_cell": [
+   47.7,
+   52.0
+  ],
+  "slope_dy_per_dx": 0.616,
+  "tip_cell": [
+   59,
+   59.0
+  ],
+  "tip_px": 56,
+  "tip_height_px": 4.0
+ },
+ "b1": {
+  "idle_height_px": 110,
+  "slash_height_px": 94,
+  "idle_front_px": 34,
+  "slash_front_px": 54,
+  "colors": 2113
+ },
+ "b2": {
+  "idle_height_px": 110,
+  "slash_height_px": 88,
+  "idle_front_px": 34,
+  "slash_front_px": 56,
+  "colors": 32
+ },
+ "palette_b2": [
+  "#fcfcfd",
+  "#f4edea",
+  "#c9bbbe",
+  "#8c8396",
+  "#856664",
+  "#615c70",
+  "#494151",
+  "#41323d",
+  "#323554",
+  "#30314c",
+  "#2a2d4b",
+  "#2a2939",
+  "#252436",
+  "#3a191d",
+  "#221d27",
+  "#1f1d2b",
+  "#1b1c2e",
+  "#1b1921",
+  "#19151c",
+  "#16151f",
+  "#131119",
+  "#0f0c13",
+  "#0a060a",
+  "#020204",
+  "#b6864d",
+  "#a56c4a",
+  "#bc302b",
+  "#a92122",
+  "#f7d7b1",
+  "#d09e79",
+  "#dcdfef",
+  "#a8abcb"
+ ]
+}

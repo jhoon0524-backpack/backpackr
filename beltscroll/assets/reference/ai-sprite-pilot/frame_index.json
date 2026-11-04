@@ -1,0 +1,187 @@
+{
+  "source": "전통_검객_픽셀_애니메이션_스프라이트_시트.png",
+  "generated_reference_only": true,
+  "frame_count": 15,
+  "frames": [
+    {
+      "name": "00_idle",
+      "file": "frames/00_idle.png",
+      "original_crop": [
+        0,
+        80,
+        224,
+        392
+      ],
+      "width": 203,
+      "height": 305
+    },
+    {
+      "name": "01_idle_breath",
+      "file": "frames/01_idle_breath.png",
+      "original_crop": [
+        224,
+        80,
+        449,
+        392
+      ],
+      "width": 200,
+      "height": 305
+    },
+    {
+      "name": "02_walk_start",
+      "file": "frames/02_walk_start.png",
+      "original_crop": [
+        449,
+        80,
+        705,
+        392
+      ],
+      "width": 236,
+      "height": 296
+    },
+    {
+      "name": "03_walk_contact",
+      "file": "frames/03_walk_contact.png",
+      "original_crop": [
+        705,
+        80,
+        945,
+        392
+      ],
+      "width": 236,
+      "height": 291
+    },
+    {
+      "name": "04_walk_striding",
+      "file": "frames/04_walk_striding.png",
+      "original_crop": [
+        945,
+        80,
+        1195,
+        392
+      ],
+      "width": 237,
+      "height": 294
+    },
+    {
+      "name": "05_walk_stride2",
+      "file": "frames/05_walk_stride2.png",
+      "original_crop": [
+        1195,
+        80,
+        1448,
+        392
+      ],
+      "width": 237,
+      "height": 294
+    },
+    {
+      "name": "06_attack_windup",
+      "file": "frames/06_attack_windup.png",
+      "original_crop": [
+        0,
+        405,
+        285,
+        765
+      ],
+      "width": 278,
+      "height": 310
+    },
+    {
+      "name": "07_downslash",
+      "file": "frames/07_downslash.png",
+      "original_crop": [
+        258,
+        405,
+        565,
+        765
+      ],
+      "width": 307,
+      "height": 268
+    },
+    {
+      "name": "08_downslash_follow",
+      "file": "frames/08_downslash_follow.png",
+      "original_crop": [
+        535,
+        405,
+        779,
+        765
+      ],
+      "width": 244,
+      "height": 224
+    },
+    {
+      "name": "09_low_sweep",
+      "file": "frames/09_low_sweep.png",
+      "original_crop": [
+        775,
+        405,
+        989,
+        765
+      ],
+      "width": 211,
+      "height": 226
+    },
+    {
+      "name": "10_overhead_prep",
+      "file": "frames/10_overhead_prep.png",
+      "original_crop": [
+        990,
+        405,
+        1225,
+        765
+      ],
+      "width": 234,
+      "height": 349
+    },
+    {
+      "name": "11_slash_recover",
+      "file": "frames/11_slash_recover.png",
+      "original_crop": [
+        1228,
+        405,
+        1448,
+        765
+      ],
+      "width": 197,
+      "height": 251
+    },
+    {
+      "name": "12_thrust_prep",
+      "file": "frames/12_thrust_prep.png",
+      "original_crop": [
+        120,
+        790,
+        467,
+        1058
+      ],
+      "width": 319,
+      "height": 250
+    },
+    {
+      "name": "13_thrust",
+      "file": "frames/13_thrust.png",
+      "original_crop": [
+        469,
+        790,
+        955,
+        1058
+      ],
+      "width": 475,
+      "height": 247
+    },
+    {
+      "name": "14_thrust_recover",
+      "file": "frames/14_thrust_recover.png",
+      "original_crop": [
+        950,
+        790,
+        1259,
+        1058
+      ],
+      "width": 308,
+      "height": 250
+    }
+  ]
+}
