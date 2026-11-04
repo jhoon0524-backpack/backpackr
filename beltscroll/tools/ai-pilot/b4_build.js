@@ -10,7 +10,7 @@ fs.mkdirSync(path.join(OUT, 'assets', 'sprites'), { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'assets/sprites/dokkaebi.png'), path.join(OUT, 'assets/sprites/dokkaebi.png'));
 fs.copyFileSync(path.join(ROOT, 'assets/sprites/trial/ai/mugyeom-ai-b4.png'), path.join(OUT, 'assets/sprites/mugyeom-b4.png'));
 const I = [0, 0], W = [1, 0], P = [2, 0];
-const frames = { idle0: I, idle1: I, windup: W, punch: P, walk0: [3, 0], walk1: [4, 0], walk2: [5, 0], walk3: [6, 0], jump: [7, 0], hurt: [8, 0], punch2: P, kick: P, airKick: P, stomp: P };   // 2026-11-04 걷기·점프·맞음 칸 추가 (칸 3~8)
+const frames = { idle0: I, idle1: I, windup: W, punch: P, walk0: [3, 0], walk1: [4, 0], walk2: [5, 0], walk3: [6, 0], jump: [7, 0], hurt: [8, 0], punch2: P, kick: P, airKick: [9, 0], stomp: P };   // 점프 공격 전용 칸 9 (2026-11-04)   // 2026-11-04 걷기·점프·맞음 칸 추가 (칸 3~8)
 const spec = { src: 'assets/sprites/mugyeom-b4.png', frameW: 64, frameH: 64, footX: 32, footY: 60.5, scale: 2, height: 110, frames };
 const sp = fs.readFileSync(path.join(ROOT, 'data', 'sprites.js'), 'utf8');
 fs.writeFileSync(path.join(OUT, 'data', 'sprites.js'), sp.replace(/"mugyeom": \{[\s\S]*?\} \},\n/, `"mugyeom": ${JSON.stringify(spec)},\n`));

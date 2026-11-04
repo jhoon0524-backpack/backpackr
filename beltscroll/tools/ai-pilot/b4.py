@@ -211,10 +211,10 @@ def frame_arms(lean, up_dx, up_dy, ctrl, drop, legs=None):
 name_now = ['']
 # 걷기: 보폭이 넓어졌다(0·2) 좁아지며 몸이 올라감(1·3), 망토·도포 자락이 반대로 흔들림. 그림 한 장을 변형해 왼발·오른발이 바뀌지는 않음
 MOVES = {
-    'walk0': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -16, 40: -9, 85: -4, 125: 0, 170: 6, 210: 10}, drop=2, legs=(-8, 0, 12, 0)),      # 넓은 보폭: 가까운 다리 뒤·먼 다리 앞
-    'walk1': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 8, 40: 5, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-5, legs=(40, -6, -46, 0)),   # 모음: 가까운 다리가 들려 앞으로 지나감
-    'walk2': dict(lean=3, up_dx=3, up_dy=2, ctrl={-40: -22, 40: -12, 85: -2, 125: 2, 170: 6, 210: 10}, drop=2, legs=(92, 0, -92, 0)),   # 바꾼 보폭: 가까운 다리 앞·먼 다리 뒤
-    'walk3': dict(lean=1, up_dx=1, up_dy=-5, ctrl={-40: 14, 40: 8, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-5, legs=(44, 0, -40, -6)),   # 모음: 먼 다리가 들려 앞으로 지나감
+    'walk0': dict(lean=3, up_dx=3, up_dy=5, ctrl={-40: -16, 40: -9, 85: -4, 125: 0, 170: 6, 210: 10}, drop=5, legs=(-30, 0, 34, 0)),     # 넓은 보폭 (2026-11-04 오너 "폭이 작다" → −8/+12 에서 넓힘), 허리 조금 내림
+    'walk1': dict(lean=1, up_dx=1, up_dy=-2, ctrl={-40: 8, 40: 5, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-2, legs=(40, -6, -46, 0)),   # 모음: 가까운 다리가 들려 앞으로 지나감
+    'walk2': dict(lean=3, up_dx=3, up_dy=5, ctrl={-40: -22, 40: -12, 85: -2, 125: 2, 170: 6, 210: 10}, drop=5, legs=(126, 0, -126, 0)),  # 바꾼 넓은 보폭: 가까운 다리 앞·먼 다리 뒤
+    'walk3': dict(lean=1, up_dx=1, up_dy=-2, ctrl={-40: 14, 40: 8, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-2, legs=(44, 0, -40, -6)),   # 모음: 먼 다리가 들려 앞으로 지나감
     # 점프: 두 다리를 위로 당기고 가운데로 모음(늘이기 없음), 도포 자락 퍼짐 — 게임이 공중 높이만큼 올려 그림
     'jump': dict(lean=4, up_dx=2, up_dy=4, ctrl={-40: -20, 40: -10, 85: -2, 125: 0, 170: 4, 210: 14}, drop=4, legs=(14, -20, -16, -14)),
     # 맞음: 상체를 크게 뒤로 젖히고(−20°) 뒤로 밀리며 허리를 낮춤, 앞다리가 뒤로 끌림, 망토는 앞으로 쏠림
@@ -222,13 +222,24 @@ MOVES = {
 }
 b4_moves = {}
 for n, kw in MOVES.items(): name_now[0] = n; b4_moves[n] = frame_arms(**kw)
-sheet = np.concatenate([b4_idle, b4_wind, b4_punch] + [b4_moves[n] for n in MOVES], axis=1)   # 칸 0 서기 · 1 준비 · 2 1타 · 3~6 걷기 · 7 점프 · 8 맞음
+# ── 점프 공격 (airKick, 2026-11-04 오너 "칼이 너무 밑으로만"): 다리 당긴 공중 자세, 상체 앞으로 숙이되 몸은 뒤로 물려 두 손을 가슴 앞에, 칼은 앞으로 25° 아래.
+#    칼끝 = 점프 공격 사거리 50px (index.html JUMP_KICK.reach, 적 중심 기준) → 칸 (56, 37), 높이 45px
+AIR = dict(lean=10, up_dx=-14, up_dy=4, ctrl={-40: -20, 40: -10, 85: -2, 125: 0, 170: 4, 210: 14}, drop=4, legs=(14, -20, -16, -14))
+b4_air, cu, cl = frame(**AIR)
+m_a = cl(MOUTH); SCABS['airKick'] = ((round(m_a[0]), round(m_a[1])), (round(m_a[0]) + SV[0], round(m_a[1]) + SV[1])); scabbard(b4_air, *SCABS['airKick'])
+AIR_TIP = (56, 37); d = blade_dir(25); GA = (round(AIR_TIP[0] - d[0] * BLADE), round(AIR_TIP[1] - d[1] * BLADE))
+hs, fs = cu(NEAR_SH), cu(FAR_SH)
+limb(b4_air, [fs, (fs[0] + 1, fs[1] + 3), (GA[0] - 3, GA[1] - 1)], [2.5, 2.5, 2], [0, 1, 1], base=(GREY, GREY))
+sword(b4_air, GA[0], GA[1], None, tip=AIR_TIP)
+limb(b4_air, [hs, ((hs[0] + GA[0]) / 2, (hs[1] + GA[1]) / 2 + 1), (GA[0] - 2, GA[1])], [3, 3, 2.5], [1, 2, 1])
+bracer(b4_air, GA[0] - 3, GA[1] - 1); hand(b4_air, GA[0] - 1, GA[1] - 1); hand(b4_air, GA[0] - 3, GA[1] - 2, dark=True)
+sheet = np.concatenate([b4_idle, b4_wind, b4_punch] + [b4_moves[n] for n in MOVES] + [b4_air], axis=1)   # 칸 0 서기 · 1 준비 · 2 1타 · 3~6 걷기 · 7 점프 · 8 맞음 · 9 점프 공격
 Image.fromarray(sheet, 'RGBA').save(os.path.join(OUT, 'mugyeom-ai-b4.png'))
 def top_px(o): ys = np.nonzero(o[:, :, 3].any(axis=1))[0]; return int((SOLE - ys.min()) * 2)
 def front_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.max() + 1 - FOOTX) * 2)
 def back_px(o): xs = np.nonzero(o[:, :, 3].any(axis=0))[0]; return int((xs.min() - FOOTX) * 2)
-report = {'cells': ['idle', 'windup', 'punch'] + list(MOVES), 'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()}, 'pose_moves': MOVES,
-          'height_px': {'idle': top_px(b4_idle), 'windup': top_px(b4_wind), 'punch': top_px(b4_punch), **{n: top_px(o) for n, o in b4_moves.items()}},
+report = {'cells': ['idle', 'windup', 'punch'] + list(MOVES) + ['airKick'], 'airKick': {'pose': AIR, 'tip_cell': AIR_TIP, 'tip_front_px': (AIR_TIP[0] + 1 - FOOTX) * 2, 'tip_height_px': (60.5 - AIR_TIP[1] - 1) * 2, 'blade_px': round(2 * math.hypot(AIR_TIP[0] - GA[0], AIR_TIP[1] - GA[1]), 1)}, 'pose_windup': {k: v for k, v in WIND.items()}, 'pose_punch': {k: v for k, v in PUNCH.items()}, 'pose_moves': MOVES,
+          'height_px': {'idle': top_px(b4_idle), 'windup': top_px(b4_wind), 'punch': top_px(b4_punch), **{n: top_px(o) for n, o in b4_moves.items()}, 'airKick': top_px(b4_air)},
           'front_px': {'idle': front_px(b4_idle), 'windup': front_px(b4_wind), 'punch': front_px(b4_punch)},
           'back_px': {'idle': back_px(b4_idle), 'windup': back_px(b4_wind), 'punch': back_px(b4_punch)},
           'scabbard_px (입구~끝 직선)': {k: round(2 * math.hypot(e[0] - m[0], e[1] - m[1]), 1) for k, (m, e) in SCABS.items()},
