@@ -15,7 +15,7 @@ def guides(img, z):
     d.line([(0, 62 * z), (64 * z, 62 * z)], fill=(90, 200, 255, 255), width=1)
     d.line([(60 * z, 0), (60 * z, 64 * z)], fill=(255, 90, 90, 255), width=1)   # 칼끝 56px = 칸 경계 60
     return img
-SHEETS = [('A 지금 2px 코드 시안', 'assets/sprites/trial/mugyeom-2px.png'), ('B1 AI 단순 축소', 'assets/sprites/trial/ai/mugyeom-ai-b1.png'), ('B2 AI 보정', 'assets/sprites/trial/ai/mugyeom-ai-b2.png')]
+SHEETS = [('A 지금 2px 코드 시안', 'assets/sprites/trial/mugyeom-2px.png'), ('B1 AI 단순 축소', 'assets/sprites/trial/ai/mugyeom-ai-b1.png'), ('B2 AI 자동 보정 (규칙 처리)', 'assets/sprites/trial/ai/mugyeom-ai-b2.png')]
 Z = 8; W = 64 * Z
 out = Image.new('RGBA', (3 * (W + 16) + 16, 2 * (W + 16) + 16), (22, 22, 28, 255))
 for c, (label, path) in enumerate(SHEETS):

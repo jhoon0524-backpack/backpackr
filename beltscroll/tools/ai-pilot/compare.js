@@ -1,14 +1,14 @@
 // AI 스프라이트 실험 A/B 비교 (2026-11-04): 같은 전투 장면·같은 캐릭터 크기(2px, scale 2, 키 110px)로
 //   A  = 지금 2px 코드 시안 (assets/sprites/trial/mugyeom-2px.png)
 //   B1 = AI 단순 축소 (assets/sprites/trial/ai/mugyeom-ai-b1.png)
-//   B2 = AI 보정 (assets/sprites/trial/ai/mugyeom-ai-b2.png)
+//   B2 = AI 자동 보정(규칙 처리) (assets/sprites/trial/ai/mugyeom-ai-b2.png)
 // 세 판 모두 윤무겸 서기·1타 2칸만 바꾼 게임 사본(tests/out/ai-pilot/game-*)에서 찍는다. 본 게임 시트(data/sprites.js)는 그대로.
 // 조건: PC 1440×900 창(오너 PC, 게임 1.47배) / 휴대폰 가로 915×412 배율 2.625. 사진은 기기 픽셀 그대로 붙임.
 // 쓰는 법: node tools/ai-pilot/compare.js → docs/ai-pilot/compare-pc.png, compare-mobile.png (+ 게임 사본 주소 출력: tests/sheets.js·tip56-check 에 씀)
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), { pathToFileURL } = require('url');
 const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'tests', 'out', 'ai-pilot'), DOCS = path.join(ROOT, 'docs', 'ai-pilot');
-const SHEETS = [['A', 'assets/sprites/trial/mugyeom-2px.png', 'A 지금 2px 코드 시안'], ['B1', 'assets/sprites/trial/ai/mugyeom-ai-b1.png', 'B1 AI 단순 축소'], ['B2', 'assets/sprites/trial/ai/mugyeom-ai-b2.png', 'B2 AI 보정']];
+const SHEETS = [['A', 'assets/sprites/trial/mugyeom-2px.png', 'A 지금 2px 코드 시안'], ['B1', 'assets/sprites/trial/ai/mugyeom-ai-b1.png', 'B1 AI 단순 축소'], ['B2', 'assets/sprites/trial/ai/mugyeom-ai-b2.png', 'B2 AI 자동 보정 (규칙 처리)']];
 const sprites = fs.readFileSync(path.join(ROOT, 'data', 'sprites.js'), 'utf8');
 const VARIANTS = SHEETS.map(([vid, src, label]) => {
   const dir = path.join(OUT, 'game-' + vid); fs.rmSync(dir, { recursive: true, force: true });
