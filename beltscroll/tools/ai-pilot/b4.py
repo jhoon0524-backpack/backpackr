@@ -56,18 +56,15 @@ def strip_arms(a, scab=True, arms=True):
 NEAR_LEG, FAR_LEG = (60, 262, 104, 306), (143, 262, 197, 306)   # 원본 정강이·신발 상자 (뒤 = 화면 왼쪽 앞다리(가까운 쪽), 앞 = 화면 오른쪽 먼 다리)
 def pose(a, lean, up_dx, up_dy, ctrl, drop, legs=None):
     """lean: 상체 기울기(도, + 앞으로), up_dx·dy: 상체 이동(원본 px), ctrl: 허리선 아래 가로 늘이기 {원본 x: 발끝 줄에서의 이동 px}, drop: 허리 내림 px,
-    legs: (가까운 다리 dx, dy, 먼 다리 dx, dy) — 2026-11-04 (나): 정강이·신발을 늘이지 않고 상자째 잘라 옮김(도포 남청은 남김). 다리는 도포 뒤에 그림"""
+    legs: (가까운 다리 dx, dy, 먼 다리 dx, dy) 원본 px — 원본 다리는 여기서 지우고, 2px 칸에서 서기 칸의 다리 그림을 그만큼 옮겨 도포 뒤에 붙임 (put_legs)"""
     W, H = W0 + 2 * OX, H0 + 2 * OY
     canvas = np.zeros((H, W, 4), np.uint8); can = np.zeros_like(canvas); can[OY:OY + H0, OX:OX + W0] = a.astype(np.uint8)
     leg_layer = np.zeros_like(can)
     if legs:
         r, g, b = can[..., 0].astype(int), can[..., 1].astype(int), can[..., 2].astype(int)
         navy = (b > r + 18) & (b > 55) & ((r + g + b) < 330)                          # 도포 남청 (다리 상자에 걸친 도포 자락은 그대로 둠)
-        for (x0, y0, x1, y1), dx, dy in ((FAR_LEG, legs[2], legs[3]), (NEAR_LEG, legs[0], legs[1])):   # 먼 다리 먼저, 가까운 다리 위에
-            sl = (slice(OY + y0, OY + y1), slice(OX + x0, OX + x1)); m = (can[sl][..., 3] > 0) & ~navy[sl]
-            part = np.zeros_like(can[sl]); part[m] = can[sl][m]; can[sl][m] = 0
-            ys_, xs_ = np.nonzero(part[..., 3]); ty, tx = ys_ + OY + y0 + int(dy), xs_ + OX + x0 + int(dx)
-            ok = (ty >= 0) & (ty < H) & (tx >= 0) & (tx < W); leg_layer[ty[ok], tx[ok]] = part[ys_[ok], xs_[ok]]
+        for (x0, y0, x1, y1) in (FAR_LEG, NEAR_LEG):   # 2026-11-04 오너 "발 모양이 이상해": 원본 다리를 잘라 옮기면 바지·신발이 조각나 → 원본 다리는 지우고 2px 에서 서기 칸 다리를 통째로 붙임 (put_legs)
+            sl = (slice(OY + y0 - 10, OY + y1), slice(OX + x0, OX + x1)); m = (can[sl][..., 3] > 0) & ~navy[sl]; can[sl][m] = 0
         # 2026-11-04 오너 "걷는 발이 세 개로 보임": 두 다리 사이 도포 가운데 자락 끝(원본 y 258 아래, x 104~143)이 다리를 벌리면 혼자 늘어져 세 번째 다리처럼 보임 → 잘라냄
         can[OY + 258:OY + H0, OX + NEAR_LEG[2]:OX + FAR_LEG[0]] = 0
         can[OY + 264:OY + H0, OX - 40:OX + NEAR_LEG[0]] = 0                         # 망토 왼쪽 아래 끝도 뒷발 옆에서 발처럼 보여 조금 올림
@@ -171,8 +168,21 @@ for y in range(39, 44):
         if tuple(handcells[y, x, :3]) in {tuple(v[:3]) for v in K['skin']}: b4_idle[y, x] = handcells[y, x]
 
 base = strip_arms(src)
+# 서기 칸(2px)의 다리 그림 — 가까운 다리 칸 x 24~30·줄 55~61, 먼 다리 x 39~48·줄 54~61 (바지 자락·신발·금테 그대로)
+LEG_TPL = {k: [(x, y, b4_idle[y, x].copy()) for y in range(y0, 62) for x in range(x0, x1) if b4_idle[y, x, 3]] for k, (x0, x1, y0) in
+           {'near': (24, 31, 55), 'far': (39, 49, 54)}.items()}
+def put_legs(o, legs):
+    """서기 다리 그림을 통째로 옮겨 붙임 (도포 뒤 = 빈 칸에만). 먼 다리 먼저, 가까운 다리 나중 (가까운 다리가 겹치면 위)"""
+    under = o[..., 3] == 0
+    for k, dx, dy in (('far', legs[2], legs[3]), ('near', legs[0], legs[1])):
+        cx, cy = int(round(dx * scale)), int(round(dy * scale))
+        for x, y, c in LEG_TPL[k]:
+            X, Y = x + cx, y + cy
+            if 0 <= X < CELL and 0 <= Y < CELL and (under[Y, X] or k == 'near' and o[Y, X, 3] and (Y, X) in placed): o[Y, X] = c; placed.add((Y, X))
+placed = set()
 def frame(lean, up_dx, up_dy, ctrl, drop, legs=None):
     a, fu, fl = pose(base, lean, up_dx, up_dy, ctrl, drop, legs); o = place_at(a); clean(o); outline(o)
+    if legs: placed.clear(); put_legs(o, legs)
     return o, (lambda p: to_cell(fu(*p))), (lambda p: to_cell(fl(*p)))
 
 # 원본 좌표의 기준 부위
@@ -207,6 +217,7 @@ base_arms = strip_arms(src, arms=False)
 SKIN = {tuple(v[:3]) for v in K['skin']}
 def frame_arms(lean, up_dx, up_dy, ctrl, drop, legs=None):
     a, fu, fl = pose(base_arms, lean, up_dx, up_dy, ctrl, drop, legs); o = place_at(a); clean(o); outline(o)
+    if legs: placed.clear(); put_legs(o, legs)
     keep = [(x, y, o[y, x].copy()) for y in range(30, 50) for x in range(14, 36) if o[y, x, 3] and tuple(o[y, x, :3]) in SKIN]
     m = fl(*MOUTH); m = to_cell(m); mo = (round(m[0]), round(m[1])); scabbard(o, mo, (mo[0] + SV[0], mo[1] + SV[1]), hilt=True)
     for x, y, c in keep: o[y, x] = c
@@ -214,9 +225,9 @@ def frame_arms(lean, up_dx, up_dy, ctrl, drop, legs=None):
 name_now = ['']
 # 걷기: 보폭이 넓어졌다(0·2) 좁아지며 몸이 올라감(1·3), 망토·도포 자락이 반대로 흔들림. 그림 한 장을 변형해 왼발·오른발이 바뀌지는 않음
 MOVES = {
-    'walk0': dict(lean=3, up_dx=3, up_dy=5, ctrl={-40: -16, 40: -9, 85: -4, 125: 0, 170: 6, 210: 10}, drop=5, legs=(-30, 0, 34, 0)),     # 넓은 보폭 (2026-11-04 오너 "폭이 작다" → −8/+12 에서 넓힘), 허리 조금 내림
+    'walk0': dict(lean=3, up_dx=3, up_dy=3, ctrl={-40: -16, 40: -9, 85: -4, 125: 0, 170: 6, 210: 10}, drop=3, legs=(-16, 0, 20, 0)),     # 보폭: 오너 "작다"(−8/+12) → "너무 넓다"(−30/+34) → 가운데 (−16/+20)
     'walk1': dict(lean=1, up_dx=1, up_dy=-2, ctrl={-40: 8, 40: 5, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-2, legs=(40, -6, -46, 0)),   # 모음: 가까운 다리가 들려 앞으로 지나감
-    'walk2': dict(lean=3, up_dx=3, up_dy=5, ctrl={-40: -22, 40: -12, 85: -2, 125: 2, 170: 6, 210: 10}, drop=5, legs=(126, 0, -126, 0)),  # 바꾼 넓은 보폭: 가까운 다리 앞·먼 다리 뒤
+    'walk2': dict(lean=3, up_dx=3, up_dy=3, ctrl={-40: -22, 40: -12, 85: -2, 125: 2, 170: 6, 210: 10}, drop=3, legs=(113, 0, -109, 0)),  # 바꾼 보폭: 가까운 다리 앞·먼 다리 뒤 (walk0 과 같은 폭)
     'walk3': dict(lean=1, up_dx=1, up_dy=-2, ctrl={-40: 14, 40: 8, 85: 2, 125: 0, 170: -2, 210: -2}, drop=-2, legs=(44, 0, -40, -6)),   # 모음: 먼 다리가 들려 앞으로 지나감
     # 점프: 두 다리를 위로 당기고 가운데로 모음(늘이기 없음), 도포 자락 퍼짐 — 게임이 공중 높이만큼 올려 그림
     'jump': dict(lean=4, up_dx=2, up_dy=4, ctrl={-40: -20, 40: -10, 85: -2, 125: 0, 170: 4, 210: 14}, drop=4, legs=(14, -20, -16, -14)),
