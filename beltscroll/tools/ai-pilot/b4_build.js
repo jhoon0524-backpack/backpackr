@@ -15,5 +15,9 @@ const spec = { src: 'assets/sprites/mugyeom-b4.png', frameW: 64, frameH: 64, foo
 const sp = fs.readFileSync(path.join(ROOT, 'data', 'sprites.js'), 'utf8');
 fs.writeFileSync(path.join(OUT, 'data', 'sprites.js'), sp.replace(/"mugyeom": \{[\s\S]*?\} \},\n/, `"mugyeom": ${JSON.stringify(spec)},\n`));
 const html = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8');
-fs.writeFileSync(path.join(OUT, 'index.html'), html.replace(/<title>[^<]*<\/title>/, '<title>조선 퇴마전 — B4 몸 쓰는 공격 시험판</title>'));
+// 2026-11-04 오너 "걷는 발이 너무 잘다": 시험판에서만 주인공 걷기 칸을 30px 이동마다 (본 게임 12px). 적 걷기·이동 속도·판정 그대로
+const WALK_OLD = "if (f.moving) return 'walk' + (Math.floor(f.walk / 12) % 4);";
+if (!html.includes(WALK_OLD)) throw new Error('걷기 줄을 못 찾음 — index.html 이 바뀜');
+fs.writeFileSync(path.join(OUT, 'index.html'), html.replace(/<title>[^<]*<\/title>/, '<title>조선 퇴마전 — B4 몸 쓰는 공격 시험판</title>')
+  .replace(WALK_OLD, "if (f.moving) return 'walk' + (Math.floor(f.walk / (isPlayer ? 30 : 12)) % 4);"));
 console.log('ok', Object.keys(frames).join(' '));

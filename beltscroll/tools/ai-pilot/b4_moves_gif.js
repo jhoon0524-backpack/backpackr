@@ -1,6 +1,6 @@
 // B4 걷기·점프·맞음 움직임 GIF (2026-11-04): node tools/ai-pilot/b4_moves_gif.js
 //  지금 게임(코드 그림)과 B4 시험판(tools/ai-pilot/b4_build.js 로 tests/out/ai-pilot/b4-build 에 만듦)을 같은 입력으로 돌려 PC 1440×900 화면을 매 프레임 찍음:
-//  서기 4f → 오른쪽으로 걷기 32f(약 두 바퀴 — 걷기 칸은 12px 이동마다 바뀜, 약 4프레임) → 멈춤 4f → 점프(X), 10프레임 뒤 점프 공격(Z), 착지까지 + 4f → 앞에서 맞음(damagePlayer) 14f + 6f. 출력 tests/out/ai-pilot/b4m-*.png, b4m-motion.json
+//  서기 4f → 오른쪽으로 걷기 40f (시험판은 걷기 칸이 30px 이동마다 — 약 9프레임, 지금 게임은 12px) → 멈춤 4f → 점프(X), 10프레임 뒤 점프 공격(Z), 착지까지 + 4f → 앞에서 맞음(damagePlayer) 14f + 6f. 출력 tests/out/ai-pilot/b4m-*.png, b4m-motion.json
 //  GIF 는 python3 -I tools/ai-pilot/motion_gif.py . b4m → docs/ai-pilot/b4m-motion.gif · b4m-motion-slow.gif
 const { chromium } = require('playwright'); const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), { pathToFileURL } = require('url');
@@ -18,7 +18,7 @@ const V = [['NOW', pathToFileURL(path.join(ROOT, 'index.html')).href], ['B4', pa
     const shot = async (pre) => { const r = await p.evaluate(pre => { if (pre) eval(pre); ru(); draw(); return { n: frameName(player, true), sx: player.x - cam }; }, pre || null);
       const gx = Math.max(0, Math.min(960 - 220, r.sx - 110)); fs.writeFileSync(path.join(OUT, `b4m-motion-${vid}-${String(i).padStart(2, '0')}.png`), await p.screenshot({ clip: { x: box.x + gx * s, y: box.y + 220 * s, width: 220 * s, height: 230 * s } })); shots.push(r.n); i++; };
     for (let k = 0; k < 4; k++) await shot();
-    await p.keyboard.down('ArrowRight'); for (let k = 0; k < 32; k++) await shot(); await p.keyboard.up('ArrowRight');
+    await p.keyboard.down('ArrowRight'); for (let k = 0; k < 40; k++) await shot(); await p.keyboard.up('ArrowRight');
     for (let k = 0; k < 4; k++) await shot();
     await p.keyboard.down('KeyX'); await shot(); await p.keyboard.up('KeyX');
     for (let k = 0; k < 60 && await p.evaluate(() => player.z > 0); k++) { if (k === 10) await p.keyboard.down('KeyZ'); await shot(); if (k === 10) await p.keyboard.up('KeyZ'); }   // 점프 중 Z = 점프 공격 (2026-11-04)
