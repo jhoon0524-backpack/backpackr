@@ -18,6 +18,21 @@ const html = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8');
 // 2026-11-04 오너 "걷는 발이 너무 잘다"·"2번도": 시험판에서만 주인공 걷기를 6칸, 16px 이동마다 (한 바퀴 96px = 두 걸음, 걸음 약 48px = 그린 보폭) (본 게임 4칸·12px). 적 걷기·이동 속도·판정 그대로
 const WALK_OLD = "if (f.moving) return 'walk' + (Math.floor(f.walk / 12) % 4);";
 if (!html.includes(WALK_OLD)) throw new Error('걷기 줄을 못 찾음 — index.html 이 바뀜');
+// 2026-11-04 오너 "세로에서도 테스트할수있게": 시험판에서만 휴대폰 세로 화면을 막지 않고, 게임 화면 아래 빈 곳을 조작 영역으로 (본 게임은 "가로로 돌리세요" 안내 그대로)
+const ROT_OLD = 'const rotateBlocked = () => phonePortrait.matches;';
+if (!html.includes(ROT_OLD)) throw new Error('세로 막기 줄을 못 찾음 — index.html 이 바뀜');
+const PORTRAIT_CSS = `<style>/* 시험판: 휴대폰 세로 */
+  @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
+    #rotate { display: none !important; }
+    body.has-touch { justify-content: flex-start; }
+    body.has-touch #frame { padding-bottom: min(62vw, 46vh); }
+    body.has-touch #stick { width: 50%; }
+    body.has-touch .btn { width: 84px; height: 84px; font-size: 17px; }
+    body.has-touch #btnAttack { right: 7%; bottom: 7%; }
+    body.has-touch #btnJump { right: 30%; bottom: 20%; }
+  }</style>`;
 fs.writeFileSync(path.join(OUT, 'index.html'), html.replace(/<title>[^<]*<\/title>/, '<title>조선 퇴마전 — B4 몸 쓰는 공격 시험판</title>')
+  .replace('</head>', PORTRAIT_CSS + '\n</head>')
+  .replace(ROT_OLD, 'const rotateBlocked = () => false;   // 시험판: 세로도 플레이')
   .replace(WALK_OLD, "if (f.moving) return 'walk' + (isPlayer ? Math.floor(f.walk / 16) % 6 : Math.floor(f.walk / 12) % 4);"));
 console.log('ok', Object.keys(frames).join(' '));
