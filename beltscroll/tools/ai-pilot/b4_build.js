@@ -10,14 +10,14 @@ fs.mkdirSync(path.join(OUT, 'assets', 'sprites'), { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'assets/sprites/dokkaebi.png'), path.join(OUT, 'assets/sprites/dokkaebi.png'));
 fs.copyFileSync(path.join(ROOT, 'assets/sprites/trial/ai/mugyeom-ai-b4.png'), path.join(OUT, 'assets/sprites/mugyeom-b4.png'));
 const I = [0, 0], W = [1, 0], P = [2, 0];
-const frames = { idle0: I, idle1: I, windup: W, punch: P, walk0: [3, 0], walk1: [4, 0], walk2: [5, 0], walk3: [6, 0], jump: [7, 0], hurt: [8, 0], punch2: P, kick: P, airKick: [9, 0], stomp: P };   // 점프 공격 전용 칸 9 (2026-11-04)   // 2026-11-04 걷기·점프·맞음 칸 3~8 + 점프 공격 칸 9
+const frames = { idle0: I, idle1: I, windup: W, punch: P, walk0: [3, 0], walk1: [4, 0], walk2: [5, 0], walk3: [6, 0], walk4: [10, 0], walk5: [11, 0], jump: [7, 0], hurt: [8, 0], punch2: P, kick: P, airKick: [9, 0], stomp: P };   // 점프 공격 전용 칸 9 (2026-11-04)   // 2026-11-04 걷기 0~3 칸 3~6·점프 7·맞음 8 + 점프 공격 9 + 걷기 4·5 칸 10·11
 const spec = { src: 'assets/sprites/mugyeom-b4.png', frameW: 64, frameH: 64, footX: 32, footY: 60.5, scale: 2, height: 110, frames };
 const sp = fs.readFileSync(path.join(ROOT, 'data', 'sprites.js'), 'utf8');
 fs.writeFileSync(path.join(OUT, 'data', 'sprites.js'), sp.replace(/"mugyeom": \{[\s\S]*?\} \},\n/, `"mugyeom": ${JSON.stringify(spec)},\n`));
 const html = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8');
-// 2026-11-04 오너 "걷는 발이 너무 잘다": 시험판에서만 주인공 걷기 칸을 24px 이동마다 (처음 30, 보폭을 줄여 24 — 2026-11-04) (본 게임 12px). 적 걷기·이동 속도·판정 그대로
+// 2026-11-04 오너 "걷는 발이 너무 잘다"·"2번도": 시험판에서만 주인공 걷기를 6칸, 16px 이동마다 (한 바퀴 96px = 두 걸음, 걸음 약 48px = 그린 보폭) (본 게임 4칸·12px). 적 걷기·이동 속도·판정 그대로
 const WALK_OLD = "if (f.moving) return 'walk' + (Math.floor(f.walk / 12) % 4);";
 if (!html.includes(WALK_OLD)) throw new Error('걷기 줄을 못 찾음 — index.html 이 바뀜');
 fs.writeFileSync(path.join(OUT, 'index.html'), html.replace(/<title>[^<]*<\/title>/, '<title>조선 퇴마전 — B4 몸 쓰는 공격 시험판</title>')
-  .replace(WALK_OLD, "if (f.moving) return 'walk' + (Math.floor(f.walk / (isPlayer ? 24 : 12)) % 4);"));
+  .replace(WALK_OLD, "if (f.moving) return 'walk' + (isPlayer ? Math.floor(f.walk / 16) % 6 : Math.floor(f.walk / 12) % 4);"));
 console.log('ok', Object.keys(frames).join(' '));

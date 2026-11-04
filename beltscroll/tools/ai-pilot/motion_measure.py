@@ -7,7 +7,7 @@ from PIL import Image
 SK = {(206, 157, 120), (246, 214, 176)}                       # B3·B4 팔레트 피부 2색
 for f in sys.argv[1:]:
     a = np.array(Image.open(f).convert('RGBA')).astype(int)
-    for i, n in enumerate(['idle', 'windup', 'punch', 'walk0', 'walk1', 'walk2', 'walk3', 'jump', 'hurt', 'airKick'][:a.shape[1] // 64]):   # B4 10칸 (2026-11-04)
+    for i, n in enumerate(['idle', 'windup', 'punch', 'walk0', 'walk1', 'walk2', 'walk3', 'jump', 'hurt', 'airKick', 'walk4', 'walk5'][:a.shape[1] // 64]):   # B4 12칸 (2026-11-04)
         s = a[:, i * 64:(i + 1) * 64]; top = np.nonzero((s[..., 3] > 0).any(1))[0].min()
         pts = [(x, y) for y in range(top + 6, top + 14) for x in range(30, 52) if s[y, x, 3] and tuple(s[y, x, :3]) in SK]
         fx = (np.mean([p[0] for p in pts]) + 0.5 - 32) * 2; fy = (60.5 - np.mean([p[1] for p in pts]) - 0.5) * 2
