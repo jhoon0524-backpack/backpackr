@@ -4,9 +4,11 @@
 //  GIF 는 python3 -I tools/ai-pilot/motion_gif.py . b4m → tests/out/ai-pilot/b4m-motion*.gif (단계 끝에만 끝에 --docs → docs/ai-pilot, 2026-11-04 오너 결정)
 const { chromium } = require('playwright'); const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path'), { pathToFileURL } = require('url');
-const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'tests', 'out', 'ai-pilot'), BUILD = path.join(OUT, 'b4-build');
-execFileSync('node', [path.join(__dirname, 'b4_build.js'), BUILD]);
-const V = [['NOW', pathToFileURL(path.join(ROOT, 'index.html')).href], ['B4', pathToFileURL(path.join(BUILD, 'index.html')).href]];
+const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'tests', 'out', 'ai-pilot'), BUILD = path.join(OUT, 'b4-build'), BUILD5 = path.join(OUT, 'b5-build');
+const R5 = process.argv[2] === 'b5';   // node tools/ai-pilot/b4_moves_gif.js b5 → 지금 게임·B4·B5 (2026-11-05), 출력 b5m-*
+execFileSync('node', [path.join(__dirname, 'b4_build.js'), BUILD]); if (R5) execFileSync('node', [path.join(__dirname, 'b4_build.js'), BUILD5, 'b5']);
+const PFX = R5 ? 'b5m' : 'b4m';
+const V = [['NOW', pathToFileURL(path.join(ROOT, 'index.html')).href], ['B4', pathToFileURL(path.join(BUILD, 'index.html')).href], ...(R5 ? [['B5', pathToFileURL(path.join(BUILD5, 'index.html')).href]] : [])];
 (async () => {
   const b = await chromium.launch(); const names = {}; const errors = [];
   for (const [vid, url] of V) {
@@ -16,17 +18,17 @@ const V = [['NOW', pathToFileURL(path.join(ROOT, 'index.html')).href], ['B4', pa
     const box = await p.evaluate(() => { const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width }; }); const s = box.w / 960;
     const shots = []; let i = 0;
     const shot = async (pre) => { const r = await p.evaluate(pre => { if (pre) eval(pre); ru(); draw(); return { n: frameName(player, true), sx: player.x - cam }; }, pre || null);
-      const gx = Math.max(0, Math.min(960 - 220, r.sx - 110)); fs.writeFileSync(path.join(OUT, `b4m-motion-${vid}-${String(i).padStart(2, '0')}.png`), await p.screenshot({ clip: { x: box.x + gx * s, y: box.y + 220 * s, width: 220 * s, height: 230 * s } })); shots.push(r.n); i++; };
+      const gx = Math.max(0, Math.min(960 - 220, r.sx - 110)); fs.writeFileSync(path.join(OUT, `${PFX}-motion-${vid}-${String(i).padStart(2, '0')}.png`), await p.screenshot({ clip: { x: box.x + gx * s, y: box.y + 220 * s, width: 220 * s, height: 230 * s } })); shots.push(r.n); i++; };
     for (let k = 0; k < 4; k++) await shot();
     await p.keyboard.down('ArrowRight'); for (let k = 0; k < 40; k++) await shot(); await p.keyboard.up('ArrowRight');
     for (let k = 0; k < 4; k++) await shot();
-    await p.keyboard.down('KeyX'); await shot(); await p.keyboard.up('KeyX');
-    for (let k = 0; k < 60 && await p.evaluate(() => player.z > 0); k++) { if (k === 10) await p.keyboard.down('KeyZ'); await shot(); if (k === 10) await p.keyboard.up('KeyZ'); }   // 점프 중 Z = 점프 공격 (2026-11-04)
+    await shot('pressed.KeyX = true');   // 점프 (키 이벤트 대신 입력값을 바로 넣음 — 2026-11-05 키 입력이 가끔 빠져서)
+    for (let k = 0; k < 60 && await p.evaluate(() => player.z > 0); k++) await shot(k === 10 ? 'pressed.KeyZ = true' : null);   // 점프 중 Z = 점프 공격 (2026-11-04)
     for (let k = 0; k < 4; k++) await shot();
     await shot('damagePlayer(1, -1, false, null)'); for (let k = 0; k < 19; k++) await shot();
     names[vid] = shots; await ctx.close();
   }
-  const n = Math.min(names.NOW.length, names.B4.length); for (const v in names) names[v] = names[v].slice(0, n);
-  fs.writeFileSync(path.join(OUT, 'b4m-motion.json'), JSON.stringify(names)); console.log('frames', n, 'errors', errors);
+  const n = Math.min(...Object.values(names).map(v => v.length)); for (const v in names) names[v] = names[v].slice(0, n);
+  fs.writeFileSync(path.join(OUT, `${PFX}-motion.json`), JSON.stringify(names)); console.log('frames', n, 'errors', errors);
   console.log(V.map(([v]) => v + ' ' + [...new Set(names[v])].join(',')).join('\n')); await b.close();
 })();

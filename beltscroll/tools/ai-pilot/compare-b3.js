@@ -10,14 +10,15 @@ const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), { pathToFileURL } = require('url');
 const ROOT = path.join(__dirname, '..', '..'), OUT = path.join(ROOT, 'tests', 'out', 'ai-pilot'), DOCS = path.join(ROOT, 'docs', 'ai-pilot');
 // node tools/ai-pilot/compare-b3.js b4 → A·B3·B4 (B4 실험, 2026-11-04), 출력 docs/ai-pilot/b4-*.png·gif 원본 tests/out/ai-pilot/b4-* (인자 없으면 위 B3 판 그대로)
-const ROUND = process.argv[2] === 'b4' ? 'b4' : 'b3';
+const ROUND = ['b4', 'b5'].includes(process.argv[2]) ? process.argv[2] : 'b3';   // b5 → A·B4·B5 (2026-11-05)
 const THREE = { idle0: [0, 0], idle1: [0, 0], windup: [1, 0], punch: [2, 0] };
 const LABEL = JSON.parse(fs.readFileSync(path.join(__dirname, 'labels.json'), 'utf8'));   // 판 이름: 사진·GIF 가 같은 파일을 읽음
 const SHEETS_B3 = [['A', path.join(OUT, 'a3-2px.png'), LABEL.A, THREE],
   ['B2', 'assets/sprites/trial/ai/mugyeom-ai-b2.png', LABEL.B2, { idle0: [0, 0], idle1: [0, 0], punch: [1, 0] }],
   ['B3', 'assets/sprites/trial/ai/mugyeom-ai-b3.png', LABEL.B3, THREE]];
-const SHEETS = ROUND === 'b4' ? [SHEETS_B3[0], SHEETS_B3[2], ['B4', 'assets/sprites/trial/ai/mugyeom-ai-b4.png', LABEL.B4, THREE]] : SHEETS_B3;
-const HI = ROUND === 'b4' ? 'B4' : 'B3';
+const B4ROW = ['B4', 'assets/sprites/trial/ai/mugyeom-ai-b4.png', LABEL.B4, THREE];
+const SHEETS = ROUND === 'b4' ? [SHEETS_B3[0], SHEETS_B3[2], B4ROW] : ROUND === 'b5' ? [SHEETS_B3[0], B4ROW, ['B5', 'assets/sprites/trial/ai/mugyeom-ai-b5.png', LABEL.B5, { idle0: [0, 0], idle1: [1, 0], windup: [5, 0], punch: [6, 0] }]] : SHEETS_B3;
+const HI = { b4: 'B4', b5: 'B5' }[ROUND] || 'B3';
 const CONDS = [
   ['pc', { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 }, 'PC 1440×900 창 (게임 1408×792, 1.47배)'],
   ['mobile', { viewport: { width: 915, height: 412 }, deviceScaleFactor: 2.625, isMobile: true, hasTouch: true }, '휴대폰 가로 915×412 · 배율 2.625 (실제 기기 픽셀)'],
@@ -81,7 +82,7 @@ const prep = `window.realUpdate = window.realUpdate || update; update = () => {}
   // 칸 4배: 서기 → 준비 → 1타 → 회수(= 서기 칸, 게임 구조상 1타 다음은 idle0)
   const cell = (src, i) => `<div style="width:256px;height:256px;background:#4a4236 url(${b64(fs.readFileSync(path.isAbsolute(src) ? src : path.join(ROOT, src)))}) ${-i * 256}px 0/auto 256px no-repeat;image-rendering:pixelated;position:relative">` +
     `<div style="position:absolute;left:128px;top:0;bottom:0;border-left:1px solid #5ac8ff"></div><div style="position:absolute;left:240px;top:0;bottom:0;border-left:1px solid #ff5a5a"></div><div style="position:absolute;top:248px;left:0;right:0;border-top:1px solid #5ac8ff"></div></div>`;
-  const seq = { A: [0, 1, 2, 0], B2: [0, null, 1, 0], B3: [0, 1, 2, 0], B4: [0, 1, 2, 0] };
+  const seq = { A: [0, 1, 2, 0], B2: [0, null, 1, 0], B3: [0, 1, 2, 0], B4: [0, 1, 2, 0], B5: [0, 5, 6, 0] };
   await page(`<div style="padding:10px"><div style="font-size:16px;margin-bottom:6px">준비 → 1타 → 회수 (칸 4배 · 하늘색 = 몸 중심·바닥, 빨강 = 칼끝 56px)</div>` +
     SHEETS.map(([vid, src, vl]) => `<div style="margin:8px 0 4px;color:${vid === HI ? '#fc6' : '#ddd'}">${vl}</div><div style="display:flex;gap:10px">` +
       ['서기', '준비 5f', '1타 8f', '회수 (서기 칸)'].map((t, k) => `<div>${seq[vid][k] === null ? '<div style="width:256px;height:256px;background:#2a2a33;display:flex;align-items:center;justify-content:center">칸 없음 (코드 그림)</div>' : cell(src, seq[vid][k])}<div>${t}</div></div>`).join('') + '</div>').join('') + '</div>',

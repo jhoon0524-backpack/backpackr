@@ -1,0 +1,149 @@
+{
+ "source": "assets/reference/ai-sprite-gif/mugyeom-anim-15.gif",
+ "cells_per_source_px": 0.1846,
+ "anchor_x_src": 202.0,
+ "order (시트 칸 ← GIF 장)": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  7,
+  11,
+  12,
+  14,
+  13
+ ],
+ "cells": [
+  {
+   "gif_frame": 0,
+   "removed_blade_px": 0,
+   "scabbard_recolored_px": 289,
+   "height_px": 110
+  },
+  {
+   "gif_frame": 1,
+   "removed_blade_px": 0,
+   "scabbard_recolored_px": 287,
+   "height_px": 108
+  },
+  {
+   "gif_frame": 2,
+   "removed_blade_px": 0,
+   "scabbard_recolored_px": 273,
+   "height_px": 106
+  },
+  {
+   "gif_frame": 3,
+   "removed_blade_px": 0,
+   "scabbard_recolored_px": 0,
+   "height_px": 104
+  },
+  {
+   "gif_frame": 4,
+   "removed_blade_px": 0,
+   "scabbard_recolored_px": 0,
+   "height_px": 104
+  },
+  {
+   "gif_frame": 5,
+   "removed_blade_px": 764,
+   "scabbard_recolored_px": 0,
+   "guard_cell": [
+    36.8,
+    12.9
+   ],
+   "tip_cell": [
+    55,
+    27
+   ],
+   "tip_front_px": 48,
+   "tip_height_px": 65.0,
+   "blade_px": 46.0,
+   "shift_cells": 0,
+   "height_px": 106
+  },
+  {
+   "gif_frame": 7,
+   "removed_blade_px": 9478,
+   "scabbard_recolored_px": 0,
+   "blade_cells": 14.6,
+   "guard_cell": [
+    46.9,
+    50.9
+   ],
+   "tip_cell": [
+    59,
+    59
+   ],
+   "tip_front_px": 56,
+   "tip_height_px": 1.0,
+   "blade_px": 29.0,
+   "shift_cells": 0,
+   "height_px": 90
+  },
+  {
+   "gif_frame": 11,
+   "removed_blade_px": 924,
+   "scabbard_recolored_px": 0,
+   "guard_cell": [
+    27.6,
+    41.5
+   ],
+   "tip_cell": [
+    7,
+    52
+   ],
+   "tip_front_px": -48,
+   "tip_height_px": 15.0,
+   "blade_px": 46.2,
+   "shift_cells": 0,
+   "height_px": 94
+  },
+  {
+   "gif_frame": 12,
+   "removed_blade_px": 1152,
+   "scabbard_recolored_px": 0,
+   "cut_back_cells": 15,
+   "guard_cell": [
+    35.8,
+    30.3
+   ],
+   "tip_cell": [
+    59,
+    31
+   ],
+   "tip_front_px": 56,
+   "tip_height_px": 57.0,
+   "blade_px": 46.3,
+   "shift_cells": -10,
+   "height_px": 90
+  },
+  {
+   "gif_frame": 14,
+   "removed_blade_px": 615,
+   "scabbard_recolored_px": 0,
+   "guard_cell": [
+    32.6,
+    43.4
+   ],
+   "tip_cell": [
+    10,
+    50
+   ],
+   "tip_front_px": -42,
+   "tip_height_px": 19.0,
+   "blade_px": 47.0,
+   "shift_cells": 0,
+   "height_px": 92
+  },
+  {
+   "gif_frame": 13,
+   "removed_blade_px": 0,
+   "scabbard_recolored_px": 604,
+   "height_px": 88
+  }
+ ],
+ "colors": 24
+}

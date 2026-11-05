@@ -8,9 +8,13 @@ fs.rmSync(OUT, { recursive: true, force: true });
 for (const f of ['index.html', 'art.js', 'data', 'assets/joseon']) fs.cpSync(path.join(ROOT, f), path.join(OUT, f), { recursive: true });
 fs.mkdirSync(path.join(OUT, 'assets', 'sprites'), { recursive: true });
 fs.copyFileSync(path.join(ROOT, 'assets/sprites/dokkaebi.png'), path.join(OUT, 'assets/sprites/dokkaebi.png'));
-fs.copyFileSync(path.join(ROOT, 'assets/sprites/trial/ai/mugyeom-ai-b4.png'), path.join(OUT, 'assets/sprites/mugyeom-b4.png'));
+const B5 = process.argv[3] === 'b5';   // node tools/ai-pilot/b4_build.js <폴더> b5 → B5 시험판 (2026-11-05): 오너 AI 움직임 GIF 칸(b5.py) + 없는 칸은 B4
+fs.copyFileSync(path.join(ROOT, B5 ? 'assets/sprites/trial/ai/mugyeom-ai-b5-test.png' : 'assets/sprites/trial/ai/mugyeom-ai-b4.png'), path.join(OUT, 'assets/sprites/mugyeom-b4.png'));
 const I = [0, 0], W = [1, 0], P = [2, 0];
-const frames = { idle0: I, idle1: I, windup: W, punch: P, walk0: [3, 0], walk1: [4, 0], walk2: [5, 0], walk3: [6, 0], walk4: [10, 0], walk5: [11, 0], jump: [7, 0], hurt: [8, 0], punch2: P, kick: P, airKick: [9, 0], stomp: P };   // 점프 공격 전용 칸 9 (2026-11-04)   // 2026-11-04 걷기 0~3 칸 3~6·점프 7·맞음 8 + 점프 공격 9 + 걷기 4·5 칸 10·11
+const frames = { idle0: I, idle1: I, windup: W, punch: P, walk0: [3, 0], walk1: [4, 0], walk2: [5, 0], walk3: [6, 0], walk4: [10, 0], walk5: [11, 0], jump: [7, 0], hurt: [8, 0], punch2: P, kick: P, airKick: [9, 0], stomp: P };
+// B5: 칸 12~22 = GIF 0·1·2·3·4·5·7·11·12·14·13번. 걷기 4칸(GIF 2·3·4·3), 2타·점프·맞음·점프 공격은 B4 칸
+if (B5) Object.assign(frames, { idle0: [12, 0], idle1: [13, 0], walk0: [14, 0], walk1: [15, 0], walk2: [16, 0], walk3: [15, 0], windup: [17, 0], punch: [18, 0],
+  kickPrep: [19, 0], kick: [20, 0], kickRecover: [21, 0], stomp: [18, 0] }), delete frames.walk4, delete frames.walk5;   // 점프 공격 전용 칸 9 (2026-11-04)   // 2026-11-04 걷기 0~3 칸 3~6·점프 7·맞음 8 + 점프 공격 9 + 걷기 4·5 칸 10·11
 const spec = { src: 'assets/sprites/mugyeom-b4.png', frameW: 64, frameH: 64, footX: 32, footY: 60.5, scale: 2, height: 110, frames };
 const sp = fs.readFileSync(path.join(ROOT, 'data', 'sprites.js'), 'utf8');
 fs.writeFileSync(path.join(OUT, 'data', 'sprites.js'), sp.replace(/"mugyeom": \{[\s\S]*?\} \},\n/, `"mugyeom": ${JSON.stringify(spec)},\n`));
@@ -34,9 +38,9 @@ const PORTRAIT_CSS = `<style>/* 시험판: 휴대폰 세로 (본 게임이 "가�
   }</style>`;
 const PORTRAIT_JS = `<script>/* 시험판: 세로에서 아래 조작 영역의 빈 곳을 탭해도 시작 */
   document.getElementById('frame').addEventListener('pointerdown', () => tapToStart());</script>`;
-fs.writeFileSync(path.join(OUT, 'index.html'), html.replace(/<title>[^<]*<\/title>/, '<title>조선 퇴마전 — B4 몸 쓰는 공격 시험판</title>')
+fs.writeFileSync(path.join(OUT, 'index.html'), html.replace(/<title>[^<]*<\/title>/, (B5 ? '<title>조선 퇴마전 — B5 AI 움직임 시험판</title>' : '<title>조선 퇴마전 — B4 몸 쓰는 공격 시험판</title>'))
   .replace('</head>', PORTRAIT_CSS + '\n</head>')
   .replace(ROT_OLD, 'const rotateBlocked = () => false;   // 시험판: 세로도 플레이')
   .replace('</body>', PORTRAIT_JS + '\n</body>')
-  .replace(WALK_OLD, "if (f.moving) return 'walk' + (isPlayer ? Math.floor(f.walk / 16) % 6 : Math.floor(f.walk / 12) % 4);"));
+  .replace(WALK_OLD, B5 ? "if (f.moving) return 'walk' + (isPlayer ? Math.floor(f.walk / 20) % 4 : Math.floor(f.walk / 12) % 4);" : "if (f.moving) return 'walk' + (isPlayer ? Math.floor(f.walk / 16) % 6 : Math.floor(f.walk / 12) % 4);"));
 console.log('ok', Object.keys(frames).join(' '));

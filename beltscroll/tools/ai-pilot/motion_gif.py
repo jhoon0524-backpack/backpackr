@@ -8,12 +8,12 @@ import sys, os, json
 from PIL import Image, ImageDraw
 ARGS = [a for a in sys.argv[1:] if a != '--docs']; ROOT = ARGS[0]; R = ARGS[1] if len(ARGS) > 1 else 'b3';   # b4 → A·B3·B4
 OUT = os.path.join(ROOT, 'tests', 'out', 'ai-pilot'); D = os.path.join(ROOT, 'docs', 'ai-pilot') if '--docs' in sys.argv else OUT
-names = json.load(open(os.path.join(OUT, f'{R}-motion.json'))); V = {'b4': ['A', 'B3', 'B4'], 'b4m': ['NOW', 'B4']}.get(R, ['A', 'B2', 'B3'])   # b4m = 걷기·점프·맞음 (b4_moves_gif.js)
+names = json.load(open(os.path.join(OUT, f'{R}-motion.json'))); V = {'b4': ['A', 'B3', 'B4'], 'b4m': ['NOW', 'B4'], 'b5': ['A', 'B4', 'B5'], 'b5m': ['NOW', 'B4', 'B5']}.get(R, ['A', 'B2', 'B3'])   # b4m = 걷기·점프·맞음 (b4_moves_gif.js)
 LABEL = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'labels.json')))   # 판 이름: compare-b3.js 와 같은 파일
 frames = []
 for i in range(len(names[V[0]])):
     ims = [Image.open(os.path.join(OUT, f'{R}-motion-{v}-{i:02d}.png')).convert('RGB') for v in V]
-    Z = 1 if R == 'b4m' else 2                                   # b4m(프레임 많음)은 확대 없이 — 파일 크기 (2026-11-04 director)
+    Z = 1 if R in ('b4m', 'b5m') else 2                                   # b4m(프레임 많음)은 확대 없이 — 파일 크기 (2026-11-04 director)
     w, h = ims[0].size; o = Image.new('RGB', (len(V) * (w * Z + 10) + 10, h * Z + 24), (21, 21, 28)); d = ImageDraw.Draw(o)
     for k, (v, im) in enumerate(zip(V, ims)):
         o.paste(im.resize((w * Z, h * Z), Image.NEAREST), (10 + k * (w * Z + 10), 22)); d.text((10 + k * (w * Z + 10), 5), f'{LABEL[v]} · {names[v][i]}', fill=(220, 220, 220))
