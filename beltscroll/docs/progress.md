@@ -6,6 +6,7 @@
 AI 스프라이트 B5 (브랜치 `experiment/mugyeom-ai-sprites`): 오너가 올린 AI 움직임 GIF 15장을 2px 로 변환(칼·칼집 결정대로 보정, 이펙트 제거)해 B5 시험판으로 B4 와 비교. 상세 `docs/ai-pilot/README.md` 9절. B4 시험판(8절)·본 게임·P1·PR #30·#31 그대로.
 
 ## 막힌 것 (오너 답 대기)
+000. (AI B5) ① 3타 찌르기 처리 다시 선택 — (가) 지금대로(몸 −9px·칼날 26) (나) 걷기와 함께 3타 찌르기 1장도 AI 에 다시 요청 (추천). ② 걷기 한 바퀴 AI 재생성 — 오너 (`docs/ai-pilot/b5-request.md`). ③ GIF 를 만든 AI 도구 이름 (약관 확인용).
 00. (AI B4) B4 GIF 를 보고 "몸을 써서 베는 느낌" 합격 여부 판단 (ChatGPT 요청 자료 `docs/ai-pilot/b4-request/` 는 보존).
 0. (P1) 윤무겸 샘플 6칸 발주 승인 — 견적 요청문 발송·아티스트 선정·계약은 오너. 자료 `docs/p1-commission/`.
 0-1. (P1) AI 그래픽 비교 실험은 보류 — 비용 없이 쓸 생성 도구가 없음. 오너가 직접 만든 AI 이미지를 주면 단순 축소·보정 두 가지로 A/B 비교 (`docs/p1-ai-experiment.md`).
