@@ -112,3 +112,5 @@
 | KS-20261104-03 | 2026-11-03 | 수요 | 외부 | [Android ★1 v3.43.0] 구매자 주의: 프로젝트가 실패하거나 창작자가 잠적해도 킥스타터는 자기 몫을 챙기고 완전히 손을 뗀다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=82da41c8-fda1-454c-8247-431e55d6af1d) |
 | KS-20261104-04 | 2026-11-03 | 수요 | 외부 | [Android ★1 v3.43.0] 한 브랜드(levity)가 댓글을 무시하고 후원자 전원을 속이는데도 계속 방치한다. 신고했지만 아무 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a309ff9b-3806-4d34-b49f-6e84f20f5657) |
 | KS-20261104-05 | 2026-11-03 | 수요 | 외부 | [Android ★5 v3.43.0] 킥스타터 규칙이 좋고, 게임과 함께 받는 추가 구성품이 모두 마음에 든다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=7c409e50-8d97-459c-b926-17cb59434d72) |
+| KS-20261105-01 | 2026-11-04 | 수요 | 외부 | [iOS ★5 v5.38.0] 훌륭한 아이디어 — 기다릴 만한 가치가 있다! 최고의 품질 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261105-02 | 2026-11-04 | 수요 | 외부 | [Android ★5 v3.42.0] 창작자들이 막 첫발을 떼는 시점에 최고의 물건들을 발견하곤 한다. 정말 즐겁다! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=209c8f4f-7b7c-4adf-87cf-4c86537afed9) |

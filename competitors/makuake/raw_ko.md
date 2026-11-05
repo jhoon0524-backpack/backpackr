@@ -47,3 +47,4 @@
 | MK-20261102-08 | 2026-11-02 | 공급 | 관찰 | 프로젝트는 실시 기간 마지막 날 몇 시에 종료됩니까? (도움말 문서 수정 2026-11-02T06:34Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/14208071578649) |
 | MK-20261102-09 | 2026-11-02 | 공급 | 관찰 | All or Nothing 형 프로젝트가 미달성으로 종료된 경우의 환불 시기와 방법에 대해 (도움말 문서 수정 2026-11-02T06:30Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13753519323417) |
 | MK-20261104-01 | 2026-11-04 | 수요 | 공식 | [11/14~15 개최!] 일본 최대급 생활·놀이 축제 "FIELDSTYLE EXPO 2026"에 "Makuake"가 출품 | [링크](https://www.makuake.co.jp/news/archives/400) |
+| MK-20261105-01 | 2026-11-05 | 조직 | 공식 | 마쿠아케 스토리 #debut 공개: 사업 수주는 목표가 아니다. 비즈니스 파트너로서 도전자의 사업 성장을 함께 그리는 영업의 뜨거운 동행 | [링크](https://www.makuake.co.jp/makuake_story/archives/19) |
