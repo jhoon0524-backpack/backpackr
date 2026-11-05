@@ -75,8 +75,9 @@ def place_at(a, fx, fy):
 def blade(o, g, tip):
     """곧은 칼날만 (손잡이·코등이는 AI 그림): 밝은 면 위·어두운 면 아래 2칸, 칼끝 1칸"""
     L = math.hypot(tip[0] - g[0], tip[1] - g[1]); dx, dy = (tip[0] - g[0]) / L, (tip[1] - g[1]) / L; n = int(round(L))
+    flat = abs(tip[1] - g[1]) < 1.5                         # 거의 수평인 칼(3타 찌르기)은 한 줄로 — 반올림으로 1칸 꺾이지 않게 (2026-11-05 director)
     for i in range(1, n + 1):
-        x, y = g[0] + dx * i, g[1] + dy * i; put(o, x, y, (*STEEL[1], 255))
+        x, y = g[0] + dx * i, (tip[1] if flat else g[1] + dy * i); put(o, x, y, (*STEEL[1], 255))
         if i < n - 1: put(o, x, y + (1 if abs(dy) < 0.8 else 0) , (*STEEL[0], 255)) if abs(dy) < 0.8 else put(o, x + 1, y, (*STEEL[0], 255))
     put(o, tip[0], tip[1], (*STEEL[1], 255))
 
