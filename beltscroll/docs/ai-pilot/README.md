@@ -337,3 +337,10 @@ mugyeom 키                      idle0 110 idle1 108 windup 106 punch 90 ✗ wal
 - 범위 문장: CLAUDE.md 5절·README 1절에 B5·9절 표시, GIF README 장 설명을 b5.py 쓰임과 같게, b4_moves_gif.js 머리 주석에 b5 판. 검색 "8-1~8-9절" 2줄 / 고침 2, GIF README 장 설명 1 / 1, 도구 주석 1 / 1.
 - 출처: GIF 를 만든 AI 도구 이름은 오너에게 물어 적을 예정 (약관 확인용).
 - 단계 끝 GIF (`--docs`): `b5-motion.gif`·`b5-motion-slow.gif` (A·B4·B5 1타), `b5m-motion.gif`·`b5m-motion-slow.gif` (지금 게임·B4·B5 걷기·점프·점프 공격·맞음), 비교 사진 `b5-compare-pc.png`·`b5-compare-mobile.png`·`b5-sequence.png`.
+
+### 9-2. 오너 결정 반영 (2026-11-05 원문 "좋아" = 추천대로)
+| 합의된 정의 | 실제 처리 | 다른 점·이유 |
+|---|---|---|
+| 3타: 물리지 않고 칼을 짧게, 몸이 앞으로 | (12번 장을 그대로 두고 코등이 → 칼끝 56 칸까지만 칼날) | sheets 3타 칼날 기준 45~51 은 못 맞춤 (측정값 그대로 적음) |
+| 걷기: AI 로 한 바퀴 다시 받기 | (요청문 `docs/ai-pilot/b5-request.md` — 생성은 오너) | 이 환경엔 이미지 생성 도구 없음 |
+| 1타: 지금대로 | 그대로 (7번, 칼끝 높이 1·칼날 29px) | |
