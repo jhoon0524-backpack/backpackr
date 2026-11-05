@@ -81,7 +81,6 @@ def blade(o, g, tip):
         if i < n - 1: put(o, x, y + (1 if abs(dy) < 0.8 else 0) , (*STEEL[0], 255)) if abs(dy) < 0.8 else put(o, x + 1, y, (*STEEL[0], 255))
     put(o, tip[0], tip[1], (*STEEL[1], 255))
 
-SHIFT = {}                                                 # 장마다 가로로 물리는 칸 (3타 찌르기: 칼끝 56 에 맞춰)
 def frame(i):
     a, removed = strip_blade(FR[i]); a, scab = dark_scabbard(a, i)
     for x0, y0, x1, y1 in CLEAR.get(i, []): a[y0:y1, x0:x1] = 0
@@ -93,10 +92,9 @@ def frame(i):
         g0, e0 = map(tocell, BLADES[i]); d = (e0[0] - g0[0], e0[1] - g0[1]); L = math.hypot(*d); u = (d[0] / L, d[1] / L)
         if i == 7:                                          # 1타: 칼끝을 판정 56px 칸(x 59)까지 — AI 칼 방향 그대로
             t = (59 - g0[0]) / u[0]; tip = (59, g0[1] + u[1] * t); info['blade_cells'] = round(t, 1)
-        elif i == 12:                                       # 3타 찌르기: 칼날 23.4칸, 칼끝 x 59 가 되게 그림 전체를 물림
-            tip = (g0[0] + u[0] * BLADE, g0[1] + u[1] * BLADE); sh = int(round(59 - tip[0]))
-            g0 = (g0[0] + sh, g0[1]); tip = (59, g0[1] + u[1] * (59 - g0[0]) / u[0])
-            xs_ = np.nonzero((a[..., 3] > 0).any(0))[0]; info['cut_back_cells'] = max(0, -int(math.floor(FOOTX + (xs_.min() - FX0) * scale + sh)))   # 칸 0 밖으로 잘린 망토·띠 (칸 수)
+        elif i == 12:                                       # 3타 찌르기: 그림은 물리지 않고(몸이 앞으로) 칼날을 칼끝 x 59 까지만 — 2026-11-05 오너 "좋아"(추천 (가))
+            tip = (59, g0[1] + u[1] * (59 - g0[0]) / u[0])
+            xs_ = np.nonzero((a[..., 3] > 0).any(0))[0]; info['cut_back_cells'] = max(0, -int(math.floor(FOOTX + (xs_.min() - FX0) * scale)))   # 칸 0 밖으로 잘린 망토·띠 (칸 수)
         else:
             tip = (g0[0] + u[0] * BLADE, g0[1] + u[1] * BLADE)
     o = place_at(a, FX0 - sh / scale, fy); clean(o); outline(o)

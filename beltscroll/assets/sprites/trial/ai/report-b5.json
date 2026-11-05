@@ -105,19 +105,19 @@
    "gif_frame": 12,
    "removed_blade_px": 1152,
    "scabbard_recolored_px": 0,
-   "cut_back_cells": 15,
+   "cut_back_cells": 5,
    "guard_cell": [
-    35.8,
+    45.8,
     30.3
    ],
    "tip_cell": [
     59,
-    31
+    30
    ],
    "tip_front_px": 56,
-   "tip_height_px": 57.0,
-   "blade_px": 46.3,
-   "shift_cells": -10,
+   "tip_height_px": 59.0,
+   "blade_px": 26.3,
+   "shift_cells": 0,
    "height_px": 90
   },
   {
