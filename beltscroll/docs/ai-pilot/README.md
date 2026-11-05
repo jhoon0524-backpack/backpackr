@@ -336,3 +336,4 @@ mugyeom 키                      idle0 110 idle1 108 windup 106 punch 90 ✗ wal
 - B4·B5 섞임: 2타·점프·맞음·점프 공격은 B4 칸이라 머리 모양(B4 짧은 상투·B5 긴 머리 휘날림)이 콤보 중 바뀜 — 비교 GIF·시험판은 서기·걷기·준비·1타·3타 구간을 보면 됨.
 - 범위 문장: CLAUDE.md 5절·README 1절에 B5·9절 표시, GIF README 장 설명을 b5.py 쓰임과 같게, b4_moves_gif.js 머리 주석에 b5 판. 검색 "8-1~8-9절" 2줄 / 고침 2, GIF README 장 설명 1 / 1, 도구 주석 1 / 1.
 - 출처: GIF 를 만든 AI 도구 이름은 오너에게 물어 적을 예정 (약관 확인용).
+- 단계 끝 GIF (`--docs`): `b5-motion.gif`·`b5-motion-slow.gif` (A·B4·B5 1타), `b5m-motion.gif`·`b5m-motion-slow.gif` (지금 게임·B4·B5 걷기·점프·점프 공격·맞음), 비교 사진 `b5-compare-pc.png`·`b5-compare-mobile.png`·`b5-sequence.png`.
