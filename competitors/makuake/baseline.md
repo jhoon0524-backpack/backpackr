@@ -5,11 +5,11 @@
 | 회사 뉴스 (makuake.co.jp/news: 프레스릴리스·이벤트·お知らせ) | archives/400 | 2026-11-05 |  |
 | 마쿠아케 스토리 (makuake.co.jp/makuake_story: 전략·사례) | archives/19 | 2026-11-05 |  |
 | IR (makuake.co.jp/ir, TDnet 4479) | 2026-10-27 Financial statements: Non-consolidated Financial Results for the Fiscal Year Ended September 30, 2026 (files/uploads/Q1NRXBBpVVFCEHVeVFVUEGUV5VQ1UQd3FxYA4.pdf), Timely disclosure: Notice of Determination of Dividends... (files/uploads/1bmA1I2p2beh07Ge2bW91Y2j34y41bit2bW934y51b607G.pdf) | 2026-10-27 | 2026年9月期 決算発表 2026-10-27 완료 |
-| 도움말센터 (mkhelp.makuake.com, Zendesk API sort_by=edited_at) | 13899337331609 (Makuakeアナリティクスとは) | 2026-11-02T09:28Z | updated_at은 일괄 갱신이 섞여 있어 edited_at 사용 |
+| 도움말센터 (mkhelp.makuake.com, Zendesk API sort_by=edited_at) | 13796720890777 (アプリのプッシュ通知を停止したい) | 2026-11-06T09:00Z | updated_at은 일괄 갱신이 섞여 있어 edited_at 사용 |
 | 채용 (hrmos.co/pages/makuake/jobs) | 0000140 | 2026-10-08 | 게시일 미표기. 현재 공고: 0000047, 0000062, 0000089, 0000095, 0000140 (0000078 목록에서 사라짐) |
 | 앱스토어 릴리즈노트 (id1274816320) | 4.8.0 | 2026-10-05 | |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, jp) | 14633079742 | 2026-10-05 | |
 | 구글플레이 릴리즈노트 (com.ca_crowdfunding.makuake_android) | 4.8.0 | 2026-10-01 | |
 | 구글플레이 리뷰 (google-play-scraper NEWEST, ja/jp) | 657d87af-1580-4578-85bb-5a0afc7e269a | 2026-10-17 | |
 | 매거진 (magazine.makuake.com) | 미확인 | - | 피드/API 403·404 |
-| 외부 뉴스 검색 "マクアケ" | - | 2026-11-05 |  |
+| 외부 뉴스 검색 "マクアケ" | - | 2026-11-06 |  |

@@ -114,3 +114,6 @@
 | KS-20261104-05 | 2026-11-03 | 수요 | 외부 | [Android ★5 v3.43.0] 킥스타터 규칙이 좋고, 게임과 함께 받는 추가 구성품이 모두 마음에 든다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=7c409e50-8d97-459c-b926-17cb59434d72) |
 | KS-20261105-01 | 2026-11-04 | 수요 | 외부 | [iOS ★5 v5.38.0] 훌륭한 아이디어 — 기다릴 만한 가치가 있다! 최고의 품질 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261105-02 | 2026-11-04 | 수요 | 외부 | [Android ★5 v3.42.0] 창작자들이 막 첫발을 떼는 시점에 최고의 물건들을 발견하곤 한다. 정말 즐겁다! | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=209c8f4f-7b7c-4adf-87cf-4c86537afed9) |
+| KS-20261106-01 | 2026-11-05 | 수요 | 외부 | [Android ★5 v3.43.0] 훌륭한 독점 칼들이다. 오래 기다려야 하지만 문제는 없었다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2f153d00-9ab4-430b-b748-dafcadf14215) |
+| KS-20261106-02 | 2026-11-05 | 수요 | 외부 | [Android ★5 v3.43.0] 최고예요 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=aef05a26-dcf4-4c6d-9018-cfdcf16200c6) |
+| KS-20261106-03 | 2026-11-05 | 수요 | 외부 | [Android ★2] 앱이 나쁘다. 웹사이트를 감싼 것 같다. 로그인 페이지, 설정 페이지, 페이지가 다시 로드되고 여러 번 열리는 것 등. 기타 등등 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=93897480-f239-48ce-b5cf-62902c659bbf) |

@@ -101,3 +101,10 @@ WZ-20261105-05 | 2026-11-05 | https://job.wadiz.io/ko/o/240966 | 공고 240966�
 WZ-20261105-06 | 2026-11-05 | https://job.wadiz.io/ko/o/241772 | 공고 241772가 채용 목록(전체 18건)에서 사라짐. 2026-11-04 목록 18건에 포함, 2026-11-05 목록에 없음 | 조직 | 관찰
 WZ-20261105-07 | 2026-11-04 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=ecba280b-9583-4030-afbc-03ec8cf84259 | [Android ★5 v26.43.3] 정말 좋은 제품이네요~ 편하고 가벼위서 또 입고 싶어요 | 수요 | 외부
 WZ-20261105-08 | 2026-11-03 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | [Android 릴리즈노트 26.45.0] 릴리즈노트 필드 없음 (업데이트 2026-11-03) | 공급 | 공식
+WZ-20261106-01 | 2026-11-05 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=5ce49fd9-3e22-4341-9026-818cf66d62d6 | [Android ★5 v26.43.3] 좋아요~~♡ | 수요 | 외부
+WZ-20261106-02 | 2026-11-05 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=b2f6d5a3-07b0-42eb-b696-9fc017c9c648 | [Android ★4 v26.43.3] 간편결제 좋아요 | 수요 | 외부
+WZ-20261106-03 | 2026-11-05 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=193d6c4b-bf78-4aba-9bba-461131ab96b0 | [Android ★1 v26.45.0] 다 좋음. 근데 뭔 라이브만 하면 강제로 가둬버리니 기분이 그냥 불쾌하기 짝이 없다. 기종 문제인지 캐시 문제인지 X 버튼 눌러도 안닫혀서 최근 앱 갔다가 다시 와이즈로 가야 나갈 수 있는데 이런 거지같은 경험을 해야하나. 걍 들 | 수요 | 외부
+WZ-20261106-04 | 2026-11-05 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=4b5af9f8-fcc6-4b64-ab28-b73398ecc1fb | [Android ★5] 거북선 태권V 끝내줍니다. 전국민이 좋아합니다~ | 수요 | 외부
+WZ-20261106-05 | 2026-11-06 | https://job.wadiz.io/ko/o/243715 | 공고 243715(메이커 프로덕트 오너(PO))가 채용 목록(전체 17건)에 나타남. 와디즈 프로덕트 경력 5년 이상 정규직, 마감 2026. 11. 23 | 조직 | 관찰
+WZ-20261106-06 | 2026-11-06 | https://job.wadiz.io/ko/o/237124 | 공고 237124가 채용 목록(전체 17건)에서 사라짐. 2026-11-05 목록 18건에 포함, 2026-11-06 목록에 없음 | 조직 | 관찰
+WZ-20261106-07 | 2026-11-06 | https://job.wadiz.io/ko/o/239524 | 공고 239524가 채용 목록(전체 17건)에서 사라짐. 2026-11-05 목록 18건에 포함, 2026-11-06 목록에 없음 | 조직 | 관찰
