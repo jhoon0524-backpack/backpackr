@@ -117,3 +117,6 @@
 | KS-20261106-01 | 2026-11-05 | 수요 | 외부 | [Android ★5 v3.43.0] 훌륭한 독점 칼들이다. 오래 기다려야 하지만 문제는 없었다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2f153d00-9ab4-430b-b748-dafcadf14215) |
 | KS-20261106-02 | 2026-11-05 | 수요 | 외부 | [Android ★5 v3.43.0] 최고예요 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=aef05a26-dcf4-4c6d-9018-cfdcf16200c6) |
 | KS-20261106-03 | 2026-11-05 | 수요 | 외부 | [Android ★2] 앱이 나쁘다. 웹사이트를 감싼 것 같다. 로그인 페이지, 설정 페이지, 페이지가 다시 로드되고 여러 번 열리는 것 등. 기타 등등 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=93897480-f239-48ce-b5cf-62902c659bbf) |
+| KS-20261107-01 | 2026-11-05 | 수요 | 외부 | [iOS ★5 v5.38.0] 훌륭해요! — 훌륭한 사이트와 제품 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261107-02 | 2026-11-06 | 수요 | 외부 | [iOS ★1 v5.38.0] 신용카드를 추가할 수 없다 — 카드 인증 과정에 오류가 있다 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261107-03 | 2026-11-06 | 수요 | 외부 | [Android ★5] 훌륭한 앱 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=384a904b-0d9a-4b3a-9f7e-26cd1ffc1b73) |

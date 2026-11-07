@@ -116,3 +116,6 @@ KS-20261105-02 | 2026-11-04 | https://play.google.com/store/apps/details?id=com.
 KS-20261106-01 | 2026-11-05 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=2f153d00-9ab4-430b-b748-dafcadf14215 | [Android ★5 v3.43.0] Great exclusive knives. It's a long wait, but I haven't had any problems. | 수요 | 외부
 KS-20261106-02 | 2026-11-05 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=aef05a26-dcf4-4c6d-9018-cfdcf16200c6 | [Android ★5 v3.43.0] awesome | 수요 | 외부
 KS-20261106-03 | 2026-11-05 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=93897480-f239-48ce-b5cf-62902c659bbf | [Android ★2] The app is bad; it feels like a website wrapper: the sign-in page, the settings page, pages reloading and opening multiple times, etc. et | 수요 | 외부
+KS-20261107-01 | 2026-11-05 | https://apps.apple.com/us/app/id596961532?see-all=reviews | [iOS ★5 v5.38.0] Awesome! — Great site and products | 수요 | 외부
+KS-20261107-02 | 2026-11-06 | https://apps.apple.com/us/app/id596961532?see-all=reviews | [iOS ★1 v5.38.0] Can’t add a credit card — Card verification process buggy | 수요 | 외부
+KS-20261107-03 | 2026-11-06 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=384a904b-0d9a-4b3a-9f7e-26cd1ffc1b73 | [Android ★5] exellent app | 수요 | 외부

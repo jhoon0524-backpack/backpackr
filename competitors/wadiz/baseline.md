@@ -14,7 +14,7 @@
 | IR (wadizcorp.com 주요 뉴스) | newsBoardDetail/8932 | 2026-06-05 | 2026-10-02 확인 |
 | 앱스토어 릴리즈노트 | 26.45.0 | 2026-11-03 | 2026-11-03 확인. 이전 26.43.4 |
 | 구글플레이 릴리즈노트 | 26.45.0 업데이트 2026-11-03 | 2026-11-03 | 릴리즈노트 필드 없음. 이전 26.43.3 2026-10-28 |
-| 외부 뉴스 검색 "와디즈" | - | 2026-11-06 |  |
+| 외부 뉴스 검색 "와디즈" | - | 2026-11-07 |  |
 | 메인 페이지 (배너·기획전·GNB) | - | 2026-11-05 | 2026-11-02 배너: Bag, Humidifier, BlackBird(신규), 3zero books, Wear&Glow(신규), NEXT TREND(신규), Hairpin(신규), Travel Brush(신규), Anti Snore(신규) (BOOKMARKS·Fine Sense·Yumi Script·Silver Chain·Smart Heater 썸네일 목록에서 안 보임). 이전 2026-11-01 배너: Humidifier, Bag, 3zero books, BOOKMARKS, Fine Sense, Yumi Script, Silver Chain, Smart Heater. `fetch.js --headed`(xvfb-run)로만 본문이 읽힘, 헤드리스는 본문 0자. 해외 접속이라 영문 글로벌 페이지. 메뉴: Wadiz Story, Benefits, Coupon, EndingSoon, MakerGuide / 카테고리 20개 |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, kr) | 14507448070 | 2026-09-03 | 2026-10-08 신규 없음 |
 | 구글플레이 리뷰 (google-play-scraper NEWEST, ko/kr) | 4b5af9f8-fcc6-4b64-ab28-b73398ecc1fb | 2026-11-05 | 2026-11-06 신규 4건. 이전 ecba280b-9583-4030-afbc-03ec8cf84259  |
