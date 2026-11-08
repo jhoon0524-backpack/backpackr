@@ -120,3 +120,6 @@
 | KS-20261107-01 | 2026-11-05 | 수요 | 외부 | [iOS ★5 v5.38.0] 훌륭해요! — 훌륭한 사이트와 제품 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261107-02 | 2026-11-06 | 수요 | 외부 | [iOS ★1 v5.38.0] 신용카드를 추가할 수 없다 — 카드 인증 과정에 오류가 있다 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261107-03 | 2026-11-06 | 수요 | 외부 | [Android ★5] 훌륭한 앱 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=384a904b-0d9a-4b3a-9f7e-26cd1ffc1b73) |
+| KS-20261108-01 | 2026-11-06 | 수요 | 외부 | [iOS ★1 v5.38.0] 문제를 무시한다 — 킥스타터 자체가 새 배송 기능을 망쳐 놓았다. 창작자는 알게 된 즉시 킥스타터에 연락했다 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261108-02 | 2026-11-07 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 보내는 스팸이 끝이 없다. 여러 이메일 주소에서 와서 다 차단하기도 어렵다. 주 5통 이상 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=6ae5bc2c-e305-4bb1-9822-f74fdf6e260b) |
+| KS-20261108-03 | 2026-11-07 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 매우 창의적이고 재능 있는 사람들이 만든 창의적인 선택지를 보고 얻을 수 있는 최고의 방법 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=3178f030-ab3a-4018-bd0a-176e18e19a4f) |
