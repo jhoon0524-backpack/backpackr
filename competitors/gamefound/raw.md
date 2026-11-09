@@ -31,3 +31,4 @@ GF-20261104-01 | 2026-11-04 | https://help.gamefound.com/article/742-upload-and-
 GF-20261104-02 | 2026-11-04 | https://help.gamefound.com/article/771-upload-and-deliver-digital-content-part-2 | 'Upload and Deliver Digital Content (Part 2)' 문서 수정됨 (sitemap lastmod 2026-11-04T12:34:24Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261105-01 | 2026-11-05 | https://help.gamefound.com/article/111-referral-links | 'Referral Links' 문서 수정됨 (sitemap lastmod 2026-11-05T07:21:04Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰
 GF-20261105-02 | 2026-11-05 | https://help.gamefound.com/article/260-pledge-and-payment-statuses-what-do-they-mean | 'Pledge and payment statuses - what do they mean?' 문서 수정됨 (sitemap lastmod 2026-11-05T10:32:16Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261109-01 | 2026-11-09 | https://help.gamefound.com/article/343-project-roles-and-permissions | 'Project Roles and Permissions' 문서 수정됨 (sitemap lastmod 2026-11-09T12:45:47Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
