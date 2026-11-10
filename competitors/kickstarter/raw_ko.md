@@ -123,3 +123,6 @@
 | KS-20261108-01 | 2026-11-06 | 수요 | 외부 | [iOS ★1 v5.38.0] 문제를 무시한다 — 킥스타터 자체가 새 배송 기능을 망쳐 놓았다. 창작자는 알게 된 즉시 킥스타터에 연락했다 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261108-02 | 2026-11-07 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 보내는 스팸이 끝이 없다. 여러 이메일 주소에서 와서 다 차단하기도 어렵다. 주 5통 이상 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=6ae5bc2c-e305-4bb1-9822-f74fdf6e260b) |
 | KS-20261108-03 | 2026-11-07 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 매우 창의적이고 재능 있는 사람들이 만든 창의적인 선택지를 보고 얻을 수 있는 최고의 방법 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=3178f030-ab3a-4018-bd0a-176e18e19a4f) |
+| KS-20261110-01 | 2026-10-25 | 공급 | 공식 | Living Single의 에리카 알렉산더의 새 만화책💥 — 에리카 알렉산더와 토니 퓨리어의 만화책 Concrete Park가 2027년 2월 킥스타터에 나온다. (유튜브 쇼츠) | [링크](https://www.youtube.com/shorts/2pQfNNvBJ6E) |
+| KS-20261110-02 | 2026-10-26 | 공급 | 공식 | 예술가에게 필요한 건 완벽함이 아니라 커뮤니티 👏 — 아티스트 Sitara Solil은 음악가이자 Rambler Magazine 지부 리더. Rambler Magazine이 두 번째 킥스타터를 막 시작했다 (유튜브 쇼츠) | [링크](https://www.youtube.com/shorts/pUW-KvFCea8) |
+| KS-20261110-03 | 2026-11-09 | 수요 | 외부 | [안드로이드 ★2 v3.43.0] 더 이상 로그인이 안 되는데, 수신 거부도 안 되는 이메일을 계속 보낸다 -_- | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=82edc467-49d3-49ee-bdd2-065d7ad47ee1) |

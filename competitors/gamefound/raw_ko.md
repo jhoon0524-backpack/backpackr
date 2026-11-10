@@ -33,3 +33,5 @@
 | GF-20261105-01 | 2026-11-05 | 수요 | 관찰 | '추천 링크(Referral Links)' 문서 수정됨 (사이트맵 수정일 2026-11-05T07:21:04Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/111-referral-links) |
 | GF-20261105-02 | 2026-11-05 | 공급 | 관찰 | '서포트 및 결제 상태 - 무슨 뜻인가요?(Pledge and payment statuses - what do they mean?)' 문서 수정됨 (사이트맵 수정일 2026-11-05T10:32:16Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/260-pledge-and-payment-statuses-what-do-they-mean) |
 | GF-20261109-01 | 2026-11-09 | 공급 | 관찰 | '프로젝트 역할 및 권한(Project Roles and Permissions)' 문서 수정됨 (사이트맵 수정일 2026-11-09T12:45:47Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/343-project-roles-and-permissions) |
+| GF-20261110-01 | 2026-11-10 | 공급 | 관찰 | '주문 잠금 및 잠금 해제(Lock and Unlock Orders)' 도움말 문서 수정됨 (2026-11-10T09:24:38Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/772-lock-and-unlock-orders) |
+| GF-20261110-02 | 2026-11-10 | 공급 | 관찰 | '플레지 매니저와 레이트 플레지 시작하기(외부 캠페인용)' 도움말 문서 수정됨 (2026-11-10T13:42:02Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/299-getting-started-with-pledge-manager-and-late-pledge-for-imported-projects) |

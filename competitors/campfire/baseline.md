@@ -4,10 +4,10 @@
 |---|---|---|---|
 | 회사 뉴스 (campfire.co.jp/press) | NOTO food market 개최 (프레스릴리스) | 2026-10-22 | |
 | PR TIMES (companyrdf.php?company_id=19299) | 000000598.000019299 | 2026-10-22 | |
-| 서비스 뉴스 (camp-fire.jp/news, RSS feed.xml) | news/2026/11/11/casestudy | 2026-10-22 | |
+| 서비스 뉴스 (camp-fire.jp/news, RSS feed.xml) | news/2026/11/13/fieldstyle | 2026-11-10 | 2026-11-10 신규 CF-20261110-01. 이전 news/2026/11/11/casestudy |
 | 도움말센터 (help.camp-fire.jp/sitemap.xml lastmod) | 【CAMPFIRE for Social Good】領収書付き支援について (lastmod 2026-11-06) | 2026-11-06 | HubSpot 지식베이스. 이전 メンテナンスのお知らせ（2026年11月12日） lastmod 2026-11-02 |
 | 채용 (hrmos.co/pages/campfire/jobs) | 공고 0건 (직전 20260827 カスタマーサクセス アルバイト) | 2026-11-02 | 공고 총 0건 |
 | 앱스토어 릴리즈노트 (id1496301418) | 2026.10.28 | 2026-11-02 | |
 | 앱스토어 리뷰 (iTunes RSS mostrecent, jp) | 14637569725 | 2026-10-07 | |
 | 구글플레이 | 미확인 | - | 안드로이드 앱 패키지 못 찾음 |
-| 외부 뉴스 검색 "CAMPFIRE クラウドファンディング" | - | 2026-11-09 |  |
+| 외부 뉴스 검색 "CAMPFIRE クラウドファンディング" | - | 2026-11-10 | 2026-11-10 최근 2일 신규 없음 |
