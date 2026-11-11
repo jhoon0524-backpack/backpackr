@@ -126,3 +126,8 @@
 | KS-20261110-01 | 2026-10-25 | 공급 | 공식 | Living Single의 에리카 알렉산더의 새 만화책💥 — 에리카 알렉산더와 토니 퓨리어의 만화책 Concrete Park가 2027년 2월 킥스타터에 나온다. (유튜브 쇼츠) | [링크](https://www.youtube.com/shorts/2pQfNNvBJ6E) |
 | KS-20261110-02 | 2026-10-26 | 공급 | 공식 | 예술가에게 필요한 건 완벽함이 아니라 커뮤니티 👏 — 아티스트 Sitara Solil은 음악가이자 Rambler Magazine 지부 리더. Rambler Magazine이 두 번째 킥스타터를 막 시작했다 (유튜브 쇼츠) | [링크](https://www.youtube.com/shorts/pUW-KvFCea8) |
 | KS-20261110-03 | 2026-11-09 | 수요 | 외부 | [안드로이드 ★2 v3.43.0] 더 이상 로그인이 안 되는데, 수신 거부도 안 되는 이메일을 계속 보낸다 -_- | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=82edc467-49d3-49ee-bdd2-065d7ad47ee1) |
+| KS-20261111-01 | 2026-11-11 | 공급 | 공식 | 쇼피파이(Shopify) 스토어를 킥스타터와 연동하는 방법 — 새 킥스타터 쇼피파이 앱은 플레지 매니저에서 확정된 주문을 쇼피파이로 자동 전송해 캠페인 이후 배송 처리를 간소화해 준다 (유튜브 영상) | [링크](https://www.youtube.com/watch?v=gUIxb7fQylY) |
+| KS-20261111-02 | 2026-11-10 | 수요 | 외부 | [안드로이드 ★1 v3.42.0] 얼리버드로 후원하려고 몇 번이고 시도했다. "이용할 수 없거나 다른 사람들이 현재 이 프로젝트를 후원 중"이라는 메시지가 떴다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=64c22741-3c92-4b9e-8df4-7149e74d8c75) |
+| KS-20261111-03 | 2026-11-10 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 킥스타터 오류 메시지가 잔뜩 떠서 처리하는 데 한 시간 넘게 걸렸다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ede32efd-1f0a-41b2-b19a-556c0e608748) |
+| KS-20261111-04 | 2026-11-10 | 수요 | 외부 | [안드로이드 ★1 v3.42.0] 30분 동안 '불러오기 실패' 오류가 났다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=8708100f-ef71-40ac-b8d7-02f4e51c95ba) |
+| KS-20261111-05 | 2026-11-10 | 수요 | 외부 | [안드로이드 ★4 v3.43.0] 유용하고 접근이 쉽다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=684f7940-50e7-48c8-b37d-9cb5756d0cd8) |

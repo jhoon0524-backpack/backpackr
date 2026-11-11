@@ -35,3 +35,4 @@
 | GF-20261109-01 | 2026-11-09 | 공급 | 관찰 | '프로젝트 역할 및 권한(Project Roles and Permissions)' 문서 수정됨 (사이트맵 수정일 2026-11-09T12:45:47Z). 변경 내용 본문에 명시 없음 | [링크](https://help.gamefound.com/article/343-project-roles-and-permissions) |
 | GF-20261110-01 | 2026-11-10 | 공급 | 관찰 | '주문 잠금 및 잠금 해제(Lock and Unlock Orders)' 도움말 문서 수정됨 (2026-11-10T09:24:38Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/772-lock-and-unlock-orders) |
 | GF-20261110-02 | 2026-11-10 | 공급 | 관찰 | '플레지 매니저와 레이트 플레지 시작하기(외부 캠페인용)' 도움말 문서 수정됨 (2026-11-10T13:42:02Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/299-getting-started-with-pledge-manager-and-late-pledge-for-imported-projects) |
+| GF-20261111-01 | 2026-11-10 | 수요 | 외부 | [안드로이드 ★1 v1.93.1] 게임파운드는 스팀포지드(Steamforged)가 제품을 끝내 배송하지 못하면서도 후원자들에게서 돈을 받을 수 있게 해 줬다. | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=50892f6a-b075-4b18-b5d0-f27b778bfd7c) |
