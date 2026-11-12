@@ -137,3 +137,6 @@ WZ-20261111-05 | 2026-11-11 | https://blog.wadiz.io/%ed%99%94%ec%9e%a5%ec%8b%a4-
 WZ-20261111-06 | 2026-11-11 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | [Android] 버전 26.46.1, 업데이트 날짜 2026-11-11, 릴리즈노트 필드 없음. 기존 확인 26.45.0 업데이트 2026-11-10 | 공급 | 관찰
 WZ-20261111-07 | 2026-11-10 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=c86a8c05-7b18-46e9-9818-a01c985d4994 | [Android ★5 v26.45.0] 신규 상품 및 질좋은 상품 찾아주셔서 감사합니다. (*^^*) | 수요 | 외부
 WZ-20261111-08 | 2026-11-11 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 3 Bag (search?keyword=Bag) (2026-11-10 목록에 없음) | 수요 | 관찰
+WZ-20261112-01 | 2026-11-12 | https://helpcenter.wadiz.io/hc/ko/articles/59739232407321 | 정산에 필요한 핑퐁페이먼츠(PingPong Payments) 계정 만드는 방법이 궁금해요. (도움말 문서 수정 2026-11-12T03:07:58Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+WZ-20261112-02 | 2026-11-12 | https://helpcenter.wadiz.io/hc/ko/articles/25375740913817 | 누구나 메이커가 될 수 있나요? (도움말 문서 수정 2026-11-12T03:02:43Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+WZ-20261112-03 | 2026-11-12 | https://helpcenter.wadiz.io/hc/ko/articles/25510218201497 | 와디즈 정산은 언제되나요? (도움말 문서 수정 2026-11-12T02:53:46Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
