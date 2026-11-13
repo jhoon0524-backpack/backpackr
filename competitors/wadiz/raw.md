@@ -140,3 +140,5 @@ WZ-20261111-08 | 2026-11-11 | https://www.wadiz.io/ | 메인 페이지 'Looking 
 WZ-20261112-01 | 2026-11-12 | https://helpcenter.wadiz.io/hc/ko/articles/59739232407321 | 정산에 필요한 핑퐁페이먼츠(PingPong Payments) 계정 만드는 방법이 궁금해요. (도움말 문서 수정 2026-11-12T03:07:58Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 WZ-20261112-02 | 2026-11-12 | https://helpcenter.wadiz.io/hc/ko/articles/25375740913817 | 누구나 메이커가 될 수 있나요? (도움말 문서 수정 2026-11-12T03:02:43Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 WZ-20261112-03 | 2026-11-12 | https://helpcenter.wadiz.io/hc/ko/articles/25510218201497 | 와디즈 정산은 언제되나요? (도움말 문서 수정 2026-11-12T02:53:46Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+WZ-20261113-01 | 2026-11-11 | https://apps.apple.com/kr/app/id1107828621?see-all=reviews | [iOS ★1 v26.46.0] 상품은 좋음 다만 서비스 및 고객응대 최악 — 상품은 좋습니다. 얼리버드 주문해서 한달넘게 기다려서 받았는데 오배송 상품누락이네요. 고객센터 전화도 없고 채팅으로만 문의할수있고 | 수요 | 외부
+WZ-20261113-02 | 2026-11-12 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=61dd02ef-0778-4ced-82bd-d6ae0daf3416 | [Android ★3 v9.4.2] 아래로 내릴때 뭔가 이상했는데 고쳣내.. 뭐라 말해야 되는거지,. 버그 수정 감사합니다 | 수요 | 외부

@@ -134,3 +134,5 @@
 | KS-20261112-01 | 2026-11-11 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 구매자 주의: 프로젝트가 실패하거나 창작자가 연락을 끊어도, 킥스타터는 수수료를 챙기고 완전히 손을 뗀다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=25fd46d2-2286-4ab2-bca9-6fdfcca04853) |
 | KS-20261112-02 | 2026-11-11 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 서버가 형편없다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=4eb60233-6cc8-4ca5-97fd-42a011ec78a4) |
 | KS-20261112-03 | 2026-11-11 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 결제 수단을 추가하거나 바꾸려고 하면 은행 인증(3DS) 단계에서 끝없이 같은 과정이 반복된다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=904cd925-a378-4152-b7f4-16d240a2dd14) |
+| KS-20261113-01 | 2026-11-12 | 수요 | 외부 | [안드로이드 ★2 v3.43.0] 인기 프로젝트가 출시될 때 자주 버벅여서 얼리버드 후원을 놓치게 된다. 여러 해째 계속되는 문제다. 킥스타터는 별로 신경 쓰지 않는다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=99c3d02d-0a86-4dbc-81da-a0320b712aff) |
+| KS-20261113-02 | 2026-11-12 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 바가지 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=c97df499-2a92-483c-934e-7c902d8488d8) |
