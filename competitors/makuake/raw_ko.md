@@ -58,3 +58,4 @@
 | MK-20261112-07 | 2026-11-12 | 수요 | 공식 | 앞으로 오프라인 접점을 늘려, 실행자(판매자)의 신상품 데뷔부터 이후 사업 성장까지 한 번에 뒷받침하는 '사업 성장 파트너' 역할을 굳혀 가겠습니다. | [링크](https://www.makuake.co.jp/news/archives/402) |
 | MK-20261112-08 | 2026-11-12 | 정책 | 관찰 | Makuake 메시지를 이용해 영업 메시지를 보내는 행위 (도움말 문서 수정 2026-11-12T08:55:45Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/22738462608409) |
 | MK-20261112-09 | 2026-11-11 | 수요 | 외부 | [안드로이드 ★1 v4.8.0] 믿음이 안 가는 크라우드펀딩이다. 실행자가 미리 알고 있었는데도 사양과 다른 제품을 보내 놓고 뻔뻔하게 나오는 사건이 벌어지고 있다. | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=57e9e747-8726-4014-bc69-dd83b1d4a103) |
+| MK-20261115-01 | 2026-11-13 | 수익 | 공식 | 2026년 11월 13일 / IR 자료 / PR 정보 / 2026년 9월기 실적 설명 영상(영어)（95KB） | [링크](https://www.makuake.co.jp/files/uploads/ul16SL1bWc2aa707Ge07G616_V07K507GrrK8Q2Jqc1qi_1b.pdf) |
