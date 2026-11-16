@@ -147,3 +147,19 @@ WZ-20261115-02 | 2026-11-14 | https://play.google.com/store/apps/details?id=com.
 WZ-20261115-03 | 2026-11-15 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 2 Heater (search?keyword=Heater) (2026-11-14 목록에 없음) | 수요 | 관찰
 WZ-20261115-04 | 2026-11-15 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Bag (search?keyword=Bag) (2026-11-14 목록에 포함) | 수요 | 관찰
 WZ-20261115-05 | 2026-11-15 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: 3zero books (2026-11-14 목록에 포함) | 공급 | 관찰
+WZ-20261116-01 | 2026-11-16 | https://helpcenter.wadiz.io/hc/ko/articles/32698642789401 | 와디즈 해외출고 프로젝트 가이드 (도움말 문서 수정 2026-11-16T05:22:03Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+WZ-20261116-02 | 2026-11-15 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=9bd905be-b8a4-48df-9ff4-5264dfb90d5f | [Android ★1 v26.46.1] 회원 탈퇴에 메일 인증까지 하라는건 첨보네 가입은 클릭 몇번에 가입 시키고 탈퇴는 어렵게 만들어 놓고 회사 마인드가 보인다 | 수요 | 외부
+WZ-20261116-03 | 2026-11-16 | https://job.wadiz.io/ko/recruit | 공고 203979가 채용 목록(전체 15건)에서 사라짐(공고 페이지 404). 2026-11-15 목록 17건에 포함 | 조직 | 관찰
+WZ-20261116-04 | 2026-11-16 | https://job.wadiz.io/ko/recruit | 공고 234738이 채용 목록(전체 15건)에서 사라짐(공고 페이지 404). 2026-11-15 목록 17건에 포함 | 조직 | 관찰
+WZ-20261116-05 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 3 Bag (search?keyword=Bag) (2026-11-15 목록에 없음) | 수요 | 관찰
+WZ-20261116-06 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Heater (search?keyword=Heater) (2026-11-15 목록에 포함. 1번 칸 비어 나옴) | 수요 | 관찰
+WZ-20261116-07 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: Wear&Glow (events/691) (2026-11-15 목록에 없음) | 공급 | 관찰
+WZ-20261116-08 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: NEXT TREND (events/652) (2026-11-15 목록에 없음) | 공급 | 관찰
+WZ-20261116-09 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: K-Pop Items (funding/424276, utm_campaign=261116_all__424276_global quickmenu) (2026-11-15 목록에 없음) | 공급 | 관찰
+WZ-20261116-10 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: Bag Clip (funding/415926, utm_campaign=261116_all__415926_global quickmenu) (2026-11-15 목록에 없음) | 공급 | 관찰
+WZ-20261116-11 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: Lucky Gem (funding/425822, utm_campaign=261116_all__425822_global quickmenu) (2026-11-15 목록에 없음) | 공급 | 관찰
+WZ-20261116-12 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: BOOKMARKS (2026-11-15 목록에 포함) | 공급 | 관찰
+WZ-20261116-13 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Fine Sense (2026-11-15 목록에 포함) | 공급 | 관찰
+WZ-20261116-14 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Suede Jacket (2026-11-15 목록에 포함) | 공급 | 관찰
+WZ-20261116-15 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Silver Lock (2026-11-15 목록에 포함) | 공급 | 관찰
+WZ-20261116-16 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Caviar Serum (2026-11-15 목록에 포함) | 공급 | 관찰

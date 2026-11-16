@@ -37,3 +37,6 @@
 | GF-20261110-02 | 2026-11-10 | 공급 | 관찰 | '플레지 매니저와 레이트 플레지 시작하기(외부 캠페인용)' 도움말 문서 수정됨 (2026-11-10T13:42:02Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/299-getting-started-with-pledge-manager-and-late-pledge-for-imported-projects) |
 | GF-20261111-01 | 2026-11-10 | 수요 | 외부 | [안드로이드 ★1 v1.93.1] 게임파운드는 스팀포지드(Steamforged)가 제품을 끝내 배송하지 못하면서도 후원자들에게서 돈을 받을 수 있게 해 줬다. | [링크](https://play.google.com/store/apps/details?id=com.gamefound.app&reviewId=50892f6a-b075-4b18-b5d0-f27b778bfd7c) |
 | GF-20261112-01 | 2026-11-12 | 공급 | 관찰 | '게임파운드 공개 API' 도움말 문서 수정됨 (2026-11-12T19:03:18Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/425-gamefound-public-api) |
+| GF-20261116-01 | 2026-11-16 | 수요 | 관찰 | '플레지 매니저에서 내 플레지(후원 내용)를 수정할 수 있나요?' 도움말 문서 수정됨 (2026-11-16T12:45:52Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/52-pledge-content-change) |
+| GF-20261116-02 | 2026-11-16 | 공급 | 관찰 | '창작자 관리자 패널 개요' 도움말 문서 수정됨 (2026-11-16T12:53:53Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/355-navigating-to-admin-panel) |
+| GF-20261116-03 | 2026-11-16 | 수요 | 관찰 | '계정은 어떻게 삭제하나요?' 도움말 문서 수정됨 (2026-11-16T12:58:22Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/59-delete-your-account) |

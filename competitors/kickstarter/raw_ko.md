@@ -141,3 +141,4 @@
 | KS-20261115-03 | 2026-11-13 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 이 물건 받는 게 너무 기다려진다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=649ac67e-fc16-4043-aa08-d26e1dcd5ec7) |
 | KS-20261115-04 | 2026-11-13 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 처음 해 보는데 신난다. 빨리 받고 싶다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=42f7740c-a593-4fe6-b9cd-f2e2c1d850be) |
 | KS-20261115-05 | 2026-11-13 | 수요 | 외부 | [안드로이드 ★4 v3.43.0] 무엇을 후원할지 조심하고, 돈을 내기 전에 AI(LLM)와 레딧으로 한 번 검증해 봐라. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=f6b1f74f-bfb6-4133-8d40-e3eb3ad3260a) |
+| KS-20261116-01 | 2026-11-15 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 창작자와 아티스트에게 직접 자금을 댈 수 있는 기회가 있어 즐겁고, 킥스타터는 그 일을 하기에 가장 덜 번거로운 통로였다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=09b8fedd-f354-4e3c-88f2-dce43c7bfae0) |

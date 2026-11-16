@@ -59,3 +59,5 @@
 | MK-20261112-08 | 2026-11-12 | 정책 | 관찰 | Makuake 메시지를 이용해 영업 메시지를 보내는 행위 (도움말 문서 수정 2026-11-12T08:55:45Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/22738462608409) |
 | MK-20261112-09 | 2026-11-11 | 수요 | 외부 | [안드로이드 ★1 v4.8.0] 믿음이 안 가는 크라우드펀딩이다. 실행자가 미리 알고 있었는데도 사양과 다른 제품을 보내 놓고 뻔뻔하게 나오는 사건이 벌어지고 있다. | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=57e9e747-8726-4014-bc69-dd83b1d4a103) |
 | MK-20261115-01 | 2026-11-13 | 수익 | 공식 | 2026년 11월 13일 / IR 자료 / PR 정보 / 2026년 9월기 실적 설명 영상(영어)（95KB） | [링크](https://www.makuake.co.jp/files/uploads/ul16SL1bWc2aa707Ge07G616_V07K507GrrK8Q2Jqc1qi_1b.pdf) |
+| MK-20261116-01 | 2026-11-16 | 수요 | 관찰 | 앱스토어 버전 4.9.2 (2026-11-16T05:11Z 배포) 업데이트: "로그인·회원가입 구조를 개선했습니다. 경미한 수정을 했습니다." (기존 확인 4.8.0) | [링크](https://apps.apple.com/jp/app/id1274816320) |
+| MK-20261116-02 | 2026-11-13 | 수요 | 관찰 | 구글플레이 com.ca_crowdfunding.makuake_android 스토어 표기 업데이트일 2026/11/13 (기존 확인 2026/10/01). 버전 표기는 4.8.0 그대로. 릴리즈노트 미표기 | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android) |

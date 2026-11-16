@@ -58,3 +58,5 @@ MK-20261112-07 | 2026-11-12 | https://www.makuake.co.jp/news/archives/402 | 今�
 MK-20261112-08 | 2026-11-12 | https://mkhelp.makuake.com/hc/ja/articles/22738462608409 | Makuakeメッセージを利用し営業メッセージを送付する行為 (도움말 문서 수정 2026-11-12T08:55:45Z) | 정책 | 관찰
 MK-20261112-09 | 2026-11-11 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=57e9e747-8726-4014-bc69-dd83b1d4a103 | [Android ★1 v4.8.0] 不信感がつよいクラファンです。 実行者が事前に分かっていたのにもかかわらず仕様と異なる製品を送って開き直るという事件が勃発中。 | 수요 | 외부
 MK-20261115-01 | 2026-11-13 | https://www.makuake.co.jp/files/uploads/ul16SL1bWc2aa707Ge07G616_V07K507GrrK8Q2Jqc1qi_1b.pdf | November 13, 2026 / IR Documents / PR Information / Earnings Presentation Video (English) for FY2026/9（95KB） | 수익 | 공식
+MK-20261116-01 | 2026-11-16 | https://apps.apple.com/jp/app/id1274816320 | 앱스토어 버전 4.9.2 (2026-11-16T05:11Z 배포) アップデート: "・ログイン・会員登録の仕組みを改善しました。・軽微な修正をしました。" (기존 확인 4.8.0) | 수요 | 관찰
+MK-20261116-02 | 2026-11-13 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android | 구글플레이 com.ca_crowdfunding.makuake_android 스토어 표기 업데이트일 2026/11/13 (기존 확인 2026/10/01). 버전 표기 4.8.0 그대로. 릴리즈노트 미표기 | 수요 | 관찰
