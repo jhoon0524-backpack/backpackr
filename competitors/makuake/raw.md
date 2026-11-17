@@ -60,3 +60,4 @@ MK-20261112-09 | 2026-11-11 | https://play.google.com/store/apps/details?id=com.
 MK-20261115-01 | 2026-11-13 | https://www.makuake.co.jp/files/uploads/ul16SL1bWc2aa707Ge07G616_V07K507GrrK8Q2Jqc1qi_1b.pdf | November 13, 2026 / IR Documents / PR Information / Earnings Presentation Video (English) for FY2026/9（95KB） | 수익 | 공식
 MK-20261116-01 | 2026-11-16 | https://apps.apple.com/jp/app/id1274816320 | 앱스토어 버전 4.9.2 (2026-11-16T05:11Z 배포) アップデート: "・ログイン・会員登録の仕組みを改善しました。・軽微な修正をしました。" (기존 확인 4.8.0) | 수요 | 관찰
 MK-20261116-02 | 2026-11-13 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android | 구글플레이 com.ca_crowdfunding.makuake_android 스토어 표기 업데이트일 2026/11/13 (기존 확인 2026/10/01). 버전 표기 4.8.0 그대로. 릴리즈노트 미표기 | 수요 | 관찰
+MK-20261117-01 | 2026-11-17 | https://hrmos.co/pages/makuake/jobs | 공고 0000140(Makuakeのサービス広報担当を募集します！)이 채용 목록(전체 4건)에서 사라짐(공고 페이지는 200으로 열림). 2026-11-16 목록: 0000047, 0000062, 0000089, 0000095, 0000140 | 조직 | 관찰

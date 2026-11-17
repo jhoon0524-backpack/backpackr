@@ -142,3 +142,9 @@
 | KS-20261115-04 | 2026-11-13 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 처음 해 보는데 신난다. 빨리 받고 싶다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=42f7740c-a593-4fe6-b9cd-f2e2c1d850be) |
 | KS-20261115-05 | 2026-11-13 | 수요 | 외부 | [안드로이드 ★4 v3.43.0] 무엇을 후원할지 조심하고, 돈을 내기 전에 AI(LLM)와 레딧으로 한 번 검증해 봐라. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=f6b1f74f-bfb6-4133-8d40-e3eb3ad3260a) |
 | KS-20261116-01 | 2026-11-15 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 창작자와 아티스트에게 직접 자금을 댈 수 있는 기회가 있어 즐겁고, 킥스타터는 그 일을 하기에 가장 덜 번거로운 통로였다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=09b8fedd-f354-4e3c-88f2-dce43c7bfae0) |
+| KS-20261117-01 | 2026-11-17 | 공급 | 공식 | 첫 후원 전에: 킥스타터 런칭 전에 커뮤니티를 찾고 키우는 방법 — Warp Miniatures 창업자가 배운 교훈을 공유한다 (블로그 글) | [링크](https://updates.kickstarter.com/before-the-first-pledge-how-to-find-and-foster-community-ahead-of-your-kickstarter/) |
+| KS-20261117-02 | 2026-11-17 | 공급 | 공식 | 영화로 퀴어 이야기 전하기 (유튜브 영상 56:06) | [링크](https://www.youtube.com/watch?v=xy5og_iMvq0) |
+| KS-20261117-03 | 2026-11-17 | 공급 | 공식 | 마크 밀러의 킥스타터를 향한 만화 여정 \| 만화 한 칸에서 후원까지 (유튜브 영상 13:14) | [링크](https://www.youtube.com/watch?v=Tb0TJxnZCLU) |
+| KS-20261117-04 | 2026-11-16 | 수요 | 외부 | [안드로이드 ★5] 괜찮다, 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=dba3475f-7c1e-4c6b-bd9e-bdc51ba38332) |
+| KS-20261117-05 | 2026-11-16 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 내 이메일 대신 페이스북 로그인을 쓰도록 강요한다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=fe6a685e-889f-4a33-86a4-0f21f580ab73) |
+| KS-20261117-06 | 2026-11-16 | 수요 | 외부 | [안드로이드 ★5 v3.40.1] 앱이 너무 쉽게 만들어 준다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=6fef2e04-97bd-4511-9efd-bb9397c6c905) |

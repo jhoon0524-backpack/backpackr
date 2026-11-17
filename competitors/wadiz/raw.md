@@ -163,3 +163,10 @@ WZ-20261116-13 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴
 WZ-20261116-14 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Suede Jacket (2026-11-15 목록에 포함) | 공급 | 관찰
 WZ-20261116-15 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Silver Lock (2026-11-15 목록에 포함) | 공급 | 관찰
 WZ-20261116-16 | 2026-11-16 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Caviar Serum (2026-11-15 목록에 포함) | 공급 | 관찰
+WZ-20261117-01 | 2026-11-17 | https://apps.apple.com/kr/app/id1107828621 | [iOS 릴리즈노트 26.47.0] 사용성 개선 및 안정화를 위해 업데이트 했습니다. (currentVersionReleaseDate 2026-11-17T08:52:59Z). 기존 확인 26.46.0 | 공급 | 공식
+WZ-20261117-02 | 2026-11-16 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=a0e33e17-770a-4714-8cde-33c5a1473366 | [Android ★5 v26.46.1] 굿굿굿 | 수요 | 외부
+WZ-20261117-03 | 2026-11-16 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=a7021c4c-140b-482b-b6f2-5ce9c00cbe5b | [Android ★5 v26.46.1] 아주 맘에드는 물건들이 많아서 쓰기 좋아요ㅃ! | 수요 | 외부
+WZ-20261117-04 | 2026-11-17 | https://job.wadiz.io/ko/o/245235 | 그로스 프로덕트 오너(PO) 와디즈 (신규 채용공고, openDate 2026-11-17T06:17:32Z, dueDate 2026-12-07T00:59:59Z) | 조직 | 관찰
+WZ-20261117-05 | 2026-11-17 | https://job.wadiz.io/ko/o/203979 | 공고 203979(Java 백엔드 개발자 - 회원 개발)가 채용 목록(전체 17건)에 다시 나타남. openDate 2026-11-17T01:03:03Z, dueDate 2026-12-07T00:59:59Z. 2026-11-16 목록 15건에 없음 | 조직 | 관찰
+WZ-20261117-06 | 2026-11-17 | https://job.wadiz.io/ko/o/234738 | 공고 234738(콘텐츠 마케터)이 채용 목록(전체 17건)에 다시 나타남. openDate 2026-11-17T01:03:05Z, dueDate 2026-12-07T00:59:59Z. 2026-11-16 목록 15건에 없음 | 조직 | 관찰
+WZ-20261117-07 | 2026-11-17 | https://job.wadiz.io/ko/recruit | 공고 237021(와디즈에디션 뷰티 BM)이 채용 목록(전체 17건)에서 사라짐(공고 페이지 404). 2026-11-16 목록 15건에 포함 | 조직 | 관찰
