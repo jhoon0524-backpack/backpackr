@@ -39,3 +39,8 @@ GF-20261112-01 | 2026-11-12 | https://help.gamefound.com/article/425-gamefound-p
 GF-20261116-01 | 2026-11-16 | https://help.gamefound.com/article/52-pledge-content-change | 'Can I edit my pledge in pledge manager?' 문서 수정됨 (sitemap lastmod 2026-11-16T12:45:52Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰
 GF-20261116-02 | 2026-11-16 | https://help.gamefound.com/article/355-navigating-to-admin-panel | 'Creator Admin Panel Overview' 문서 수정됨 (sitemap lastmod 2026-11-16T12:53:53Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261116-03 | 2026-11-16 | https://help.gamefound.com/article/59-delete-your-account | 'How to delete an account?' 문서 수정됨 (sitemap lastmod 2026-11-16T12:58:22Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰
+GF-20261118-01 | 2026-11-18 | https://help.gamefound.com/article/73-project-updates | 'Project updates' 문서 수정됨 (sitemap lastmod 2026-11-18T08:25:12Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261118-02 | 2026-11-18 | https://help.gamefound.com/article/15-project-settings | 'Project settings and editing project' 문서 수정됨 (sitemap lastmod 2026-11-18T08:40:27Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261118-03 | 2026-11-18 | https://help.gamefound.com/article/96-how-can-i-pledge | 'How to pledge in crowdfunding?' 문서 수정됨 (sitemap lastmod 2026-11-18T08:43:10Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰
+GF-20261118-04 | 2026-11-18 | https://help.gamefound.com/article/769-exclude-products-from-stretch-pay | 'Exclude products from Stretch Pay' 문서 수정됨 (sitemap lastmod 2026-11-18T09:16:11Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261118-05 | 2026-11-18 | https://help.gamefound.com/article/774-change-your-display-currency | 'Change Your Display Currency' 문서 수정됨 (sitemap lastmod 2026-11-18T09:55:30Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰

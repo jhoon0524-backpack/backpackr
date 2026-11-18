@@ -148,3 +148,9 @@
 | KS-20261117-04 | 2026-11-16 | 수요 | 외부 | [안드로이드 ★5] 괜찮다, 좋다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=dba3475f-7c1e-4c6b-bd9e-bdc51ba38332) |
 | KS-20261117-05 | 2026-11-16 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 내 이메일 대신 페이스북 로그인을 쓰도록 강요한다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=fe6a685e-889f-4a33-86a4-0f21f580ab73) |
 | KS-20261117-06 | 2026-11-16 | 수요 | 외부 | [안드로이드 ★5 v3.40.1] 앱이 너무 쉽게 만들어 준다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=6fef2e04-97bd-4511-9efd-bb9397c6c905) |
+| KS-20261118-01 | 2026-11-18 | 공급 | 공식 | 성공한 킥스타터 프로젝트로 사업을 시작하는 법 — Xeric Watches 창업자가 킥스타터가 회사 성장에 왜 꼭 필요했는지 설명한다 (블로그 글) | [링크](https://updates.kickstarter.com/how-to-start-a-business-with-a-successful-kickstarter-project/) |
+| KS-20261118-02 | 2026-11-16 | 수요 | 외부 | [iOS ★5 v5.38.0] 킥스타터 좋아요 — 앱이 아주 잘 작동한다. 강력 추천. | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261118-03 | 2026-11-16 | 수요 | 외부 | [iOS ★1 v5.38.0] 쓸모없음 — 내 실제 프로젝트를 수정할 수 없다. 앱 계정 어디에도 프로젝트가 나오지 않는다. | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261118-04 | 2026-11-17 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 너무 좋아요!! 🥰 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a27a2285-100b-45ea-b21e-af721c5bbf7f) |
+| KS-20261118-05 | 2026-11-17 | 수요 | 외부 | [안드로이드 ★1] 연락처 정보도 없는 쓸모없는 앱. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a559eb74-1b09-460a-af83-1906e231367b) |
+| KS-20261118-06 | 2026-11-17 | 수요 | 외부 | [안드로이드 ★1 v3.43.0] 더 좋아하고 싶다. 하지만 프로젝트가 후원자 돈만 받고 도망가려 할 때 킥스타터는 아무 구제 수단도 주지 않는다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=445573a2-f936-4a43-bc8f-1416839082c7) |

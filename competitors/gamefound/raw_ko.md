@@ -40,3 +40,8 @@
 | GF-20261116-01 | 2026-11-16 | 수요 | 관찰 | '플레지 매니저에서 내 플레지(후원 내용)를 수정할 수 있나요?' 도움말 문서 수정됨 (2026-11-16T12:45:52Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/52-pledge-content-change) |
 | GF-20261116-02 | 2026-11-16 | 공급 | 관찰 | '창작자 관리자 패널 개요' 도움말 문서 수정됨 (2026-11-16T12:53:53Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/355-navigating-to-admin-panel) |
 | GF-20261116-03 | 2026-11-16 | 수요 | 관찰 | '계정은 어떻게 삭제하나요?' 도움말 문서 수정됨 (2026-11-16T12:58:22Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/59-delete-your-account) |
+| GF-20261118-01 | 2026-11-18 | 공급 | 관찰 | '프로젝트 업데이트(소식)' 도움말 문서 수정됨 (2026-11-18T08:25:12Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/73-project-updates) |
+| GF-20261118-02 | 2026-11-18 | 공급 | 관찰 | '프로젝트 설정 및 프로젝트 수정' 도움말 문서 수정됨 (2026-11-18T08:40:27Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/15-project-settings) |
+| GF-20261118-03 | 2026-11-18 | 수요 | 관찰 | '크라우드펀딩에서 후원(플레지)하는 방법은?' 도움말 문서 수정됨 (2026-11-18T08:43:10Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/96-how-can-i-pledge) |
+| GF-20261118-04 | 2026-11-18 | 공급 | 관찰 | '스트레치 페이(분할 결제)에서 상품 제외하기' 도움말 문서 수정됨 (2026-11-18T09:16:11Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/769-exclude-products-from-stretch-pay) |
+| GF-20261118-05 | 2026-11-18 | 수요 | 관찰 | '표시 통화 바꾸기' 도움말 문서 수정됨 (2026-11-18T09:55:30Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/774-change-your-display-currency) |

@@ -170,3 +170,11 @@ WZ-20261117-04 | 2026-11-17 | https://job.wadiz.io/ko/o/245235 | 그로스 프�
 WZ-20261117-05 | 2026-11-17 | https://job.wadiz.io/ko/o/203979 | 공고 203979(Java 백엔드 개발자 - 회원 개발)가 채용 목록(전체 17건)에 다시 나타남. openDate 2026-11-17T01:03:03Z, dueDate 2026-12-07T00:59:59Z. 2026-11-16 목록 15건에 없음 | 조직 | 관찰
 WZ-20261117-06 | 2026-11-17 | https://job.wadiz.io/ko/o/234738 | 공고 234738(콘텐츠 마케터)이 채용 목록(전체 17건)에 다시 나타남. openDate 2026-11-17T01:03:05Z, dueDate 2026-12-07T00:59:59Z. 2026-11-16 목록 15건에 없음 | 조직 | 관찰
 WZ-20261117-07 | 2026-11-17 | https://job.wadiz.io/ko/recruit | 공고 237021(와디즈에디션 뷰티 BM)이 채용 목록(전체 17건)에서 사라짐(공고 페이지 404). 2026-11-16 목록 15건에 포함 | 조직 | 관찰
+WZ-20261118-01 | 2026-11-18 | https://blog.wadiz.io/wbg-marketing-pd-2027-1/ | 신입 PD들의 성장기 : MPD에서 정규직 PD가 되기까지 (블로그 신규 글 id 370809, 2026-11-18T14:47:54) | 조직 | 공식
+WZ-20261118-02 | 2026-11-18 | https://www.wadiz.io/web/maker/makercenter/board/event/392 | [기획전] 1월 진행 기획전 참여 메이커 모집 — 2027년의 좋은 기운, 와디즈에서 가장 먼저 만나보세요. 2026.11.18 ~ 2027.01.03 (메이커센터 기획전·혜택 신규 board/event/392) | 공급 | 공식
+WZ-20261118-03 | 2026-11-18 | https://www.wadiz.io/web/maker/makercenter/board/event/393 | [기획전] 2027 와디즈 상반기 기획전 캘린더 — 새해 첫 매출 기회부터 상반기 대형 기획전까지 2027 기획전 일정을 가장 먼저 확인하세요 2026.11.18 ~ 2027.06.30 (신규 board/event/393) | 공급 | 공식
+WZ-20261118-04 | 2026-11-18 | https://www.wadiz.io/web/maker/makercenter/menu/20 | 기획전·혜택 board/event/262가 목록(전체 15건)에서 사라짐. 2026-11-17 목록 15건에 포함 | 공급 | 관찰
+WZ-20261118-05 | 2026-11-18 | https://www.wadiz.io/web/maker/makercenter/menu/20 | 기획전·혜택 board/event/15가 목록(전체 15건)에서 사라짐. 2026-11-17 목록 15건에 포함 | 공급 | 관찰
+WZ-20261118-06 | 2026-11-17 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | [Android] 버전 26.46.1, 업데이트 날짜 2026. 11. 17., 릴리즈노트 필드 없음. 기존 확인 26.46.1 업데이트 2026-11-11 | 공급 | 관찰
+WZ-20261118-07 | 2026-11-17 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=6aa7f97e-d547-478b-a3da-6d08ab0f8445 | [Android ★1 v25.4.0] 인스타에 나온 정치적인 이유로 이용 안 하기로 했어요. 정말 불쾌하네요.. | 수요 | 외부
+WZ-20261118-08 | 2026-11-17 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=9e1fc0b3-ac39-47f7-a5b3-d979ffb6c186 | [Android ★5 v26.46.1] 새로운 묵주가 나와서 반가웠어요 | 수요 | 외부
