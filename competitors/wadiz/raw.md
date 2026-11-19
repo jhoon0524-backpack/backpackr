@@ -178,3 +178,14 @@ WZ-20261118-05 | 2026-11-18 | https://www.wadiz.io/web/maker/makercenter/menu/20
 WZ-20261118-06 | 2026-11-17 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | [Android] 버전 26.46.1, 업데이트 날짜 2026. 11. 17., 릴리즈노트 필드 없음. 기존 확인 26.46.1 업데이트 2026-11-11 | 공급 | 관찰
 WZ-20261118-07 | 2026-11-17 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=6aa7f97e-d547-478b-a3da-6d08ab0f8445 | [Android ★1 v25.4.0] 인스타에 나온 정치적인 이유로 이용 안 하기로 했어요. 정말 불쾌하네요.. | 수요 | 외부
 WZ-20261118-08 | 2026-11-17 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=9e1fc0b3-ac39-47f7-a5b3-d979ffb6c186 | [Android ★5 v26.46.1] 새로운 묵주가 나와서 반가웠어요 | 수요 | 외부
+WZ-20261119-01 | 2026-11-19 | https://blog.wadiz.io/wbg-pd-2027-1/ | MD의 넥스트 커리어: 시장을 움직이는 영업PD (블로그 신규 글 id 370829, 2026-11-19T17:26:13) | 조직 | 공식
+WZ-20261119-02 | 2026-11-19 | https://www.wadiz.io/web/maker/makercenter/board/basic/1751 | [기획전] 2027 와디즈 상반기 기획전 일정 안내 — 새해 첫 매출 기회부터 상반기 대형 기획전까지 2027 기획전 일정을 가장 먼저 확인하세요 (메이커센터 공지 신규 board/basic/1751, 2026.11.19) | 공급 | 공식
+WZ-20261119-03 | 2026-11-19 | https://www.wadiz.io/web/maker/makercenter/board/basic/1752 | [40개사] 부산 광안리 팝업과 프로젝트 광고, 수수료 지원을 한번에! — 12월에 펀딩/프리오더 진행 예정인 40개사 대상 … 2026.12.11(금) ~ 2026.12.13(일) 3일 간 (공지 신규 1752) | 공급 | 공식
+WZ-20261119-04 | 2026-11-19 | https://www.wadiz.io/web/maker/makercenter/board/basic/1752 | 혜택 2. 프로젝트 유입을 위한 디스플레이 광고 무상 지원 … 참여 기업마다 메인 노출 광고 구좌 2개를 제공합니다. 앱메인팝업(휴일) 1회 메인콘텐츠(휴일) 1회 | 공급 | 공식
+WZ-20261119-05 | 2026-11-19 | https://www.wadiz.io/web/maker/makercenter/board/basic/1752 | 혜택 3. 프라이빗 온라인 기획전 … 메이커 40개사만 노출되는 프라이빗 기획전 … 기획전 일정 : 2026.12.1(화)~12.16(수) 16일간 | 공급 | 공식
+WZ-20261119-06 | 2026-11-19 | https://www.wadiz.io/web/maker/makercenter/board/basic/1752 | 혜택 4. 온라인 기획전 쿠폰 … 쿠폰 할인 비용은 와디즈가 전액 부담합니다. 30,000원 10만원 이상 펀딩 시 / 15,000원 5만원 이상 / 10,000원 3만원 이상 / 5,000원 1만원 이상 | 수요 | 공식
+WZ-20261119-07 | 2026-11-19 | https://www.wadiz.io/web/maker/makercenter/board/basic/1752 | 혜택 5. 와디즈 서비스 이용 수수료 지원 (기업 당 30만원 한도) 프로젝트 결제 금액 250만원 이하일 경우 → 전액 면제 / 250만원 초과일 경우 → 최대 30만원 면제 | 수익 | 공식
+WZ-20261119-08 | 2026-11-19 | https://helpcenter.wadiz.io/hc/ko/articles/25422067439385 | 프로젝트 사업자 정보 변경은 어떻게 하나요? (도움말 문서 수정 2026-11-19T09:00:33Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+WZ-20261119-09 | 2026-11-19 | https://helpcenter.wadiz.io/hc/ko/articles/25482171019545 | 메이커 페이지 정보 수정은 어떻게 하나요? (도움말 문서 수정 2026-11-19T08:39:52Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+WZ-20261119-10 | 2026-11-17 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | [Android] 버전 26.47.0, 업데이트 날짜 2026. 11. 17., 릴리즈노트 필드 없음. 기존 확인 26.46.1 업데이트 2026-11-17 | 공급 | 관찰
+WZ-20261119-11 | 2026-11-18 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=e7271486-e441-4211-94c2-83c756cf94db | [Android ★1 v26.46.1] 아이디 찾다가 다른걸로 가입되서 탈퇴하러니 인증번호 안옴 | 수요 | 외부
