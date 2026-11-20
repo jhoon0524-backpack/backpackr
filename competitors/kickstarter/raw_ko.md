@@ -160,3 +160,5 @@
 | KS-20261119-04 | 2026-11-18 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 정말 아름답다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=9400a98d-2842-4f81-8a10-977281bdb8fb) |
 | KS-20261119-05 | 2026-11-18 | 수요 | 외부 | [안드로이드 ★3 v3.43.0] 결제를 마칠 즈음에는 이미 선택할 수 없게 된 항목을 골랐다. 내가 돈을 넣는 동안 자리를 잡아 두는 기능이 있어야 한다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ca54dd77-33fc-4c48-b493-0f8f07f4278e) |
 | KS-20261119-06 | 2026-11-18 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 이걸 정말 오래 기다렸다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=ec402ab5-ebf0-49f4-a104-4b7bbd702fcb) |
+| KS-20261120-01 | 2026-11-18 | 수요 | 외부 | [iOS ★1 v5.38.0] 사기 프로젝트 — 많은 프로젝트가 펀딩됐는데 돈은 도둑맞고 물건은 받지 못했다. 킥스타터는 이에 대해 아무것도 하지 않는다 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261120-02 | 2026-11-18 | 수요 | 외부 | [iOS ★3 v5.38.0] 약을 구할 수 있게 도와주세요, 여기는 처음이에요 — 무엇이든 도움이 됩니다. 0.50달러라도요 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
