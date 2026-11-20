@@ -66,3 +66,5 @@
 | MK-20261118-02 | 2026-11-18 | 공급 | 관찰 | 서포터와 직접 연락할 수단이 있나요? (도움말 문서 수정 2026-11-18T09:07:59Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13899534285081) |
 | MK-20261118-03 | 2026-11-18 | 공급 | 관찰 | 실행자(프로젝트 진행자)용 관리 화면이란? (도움말 문서 수정 2026-11-18T09:30:16Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13899222721689) |
 | MK-20261119-01 | 2026-11-19 | 공급 | 관찰 | 서포터에게서 메시지가 왔습니다. 어떻게 하면 되나요? (도움말 문서 수정 2026-11-19T00:21:49Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13900202961945) |
+| MK-20261120-01 | 2026-11-20 | 공급 | 관찰 | 리턴(리워드) 발송 상황을 알리는 방법이 있나요? (도움말 문서 수정 2026-11-20T09:26:37Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13794758587673) |
+| MK-20261120-02 | 2026-11-13 | 수요 | 관찰 | 구글플레이 com.ca_crowdfunding.makuake_android 스토어 버전 표기 4.9.2 (기존 확인 4.8.0). 업데이트일은 2026/11/13 그대로. 릴리즈노트 미표기 | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android) |
