@@ -199,3 +199,10 @@ WZ-20261120-07 | 2026-11-20 | https://job.wadiz.io/ko/o/237021 | 공고 237021(�
 WZ-20261120-08 | 2026-11-20 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 3 Keyboard (search?keyword=Keyboard) (2026-11-19 목록에 없음) | 수요 | 관찰
 WZ-20261120-09 | 2026-11-20 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Bag (2026-11-19 목록 3번에 포함. 1번 칸 비어 나옴) | 수요 | 관찰
 WZ-20261120-10 | 2026-11-19 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=109435e0-9f3c-43ef-91c3-35d79a505bc5 | [Android ★5 v26.47.0] 저렴하네요 | 수요 | 외부
+WZ-20261121-01 | 2026-11-20 | https://apps.apple.com/kr/app/id1107828621?see-all=reviews | [iOS ★5 v26.47.0] 혹하는물건들 — 말그대로 혹하는 물건들!필요한 것들만 쏙쏙 팔아요 | 수요 | 외부
+WZ-20261121-02 | 2026-11-21 | https://blog.wadiz.io/wbg-marketing-pd-2027-1/ | 블로그 글 id 370809 제목이 '신입 PD들의 성장기 : 마케팅 PD에서 영업 PD가 되기까지'로 바뀜. 2026-11-18 기록 제목 '신입 PD들의 성장기 : MPD에서 정규직 PD가 되기까지' | 조직 | 관찰
+WZ-20261121-03 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 2 Heater (search?keyword=Heater) (2026-11-20 목록에 없음) | 수요 | 관찰
+WZ-20261121-04 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 3 Bag (search?keyword=Bag) (2026-11-20 목록에 없음) | 수요 | 관찰
+WZ-20261121-05 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Humidifier (2026-11-20 목록 2번에 포함. 1번 칸 비어 나옴) | 수요 | 관찰
+WZ-20261121-06 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Keyboard (2026-11-20 목록 3번에 포함) | 수요 | 관찰
+WZ-20261121-07 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: LoveDisguise (campaign/detail/428746, utm_campaign=261121_all__428746_global quickmenu) (2026-11-20 목록에 없음) | 공급 | 관찰
