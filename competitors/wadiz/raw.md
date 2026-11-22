@@ -206,3 +206,6 @@ WZ-20261121-04 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 'Looking 
 WZ-20261121-05 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Humidifier (2026-11-20 목록 2번에 포함. 1번 칸 비어 나옴) | 수요 | 관찰
 WZ-20261121-06 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Keyboard (2026-11-20 목록 3번에 포함) | 수요 | 관찰
 WZ-20261121-07 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: LoveDisguise (campaign/detail/428746, utm_campaign=261121_all__428746_global quickmenu) (2026-11-20 목록에 없음) | 공급 | 관찰
+WZ-20261122-01 | 2026-11-22 | https://helpcenter.wadiz.io/hc/ko/articles/64603766647321 | [와디즈] 투명성 보고서 Vol.25 (도움말 문서 신규 2026-11-22T23:32Z). 발행 일자 2026. 11. 23, 대상 기간 11.08 — 11.21 | 정책 | 관찰
+WZ-20261122-02 | 2026-11-22 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 3 100 Days of Lies (search?keyword=100%20Days%20of%20Lies) (2026-11-21 목록에 없음) | 수요 | 관찰
+WZ-20261122-03 | 2026-11-22 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Bag (2026-11-21 목록 3번에 포함. 1번 칸 비어 나옴) | 수요 | 관찰
