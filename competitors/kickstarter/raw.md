@@ -164,3 +164,5 @@ KS-20261120-02 | 2026-11-18 | https://apps.apple.com/us/app/id596961532?see-all=
 KS-20261121-01 | 2026-11-19 | https://apps.apple.com/us/app/id596961532?see-all=reviews | [iOS ★1 v5.38.0] Scammed — Disappointing. Two projects backed. Both scams. | 수요 | 외부
 KS-20261121-02 | 2026-11-19 | https://apps.apple.com/us/app/id596961532?see-all=reviews | [iOS ★1 v5.38.0] To many emails — I get a couple dozen emails a day from this AP. Help, make it stop, or better yet send limited relevant offers | 수요 | 외부
 KS-20261121-03 | 2026-11-20 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=c0255c8d-5310-4174-b7fc-41eeec62030f | [Android ★5 v3.43.0] Very easy to set up and user friendly | 수요 | 외부
+KS-20261122-01 | 2026-11-21 | https://apps.apple.com/us/app/id596961532?see-all=reviews | [iOS ★5 v5.38.0] Just what I need. — Very helpful for me .thank you | 수요 | 외부
+KS-20261122-02 | 2026-11-21 | https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1dd1195b-dbf0-415a-aeb1-ef3297b1bd17 | [Android ★5 v3.43.0] Been a ravenous KS backer since 2014. I will keep backing until I die. | 수요 | 외부

@@ -165,3 +165,5 @@
 | KS-20261121-01 | 2026-11-19 | 수요 | 외부 | [iOS ★1 v5.38.0] 사기당함 — 실망스럽다. 프로젝트 두 개를 후원했다. 둘 다 사기였다. | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261121-02 | 2026-11-19 | 수요 | 외부 | [iOS ★1 v5.38.0] 이메일이 너무 많음 — 이 앱에서 하루에 이메일이 수십 통 온다. 도와주세요, 멈추게 해 주거나, 더 좋게는 관련 있는 제안만 조금 보내 달라 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261121-03 | 2026-11-20 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 설정하기 아주 쉽고 사용하기 편하다 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=c0255c8d-5310-4174-b7fc-41eeec62030f) |
+| KS-20261122-01 | 2026-11-21 | 수요 | 외부 | [iOS ★5 v5.38.0] 딱 내가 필요한 것 — 나에게 아주 도움이 된다. 고맙다 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261122-02 | 2026-11-21 | 수요 | 외부 | [안드로이드 ★5 v3.43.0] 2014년부터 킥스타터를 열렬히 후원해 왔다. 죽을 때까지 계속 후원할 것이다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=1dd1195b-dbf0-415a-aeb1-ef3297b1bd17) |
