@@ -68,3 +68,4 @@
 | MK-20261119-01 | 2026-11-19 | 공급 | 관찰 | 서포터에게서 메시지가 왔습니다. 어떻게 하면 되나요? (도움말 문서 수정 2026-11-19T00:21:49Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13900202961945) |
 | MK-20261120-01 | 2026-11-20 | 공급 | 관찰 | 리턴(리워드) 발송 상황을 알리는 방법이 있나요? (도움말 문서 수정 2026-11-20T09:26:37Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13794758587673) |
 | MK-20261120-02 | 2026-11-13 | 수요 | 관찰 | 구글플레이 com.ca_crowdfunding.makuake_android 스토어 버전 표기 4.9.2 (기존 확인 4.8.0). 업데이트일은 2026/11/13 그대로. 릴리즈노트 미표기 | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android) |
+| MK-20261122-01 | 2026-11-21 | 수요 | 외부 | [안드로이드 ★4 v4.9.2] 전기 관련, 정보가 있으면 됩니다. | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=a476bfb3-01ef-4e8b-ab53-96db3bd81551) |
