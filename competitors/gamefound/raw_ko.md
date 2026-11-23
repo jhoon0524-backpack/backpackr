@@ -45,3 +45,4 @@
 | GF-20261118-03 | 2026-11-18 | 수요 | 관찰 | '크라우드펀딩에서 후원(플레지)하는 방법은?' 도움말 문서 수정됨 (2026-11-18T08:43:10Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/96-how-can-i-pledge) |
 | GF-20261118-04 | 2026-11-18 | 공급 | 관찰 | '스트레치 페이(분할 결제)에서 상품 제외하기' 도움말 문서 수정됨 (2026-11-18T09:16:11Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/769-exclude-products-from-stretch-pay) |
 | GF-20261118-05 | 2026-11-18 | 수요 | 관찰 | '표시 통화 바꾸기' 도움말 문서 수정됨 (2026-11-18T09:55:30Z). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/774-change-your-display-currency) |
+| GF-20261123-01 | 2026-11-23 | 공급 | 관찰 | '게임파운드 공개 API' 도움말 문서 수정됨 (2026-11-23T16:15:37Z, 문서 표기 2026년 11월 23일 최종 수정). 무엇이 바뀌었는지는 본문에 없음 | [링크](https://help.gamefound.com/article/425-gamefound-public-api) |

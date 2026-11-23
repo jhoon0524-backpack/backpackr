@@ -44,3 +44,4 @@ GF-20261118-02 | 2026-11-18 | https://help.gamefound.com/article/15-project-sett
 GF-20261118-03 | 2026-11-18 | https://help.gamefound.com/article/96-how-can-i-pledge | 'How to pledge in crowdfunding?' 문서 수정됨 (sitemap lastmod 2026-11-18T08:43:10Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰
 GF-20261118-04 | 2026-11-18 | https://help.gamefound.com/article/769-exclude-products-from-stretch-pay | 'Exclude products from Stretch Pay' 문서 수정됨 (sitemap lastmod 2026-11-18T09:16:11Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261118-05 | 2026-11-18 | https://help.gamefound.com/article/774-change-your-display-currency | 'Change Your Display Currency' 문서 수정됨 (sitemap lastmod 2026-11-18T09:55:30Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰
+GF-20261123-01 | 2026-11-23 | https://help.gamefound.com/article/425-gamefound-public-api | 'Gamefound Public API' 문서 수정됨 (sitemap lastmod 2026-11-23T16:15:37Z, Last updated on November 23, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
