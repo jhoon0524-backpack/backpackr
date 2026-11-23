@@ -209,3 +209,23 @@ WZ-20261121-07 | 2026-11-21 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴
 WZ-20261122-01 | 2026-11-22 | https://helpcenter.wadiz.io/hc/ko/articles/64603766647321 | [와디즈] 투명성 보고서 Vol.25 (도움말 문서 신규 2026-11-22T23:32Z). 발행 일자 2026. 11. 23, 대상 기간 11.08 — 11.21 | 정책 | 관찰
 WZ-20261122-02 | 2026-11-22 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 3 100 Days of Lies (search?keyword=100%20Days%20of%20Lies) (2026-11-21 목록에 없음) | 수요 | 관찰
 WZ-20261122-03 | 2026-11-22 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Bag (2026-11-21 목록 3번에 포함. 1번 칸 비어 나옴) | 수요 | 관찰
+WZ-20261123-01 | 2026-11-21 | https://apps.apple.com/kr/app/id1107828621?see-all=reviews | [iOS ★5 v26.47.0] 히터팬 — 첫구매 리뉴얼된제품 구매 빨리 써보고 싶네요 | 수요 | 외부
+WZ-20261123-02 | 2026-11-22 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=8a1e6252-a71e-45e3-8f2b-5d9d5db4642f | [Android ★5 v26.40.0] 좋은 제품을 가성비있게 소비가능해요. | 수요 | 외부
+WZ-20261123-03 | 2026-11-23 | https://job.wadiz.io/ko/o/245965 | 그로스 프로덕트 오너(PO) 인턴 와디즈 프로덕트 경력 무관 인턴 (신규 채용공고, openDate 2026-11-23T08:45:19Z, dueDate 2026-12-07T00:59:59Z) | 조직 | 관찰
+WZ-20261123-04 | 2026-11-23 | https://job.wadiz.io/ko/recruit | 공고 234300이 채용 목록(전체 15건)에서 사라짐(공고 페이지 404). 2026-11-22 목록 18건에 포함 | 조직 | 관찰
+WZ-20261123-05 | 2026-11-23 | https://job.wadiz.io/ko/recruit | 공고 240112([와디즈 파트너스] 전략투자 담당자)가 채용 목록(전체 15건)에서 사라짐(공고 페이지 404). 2026-11-22 목록 18건에 포함 | 조직 | 관찰
+WZ-20261123-06 | 2026-11-23 | https://job.wadiz.io/ko/recruit | 공고 243077([WBG 2027-1기] 영업PD)이 채용 목록(전체 15건)에서 사라짐(공고 페이지 404). 2026-11-22 목록 18건에 포함 | 조직 | 관찰
+WZ-20261123-07 | 2026-11-23 | https://job.wadiz.io/ko/recruit | 공고 243085([WBG 2027-1기] 마케팅PD(채용연계형 인턴))가 채용 목록(전체 15건)에서 사라짐(공고 페이지 404). 2026-11-22 목록 18건에 포함 | 조직 | 관찰
+WZ-20261123-08 | 2026-11-23 | https://www.wadiz.io/web/maker/makercenter/menu/20 | 기획전·혜택 board/event/376이 목록(전체 15건)에서 사라짐. 2026-11-22 목록 15건에 포함 | 공급 | 관찰
+WZ-20261123-09 | 2026-11-23 | https://www.wadiz.io/web/maker/makercenter/board/event/262 | 기획전·혜택 board/event/262([프로모션] 퀵계좌이체로 비즈머니 충전 시, 0.3% 즉시 할인 혜택 2026.01.01 ~ 2026.12.31)가 목록(전체 15건)에 다시 나타남. 2026-11-18~22 목록에 없음 | 공급 | 관찰
+WZ-20261123-10 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: 100-Day Gift (wcomingsoon/rwd/429696, utm_campaign=261123_all__429696_quickmenu) (2026-11-22 목록에 없음) | 공급 | 관찰
+WZ-20261123-11 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 다시 나타남: BOOKMARKS (events/672) (2026-11-16~22 목록에 없음) | 공급 | 관찰
+WZ-20261123-12 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 다시 나타남: Fine Sense (events/665) (2026-11-16~22 목록에 없음) | 공급 | 관찰
+WZ-20261123-13 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: Golf Glove (funding/425454, utm_campaign=261123_all__425454_global quickmenu) (2026-11-22 목록에 없음) | 공급 | 관찰
+WZ-20261123-14 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: Shearling (funding/425639, utm_campaign=261123_all__425639_global quickmenu) (2026-11-22 목록에 없음) | 공급 | 관찰
+WZ-20261123-15 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에 나타남: Silver Gem (funding/336718, utm_campaign=261123_all__336718_global quickmenu) (2026-11-22 목록에 없음) | 공급 | 관찰
+WZ-20261123-16 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Wear&Glow (2026-11-22 목록에 포함) | 공급 | 관찰
+WZ-20261123-17 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: NEXT TREND (2026-11-22 목록에 포함) | 공급 | 관찰
+WZ-20261123-18 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: K-Pop Items (2026-11-22 목록에 포함) | 공급 | 관찰
+WZ-20261123-19 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Bag Clip (2026-11-22 목록에 포함) | 공급 | 관찰
+WZ-20261123-20 | 2026-11-23 | https://www.wadiz.io/ | 메인 페이지 퀵메뉴 배너 목록에서 사라짐: Lucky Gem (2026-11-22 목록에 포함) | 공급 | 관찰
