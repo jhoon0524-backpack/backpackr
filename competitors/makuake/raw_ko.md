@@ -69,3 +69,5 @@
 | MK-20261120-01 | 2026-11-20 | 공급 | 관찰 | 리턴(리워드) 발송 상황을 알리는 방법이 있나요? (도움말 문서 수정 2026-11-20T09:26:37Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13794758587673) |
 | MK-20261120-02 | 2026-11-13 | 수요 | 관찰 | 구글플레이 com.ca_crowdfunding.makuake_android 스토어 버전 표기 4.9.2 (기존 확인 4.8.0). 업데이트일은 2026/11/13 그대로. 릴리즈노트 미표기 | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android) |
 | MK-20261122-01 | 2026-11-21 | 수요 | 외부 | [안드로이드 ★4 v4.9.2] 전기 관련, 정보가 있으면 됩니다. | [링크](https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=a476bfb3-01ef-4e8b-ab53-96db3bd81551) |
+| MK-20261124-01 | 2026-11-24 | 공급 | 관찰 | 서포터와 직접 연락할 수단이 있나요? (도움말 문서 수정 2026-11-24T06:00:31Z) | [링크](https://mkhelp.makuake.com/hc/ja/articles/13899534285081) |
+| MK-20261124-02 | 2026-11-24 | 조직 | 관찰 | 채용 목록(전체 5건)에 공고 0000299('설레는 응원구매 경험을 만드는 엔지니어 모집! / 팀 리더', 엔지니어 리더(프로덕트 개발부), 정규직)가 새로 나타남. 2026-11-23 목록 4건에는 없었음 | [링크](https://hrmos.co/pages/makuake/jobs/0000299) |

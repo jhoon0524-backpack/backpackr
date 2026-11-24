@@ -45,3 +45,5 @@ GF-20261118-03 | 2026-11-18 | https://help.gamefound.com/article/96-how-can-i-pl
 GF-20261118-04 | 2026-11-18 | https://help.gamefound.com/article/769-exclude-products-from-stretch-pay | 'Exclude products from Stretch Pay' 문서 수정됨 (sitemap lastmod 2026-11-18T09:16:11Z). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261118-05 | 2026-11-18 | https://help.gamefound.com/article/774-change-your-display-currency | 'Change Your Display Currency' 문서 수정됨 (sitemap lastmod 2026-11-18T09:55:30Z). 변경 내용 본문에 명시 없음 | 수요 | 관찰
 GF-20261123-01 | 2026-11-23 | https://help.gamefound.com/article/425-gamefound-public-api | 'Gamefound Public API' 문서 수정됨 (sitemap lastmod 2026-11-23T16:15:37Z, Last updated on November 23, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261124-01 | 2026-11-24 | https://help.gamefound.com/article/217-top-banner | 'Top banner' 문서 수정됨 (sitemap lastmod 2026-11-24T14:27:26Z, Last updated on November 24, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
+GF-20261124-02 | 2026-11-24 | https://help.gamefound.com/article/746-export-comments | 'Export Comments' 문서 수정됨 (sitemap lastmod 2026-11-24T08:38:02Z, Last updated on November 24, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰

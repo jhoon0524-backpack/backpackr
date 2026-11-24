@@ -68,3 +68,5 @@ MK-20261119-01 | 2026-11-19 | https://mkhelp.makuake.com/hc/ja/articles/13900202
 MK-20261120-01 | 2026-11-20 | https://mkhelp.makuake.com/hc/ja/articles/13794758587673 | リターン発送状況のお知らせをする方法はありますか？ (도움말 문서 수정 2026-11-20T09:26:37Z) | 공급 | 관찰
 MK-20261120-02 | 2026-11-13 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android | 구글플레이 com.ca_crowdfunding.makuake_android 스토어 버전 표기 4.9.2 (기존 확인 4.8.0). 업데이트일 2026/11/13 그대로. 릴리즈노트 미표기 | 수요 | 관찰
 MK-20261122-01 | 2026-11-21 | https://play.google.com/store/apps/details?id=com.ca_crowdfunding.makuake_android&reviewId=a476bfb3-01ef-4e8b-ab53-96db3bd81551 | [Android ★4 v4.9.2] 電気関係な、情報あればいいんです。 | 수요 | 외부
+MK-20261124-01 | 2026-11-24 | https://mkhelp.makuake.com/hc/ja/articles/13899534285081 | サポーターと直接連絡をとる手段はありますか？ (도움말 문서 수정 2026-11-24T06:00:31Z) | 공급 | 관찰
+MK-20261124-02 | 2026-11-24 | https://hrmos.co/pages/makuake/jobs/0000299 | 공고 0000299(ワクワクする応援購入体験をつくるエンジニア募集！｜チームリーダー, エンジニアリーダー（プロダクト開発部）, 正社員)이 채용 목록(전체 5건)에 나타남. 2026-11-23 목록 4건에 없음 | 조직 | 관찰
