@@ -242,3 +242,5 @@ WZ-20261124-10 | 2026-11-24 | https://www.wadiz.io/ | 메인 페이지 'Looking 
 WZ-20261124-11 | 2026-11-24 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 2 Bag (search?keyword=Bag) (2026-11-23 목록에 없음) | 수요 | 관찰
 WZ-20261124-12 | 2026-11-24 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: 100 Days of Lies (2026-11-23 목록 2번에 포함. 3번 칸 비어 나옴) | 수요 | 관찰
 WZ-20261124-13 | 2026-11-24 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Heater (2026-11-23 목록 3번에 포함) | 수요 | 관찰
+WZ-20261125-01 | 2026-11-25 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 2 Heater (2026-11-24 목록에 없음) | 수요 | 관찰
+WZ-20261125-02 | 2026-11-25 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Humidifier (2026-11-24 목록 1번에 포함. 1번 칸 비어 나옴) | 수요 | 관찰

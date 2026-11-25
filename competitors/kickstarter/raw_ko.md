@@ -171,3 +171,7 @@
 | KS-20261123-02 | 2026-11-21 | 수요 | 외부 | [iOS ★1 v5.38.0] 사기꾼을 위한 최고의 사기 앱 — 킥스타터는 제3자가 캠페인을 만들어, 회사의 프로젝트 시작을 돕는다는 거짓 약속으로 사람들의 돈을 사기 치게 둔다. 킥스타터는 자기가 광고까지 해 준 캠페인에서도 돈을 돌려받도록 돕지 않는다. 창작자가 인증됐는지도 확인하지 않는다. 각자 책임하에 쓰라. 나는 더는 이용하지 않겠다. | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261124-01 | 2026-11-24 | 조직 | 공식 | 채용 공고 5301988007 신규: 퍼포먼스 마케팅·창작자 성공 리드(Performance Marketing & Creator Success Lead), 영국 원격 근무, 부서 퍼포먼스 마케팅 (갱신 2026-11-24T09:36:51-05:00). 공고 총 5건 | [링크](https://job-boards.greenhouse.io/kickstarter/jobs/5301988007) |
 | KS-20261124-02 | 2026-11-24 | 수익 | 공식 | 이 팀은 킥스타터의 첫 번째 신규 사업 부문이며, 경험 많고 창의적인 팀에 합류하게 된다 (채용 공고 문구) | [링크](https://job-boards.greenhouse.io/kickstarter/jobs/5301988007) |
+| KS-20261125-01 | 2026-11-23 | 수요 | 외부 | [iOS ★1 v5.38.0] 사기가 판친다 — 이 플랫폼에는 사기가 판치는데, 회사는 아무것도 하지 않는다. | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261125-02 | 2026-11-23 | 수요 | 외부 | [iOS ★4 v5.38.0] 좋은 앱 — iPhone duo에 맞게 업데이트해 주세요 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
+| KS-20261125-03 | 2026-11-24 | 수요 | 외부 | [Android ★2 v3.43.0] 사기를 당해서 신고했다. 그들은 아무것도 하지 않았다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=c88c9670-e857-4d1c-9ecd-6334aa565942) |
+| KS-20261125-04 | 2026-11-24 | 수요 | 외부 | [Android ★5 v3.43.0] 내 인생 최고의 선택 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=b8b3e22b-c2c6-4e5c-82f2-b3854f4890f6) |
