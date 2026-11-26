@@ -244,3 +244,8 @@ WZ-20261124-12 | 2026-11-24 | https://www.wadiz.io/ | 메인 페이지 'Looking 
 WZ-20261124-13 | 2026-11-24 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Heater (2026-11-23 목록 3번에 포함) | 수요 | 관찰
 WZ-20261125-01 | 2026-11-25 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 2 Heater (2026-11-24 목록에 없음) | 수요 | 관찰
 WZ-20261125-02 | 2026-11-25 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Humidifier (2026-11-24 목록 1번에 포함. 1번 칸 비어 나옴) | 수요 | 관찰
+WZ-20261126-01 | 2026-11-25 | https://apps.apple.com/kr/app/id1107828621?see-all=reviews | [iOS ★1 v26.48.0] 앱 중 최악 — 광고에 미친 앱  알람 다 꺼놨는데 계속 알람 켜라는 문구에 실수로 누르면 미친듯 알람옴. 앱 삭제만 답이에요. | 수요 | 외부
+WZ-20261126-02 | 2026-11-25 | https://play.google.com/store/apps/details?id=com.markmount.wadiz&reviewId=54316108-f272-4391-a4ca-3ffcfa400e8a | [Android ★5 v26.46.1] 좋은 품질의 옷을 판매해요. | 수요 | 외부
+WZ-20261126-03 | 2026-11-26 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에 나타남: 3 Keyboard (2026-11-25 목록에 없음) | 수요 | 관찰
+WZ-20261126-04 | 2026-11-26 | https://www.wadiz.io/ | 메인 페이지 'Looking for something new?' 목록에서 사라짐: Heater (2026-11-25 목록 2번에 포함) | 수요 | 관찰
+WZ-20261126-05 | 2026-11-24 | https://play.google.com/store/apps/details?id=com.markmount.wadiz | 구글플레이 버전 표기 26.47.0 → 26.48.0 (업데이트 날짜 2026. 11. 24. 그대로). 새 기능 문구 없음 | 공급 | 관찰

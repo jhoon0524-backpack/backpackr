@@ -50,3 +50,4 @@ GF-20261124-02 | 2026-11-24 | https://help.gamefound.com/article/746-export-comm
 GF-20261125-01 | 2026-11-24 | https://apps.apple.com/us/app/id6504344271 | 앱스토어 버전 1.98.1 (2026-11-24T09:16Z 배포) Improved navigation when opening the app from push notifications. | 수요 | 관찰
 GF-20261125-02 | 2026-11-25 | https://help.gamefound.com/article/89-changing-pledge-stage | 'Changing order shipping stage' 문서 수정됨 (sitemap lastmod 2026-11-25T10:42:39Z, Last updated on November 25, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰
 GF-20261125-03 | 2026-11-25 | https://help.gamefound.com/article/51-your-pledge | 'Where can I find my pledge?' 문서 수정됨 (sitemap lastmod 2026-11-25T10:36:23Z, Last updated on November 25, 2026). 변경 내용 본문에 명시 없음 | 수요 | 관찰
+GF-20261126-01 | 2026-11-26 | https://help.gamefound.com/article/89-changing-pledge-stage | 'Changing order shipping stage' 문서 다시 수정됨 (sitemap lastmod 2026-11-26T13:03:57Z, Last updated on November 26, 2026). 변경 내용 본문에 명시 없음 | 공급 | 관찰

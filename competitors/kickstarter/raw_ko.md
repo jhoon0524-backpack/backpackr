@@ -175,3 +175,4 @@
 | KS-20261125-02 | 2026-11-23 | 수요 | 외부 | [iOS ★4 v5.38.0] 좋은 앱 — iPhone duo에 맞게 업데이트해 주세요 | [링크](https://apps.apple.com/us/app/id596961532?see-all=reviews) |
 | KS-20261125-03 | 2026-11-24 | 수요 | 외부 | [Android ★2 v3.43.0] 사기를 당해서 신고했다. 그들은 아무것도 하지 않았다. | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=c88c9670-e857-4d1c-9ecd-6334aa565942) |
 | KS-20261125-04 | 2026-11-24 | 수요 | 외부 | [Android ★5 v3.43.0] 내 인생 최고의 선택 | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=b8b3e22b-c2c6-4e5c-82f2-b3854f4890f6) |
+| KS-20261126-01 | 2026-11-25 | 수요 | 외부 | [Android ★1 v3.43.0] 고객 서비스가 형편없다. 후원하는 사람들을 철저히 조사하라. 왜냐하면 사기를 당하면, | [링크](https://play.google.com/store/apps/details?id=com.kickstarter.kickstarter&reviewId=a1a3c857-faf5-47cd-89c6-9226334d96bf) |
